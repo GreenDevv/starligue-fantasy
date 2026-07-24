@@ -13,6 +13,7 @@ import { StarligueBestXICard } from "@/components/starligue/StarligueBestXICard"
 import { StarliguePerformancesCard } from "@/components/starligue/StarliguePerformancesCard";
 import { StatLeadersSection } from "@/components/starligue/StatLeadersSection";
 import { AuthButton } from "@/components/auth/AuthButton";
+import { ComingSoon } from "@/components/ComingSoon";
 import type { NewsCategory } from "@prisma/client";
 
 const VALID_CATEGORIES: NewsCategory[] = ["TRANSFER", "INJURY", "TEAM_OF_WEEK", "PERFORMANCE", "GENERAL"];
@@ -31,6 +32,10 @@ export default async function HomePage({
 }: {
   searchParams: { category?: string; page?: string };
 }) {
+  if (process.env.COMING_SOON === "true") {
+    return <ComingSoon />;
+  }
+
   const [session, season] = await Promise.all([auth(), prisma.season.findFirst({ where: { isActive: true } })]);
 
   const category = VALID_CATEGORIES.includes(searchParams.category as NewsCategory)
