@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/admin/import/lnh-roster
 // Importe tous les joueurs depuis lnh.fr (saison 2025/2026 = seasons_id 39)
 // et remplace les joueurs de la saison active.

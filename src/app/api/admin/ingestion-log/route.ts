@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/admin/ingestion-log — statut des providers et derniers crons
 // Pour v1 : retourne l'état des providers (API-Sports: clé configurée? LNH: accessible?)
 // ARCHITECTURE.md §6.6

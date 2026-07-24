@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/my-team/points-conversion { amount } — convertit une partie des points de
 // saison de l'équipe en budget de transfert, au taux GameConfig POINTS_TO_BUDGET_RATE.
 // Autorisé uniquement pendant une fenêtre de transfert ouverte (même contrainte que

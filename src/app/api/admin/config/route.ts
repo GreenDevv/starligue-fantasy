@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/admin/config — liste toutes les clés GameConfig
 // PUT /api/admin/config — met à jour une clé GameConfig
 // ARCHITECTURE.md §6.6

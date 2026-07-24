@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/trades/:id/reject — le destinataire refuse une proposition PENDING.
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";

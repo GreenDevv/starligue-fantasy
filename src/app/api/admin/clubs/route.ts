@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/admin/clubs — liste tous les clubs avec stats joueurs actifs
 
 import { NextResponse } from "next/server";

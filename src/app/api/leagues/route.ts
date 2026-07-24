@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/leagues — mes ligues (du mode courant) + rang | POST /api/leagues — créer (+ équipe)
 import { NextResponse } from "next/server";
 import { z } from "zod";

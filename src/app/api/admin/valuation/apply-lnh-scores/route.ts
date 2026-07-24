@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/admin/valuation/apply-lnh-scores — met à jour marketValue des joueurs
 // qui ont un PlayerLnhSeasonStat pour la saison demandée (formule normalisée par
 // poste, cf. src/lib/players/valuation.ts). Les joueurs sans score ne sont pas

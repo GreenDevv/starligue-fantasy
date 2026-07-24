@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/cron/snapshot-lineups — ARCHITECTURE.md §6.7
 // Gèle l'alignement de chaque équipe validée pour les journées dont la deadline vient de passer.
 // Idempotent : ne crée pas si un snapshot existe déjà.

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/my-team/transfer { sellPlayerId, buyPlayerId } — remplace un joueur de
 // l'effectif par un autre au même poste, au prix marchand courant des deux côtés.
 // Autorisé pendant une fenêtre de transfert ouverte, OU hors fenêtre si le joueur

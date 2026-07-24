@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/admin/import/lnh-boxscore
 // Scrape et upsert les stats détaillées de boxscore (buts, passes, ballons
 // récupérés, etc. — src/lib/stats/stat-lines.ts) pour tous les matchs joués d'une

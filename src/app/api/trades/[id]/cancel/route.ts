@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/trades/:id/cancel — le proposeur annule sa propre proposition PENDING.
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";

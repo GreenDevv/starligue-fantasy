@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/admin/import/ratings — ARCHITECTURE.md §6.6
 // Importe les notes LNH et déclenche compute-scores si toutes les notes sont là.
 import { NextResponse } from "next/server";

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/stats/leaders?statKey=&scope=season|gameweek|average&seasonId=&gameweekNumber=
 // Top 5 d'une ligne de stat détaillée (src/lib/stats/stat-lines.ts) : accumulée
 // depuis le début de la saison, pour une seule journée (par défaut la dernière

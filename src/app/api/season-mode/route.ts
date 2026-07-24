@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/season-mode — bascule le cookie httpOnly de mode de saison (live/simulation)
 // lu par resolveSeasonMode() côté serveur sur toutes les pages (game)/*.
 import { NextResponse } from "next/server";

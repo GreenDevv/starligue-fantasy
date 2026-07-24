@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET  /api/admin/transfer-windows — liste toutes les fenêtres de transfert (live + simulation)
 // POST /api/admin/transfer-windows — crée une fenêtre { seasonId, label, opensAt, closesAt }
 import { NextResponse } from "next/server";

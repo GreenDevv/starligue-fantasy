@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/leagues/:id/teams/:teamId/squad — effectif en lecture seule d'une équipe
 // de la ligue (nécessaire pour proposer un trade : voir l'effectif adverse avant de
 // choisir les joueurs demandés). Réservé aux membres de la ligue ; pas de budget ni

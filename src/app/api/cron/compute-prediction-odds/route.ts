@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/cron/compute-prediction-odds — ARCHITECTURE.md §14, §6.7
 // Crée les marchés de pronostic (cotes) pour les matchs programmés de la saison live
 // qui n'en ont pas encore. Idempotent (voir ensurePredictionMarkets) : peut tourner

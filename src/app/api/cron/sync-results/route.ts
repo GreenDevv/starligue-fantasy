@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/cron/sync-results
 // Met à jour les scores des matchs terminés depuis API-Sports.
 // Même source que sync-fixtures : fetchFixtures retourne fixtures + scores.

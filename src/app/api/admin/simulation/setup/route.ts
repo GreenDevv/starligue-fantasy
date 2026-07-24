@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/admin/simulation/setup — importe une saison historique complète (clubs,
 // calendrier, joueurs, valorisation d'après la saison précédente) pour le Mode
 // Simulation. Idempotent — rejouable sans doublon.

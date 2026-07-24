@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/my-team/history — ARCHITECTURE.md §6.3
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";

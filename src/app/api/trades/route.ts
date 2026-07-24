@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/trades — propose un trade (joueur(s) contre joueur(s) + budget) à une
 // autre équipe de la même ligue (live ou simulation, résolu via resolveSeasonMode).
 // Exécuté seulement à l'acceptation (voir /api/trades/:id/accept) ; ici on valide

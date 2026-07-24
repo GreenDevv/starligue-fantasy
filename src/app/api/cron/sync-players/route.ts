@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/cron/sync-players?season=YYYY
 // Importe les joueurs depuis API-Sports et met à jour les noms/prénoms en base.
 // Ne crée pas de nouveaux clubs — les clubs doivent exister.

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/cron/sync-standings
 // Scrape le classement officiel Daikin StarLigue (daikin-starligue/classement) pour
 // la saison live 2026/2027 et snapshote l'état à la journée en cours (widget

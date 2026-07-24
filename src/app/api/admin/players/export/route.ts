@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/admin/players/export — export .xlsx (nom, prenom, club, valeur) de
 // l'effectif actif de la saison active, pour révision externe de la valorisation.
 import { NextResponse } from "next/server";

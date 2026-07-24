@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/auth/register — ARCHITECTURE.md §6.1
 import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";

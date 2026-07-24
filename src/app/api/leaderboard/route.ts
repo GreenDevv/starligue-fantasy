@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/leaderboard — classement global paginé
 import { NextResponse } from "next/server";
 import { z } from "zod";

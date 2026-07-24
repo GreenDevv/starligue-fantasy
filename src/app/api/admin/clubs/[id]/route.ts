@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // PUT /api/admin/clubs/[id] — modifie un club (nom, shortName, logoUrl, externalIds.lnh)
 
 import { NextResponse } from "next/server";

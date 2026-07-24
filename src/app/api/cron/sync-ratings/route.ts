@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/cron/sync-ratings
 // Scrape les stats détaillées de boxscore lnh.fr (note LNH + buts/passes/ballons
 // récupérés/etc., src/lib/stats/stat-lines.ts) pour les matchs du jour (J+1 matin),

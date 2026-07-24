@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/admin/simulation/revert-gameweek — annule la dernière journée avancée
 // de la saison de simulation, globalement pour toutes les équipes à la fois.
 // Symétrique de /api/admin/simulation/advance-gameweek. Réservé aux admins (même

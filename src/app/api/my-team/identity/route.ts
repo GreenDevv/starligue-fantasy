@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // PUT /api/my-team/identity — nom + maillot de l'équipe (remplace le PUT
 // /api/my-team/name jamais construit — ARCHITECTURE.md §6.3)
 import { NextResponse } from "next/server";

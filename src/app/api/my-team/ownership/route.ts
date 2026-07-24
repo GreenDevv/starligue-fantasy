@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/my-team/ownership — mes équipes (toutes ligues confondues, mode courant
 // live/simulation) et les joueurs que chacune possède. Utilisé côté client par les
 // widgets qui listent des joueurs (StatLeaderCard) pour surligner "je le possède

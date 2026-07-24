@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/my-team/lineup/:gameweekId — snapshot + points par joueur
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";

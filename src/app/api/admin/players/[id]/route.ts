@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // PUT /api/admin/players/[id] — modifie un joueur (nom, poste, club, valeur, photo)
 // DELETE /api/admin/players/[id] — supprime un joueur
 

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/players/:id/detail — données complètes de la page /players/[id]
 // (respecte le curseur anti-spoiler simulation), utilisé par la comparaison de
 // joueurs sur cette même page. Lecture publique, même convention que

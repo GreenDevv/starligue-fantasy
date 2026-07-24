@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // PUT /api/my-team/bonus — choisit le bonus de saison actif pour la prochaine
 // journée non verrouillée (Triple Capitaine, Bench Boost, Assurance, Statisticien).
 // Au plus un bonus actif par journée (le champ pendingBonus est singulier) ; chaque

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/players/:id/season-recap — chiffres clés de la saison 2025/2026
 // (si dispo) pour le popup au survol pendant la construction d'effectif.
 // data: null est une réponse valide (pas de saison précédente exploitable),

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // PUT /api/admin/transfer-windows/[id] — modifie une fenêtre de transfert
 // DELETE /api/admin/transfer-windows/[id] — supprime une fenêtre de transfert
 import { NextResponse } from "next/server";

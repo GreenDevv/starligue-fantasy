@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/admin/simulation/advance-gameweek — avance la saison de simulation
 // d'une journée, globalement pour toutes les équipes validées à la fois. Réservé
 // aux admins (voir plan de fusion live/simulation, étape 6) : remplace l'ancien

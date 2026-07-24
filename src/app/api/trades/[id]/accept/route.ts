@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/trades/:id/accept — exécute un trade PENDING : seul le destinataire peut
 // accepter. Re-valide à froid le squad et le budget (relus au moment de l'acceptation,
 // pas ceux de la création) pour se protéger d'un joueur revendu entre-temps. Si invalide,

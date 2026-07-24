@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/gameweeks/current — prochaine deadline à venir
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";

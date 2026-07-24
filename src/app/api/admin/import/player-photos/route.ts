@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/admin/import/player-photos — applique le dataset curaté
 // prisma/player_photos_2026.json (photos trouvées sur les sites officiels de club,
 // hotlink uniquement) : met à jour photoUrl des joueurs existants uniquement (ne crée

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/cron/sync-news — ARCHITECTURE.md §6.7/§10 (quotidien, 0 7 * * *)
 // Scrape toutes les sources enregistrées (lnh.fr + clubs, src/lib/data-providers/news/registry.ts),
 // classe (src/lib/news/classify.ts), dédoublonne (exact par dedupeKey + quasi-doublon

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/admin/recompute/:gameweekId — ARCHITECTURE.md §6.6
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/admin/import/player-values — réimporte un .xlsx (nom, prenom, club,
 // valeur) : met à jour marketValue des joueurs existants uniquement (ne crée ni
 // ne supprime aucun joueur — un nom/club non reconnu est remonté en erreur).

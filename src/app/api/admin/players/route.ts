@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/admin/players — liste joueurs saison active (filtrable)
 // POST /api/admin/players — crée un joueur
 

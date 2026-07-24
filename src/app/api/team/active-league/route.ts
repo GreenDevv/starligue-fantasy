@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/team/active-league — bascule la ligue courante (sélecteur multi-ligues)
 import { NextResponse } from "next/server";
 import { z } from "zod";

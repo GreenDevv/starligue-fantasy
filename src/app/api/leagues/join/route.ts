@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/leagues/join — rejoindre via code d'invitation (+ crée l'équipe)
 import { NextResponse } from "next/server";
 import { z } from "zod";

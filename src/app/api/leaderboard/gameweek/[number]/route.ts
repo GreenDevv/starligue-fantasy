@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/leaderboard/gameweek/:number — classement d'une journée
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";

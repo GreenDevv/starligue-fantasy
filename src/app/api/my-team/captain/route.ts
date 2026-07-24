@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // PUT /api/my-team/captain — désigne le capitaine (×2 points s'il est titulaire à
 // la journée). Modifiable librement tant qu'aucun capitaine n'a jamais été choisi,
 // sinon uniquement pendant une fenêtre de transfert ouverte.

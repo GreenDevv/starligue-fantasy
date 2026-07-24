@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/matches?gameweek=<number> — matchs d'une journée
 import { NextResponse } from "next/server";
 import { z } from "zod";

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // DELETE /api/leagues/:id/members/me — quitter une ligue (+ supprime l'équipe associée)
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";

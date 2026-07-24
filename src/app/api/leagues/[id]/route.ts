@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/leagues/:id — détail + classement | DELETE — supprimer (owner)
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";

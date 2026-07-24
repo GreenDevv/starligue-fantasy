@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET /api/admin/discover-leagues?country=France
 // Liste les ligues disponibles dans API-Sports pour trouver le bon league ID.
 

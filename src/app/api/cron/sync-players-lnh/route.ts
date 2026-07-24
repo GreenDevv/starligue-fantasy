@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/cron/sync-players-lnh
 // Scrape les joueurs depuis lnh.fr et met à jour les records en DB
 // Résolution club : par Club.externalIds.lnh (slug LNH) puis par similarité de nom

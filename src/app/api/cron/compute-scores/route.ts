@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/cron/compute-scores — ARCHITECTURE.md §6.7
 // Déclenche computeGameweekScores pour toutes les journées snapshotées non scorées.
 // Rejouable : computeGameweekScores efface et recalcule.

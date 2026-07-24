@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/admin/import/lnh-season-scores — scrape le classement "Score LNH" d'une
 // saison lnh.fr passée (ex: 2025/2026) et l'enregistre dans PlayerLnhSeasonStat.
 // Sert de base à une future estimation de valorisation ; les joueurs sans historique

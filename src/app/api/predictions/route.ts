@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // GET  /api/predictions?gw=&leagueId=  → matchs pronostiquables d'une journée
 //                                         (cotes + mon pronostic + verrouillage)
 // POST /api/predictions                { matchId, outcome, leagueId? } → pose/modifie

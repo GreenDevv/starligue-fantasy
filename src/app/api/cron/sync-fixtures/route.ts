@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // POST /api/cron/sync-fixtures
 // Sync le calendrier et les résultats depuis API-Sports.
 // Paramètre ?season=YYYY (défaut : saison active).
