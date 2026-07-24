@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-bg text-text font-sans antialiased;
+    /* tabular-nums pour les points et valeurs — §8.1 */
+    font-variant-numeric: tabular-nums;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display uppercase tracking-wide;
+  }
+}
+
+@layer utilities {
+  /* Panneau "cabinet" à coins coupés — signature visuelle arcade, pilote sur
+     /team /market /leaderboard. ARCHITECTURE.md §8.1. */
+  .pixel-corners {
+    clip-path: polygon(
+      8px 0, calc(100% - 8px) 0, 100% 8px,
+      100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%,
+      0 calc(100% - 8px), 0 8px
+    );
+  }
+  .pixel-corners-sm {
+    clip-path: polygon(
+      4px 0, calc(100% - 4px) 0, 100% 4px,
+      100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%,
+      0 calc(100% - 4px), 0 4px
+    );
+  }
+
+  /* Overlay de lignes de balayage CRT — sur l'élément parent en position relative. */
+  .scanlines::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.05) 0px,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    mix-blend-mode: overlay;
+  }
+
+  /* Grain subtil — casse les grands aplats plats (fond de page, hero landing).
+     Sur l'élément parent en position relative, très faible opacité pour ne
+     jamais gêner la lecture. */
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Shimmer de chargement — utilisé par Skeleton.tsx (pixel-corners-sm). */
+  .shimmer {
+    background: linear-gradient(
+      100deg,
+      theme(colors.surface) 40%,
+      theme(colors.border) 50%,
+      theme(colors.surface) 60%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    from {
+      background-position: 150% 0;
+    }
+    to {
+      background-position: -50% 0;
+    }
+  }
+}

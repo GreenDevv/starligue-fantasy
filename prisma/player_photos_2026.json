@@ -1,0 +1,202 @@
+{
+  "PSG": {
+    "sourcePageUrl": "https://www.psg.fr/en/handball/squad",
+    "matches": [
+      {"firstName": "Yahia Khaled", "lastName": "FATHY OMAR", "photoUrl": "https://media.psg.fr/image/upload/w_3841/f_avif,q_85/v1755099708/Card_25-26_Omar_izpwyo.png", "confidence": "high"},
+      {"firstName": "Noah", "lastName": "GAUDIN", "photoUrl": "https://media.psg.fr/image/upload/w_3841/f_avif,q_85/v1755100196/Card_25-26_Gaudin_eouhfr.png", "confidence": "high"},
+      {"firstName": "Mathieu", "lastName": "GREBILLE", "photoUrl": "https://media.psg.fr/image/upload/w_3841/f_avif,q_85/v1755099989/Card_25-26_Grebille_eyfjjb.png", "confidence": "high"},
+      {"firstName": "Luka", "lastName": "KARABATIC", "photoUrl": "https://media.psg.fr/image/upload/w_3841/f_avif,q_85/v1755100072/Card_25-26_Karabatic_nrevrb.png", "confidence": "high"},
+      {"firstName": "Sebastian", "lastName": "KARLSSON", "photoUrl": "https://media.psg.fr/image/upload/w_3841/f_avif,q_85/v1755099863/Card_25-26_Karlsson_v34wfs.png", "confidence": "high"},
+      {"firstName": "Karl", "lastName": "KONAN", "photoUrl": "https://media.psg.fr/image/upload/w_3841/f_avif,q_85/v1755099777/Card_25-26_Konan_pxyukb.png", "confidence": "high"},
+      {"firstName": "Mikkel", "lastName": "LOVKVIST", "photoUrl": "https://media.psg.fr/image/upload/w_3841/f_avif,q_85/v1755099603/Card_25-26_Lovkist_ot1dex.png", "confidence": "high"},
+      {"firstName": "Simen Ulstad", "lastName": "LYSE", "photoUrl": "https://media.psg.fr/image/upload/w_3841/f_avif,q_85/v1770634760/Lyse1_ybo2a3.png", "confidence": "high"},
+      {"firstName": "Mateo", "lastName": "MARAS", "photoUrl": "https://media.psg.fr/image/upload/w_3841/f_avif,q_85/v1755099664/Card_25-26_Maras_lulw9h.png", "confidence": "high"},
+      {"firstName": "Emil", "lastName": "MELLEGARD", "photoUrl": "https://media.psg.fr/image/upload/w_3841/f_avif,q_85/v1755103070/Card_25-26_Mellegard_uigezo.png", "confidence": "high"},
+      {"firstName": "Wallem", "lastName": "PELEKA", "photoUrl": "https://media.psg.fr/image/upload/w_3841/f_avif,q_85/v1755100152/Card_25-26_Peleka_jwsaqr.png", "confidence": "high"},
+      {"firstName": "Elohim", "lastName": "PRANDI", "photoUrl": "https://media.psg.fr/image/upload/w_3841/f_avif,q_85/v1755100218/Card_25-26_Prandi_whwvst.png", "confidence": "high"},
+      {"firstName": "Ferran", "lastName": "SOLE", "photoUrl": "https://media.psg.fr/image/upload/w_3841/f_avif,q_85/v1755103321/Card_25-26_Sole_uj3xrl.png", "confidence": "high"},
+      {"firstName": "Luc", "lastName": "STEINS", "photoUrl": "https://media.psg.fr/image/upload/w_3841/f_avif,q_85/v1755102959/Card_25-26_Steins_rxhk2c.png", "confidence": "high"},
+      {"firstName": "Kamil", "lastName": "SYPRZAK", "photoUrl": "https://media.psg.fr/image/upload/w_3841/f_avif,q_85/v1755100019/Card_25-26_Syprzak_nxadgb.png", "confidence": "high"}
+    ],
+    "notes": "3 joueurs (CORRALES, ELISSON, LADEFOGED) n'ont qu'une image générique PSG sur la page squad, exclus car placeholders non nominatifs."
+  },
+  "MHB": {
+    "sourcePageUrl": "https://www.montpellierhandball.com/fr/l-equipe-pro/joueurs-statistiques",
+    "matches": [],
+    "notes": "7 vraies photos existent sur la page mais pour des joueurs absents de notre roster (Pellas, Simonet, etc. — centre de formation ou saison différente). Tous nos joueurs MHB n'ont que le placeholder silhouette.png."
+  },
+  "CSMBH": {
+    "sourcePageUrl": "https://www.teamchambe.com/wp-json/wp/v2/media",
+    "matches": [
+      {"firstName": "Matic", "lastName": "GROSELJ", "photoUrl": "https://www.teamchambe.com/wp-content/uploads/2025/02/Visuel-Matic-Groselj-1350_1080.jpg", "confidence": "high"},
+      {"firstName": "Sveinn", "lastName": "JOHANNSSON", "photoUrl": "https://www.teamchambe.com/wp-content/uploads/2025/02/Visuel-Sveinn-Johannsson1350_1080.png", "confidence": "high"},
+      {"firstName": "Roberto", "lastName": "RODRÍGUEZ LARIO", "photoUrl": "https://www.teamchambe.com/wp-content/uploads/2025/01/Visuel-Roberto-Rodriguez-1350_1080.png", "confidence": "high"},
+      {"firstName": "André", "lastName": "SOUSA", "photoUrl": "https://www.teamchambe.com/wp-content/uploads/2025/06/Visuel-Andre-Sousa-1350_1080.jpg", "confidence": "high"},
+      {"firstName": "Elio", "lastName": "ZAMMIT", "photoUrl": "https://www.teamchambe.com/wp-content/uploads/2025/03/Visuel-Elio-Zammit-1350_1080.png", "confidence": "high"},
+      {"firstName": "Emilien", "lastName": "PEYRONNET", "photoUrl": "https://www.teamchambe.com/wp-content/uploads/2025/07/Visuel-Emilien-Peyronnet-1350_1080.jpg", "confidence": "high"},
+      {"firstName": "Achilleas", "lastName": "TOSKAS", "photoUrl": "https://www.teamchambe.com/wp-content/uploads/2026/04/Signature-Achilleas-7-scaled.jpg", "confidence": "medium"},
+      {"firstName": "Sasha", "lastName": "FRATTARUOLO", "photoUrl": "https://www.teamchambe.com/wp-content/uploads/2026/03/Signature-Sacha-11-scaled.jpg", "confidence": "medium"},
+      {"firstName": "Lucas", "lastName": "VANEGUE", "photoUrl": "https://www.teamchambe.com/wp-content/uploads/2025/12/Lucas-signature-05-scaled.jpg", "confidence": "medium"}
+    ],
+    "notes": "Page effectif JS-rendue sans photos exploitables ; contournement via la médiathèque WordPress (wp-json/wp/v2/media?search=<nom>). Non trouvés: BERNARD, CAVALCANTI, COSTOYA, LOREDON, PETTERSEN, TRAORE, VERGELY."
+  },
+  "CCMHB": {
+    "sourcePageUrl": "https://pro.ccmhb.fr/pages/lequipe-2025-2026-17.html",
+    "matches": [
+      {"firstName": "Koussay", "lastName": "BEN FRAJ", "photoUrl": "https://pro.ccmhb.fr/public/Thumbs/Medias/joueurs_pro/39_koussay_ben_fraj_w270_h405_fitfill_1756729233.png", "confidence": "high"},
+      {"firstName": "Julien", "lastName": "LUCIANI", "photoUrl": "https://pro.ccmhb.fr/public/Thumbs/Medias/joueurs_pro/71_julien_luciani_w270_h405_fitfill_1756729693.png", "confidence": "high"},
+      {"firstName": "Julien", "lastName": "MEYER", "photoUrl": "https://pro.ccmhb.fr/public/Thumbs/Medias/joueurs_pro/31_julien_meyer_w270_h405_fitfill_1756729665.png", "confidence": "high"},
+      {"firstName": "Quentin", "lastName": "MINEL", "photoUrl": "https://pro.ccmhb.fr/public/Thumbs/Medias/joueurs_pro/38_quentin_minel_3_4_face_w270_h405_fitfill_1756729340.png", "confidence": "high"},
+      {"firstName": "Gaël", "lastName": "TRIBILLON", "photoUrl": "https://pro.ccmhb.fr/public/Thumbs/Medias/joueurs_pro/96_gael_tribillon_w270_h405_fitfill_1756729044.png", "confidence": "high"},
+      {"firstName": "Yvan", "lastName": "VERIN", "photoUrl": "https://pro.ccmhb.fr/public/Thumbs/Medias/joueurs_pro/97_yvan_verin_w270_h405_fitfill_1756729084.png", "confidence": "high"}
+    ],
+    "notes": "Photos réelles hébergées sur pro.ccmhb.fr. Non trouvés: ARAUJO, BORGES MORAES SILVA, GARCIAS, GOURDEL, HARBAOUI, HOSNI, KEMPF, MARTINEZ, ONUFRIIENKO, TIGHIOUART (HARBAOUI/MARTINEZ semblent listés côté USDK — possible incohérence club, non traité ici)."
+  },
+  "CAEN": {
+    "sourcePageUrl": null,
+    "matches": [],
+    "notes": "Site officiel (handballvikings.com) protégé par Cloudflare (403 sur toutes les tentatives). Aucune photo exploitable."
+  },
+  "CRMHB": {
+    "sourcePageUrl": "https://www.cesson-handball.com/pro/effectif",
+    "matches": [
+      {"firstName": "Mate", "lastName": "SUNJIC", "photoUrl": "https://www.cesson-handball.com/storage/cache/c0c9bc986d79e5ecf9d74a252d0c9fe5.png", "confidence": "high"},
+      {"firstName": "Jean-emmanuel", "lastName": "KOUASSI", "photoUrl": "https://www.cesson-handball.com/storage/cache/a0d11a9eab3ae0f4c5af7ced4cc5653d.png", "confidence": "high"},
+      {"firstName": "Mathieu", "lastName": "SALOU", "photoUrl": "https://www.cesson-handball.com/storage/cache/6088faded6e91a7922e4db125f386d6f.png", "confidence": "high"},
+      {"firstName": "Josep", "lastName": "FOLQUES", "photoUrl": "https://www.cesson-handball.com/storage/cache/1fef7b7c0621d14d9dbd18648e892cd4.png", "confidence": "high"},
+      {"firstName": "Asier", "lastName": "NIETO MARCOS", "photoUrl": "https://www.cesson-handball.com/storage/cache/80b91f2666d62e2d971235cc5eeddf89.png", "confidence": "high"},
+      {"firstName": "Alex", "lastName": "MORAN", "photoUrl": "https://www.cesson-handball.com/storage/cache/37f50e4d53a5d1baecec60cbde9fb467.png", "confidence": "high"},
+      {"firstName": "Gustavo", "lastName": "RODRIGUES", "photoUrl": "https://www.cesson-handball.com/storage/cache/5eb6a6e4e732e8d9a236248ee51fec15.png", "confidence": "high"},
+      {"firstName": "Simon", "lastName": "OOMS", "photoUrl": "https://www.cesson-handball.com/storage/cache/f027c83e0bffbb1b72c79a9a3e275da1.png", "confidence": "high"},
+      {"firstName": "Egon", "lastName": "HANUSZ", "photoUrl": "https://www.cesson-handball.com/storage/cache/c1b958535214695cf5dd5a09ee02fc67.png", "confidence": "high"},
+      {"firstName": "Erik", "lastName": "SZEITL", "photoUrl": "https://www.cesson-handball.com/storage/cache/bcb92fb793a7c70bab94f07e92ac5446.png", "confidence": "high"},
+      {"firstName": "Théophile", "lastName": "CAUSSE", "photoUrl": "https://www.cesson-handball.com/storage/cache/94fb5f23ca908f671b5d4a7164df896f.png", "confidence": "high"},
+      {"firstName": "Xavier", "lastName": "LABIGANG", "photoUrl": "https://www.cesson-handball.com/storage/cache/ec5da4edb619e6bdb8884e24dd403bd6.png", "confidence": "high"},
+      {"firstName": "Michal", "lastName": "BARAN", "photoUrl": "https://www.cesson-handball.com/storage/cache/b669a453cc226f86a63291fd9d94aa4a.png", "confidence": "high"}
+    ],
+    "notes": "13/14 trouvés, non trouvé: Andrei KLIMAVETS. La page liste aussi 'Mathéo Briffe' mais notre DB l'assigne à FENIX — exclu ici, incohérence club à vérifier séparément."
+  },
+  "FENIX": {
+    "sourcePageUrl": "https://www.fenix-toulouse.fr/equipes/l-equipe",
+    "matches": [
+      {"firstName": "Pontus", "lastName": "BROLIN", "photoUrl": "https://www.fenix-toulouse.fr/sites/default/files/2025-09/15.png", "confidence": "high"},
+      {"firstName": "Bakary", "lastName": "DIALLO", "photoUrl": "https://www.fenix-toulouse.fr/sites/default/files/2025-09/12.png", "confidence": "high"},
+      {"firstName": "Nemanja", "lastName": "ILIC", "photoUrl": "https://www.fenix-toulouse.fr/sites/default/files/2025-09/13_1.png", "confidence": "high"},
+      {"firstName": "Téo", "lastName": "JARRY", "photoUrl": "https://www.fenix-toulouse.fr/sites/default/files/2025-09/8.png", "confidence": "high"},
+      {"firstName": "Hugo", "lastName": "JUND", "photoUrl": "https://www.fenix-toulouse.fr/sites/default/files/2025-09/7_0.png", "confidence": "high"},
+      {"firstName": "Uros", "lastName": "KOJADINOVIC", "photoUrl": "https://www.fenix-toulouse.fr/sites/default/files/2025-09/6.png", "confidence": "high"},
+      {"firstName": "Jef", "lastName": "LETTENS", "photoUrl": "https://www.fenix-toulouse.fr/sites/default/files/2025-09/14.png", "confidence": "high"},
+      {"firstName": "Gonçalo", "lastName": "MARTINS VIEIRA", "photoUrl": "https://www.fenix-toulouse.fr/sites/default/files/2025-09/2.png", "confidence": "high"},
+      {"firstName": "Gabriel", "lastName": "NYEMBO", "photoUrl": "https://www.fenix-toulouse.fr/sites/default/files/2025-09/10.png", "confidence": "high"},
+      {"firstName": "Ernest", "lastName": "PINEAU-ROSSI", "photoUrl": "https://www.fenix-toulouse.fr/sites/default/files/2025-09/Design%20sans%20titre%20%2819%29.png", "confidence": "medium"},
+      {"firstName": "Enej", "lastName": "SLATINEK JOVICIC", "photoUrl": "https://www.fenix-toulouse.fr/sites/default/files/2025-09/5.png", "confidence": "high"}
+    ],
+    "notes": "Non trouvés: BONO, BRIFFE (voir note CRMHB), GUILLAUME, KERDUDO, ROBERT. La page liste aussi 'Edouard Kempf' mais notre DB l'assigne à CCMHB — exclu ici, incohérence club à vérifier séparément."
+  },
+  "HBCN": {
+    "sourcePageUrl": "https://hbcnantes.com/equipe-professionnelle/effectif-et-staff/",
+    "matches": [
+      {"firstName": "Ivan", "lastName": "PESIC", "photoUrl": "https://hbcnantes.com/media/cache/widen_400/rc/0eWRe4V3/uploads/hbc-nantes/pages/effectif-25-26/ivan-pesic.png", "confidence": "high"},
+      {"firstName": "Nicolas", "lastName": "TOURNAT", "photoUrl": "https://hbcnantes.com/media/cache/widen_400/rc/ESwpUe5W/uploads/hbc-nantes/pages/effectif-25-26/nicolas-tournat.png", "confidence": "high"},
+      {"firstName": "Matej", "lastName": "GABER", "photoUrl": "https://hbcnantes.com/media/cache/widen_400/rc/W8cf5zPO/uploads/hbc-nantes/pages/effectif-25-26/matej-gaber.png", "confidence": "high"},
+      {"firstName": "Noam", "lastName": "LEOPOLD", "photoUrl": "https://hbcnantes.com/media/cache/widen_400/rc/O1IpwcBS/uploads/hbc-nantes/pages/effectif-25-26/noam-leopold.png", "confidence": "high"},
+      {"firstName": "Kauldi", "lastName": "ODRIOZOLA YEREGUI", "photoUrl": "https://hbcnantes.com/media/cache/widen_400/rc/JcfEBFjF/uploads/hbc-nantes/pages/effectif-25-26/kauldi-odriozola.png", "confidence": "high"},
+      {"firstName": "Ian", "lastName": "TARRAFETA", "photoUrl": "https://hbcnantes.com/media/cache/widen_400/rc/Jm28H7Dz/uploads/hbc-nantes/pages/effectif-25-26/ian-tarrafeta.png", "confidence": "high"},
+      {"firstName": "Rok", "lastName": "OVNICEK", "photoUrl": "https://hbcnantes.com/media/cache/widen_400/rc/slgbii0m/uploads/hbc-nantes/pages/effectif-25-26/rok-ovnicek.png", "confidence": "high"},
+      {"firstName": "Romain", "lastName": "LAGARDE", "photoUrl": "https://hbcnantes.com/media/cache/widen_400/rc/MD2i9TFm/uploads/hbc-nantes/pages/effectif-25-26/romain-lagarde.png", "confidence": "high"},
+      {"firstName": "Thibaud", "lastName": "BRIET", "photoUrl": "https://hbcnantes.com/media/cache/widen_400/rc/kBzhI8b3/uploads/hbc-nantes/pages/effectif-25-26/thibaud-briet.png", "confidence": "high"},
+      {"firstName": "Ayyoub", "lastName": "ABDI", "photoUrl": "https://hbcnantes.com/media/cache/widen_400/rc/thp2URlY/uploads/hbc-nantes/pages/effectif-25-26/ayoub-abdi.jpg", "confidence": "high"},
+      {"firstName": "Andre", "lastName": "WENKEGHEU TCHAMBOU", "photoUrl": "https://hbcnantes.com/media/cache/widen_400/rc/MguDAc3J/uploads/hbc-nantes/pages/effectif-25-26/cf/n28.png", "confidence": "medium"}
+    ],
+    "notes": "11/17 matchés. 6 exclus (placeholder générique explicite 'man-in-suit'): BONDE, ANTONSEN, PERIC, NORLYK, TURCHENKO, GARCIANDIA A."
+  },
+  "LIMOGES": {
+    "sourcePageUrl": "https://www.lh-handball.fr/effectif/",
+    "matches": [
+      {"firstName": "Gauthier", "lastName": "IVAH", "photoUrl": "https://www.lh-handball.fr/wp-content/uploads/2025/09/DG-Ivah-Gauthier.png", "confidence": "high"},
+      {"firstName": "Théo", "lastName": "CLARAC", "photoUrl": "https://www.lh-handball.fr/wp-content/uploads/2025/09/DG-Theo-Clarac.png", "confidence": "high"},
+      {"firstName": "Ewan", "lastName": "KERVADEC", "photoUrl": "https://www.lh-handball.fr/wp-content/uploads/2025/09/DG-Ewan-Kervadec.png", "confidence": "high"},
+      {"firstName": "Valentin", "lastName": "AMAN", "photoUrl": "https://www.lh-handball.fr/wp-content/uploads/2025/09/DG-Valentin-Aman.png", "confidence": "high"},
+      {"firstName": "Maxime", "lastName": "OGANDO", "photoUrl": "https://www.lh-handball.fr/wp-content/uploads/2025/09/DG-Maxime-Ogando.png", "confidence": "high"},
+      {"firstName": "Arnau", "lastName": "GARCIA", "photoUrl": "https://www.lh-handball.fr/wp-content/uploads/2025/09/DG-Arnau-Garcia.png", "confidence": "high"},
+      {"firstName": "Jon", "lastName": "AZKUE", "photoUrl": "https://www.lh-handball.fr/wp-content/uploads/2025/09/DG-Jon-Azkue.png", "confidence": "high"},
+      {"firstName": "Andrea", "lastName": "PARISINI", "photoUrl": "https://www.lh-handball.fr/wp-content/uploads/2025/09/DG-Andrea-Parisini.png", "confidence": "high"},
+      {"firstName": "Matej", "lastName": "HRSTIC", "photoUrl": "https://www.lh-handball.fr/wp-content/uploads/2025/09/DG-Matej-Hrstic.png", "confidence": "high"},
+      {"firstName": "Jenilson", "lastName": "VARELA MONTEIRO", "photoUrl": "https://www.lh-handball.fr/wp-content/uploads/2025/09/DG-Jenilson-Varela.png", "confidence": "high"}
+    ],
+    "notes": "10/15 trouvés (pattern DG-<Prénom>-<Nom>). Non trouvés: KIEFFER, MIELCZARSKI, PELAYO, PETIT, THUILLIER."
+  },
+  "PAUC": {
+    "sourcePageUrl": "https://www.pauc-handball.com/effectif",
+    "matches": [
+      {"firstName": "Gustaf", "lastName": "BANKE", "photoUrl": "https://static.wixstatic.com/media/a8ae41_34d0f093a32f4967af7056ddaa30f88b~mv2.png", "confidence": "high"},
+      {"firstName": "Joze", "lastName": "BAZNIK", "photoUrl": "https://static.wixstatic.com/media/a8ae41_5e2902b8c9c640e7bf8d111a785c73dc~mv2.png", "confidence": "high"},
+      {"firstName": "Eliott", "lastName": "DESBLANCS", "photoUrl": "https://static.wixstatic.com/media/a8ae41_37209391037640eca5e473ab21a4ae8a~mv2.png", "confidence": "high"},
+      {"firstName": "Hugo", "lastName": "BROUZET", "photoUrl": "https://static.wixstatic.com/media/a8ae41_17ff8ea60c6043ae86c92fdbf40383ea~mv2.png", "confidence": "high"},
+      {"firstName": "Aymeric", "lastName": "ZAEPFEL", "photoUrl": "https://static.wixstatic.com/media/a8ae41_9da60535351446eb9b56f202b8858f83~mv2.png", "confidence": "high"},
+      {"firstName": "Alexandre", "lastName": "TRITTA", "photoUrl": "https://static.wixstatic.com/media/a8ae41_d51362903be34b72a770ec0a1a994f33~mv2.png", "confidence": "high"},
+      {"firstName": "Paul Louis", "lastName": "GUIRAUDOU", "photoUrl": "https://static.wixstatic.com/media/a8ae41_a36c6a25310241ec90048a7b56dd9714~mv2.png", "confidence": "high"},
+      {"firstName": "Mouhamadou", "lastName": "SIDIBE", "photoUrl": "https://static.wixstatic.com/media/a8ae41_d4a2346f286e4859ab8385a9048449d5~mv2.png", "confidence": "high"},
+      {"firstName": "Gabriel", "lastName": "LOESCH", "photoUrl": "https://static.wixstatic.com/media/a8ae41_fc853164d68649ca86fc12627b45996a~mv2.png", "confidence": "high"},
+      {"firstName": "Lucas", "lastName": "DE LA BRETECHE", "photoUrl": "https://static.wixstatic.com/media/a8ae41_820cb88d31754031bb4cb863243f93bc~mv2.png", "confidence": "high"},
+      {"firstName": "Robin", "lastName": "MOLINIE", "photoUrl": "https://static.wixstatic.com/media/a8ae41_172c13cf81ae41c98409c25886fc6286~mv2.png", "confidence": "high"},
+      {"firstName": "Antoine", "lastName": "TISSOT", "photoUrl": "https://static.wixstatic.com/media/a8ae41_8a7f5058f31346bcb200bf03887c1cea~mv2.png", "confidence": "high"},
+      {"firstName": "Nikoloz", "lastName": "KALANDADZE", "photoUrl": "https://static.wixstatic.com/media/a8ae41_cca2b4e29b524f08b5a4200bd298c93a~mv2.png", "confidence": "high"}
+    ],
+    "notes": "13/14 trouvés (site Wix, thumbnails 56x85). Non trouvé: Magnus SONDENA (placeholder générique data:image base64, exclu)."
+  },
+  "SAHB": {
+    "sourcePageUrl": "https://www.sa-hb.com/pros/lequipe-le-staff/",
+    "matches": [],
+    "notes": "Tous les joueurs (17/17 de notre liste) n'ont que le placeholder silhouette.png de lnh.fr embarqué sur la page. Aucune photo exploitable."
+  },
+  "SRVH": {
+    "sourcePageUrl": "https://www.srvhb.com/equipe-pro-effectif/",
+    "matches": [
+      {"firstName": "Benjamin", "lastName": "BATAILLE", "photoUrl": "https://www.srvhb.com/base/uploads/2021/06/Bataille-scaled-446x520_1_1.jpg", "confidence": "high"},
+      {"firstName": "Micke", "lastName": "BRASSELEUR", "photoUrl": "https://www.srvhb.com/base/uploads/2021/06/Brasseleur-scaled-446x520_1_1.jpg", "confidence": "high"},
+      {"firstName": "Quinten", "lastName": "COLMAN", "photoUrl": "https://www.srvhb.com/base/uploads/2024/03/Colman-scaled-446x520_1_1.jpg", "confidence": "high"},
+      {"firstName": "Alexandre", "lastName": "DEMAILLE", "photoUrl": "https://www.srvhb.com/base/uploads/2021/06/Demaille-scaled-446x520_1_1.jpg", "confidence": "high"},
+      {"firstName": "Marc", "lastName": "LEYVIGNE", "photoUrl": "https://www.srvhb.com/base/uploads/2021/06/Leyvigne-scaled-446x520_1_1.jpg", "confidence": "high"},
+      {"firstName": "Jonathan", "lastName": "MAPU", "photoUrl": "https://www.srvhb.com/base/uploads/2021/06/Mapu-scaled-446x520_1_1.jpg", "confidence": "high"},
+      {"firstName": "Johannes", "lastName": "MARESCOT", "photoUrl": "https://www.srvhb.com/base/uploads/2021/06/Marescot-scaled-446x520_1_1.jpg", "confidence": "high"},
+      {"firstName": "Antonin", "lastName": "MOHAMED", "photoUrl": "https://www.srvhb.com/base/uploads/2021/06/Mohamed-scaled-446x520_1_1.jpg", "confidence": "high"},
+      {"firstName": "Sergio", "lastName": "PEREZ", "photoUrl": "https://www.srvhb.com/base/uploads/2021/06/Perez-scaled-446x520_1_1.jpg", "confidence": "high"},
+      {"firstName": "Jorge", "lastName": "PEREZ MOLINA", "photoUrl": "https://www.srvhb.com/base/uploads/2021/06/Jorge-Perez-scaled-446x520_1_1.jpg", "confidence": "high"},
+      {"firstName": "Miguel Jose", "lastName": "SOARES NEVES", "photoUrl": "https://www.srvhb.com/base/uploads/2025/01/Neves-scaled-446x520_1_1.jpg", "confidence": "high"},
+      {"firstName": "Arthur", "lastName": "VIGNERON", "photoUrl": "https://www.srvhb.com/base/uploads/2021/06/Vigneron-scaled-446x520_1_1.jpg", "confidence": "high"}
+    ],
+    "notes": "12/15 trouvés. Non trouvés: AUGUSTINE, BLYZNIUK, KOUADIO. La page liste aussi Drevy PASCHAL mais notre DB l'assigne à MHB — exclu ici, incohérence club à vérifier séparément."
+  },
+  "TREMBLAY": {
+    "sourcePageUrl": "https://tremblayhandball.com/effectif-staff/",
+    "matches": [
+      {"firstName": "Erekle", "lastName": "ARSENASHVILI", "photoUrl": "https://tremblayhandball.com/wp-content/uploads/2025/09/EREKLE2.png", "confidence": "high"},
+      {"firstName": "Mathis", "lastName": "BARELLE", "photoUrl": "https://tremblayhandball.com/wp-content/uploads/2025/09/BARELLE2.png", "confidence": "high"},
+      {"firstName": "Jean-pierre", "lastName": "DUPOUX", "photoUrl": "https://tremblayhandball.com/wp-content/uploads/2025/09/DUPOUX2.png", "confidence": "high"},
+      {"firstName": "Thibault", "lastName": "GARAUDET", "photoUrl": "https://tremblayhandball.com/wp-content/uploads/2025/09/GARAUDET2.png", "confidence": "high"},
+      {"firstName": "Raphael", "lastName": "KÖTTERS", "photoUrl": "https://tremblayhandball.com/wp-content/uploads/brizy/imgs/KOTTERS2-344x430x0x0x344x430x1776448483.png", "confidence": "high"},
+      {"firstName": "Antoine", "lastName": "LEGER", "photoUrl": "https://tremblayhandball.com/wp-content/uploads/2025/09/LEGER2.png", "confidence": "high"},
+      {"firstName": "Nicolas", "lastName": "NIETO", "photoUrl": "https://tremblayhandball.com/wp-content/uploads/2025/09/NIETO2.png", "confidence": "high"},
+      {"firstName": "Kylian", "lastName": "RIGAULT", "photoUrl": "https://tremblayhandball.com/wp-content/uploads/2025/09/RIGAULT2.png", "confidence": "high"}
+    ],
+    "notes": "8/15 trouvés (page JS/Brizy, extraction HTML brut). Non trouvés: AVELANGE DEMOUGE, BONNEFOI, PETIT, PRAT, SCULO, ZUZO. La page liste aussi Antonio AREIA mais notre DB l'assigne à CAEN — exclu ici, incohérence club à vérifier séparément."
+  },
+  "USDK": {
+    "sourcePageUrl": "https://www.usdk.fr/effectif/",
+    "matches": [
+      {"firstName": "Ludwig", "lastName": "APPOLINAIRE", "photoUrl": "https://www.usdk.fr/wp-content/uploads/54_APPOLINAIRE-Ludwig_600x800.jpg", "confidence": "high"},
+      {"firstName": "Thibaud", "lastName": "ARTEAGA", "photoUrl": "https://www.usdk.fr/wp-content/uploads/64_ARTEAGA-Thibaud_600x800.jpg", "confidence": "high"},
+      {"firstName": "Florian", "lastName": "BILLANT", "photoUrl": "https://www.usdk.fr/wp-content/uploads/05_BILLANT-Florian_600x800-1.jpg", "confidence": "high"},
+      {"firstName": "Gautier", "lastName": "CREPEL", "photoUrl": "https://www.usdk.fr/wp-content/uploads/30_CREPEL-Gautier_600x800.jpg", "confidence": "high"},
+      {"firstName": "Diogo", "lastName": "DE ABREU OLIVEIRA", "photoUrl": "https://www.usdk.fr/wp-content/uploads/07_OLIVEIRA-Diogo_600x800-1.jpg", "confidence": "high"},
+      {"firstName": "Quentin", "lastName": "DUPUY", "photoUrl": "https://www.usdk.fr/wp-content/uploads/11_DUPUY-Quentin_600x800.jpg", "confidence": "high"},
+      {"firstName": "Steve", "lastName": "MARIE-JOSEPH", "photoUrl": "https://www.usdk.fr/wp-content/uploads/55_MARIE-JOSEPH-Steve_600x800.jpg", "confidence": "high"},
+      {"firstName": "Matthieu", "lastName": "MARMIER", "photoUrl": "https://www.usdk.fr/wp-content/uploads/08_MARMIER-Matthieu_600x800-1.jpg", "confidence": "high"},
+      {"firstName": "Taras", "lastName": "MINOTSKYI", "photoUrl": "https://www.usdk.fr/wp-content/uploads/35_MINOTSKYI-Taras_600x800-1.jpg", "confidence": "high"},
+      {"firstName": "Alejandro", "lastName": "ROMERO CARRERAS", "photoUrl": "https://www.usdk.fr/wp-content/uploads/01_ROMERO-Alejandro_600x800.jpg", "confidence": "high"},
+      {"firstName": "Dylan", "lastName": "TOSSIN", "photoUrl": "https://www.usdk.fr/wp-content/uploads/10_TOSSIN-Dylan_600x800-1.jpg", "confidence": "high"}
+    ],
+    "notes": "11/15 trouvés. Non trouvés: BUSSELIER, CARABASSE, VAINIONPÄÄ, VILLAIN. La page liste aussi Mehdi HARBAOUI et Gabin MARTINEZ mais notre DB les assigne à CCMHB — exclus ici, incohérence club à vérifier séparément."
+  }
+}

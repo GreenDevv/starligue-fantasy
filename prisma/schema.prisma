@@ -1,0 +1,761 @@
+// prisma/schema.prisma
+// Modèle de données — ARCHITECTURE.md §5
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Position {
+  GK
+  LW
+  LB
+  CB
+  RB
+  RW
+  PV
+}
+
+enum SquadRole {
+  STARTER
+  BENCH
+}
+
+// Bonus de saison — chaque type activable au maximum une fois par saison, un seul
+// actif par journée (voir FantasyBonusUsage/SimulationBonusUsage). 4 types pour un
+// quota global de 3 activations/saison (GameConfig SEASON_BONUS_QUOTA_PER_SEASON) :
+// un joueur doit en sacrifier un.
+enum BonusType {
+  TRIPLE_CAPTAIN // ×3 sur le capitaine (au lieu de ×2) pour la journée où il est actif
+  BENCH_BOOST // remplace le ×0.5 banc par un ×1 classique pour la journée où il est actif
+  INSURANCE // aucun joueur ne peut finir la journée en négatif (score plancher à 0/joueur)
+  STATISTICIAN // double le bonus/malus "leader de journée" (src/lib/scoring/stat-leaders.ts) pour la journée
+}
+
+enum MatchStatus {
+  SCHEDULED
+  LIVE
+  FINISHED
+  POSTPONED
+  CANCELLED
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum DataSource {
+  CSV
+  API_SPORTS
+  LNH_SCRAPER
+  MANUAL
+}
+
+// Catégories du flux d'actus Starligue (page publique /starligue) — TRANSFER posée
+// par heuristique de mots-clés sur du contenu scrapé (best-effort, aucune source
+// structurée n'existe pour les transferts réels) ; INJURY/TEAM_OF_WEEK/PERFORMANCE
+// sont exclusivement posées par les générateurs internes (src/lib/news/*), jamais
+// déduites d'un texte scrapé, pour ne pas mélanger donnée admin-confirmée/calculée
+// et rumeur de presse.
+enum NewsCategory {
+  TRANSFER
+  INJURY
+  TEAM_OF_WEEK
+  PERFORMANCE
+  GENERAL
+}
+
+enum NewsSourceType {
+  LNH_SITE
+  CLUB_SITE
+  GENERATED
+}
+
+// Les 5 issues pronostiquables d'un match, en bandes disjointes sur l'écart de
+// buts final (homeScore - awayScore) — voir src/lib/predictions/outcome.ts pour
+// les seuils exacts. Volontairement pas un handicap classique (bandes non
+// chevauchantes, plus simple à comprendre et à trancher qu'un vrai asian handicap).
+// 1X2 classique — plus simple à trancher qu'un vrai handicap. Les 5 bandes
+// d'écart de buts (AWAY_BIG/AWAY_SMALL/HOME_SMALL/HOME_BIG) ont été abandonnées :
+// pas assez d'intérêt supplémentaire pour la complexité ajoutée.
+enum PredictionOutcome {
+  HOME
+  DRAW
+  AWAY
+}
+
+model User {
+  id               String           @id @default(cuid())
+  email            String           @unique
+  passwordHash     String?
+  name             String
+  role             UserRole         @default(USER)
+  favoritePlayerId String? // choisi (facultatif) à l'inscription — src/app/(public)/register/page.tsx
+  favoritePlayer   Player?          @relation("FavoritePlayer", fields: [favoritePlayerId], references: [id])
+  createdAt        DateTime         @default(now())
+  fantasyTeams     FantasyTeam[]
+  leagueMembers    LeagueMember[]
+  ownedLeagues     League[]         @relation("LeagueOwner")
+  accounts         Account[]
+  simulationTeams  SimulationTeam[]
+}
+
+// Requis par @auth/prisma-adapter (OAuth Google + credentials)
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Season {
+  id                              String                    @id @default(cuid())
+  label                           String                    @unique // "2026-2027"
+  isActive                        Boolean                   @default(false)
+  currentSimulationGameweekNumber Int                       @default(0) // curseur global de journée pour une saison de type simulation (avancée par un admin, src/lib/simulation/admin-advance.ts) — sans objet pour la saison live (pilotée par Gameweek.deadlineAt/isScored)
+  gameweeks                       Gameweek[]
+  players                         Player[]
+  matches                         Match[]
+  leagues                         League[]
+  simulationTeams                 SimulationTeam[]
+  transferWindows                 TransferWindow[]
+  simulationTradeProposals        SimulationTradeProposal[]
+  clubStandings                   ClubStanding[]
+  newsItems                       NewsItem[]
+}
+
+model Club {
+  id             String                @id @default(cuid())
+  name           String // "Montpellier Handball"
+  shortName      String // "MHB"
+  logoUrl        String?
+  externalIds    Json                  @default("{}") // { "api_sports": "123", "lnh": "mhb" }
+  players        Player[]
+  homeMatches    Match[]               @relation("HomeClub")
+  awayMatches    Match[]               @relation("AwayClub")
+  standings      ClubStanding[]
+  h2hHomeMatches ClubHeadToHeadMatch[] @relation("H2HHomeClub")
+  h2hAwayMatches ClubHeadToHeadMatch[] @relation("H2HAwayClub")
+  newsItems      NewsItem[]
+}
+
+// Historique des confrontations directes entre deux clubs, au-delà de ce que Match
+// couvre déjà (live 2026/27 + Simulation 2025/26, cf. [[live_simulation_merge_plan]])
+// — scrapé à la demande sur lnh.fr (saisons antérieures, src/lib/clubs/head-to-head.ts)
+// et mis en cache ici pour ne jamais rescrapper à chaque vue de la page de
+// comparaison /clubs/[id]/vs/[opponentId]. homeClubId/awayClubId = qui jouait à
+// domicile ce jour-là (peut être l'un ou l'autre club de la paire), même
+// convention que Match. seasonLabel est du texte libre lnh.fr ("2023/2024"), pas
+// une FK vers Season (qui ne modélise que les saisons jouables dans l'app).
+model ClubHeadToHeadMatch {
+  id          String     @id @default(cuid())
+  homeClubId  String
+  homeClub    Club       @relation("H2HHomeClub", fields: [homeClubId], references: [id])
+  awayClubId  String
+  awayClub    Club       @relation("H2HAwayClub", fields: [awayClubId], references: [id])
+  playedAt    DateTime
+  seasonLabel String
+  homeScore   Int
+  awayScore   Int
+  externalIds Json       @default("{}") // { lnh_calendars_id: "..." }
+  source      DataSource @default(LNH_SCRAPER)
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([homeClubId, awayClubId, playedAt])
+  @@index([homeClubId, awayClubId])
+  @@index([awayClubId, homeClubId])
+}
+
+model Player {
+  id                     String                          @id @default(cuid())
+  seasonId               String
+  season                 Season                          @relation(fields: [seasonId], references: [id])
+  clubId                 String
+  club                   Club                            @relation(fields: [clubId], references: [id])
+  firstName              String
+  lastName               String
+  position               Position
+  marketValue            Decimal                         @db.Decimal(5, 1) // ex: 12.5
+  valuationPending       Boolean                         @default(true) // true = valeur encore approximative (placeholder), ND tant qu'aucune méthode de valorisation n'a été appliquée
+  photoUrl               String?
+  externalIds            Json                            @default("{}")
+  isActive               Boolean                         @default(true) // blessure longue durée / départ
+  injuredAt              DateTime? // déclaration manuelle admin — distinct de isActive (aussi utilisé pour "parti du club") ; seul injuredAt rend éligible au joker médical
+  stats                  PlayerMatchStat[]
+  squadEntries           FantasySquadPlayer[]
+  valueHistory           PlayerValueHistory[]
+  lnhSeasonStats         PlayerLnhSeasonStat[]
+  simulationSquadEntries SimulationSquadPlayer[]
+  fantasyCaptainOf       FantasyTeam[]                   @relation("FantasyCaptain")
+  simulationCaptainOf    SimulationTeam[]                @relation("SimulationCaptain")
+  tradeOffers            TradeProposalPlayer[]
+  simulationTradeOffers  SimulationTradeProposalPlayer[]
+  newsItems              NewsItem[]
+  favoritedBy            User[]                          @relation("FavoritePlayer")
+
+  @@unique([seasonId, clubId, firstName, lastName])
+  @@index([seasonId, position])
+}
+
+model PlayerValueHistory {
+  id         String    @id @default(cuid())
+  playerId   String
+  player     Player    @relation(fields: [playerId], references: [id])
+  value      Decimal   @db.Decimal(5, 1)
+  gameweekId String? // null = valorisation pré-saison ; sinon sert de garde d'idempotence pour l'ajustement de valeur dynamique
+  gameweek   Gameweek? @relation(fields: [gameweekId], references: [id])
+  changedAt  DateTime  @default(now())
+
+  @@index([gameweekId])
+}
+
+// Fenêtre de transfert (Noël, trêves internationales, …) — dates saisies par
+// l'admin, un même modèle sert à la saison live et à la saison de simulation
+// (distinguées par seasonId).
+model TransferWindow {
+  id       String   @id @default(cuid())
+  seasonId String
+  season   Season   @relation(fields: [seasonId], references: [id])
+  label    String
+  opensAt  DateTime
+  closesAt DateTime
+
+  @@index([seasonId])
+}
+
+// Historique des "Score LNH" par saison lnh.fr (source externe, distincte de nos
+// propres Season/Gameweek) — sert de base à l'estimation de valorisation des joueurs
+// déjà passés par la Starligue. Un joueur nouvellement arrivé n'aura aucune ligne ici.
+model PlayerLnhSeasonStat {
+  id                String     @id @default(cuid())
+  playerId          String
+  player            Player     @relation(fields: [playerId], references: [id])
+  seasonLabel       String // "2025/2026"
+  lnhSeasonsId      String // id interne lnh.fr, ex "39" — permet de relancer le scraper
+  matchesPlayed     Int
+  totalLnhScore     Decimal    @db.Decimal(7, 1) // cumul saison brut ("Score LNH")
+  avgLnhScore       Decimal    @db.Decimal(5, 2) // totalLnhScore / matchesPlayed
+  scrapedClub       String? // shortName (ou slug lnh brut si non résolu) du club sous lequel le joueur a été trouvé pour cette saison — utile si différent du club actuel (transfert)
+  matchedByNameOnly Boolean    @default(false) // true = matché par nom seul (club différent, transfert probable) plutôt que nom+club
+  source            DataSource @default(LNH_SCRAPER)
+  updatedAt         DateTime   @updatedAt
+
+  @@unique([playerId, seasonLabel])
+  @@index([seasonLabel])
+}
+
+// Mode Simulation — rejoue une saison passée déjà terminée (ex: 2025/2026), séparé
+// du jeu en direct (FantasyTeam/FantasySquadPlayer/FantasyLineup) pour zéro risque
+// de régression : mêmes forme et logique de calcul (moteur pur réutilisé tel quel),
+// tables dédiées. Player/Club/Season/Gameweek/Match/PlayerMatchStat sont partagés
+// (déjà multi-saison par construction). Scopée par League comme FantasyTeam (un
+// utilisateur peut avoir plusieurs SimulationTeam, une par ligue de simulation
+// rejointe) — leagueId nullable en transition de migration uniquement, voir
+// scripts/migrate-simulation-teams-to-leagues.ts.
+model SimulationTeam {
+  id                     String                             @id @default(cuid())
+  userId                 String
+  user                   User                               @relation(fields: [userId], references: [id])
+  seasonId               String // dénormalisé depuis league.seasonId, immuable — conservé pour toutes les requêtes déjà filtrées par seasonId
+  season                 Season                             @relation(fields: [seasonId], references: [id])
+  leagueId               String
+  league                 League                             @relation(fields: [leagueId], references: [id])
+  name                   String
+  budget                 Decimal                            @db.Decimal(6, 1)
+  totalPoints            Decimal                            @default(0) @db.Decimal(8, 1)
+  pointsConverted        Decimal                            @default(0) @db.Decimal(8, 1) // voir FantasyTeam.pointsConverted — même mécanique, src/lib/budget/points-conversion.ts
+  isValidated            Boolean                            @default(false)
+  captainId              String? // null = jamais choisi ; modifiable seulement hors verrouillage (voir src/lib/transfers/window.ts)
+  captain                Player?                            @relation("SimulationCaptain", fields: [captainId], references: [id])
+  jokersUsed             Int                                @default(0) // jokers médicaux consommés cette saison (quota : GameConfig JOKER_QUOTA_PER_SEASON)
+  pendingBonus           BonusType? // bonus choisi pour la prochaine journée non verrouillée (src/lib/bonus/*) ; appliqué et remis à null au snapshot de lineup, voir SimulationBonusUsage pour l'historique "1×/saison"
+  createdAt              DateTime                           @default(now())
+  squad                  SimulationSquadPlayer[]
+  lineups                SimulationLineup[]
+  bonusUsages            SimulationBonusUsage[]
+  pointsConversions      SimulationPointsBudgetConversion[]
+  tradeProposalsSent     SimulationTradeProposal[]          @relation("SimulationTradeProposer")
+  tradeProposalsReceived SimulationTradeProposal[]          @relation("SimulationTradeReceiver")
+
+  @@unique([userId, leagueId])
+  @@index([seasonId])
+}
+
+// Ledger d'audit des conversions points → budget en Mode Simulation — voir
+// PointsBudgetConversion (jeu en direct), même rôle, table séparée pour ne jamais
+// mélanger les deux pipelines (cf. convention déjà établie FantasyTeam/SimulationTeam).
+model SimulationPointsBudgetConversion {
+  id               String         @id @default(cuid())
+  simulationTeamId String
+  simulationTeam   SimulationTeam @relation(fields: [simulationTeamId], references: [id])
+  pointsSpent      Decimal        @db.Decimal(8, 1)
+  budgetGained     Decimal        @db.Decimal(6, 1)
+  createdAt        DateTime       @default(now())
+
+  @@index([simulationTeamId])
+}
+
+// Trade entre deux SimulationTeam de la MÊME ligue de simulation — resserré depuis
+// "même saison" (seasonId conservé en dénormalisation, cf SimulationTeam.seasonId)
+// maintenant que SimulationTeam a une League, symétrique à TradeProposal.leagueId.
+// Réutilise TradeStatus/TradeSide (mêmes sémantiques que TradeProposal) et la même
+// logique pure de validation (src/lib/trades/proposal.ts, season/league-agnostique).
+model SimulationTradeProposal {
+  id               String                          @id @default(cuid())
+  seasonId         String
+  season           Season                          @relation(fields: [seasonId], references: [id])
+  leagueId         String
+  league           League                          @relation(fields: [leagueId], references: [id])
+  proposingTeamId  String
+  proposingTeam    SimulationTeam                  @relation("SimulationTradeProposer", fields: [proposingTeamId], references: [id])
+  receivingTeamId  String
+  receivingTeam    SimulationTeam                  @relation("SimulationTradeReceiver", fields: [receivingTeamId], references: [id])
+  budgetAdjustment Decimal                         @default(0) @db.Decimal(6, 1) // proposeur → destinataire ; négatif = sens inverse
+  status           TradeStatus                     @default(PENDING)
+  expiresAt        DateTime
+  respondedAt      DateTime?
+  createdAt        DateTime                        @default(now())
+  players          SimulationTradeProposalPlayer[]
+
+  @@index([receivingTeamId, status])
+  @@index([proposingTeamId, status])
+  @@index([leagueId])
+}
+
+model SimulationTradeProposalPlayer {
+  id                        String                  @id @default(cuid())
+  simulationTradeProposalId String
+  simulationTradeProposal   SimulationTradeProposal @relation(fields: [simulationTradeProposalId], references: [id])
+  playerId                  String
+  player                    Player                  @relation(fields: [playerId], references: [id])
+  side                      TradeSide
+
+  @@unique([simulationTradeProposalId, playerId])
+}
+
+model SimulationSquadPlayer {
+  id               String         @id @default(cuid())
+  simulationTeamId String
+  simulationTeam   SimulationTeam @relation(fields: [simulationTeamId], references: [id])
+  playerId         String
+  player           Player         @relation(fields: [playerId], references: [id])
+  role             SquadRole      @default(BENCH)
+  purchasePrice    Decimal        @db.Decimal(5, 1)
+
+  @@unique([simulationTeamId, playerId])
+}
+
+model SimulationLineup {
+  id               String         @id @default(cuid())
+  simulationTeamId String
+  simulationTeam   SimulationTeam @relation(fields: [simulationTeamId], references: [id])
+  gameweekId       String
+  gameweek         Gameweek       @relation(fields: [gameweekId], references: [id])
+  entries          Json // même forme que FantasyLineup.entries
+  bonus            BonusType? // bonus de saison actif ce jour-là (snapshoté depuis SimulationTeam.pendingBonus), null = aucun
+  points           Decimal?       @db.Decimal(7, 1)
+  createdAt        DateTime       @default(now())
+
+  @@unique([simulationTeamId, gameweekId])
+}
+
+// Historique des bonus de saison consommés en Mode Simulation — symétrique de
+// FantasyBonusUsage. Le @@unique([simulationTeamId, type]) est la garde
+// d'application du "1×/saison" : une tentative de réutilisation échoue à l'insertion.
+model SimulationBonusUsage {
+  id               String         @id @default(cuid())
+  simulationTeamId String
+  simulationTeam   SimulationTeam @relation(fields: [simulationTeamId], references: [id])
+  gameweekId       String
+  gameweek         Gameweek       @relation(fields: [gameweekId], references: [id])
+  type             BonusType
+  createdAt        DateTime       @default(now())
+
+  @@unique([simulationTeamId, type])
+  @@index([gameweekId])
+}
+
+model Gameweek {
+  id                    String                 @id @default(cuid())
+  seasonId              String
+  season                Season                 @relation(fields: [seasonId], references: [id])
+  number                Int // J1..J30
+  deadlineAt            DateTime
+  isScored              Boolean                @default(false) // tous les points calculés
+  matches               Match[]
+  lineups               FantasyLineup[]
+  simulationLineups     SimulationLineup[]
+  valueHistory          PlayerValueHistory[]
+  bonusUsages           FantasyBonusUsage[]
+  simulationBonusUsages SimulationBonusUsage[]
+
+  @@unique([seasonId, number])
+}
+
+model Match {
+  id          String            @id @default(cuid())
+  seasonId    String
+  season      Season            @relation(fields: [seasonId], references: [id])
+  gameweekId  String
+  gameweek    Gameweek          @relation(fields: [gameweekId], references: [id])
+  homeClubId  String
+  homeClub    Club              @relation("HomeClub", fields: [homeClubId], references: [id])
+  awayClubId  String
+  awayClub    Club              @relation("AwayClub", fields: [awayClubId], references: [id])
+  kickoffAt   DateTime
+  status      MatchStatus       @default(SCHEDULED)
+  homeScore   Int?
+  awayScore   Int?
+  externalIds Json              @default("{}")
+  playerStats PlayerMatchStat[]
+  predictionMarket PredictionMarket?
+
+  @@index([gameweekId])
+}
+
+// Stats détaillées issues du boxscore lnh.fr (feuille de match). Toutes nullable :
+// le tableau gardiens n'a pas les mêmes colonnes que le tableau joueurs de champ
+// (ex: pas de goalsPlay/opponentShotsBlocked/neutralizations pour un gardien), et les
+// matchs pas encore re-synchronisés avec le parseur étendu n'auront rien. Sert à la
+// fois à l'affichage (leaders saison/journée, src/lib/stats/stat-lines.ts) et au
+// bonus/malus de scoring (src/lib/scoring/stat-leaders.ts).
+model PlayerMatchStat {
+  id                   String     @id @default(cuid())
+  matchId              String
+  match                Match      @relation(fields: [matchId], references: [id])
+  playerId             String
+  player               Player     @relation(fields: [playerId], references: [id])
+  lnhRating            Decimal?   @db.Decimal(3, 1) // note LNH /10, null = pas noté
+  played               Boolean    @default(false)
+  saves                Int? // gardiens — total arrêts (arrêts tirs + arrêts penalty)
+  shotsFaced           Int? // gardiens — total tirs subis (arrêts + buts encaissés), pour % arrêts
+  savePercentage       Decimal?   @db.Decimal(5, 2) // gardiens — % arrêts (saves/shotsFaced), distinct de shotPercentage
+  goalsPlay            Int? // buts tirs — buts marqués
+  shotsPlay            Int? // buts tirs — tentatives
+  goalsPenalty         Int?
+  shotsPenalty         Int?
+  goalsTotal           Int?
+  shotsTotal           Int?
+  shotPercentage       Decimal?   @db.Decimal(5, 2) // joueurs de champ uniquement (% tirs) — null pour un gardien
+  assists              Int? // dernière passe
+  ballsRecovered       Int?
+  opponentShotsBlocked Int? // tirs adverses contrés
+  penaltiesDrawn       Int? // penaltys provoqués
+  twoMinDrawn          Int? // 2 min provoquées
+  neutralizations      Int?
+  turnovers            Int? // pertes balles
+  twoMinTaken          Int? // 2 min (reçues)
+  disqualified         Int? // disq. — 0/1 (Int plutôt que Boolean pour permettre un SUM() Prisma groupBy identique aux autres stats)
+  source               DataSource
+  updatedAt            DateTime   @updatedAt
+
+  @@unique([matchId, playerId])
+}
+
+// Cotes de pronostic d'un match — calculées en interne (src/lib/predictions/odds.ts,
+// force des clubs = valeur marchande moyenne de l'effectif actif) à la création du
+// marché (cron compute-prediction-odds), puis figées jusqu'au coup d'envoi : le
+// pronostic se juge sur les cotes vues au moment du pari, pas recalculées après.
+// Un seul jeu de cotes par match (Match est déjà scopé par saison live/simulation),
+// pas de duplication Fantasy*/Simulation* ici contrairement au reste du modèle —
+// seul Prediction (le choix d'une équipe) suit cette convention. v1 : jeu en direct
+// uniquement, voir ARCHITECTURE.md §14 pour l'extension Simulation (hors scope,
+// piège anti-spoiler à vérifier d'abord, cf. [[live_simulation_merge_plan]]).
+model PredictionMarket {
+  id          String       @id @default(cuid())
+  matchId     String       @unique
+  match       Match        @relation(fields: [matchId], references: [id])
+  oddsHome    Decimal      @db.Decimal(4, 2)
+  oddsDraw    Decimal      @db.Decimal(4, 2)
+  oddsAway    Decimal      @db.Decimal(4, 2)
+  computedAt  DateTime     @default(now())
+  predictions Prediction[]
+}
+
+// Classement du championnat (clubs, pas équipes fantasy) — snapshot immuable par
+// journée : une ligne par (seasonId, gameweekNumber, clubId), jamais écrasée, pour
+// conserver l'état du classement après chaque journée (widget dashboard). Saison
+// live 2026/27 : chaque ligne copiée telle quelle depuis daikin-starligue/classement
+// (LnhScraperProvider.fetchStandings, rank/points autorité LNH). Saison simulation
+// 2025/26 : calculé par nous depuis Match (src/lib/standings/compute.ts, victoire 2
+// pts/nul 1/défaite 0, goalAvg = buts pour - buts contre) au fil des avancées admin
+// — jamais au-delà du curseur Season.currentSimulationGameweekNumber (pas de spoiler,
+// même règle que getSimulationDashboardMatchStrips). gameweekNumber = 0 : état
+// pré-saison (aucun match joué).
+model ClubStanding {
+  id             String     @id @default(cuid())
+  seasonId       String
+  season         Season     @relation(fields: [seasonId], references: [id])
+  gameweekNumber Int
+  clubId         String
+  club           Club       @relation(fields: [clubId], references: [id])
+  rank           Int
+  points         Int
+  played         Int
+  wins           Int
+  draws          Int
+  losses         Int
+  goalsFor       Int
+  goalsAgainst   Int
+  goalAvg        Int
+  source         DataSource
+  capturedAt     DateTime   @default(now())
+
+  @@unique([seasonId, gameweekNumber, clubId])
+  @@index([seasonId, gameweekNumber])
+}
+
+// Flux d'actus de la page publique /starligue (ARCHITECTURE.md §8.2) — agrège du
+// contenu scrapé (lnh.fr + sites de clubs, cron sync-news, src/lib/data-providers/news)
+// et du contenu généré en interne (blessures déclarées par l'admin, équipe type et
+// meilleures perfs de la semaine, src/lib/news/*). Saison live uniquement (comme les
+// pronostics, §14.6) : pas de sens pour le Mode Simulation (curseur anti-spoiler).
+// dedupeKey = idempotence exacte par source (upsert, jamais de create nu, cf. règle
+// projet) ; le quasi-doublon cross-source (même actu sur lnh.fr ET un club) est géré
+// en logique applicative (src/lib/news/dedupe.ts), pas encodable en contrainte SQL.
+model NewsItem {
+  id          String         @id @default(cuid())
+  seasonId    String
+  season      Season         @relation(fields: [seasonId], references: [id])
+  category    NewsCategory
+  sourceType  NewsSourceType
+  sourceKey   String // "lnh" | slug club (ex: "montpellier") | "system"
+  title       String
+  excerpt     String?        @db.Text
+  content     String?        @db.Text // texte intégral (paragraphes, jamais de HTML stocké — src/lib/news/html-to-text.ts), pour lire l'article entier sans quitter le site ; null si non récupéré (échec réseau, source sans article dédié)
+  sourceUrl   String? // null pour GENERATED
+  imageUrl    String?
+  publishedAt DateTime
+  dedupeKey   String         @unique
+  clubId      String?
+  club        Club?          @relation(fields: [clubId], references: [id])
+  playerId    String?
+  player      Player?        @relation(fields: [playerId], references: [id])
+  payload     Json? // structure par catégorie (TEAM_OF_WEEK/PERFORMANCE), voir src/lib/news/payload.ts — pas de contrainte DB
+  createdAt   DateTime       @default(now())
+
+  @@index([seasonId, publishedAt(sort: Desc)])
+  @@index([seasonId, category, publishedAt(sort: Desc)])
+}
+
+model FantasyTeam {
+  id                     String                   @id @default(cuid())
+  userId                 String
+  user                   User                     @relation(fields: [userId], references: [id])
+  leagueId               String
+  league                 League                   @relation(fields: [leagueId], references: [id])
+  name                   String // "Les Experts de Tish"
+  budget                 Decimal                  @db.Decimal(6, 1) // budget restant
+  totalPoints            Decimal                  @default(0) @db.Decimal(8, 1)
+  pointsConverted        Decimal                  @default(0) @db.Decimal(8, 1) // cumul historique converti en budget (src/lib/budget/points-conversion.ts) — jamais décrémenté, totalPoints = Σ(lineup.points) - pointsConverted (voir recalcTotalPoints)
+  isValidated            Boolean                  @default(false) // 14 joueurs OK + budget OK
+  captainId              String? // null = jamais choisi ; modifiable seulement hors verrouillage (voir src/lib/transfers/window.ts)
+  captain                Player?                  @relation("FantasyCaptain", fields: [captainId], references: [id])
+  jokersUsed             Int                      @default(0) // jokers médicaux consommés cette saison (quota : GameConfig JOKER_QUOTA_PER_SEASON)
+  pendingBonus           BonusType? // bonus choisi pour la prochaine journée non verrouillée (src/lib/bonus/*) ; appliqué et remis à null au snapshot de lineup, voir FantasyBonusUsage pour l'historique "1×/saison"
+  jerseyConfig           Json // JerseyConfig (src/lib/team/jersey.ts) — pas de @default, toujours fourni à la création (même convention que FantasyLineup.entries)
+  createdAt              DateTime                 @default(now())
+  squad                  FantasySquadPlayer[]
+  lineups                FantasyLineup[]
+  bonusUsages            FantasyBonusUsage[]
+  pointsConversions      PointsBudgetConversion[]
+  tradeProposalsSent     TradeProposal[]          @relation("TradeProposer")
+  tradeProposalsReceived TradeProposal[]          @relation("TradeReceiver")
+  predictions            Prediction[]
+
+  @@unique([userId, leagueId])
+  @@index([leagueId, totalPoints(sort: Desc)]) // classement de ligue
+  @@index([totalPoints(sort: Desc)]) // classement global
+}
+
+// Ledger d'audit des conversions points → budget (src/lib/budget/points-conversion.ts)
+// — même esprit que PlayerValueHistory : jamais lu par la logique de jeu elle-même,
+// sert d'historique affichable et de trace de debug.
+model PointsBudgetConversion {
+  id            String      @id @default(cuid())
+  fantasyTeamId String
+  fantasyTeam   FantasyTeam @relation(fields: [fantasyTeamId], references: [id])
+  pointsSpent   Decimal     @db.Decimal(8, 1)
+  budgetGained  Decimal     @db.Decimal(6, 1)
+  createdAt     DateTime    @default(now())
+
+  @@index([fantasyTeamId])
+}
+
+enum TradeStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+  EXPIRED
+}
+
+// Côté de la proposition qui OFFRE ce joueur — PROPOSER = joueur pris dans
+// l'effectif de l'auteur de la proposition, RECEIVER = joueur demandé dans
+// l'effectif du destinataire.
+enum TradeSide {
+  PROPOSER
+  RECEIVER
+}
+
+// Proposition de trade entre deux FantasyTeam de la même ligue — joueur(s) contre
+// joueur(s) + ajustement de budget. Exécutée seulement à l'acceptation du
+// destinataire, et seulement si une fenêtre de transfert est ouverte (src/lib/transfers/status.ts).
+model TradeProposal {
+  id               String                @id @default(cuid())
+  leagueId         String
+  league           League                @relation(fields: [leagueId], references: [id])
+  proposingTeamId  String
+  proposingTeam    FantasyTeam           @relation("TradeProposer", fields: [proposingTeamId], references: [id])
+  receivingTeamId  String
+  receivingTeam    FantasyTeam           @relation("TradeReceiver", fields: [receivingTeamId], references: [id])
+  budgetAdjustment Decimal               @default(0) @db.Decimal(6, 1) // proposeur → destinataire ; négatif = sens inverse
+  status           TradeStatus           @default(PENDING)
+  expiresAt        DateTime
+  respondedAt      DateTime?
+  createdAt        DateTime              @default(now())
+  players          TradeProposalPlayer[]
+
+  @@index([receivingTeamId, status])
+  @@index([proposingTeamId, status])
+}
+
+model TradeProposalPlayer {
+  id              String        @id @default(cuid())
+  tradeProposalId String
+  tradeProposal   TradeProposal @relation(fields: [tradeProposalId], references: [id])
+  playerId        String
+  player          Player        @relation(fields: [playerId], references: [id])
+  side            TradeSide
+
+  @@unique([tradeProposalId, playerId])
+}
+
+model FantasySquadPlayer {
+  id            String      @id @default(cuid())
+  fantasyTeamId String
+  fantasyTeam   FantasyTeam @relation(fields: [fantasyTeamId], references: [id])
+  playerId      String
+  player        Player      @relation(fields: [playerId], references: [id])
+  role          SquadRole   @default(BENCH) // rôle COURANT (modifiable avant deadline)
+  purchasePrice Decimal     @db.Decimal(5, 1)
+
+  @@unique([fantasyTeamId, playerId])
+}
+
+// Snapshot immuable de l'alignement à la deadline d'une journée
+model FantasyLineup {
+  id            String      @id @default(cuid())
+  fantasyTeamId String
+  fantasyTeam   FantasyTeam @relation(fields: [fantasyTeamId], references: [id])
+  gameweekId    String
+  gameweek      Gameweek    @relation(fields: [gameweekId], references: [id])
+  entries       Json // [{ playerId, position, role, purchasePrice }]
+  bonus         BonusType? // bonus de saison actif ce jour-là (snapshoté depuis FantasyTeam.pendingBonus), null = aucun
+  points        Decimal?    @db.Decimal(7, 1) // null tant que non calculé
+  createdAt     DateTime    @default(now())
+
+  @@unique([fantasyTeamId, gameweekId])
+  @@index([gameweekId, points(sort: Desc)]) // classement de la journée
+}
+
+// Historique des bonus de saison consommés — un utilisateur peut activer chaque
+// type de bonus au maximum une fois par saison. Le @@unique([fantasyTeamId, type])
+// est la garde d'application : une tentative de réutilisation échoue à l'insertion.
+model FantasyBonusUsage {
+  id            String      @id @default(cuid())
+  fantasyTeamId String
+  fantasyTeam   FantasyTeam @relation(fields: [fantasyTeamId], references: [id])
+  gameweekId    String
+  gameweek      Gameweek    @relation(fields: [gameweekId], references: [id])
+  type          BonusType
+  createdAt     DateTime    @default(now())
+
+  @@unique([fantasyTeamId, type])
+  @@index([gameweekId])
+}
+
+// Pronostic d'une équipe sur l'issue d'un match — gratuit et illimité (aucun coût,
+// aucun budget/wallet dédié, jamais de pénalité pour un pronostic faux). Modifiable
+// jusqu'au coup d'envoi DU MATCH (Match.kickoffAt), pas la deadline de journée : les
+// matchs d'une même journée ne débutent pas tous en même temps. Un pronostic juste
+// alimente le multiplicateur de la journée (src/lib/predictions/multiplier.ts),
+// appliqué aux points positifs du lineup dans computeGameweekScores — voir
+// src/lib/scoring/compute.ts. Aucun pronostic tenté sur la journée → multiplicateur
+// neutre (×1), ne jamais pénaliser l'absence de pari.
+model Prediction {
+  id            String            @id @default(cuid())
+  fantasyTeamId String
+  fantasyTeam   FantasyTeam       @relation(fields: [fantasyTeamId], references: [id])
+  marketId      String
+  market        PredictionMarket  @relation(fields: [marketId], references: [id])
+  outcome       PredictionOutcome
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@unique([fantasyTeamId, marketId])
+}
+
+// Le "mode" (live vs simulation) d'une ligue est un dérivé de la saison qu'elle
+// pointe (season.label === SIMULATION_SEASON_LABEL vs season.isActive) — pas un
+// champ séparé à maintenir. seasonId nullable en transition de migration
+// uniquement, NOT NULL dans les faits dès la fin de l'étape 1 (voir
+// scripts/migrate-simulation-teams-to-leagues.ts et memory-bank/plan de fusion).
+model League {
+  id                       String                    @id @default(cuid())
+  name                     String
+  inviteCode               String                    @unique // 8 chars alphanum
+  ownerId                  String
+  owner                    User                      @relation("LeagueOwner", fields: [ownerId], references: [id])
+  seasonId                 String
+  season                   Season                    @relation(fields: [seasonId], references: [id])
+  maxMembers               Int                       @default(50)
+  createdAt                DateTime                  @default(now())
+  members                  LeagueMember[]
+  teams                    FantasyTeam[]
+  simulationTeams          SimulationTeam[]
+  tradeProposals           TradeProposal[]
+  simulationTradeProposals SimulationTradeProposal[]
+
+  @@index([seasonId])
+}
+
+model LeagueMember {
+  id       String   @id @default(cuid())
+  leagueId String
+  league   League   @relation(fields: [leagueId], references: [id])
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  joinedAt DateTime @default(now())
+
+  @@unique([leagueId, userId])
+}
+
+model GameConfig {
+  key   String @id // "INITIAL_BUDGET", "STARTER_MULTIPLIER", ...
+  value String // stocké en string, parsé par Zod
+}
