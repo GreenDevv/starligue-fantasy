@@ -94,9 +94,9 @@ export function ComingSoon() {
             transition={{ duration: 0.6, delay: 0.22 }}
             className="mt-6 max-w-xl text-balance text-lg text-text-muted sm:text-xl"
           >
-            Compose ton équipe avec les{" "}
-            <strong className="font-semibold text-text">vrais joueurs de la Daikin StarLigue</strong> et marque
-            des points sur leurs vraies performances, journée après journée.
+            Le jeu de <strong className="font-semibold text-text">fantasy handball</strong> basé sur les vrais
+            joueurs de la Daikin StarLigue. Compose ton équipe et marque des points sur leurs vraies performances,
+            journée après journée.
           </motion.p>
 
           <motion.div

@@ -1,0 +1,18 @@
+# Starligue Fantasy
+
+> Jeu de fantasy handball basé sur la Daikin Starligue (championnat de France de handball, D1). Les joueurs composent une équipe avec de vrais joueurs de handball, marquent des points selon leurs statistiques réelles en match, et s'affrontent entre amis dans des ligues privées.
+
+Starligue Fantasy est un projet indépendant, sans rapport officiel avec la LNH (Ligue Nationale de Handball) ou la Daikin Starligue.
+
+## Ce que le site propose
+
+- Composition d'équipe fantasy handball avec budget et postes réels (gardien, ailiers, arrières, demi-centre, pivot)
+- Alignements hebdomadaires (titulaires/remplaçants) avec deadline avant chaque journée
+- Scoring basé sur les statistiques réelles des matchs de la Daikin Starligue (buts, arrêts, passes décisives)
+- Ligues privées entre amis avec classement
+- Pronostics sur les résultats des matchs de Starligue
+- Actualités handball : résultats, classement, transferts, équipe-type de la semaine
+
+## Mots-clés
+
+fantasy handball, jeu fantasy handball, Starligue fantasy, handball D1, Daikin Starligue, pronostics handball, fantasy sport handball France

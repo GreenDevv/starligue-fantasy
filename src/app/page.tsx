@@ -15,8 +15,20 @@ import { StatLeadersSection } from "@/components/starligue/StatLeadersSection";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { ComingSoon } from "@/components/ComingSoon";
 import type { NewsCategory } from "@prisma/client";
+import type { Metadata } from "next";
 
 const VALID_CATEGORIES: NewsCategory[] = ["TRANSFER", "INJURY", "TEAM_OF_WEEK", "PERFORMANCE", "GENERAL"];
+
+export function generateMetadata(): Metadata {
+  if (process.env.COMING_SOON === "true") {
+    return {
+      title: "Bientôt disponible",
+      description:
+        "Starligue Fantasy arrive : le jeu de fantasy handball basé sur la Daikin Starligue. Compose ton équipe avec de vrais joueurs de handball D1 avant le coup d'envoi de la saison.",
+    };
+  }
+  return {};
+}
 
 // Page d'accueil du site — vue d'ensemble de la Daikin StarLigue en un coup d'œil
 // (résultats, prochains matchs, classement, actus scrapées lnh.fr + clubs, équipe
