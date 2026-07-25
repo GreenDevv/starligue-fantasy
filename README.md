@@ -18,3 +18,5 @@ pnpm test            # tests unitaires (vitest)
 pnpm prisma migrate dev
 pnpm prisma db seed
 ```
+
+Déployé automatiquement via Railway (GitHub auto-deploy).
