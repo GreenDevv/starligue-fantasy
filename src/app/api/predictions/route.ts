@@ -17,6 +17,12 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { resolveSeasonMode, resolveActiveTeamContext } from "@/lib/team/active-team-context";
+import { isMatchLocked } from "@/lib/predictions/lock";
+
+async function getLockMinutesBeforeKickoff(): Promise<number> {
+  const config = await prisma.gameConfig.findUnique({ where: { key: "PREDICTION_LOCK_MINUTES_BEFORE_KICKOFF" } });
+  return config ? parseFloat(config.value) : 5;
+}
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -81,10 +87,12 @@ export async function GET(request: Request) {
     orderBy: { kickoffAt: "asc" },
   });
 
+  const lockMinutesBeforeKickoff = await getLockMinutesBeforeKickoff();
+
   const data = matches.map((m) => ({
     matchId: m.id,
     kickoffAt: m.kickoffAt,
-    locked: m.kickoffAt <= now,
+    locked: isMatchLocked(m.kickoffAt, lockMinutesBeforeKickoff, now),
     homeClub: m.homeClub,
     awayClub: m.awayClub,
     odds: m.predictionMarket
@@ -150,9 +158,15 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
-  if (match.kickoffAt <= new Date()) {
+  const lockMinutesBeforeKickoff = await getLockMinutesBeforeKickoff();
+  if (isMatchLocked(match.kickoffAt, lockMinutesBeforeKickoff, new Date())) {
     return NextResponse.json(
-      { error: { code: "MATCH_LOCKED", message: "Ce match a déjà commencé, pronostic verrouillé" } },
+      {
+        error: {
+          code: "MATCH_LOCKED",
+          message: `Pronostic verrouillé — le match commence dans moins de ${lockMinutesBeforeKickoff} minutes`,
+        },
+      },
       { status: 400 }
     );
   }

@@ -833,10 +833,16 @@ homeScore = awayScore → DRAW
 homeScore < awayScore → AWAY
 ```
 
+**Optionnel** : pronostiquer n'est jamais obligatoire — une journée sans aucun
+pronostic tenté reste neutre (×1, voir §14.3), aucune pénalité ni aucune fonctionnalité
+bloquée pour qui n'y touche pas.
+
 Gratuit et illimité : aucun coût, aucun wallet/budget dédié, aucune pénalité pour un
 pronostic faux (0 point, cohérent avec §2.3 « joueur non noté = 0 »). Modifiable
-jusqu'au **coup d'envoi du match** (`Match.kickoffAt`), pas la deadline de journée —
-les matchs d'une même journée ne débutent pas tous en même temps.
+jusqu'à **`PREDICTION_LOCK_MINUTES_BEFORE_KICKOFF` minutes avant le coup d'envoi du
+match** (`Match.kickoffAt`, défaut 5 min, `src/lib/predictions/lock.ts`), pas la
+deadline de journée — les matchs d'une même journée ne débutent pas tous en même
+temps.
 
 **Une seule journée ouverte à la fois** : impossible de pronostiquer une journée
 future tant que la précédente n'est pas passée (deadline de la journée courante —
@@ -872,8 +878,9 @@ multiplicateur §14.3, basé sur juste/faux, compte).
 multiplicateur = MULTIPLIER_MIN + (MULTIPLIER_MAX − MULTIPLIER_MIN) × (pronostics_justes / pronostics_tentés)
 ```
 
-Défaut : `MULTIPLIER_MIN = 0.5`, `MULTIPLIER_MAX = 2.0` → 8/8 justes = ×2.0, 0/8 =
-×0.5, 4/8 = ×1.25. Généralisé à `pronostics_tentés` (pas un nombre de matchs fixe) :
+Défaut : `MULTIPLIER_MIN = 0`, `MULTIPLIER_MAX = 2.0` → par pas de 0.25 sur une
+journée à 8 matchs (0/8 = ×0, 1/8 = ×0.25, 2/8 = ×0.5, 3/8 = ×0.75, 4/8 = ×1,
+5/8 = ×1.25, 6/8 = ×1.5, 7/8 = ×1.75, 8/8 = ×2.0). Généralisé à `pronostics_tentés` (pas un nombre de matchs fixe) :
 robuste aux reports/annulations, on attend simplement que tous les matchs de la
 journée soient joués. **Aucun pronostic tenté → ×1 (neutre)** : ne jamais pénaliser
 l'absence de pari, seul un pari tenté et raté coûte (`src/lib/predictions/multiplier.ts`).
@@ -906,6 +913,7 @@ enum PredictionOutcome { HOME DRAW AWAY }
 ```
 
 Nouvelles clés `GameConfig` : `PREDICTION_MULTIPLIER_MIN/MAX`,
+`PREDICTION_LOCK_MINUTES_BEFORE_KICKOFF`,
 `PREDICTION_BOOKMAKER_MARGIN`, `PREDICTION_STRENGTH_SCALE`, `PREDICTION_MAX_SKEW`,
 `PREDICTION_BASE_PROB_{HOME,DRAW,AWAY}`.
 

@@ -2,11 +2,11 @@
 // PURE : aucun effet de bord, aucun import Prisma.
 
 export interface MultiplierConfig {
-  min: number; // défaut 0.5 — 0 pronostic tenté juste sur la journée
+  min: number; // défaut 0 — 0 pronostic tenté juste sur la journée
   max: number; // défaut 2.0 — tous les pronostics tentés justes
 }
 
-export const DEFAULT_MULTIPLIER_CONFIG: MultiplierConfig = { min: 0.5, max: 2.0 };
+export const DEFAULT_MULTIPLIER_CONFIG: MultiplierConfig = { min: 0, max: 2.0 };
 
 export interface PredictionAttempt {
   correct: boolean;
@@ -45,7 +45,7 @@ export function parseMultiplierConfig(
   overrides: Partial<MultiplierConfig> = {},
 ): MultiplierConfig {
   return {
-    min: parseFloat(raw["PREDICTION_MULTIPLIER_MIN"] ?? "0.5"),
+    min: parseFloat(raw["PREDICTION_MULTIPLIER_MIN"] ?? "0"),
     max: parseFloat(raw["PREDICTION_MULTIPLIER_MAX"] ?? "2.0"),
     ...overrides,
   };
