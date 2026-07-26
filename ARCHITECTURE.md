@@ -821,7 +821,7 @@ saison + fenêtres de transfert, valeurs marchandes dynamiques, capitaine ×2 �
 
 ---
 
-## 13. Capitaine et bonus de saison
+## 13. Capitaine, bonus de saison et joker médical
 
 Fonctionnalités ajoutées après le v1 initial (le §12 les listait encore par erreur
 comme roadmap "v2" — corrigé). Logique pure dans `src/lib/scoring/engine.ts`
@@ -858,6 +858,28 @@ l'alignement). Quota global `SEASON_BONUS_QUOTA_PER_SEASON` (défaut **3 sur les
 | `BENCH_BOOST` | Le banc compte ×1.0 au lieu de ×0.5 | `BENCH_BOOST_MULTIPLIER` (déf. 1.0) |
 | `INSURANCE` | Chaque joueur individuel est plancherné à 0 avant sommation — aucun joueur ne peut faire perdre de points à l'équipe ce jour-là | — (logique dans `computeLineupPoints`) |
 | `STATISTICIAN` | Double le bonus/malus "leader de journée" (§ stats boxscore) | `STATISTICIAN_MULTIPLIER` (déf. 2.0) |
+
+### 13.3 Joker médical
+
+Permet de remplacer un joueur blessé longue durée **sans attendre une fenêtre de
+transfert** — même route que les transferts classiques (`POST /api/my-team/transfer`),
+juste un chemin d'autorisation alternatif quand aucune fenêtre n'est ouverte.
+
+- Un joueur devient éligible quand l'admin déclare la blessure via
+  `PUT /api/admin/players/[id]` (champ `Player.injuredAt`, distinct de `isActive`
+  qui sert plutôt à un départ de club). La déclaration/levée génère aussi une actu
+  publique (`createInjuryNewsItem`, §16).
+- Condition d'éligibilité au moment du transfert : `sellPlayer.injuredAt` non nul
+  **ET** `team.jokersUsed < JOKER_QUOTA_PER_SEASON` (défaut **2** par saison,
+  `FantasyTeam.jokersUsed` / `SimulationTeam.jokersUsed`, jamais remis à zéro en
+  cours de saison). Sinon → `TRANSFER_WINDOW_CLOSED` (aucune fenêtre ouverte, et
+  pas de joker disponible pour ce joueur).
+- Mêmes règles qu'un transfert classique une fois l'éligibilité passée : même
+  poste obligatoire, prix au marché courant des deux côtés (§13.1 s'applique
+  aussi si le joueur vendu était le capitaine : `captainId` repasse à `null`).
+- Consomme un joker (`jokersUsed` incrémenté) que le joueur remplaçant soit
+  meilleur ou moins bon que le blessé — pas de remboursement si l'état du joueur
+  s'améliore ensuite.
 
 ---
 
