@@ -54,7 +54,7 @@ Alignement par journée : exactement **1 titulaire par poste** (7 titulaires + 7
 - Budget initial : `INITIAL_BUDGET` (env / table `game_config`), défaut proposé **100.0** (unité arbitraire, 1 décimale).
 - Chaque joueur a une `marketValue` (défaut proposé : entre 3.0 et 15.0 selon le niveau).
 - Contrainte à la validation de l'effectif : `SUM(marketValue des 14 joueurs) <= budget`.
-- Les valeurs seront importées plus tard (CSV admin) ou seedées avec des valeurs par défaut par poste/club. Une table `player_value_history` trace les évolutions (permet plus tard un marché dynamique, hors scope v1).
+- Les valeurs seront importées plus tard (CSV admin) ou seedées avec des valeurs par défaut par poste/club. Une table `PlayerValueHistory` trace les évolutions — le marché dynamique évoqué ici comme "plus tard, hors scope v1" est en fait livré, voir §13.3.
 
 ### 2.3 Scoring (basé sur la note LNH)
 
@@ -84,7 +84,7 @@ Cas particuliers (tous configurables dans `game_config`) :
 - Chaque journée (`gameweek`) a une `deadlineAt` = horaire du premier match − 1h.
 - Après la deadline : l'alignement (titulaires/remplaçants) et l'effectif sont **gelés** pour cette journée (snapshot en base, voir `fantasy_lineup`).
 - Les changements faits après deadline s'appliquent à la journée suivante.
-- Transferts en cours de saison : **livrés** (contrairement à la mention "hors scope v1" que cette ligne portait encore) — effectif modifiable sans limite de nombre pendant une fenêtre de transfert ouverte (`TransferWindow`, `POST /api/my-team/transfer`), verrouillé le reste du temps. Détail non encore rédigé dans ce document (à faire dans une section dédiée) ; code de référence : `src/lib/transfers/validate.ts`, `src/lib/transfers/window.ts`.
+- Transferts en cours de saison : **livrés** (contrairement à la mention "hors scope v1" que cette ligne portait encore) — effectif modifiable sans limite de nombre pendant une fenêtre de transfert ouverte, verrouillé le reste du temps. Détail complet en §13.1.
 
 ### 2.5 Ligues et classements
 
@@ -821,20 +821,73 @@ saison + fenêtres de transfert, valeurs marchandes dynamiques, capitaine ×2 �
 
 ---
 
-## 13. Capitaine, bonus de saison et joker médical
+## 13. Effectif en cours de saison : transferts, capitaine, bonus et joker médical
 
 Fonctionnalités ajoutées après le v1 initial (le §12 les listait encore par erreur
-comme roadmap "v2" — corrigé). Logique pure dans `src/lib/scoring/engine.ts`
+comme roadmap "v2" — corrigé). Logique pure dans `src/lib/transfers/*`,
+`src/lib/players/value-adjustment.ts` et `src/lib/scoring/engine.ts`
 (`computePlayerPoints`/`computeLineupPoints`/`applySeasonBonus`), orchestration
 partagée entre jeu en direct et Mode Simulation.
 
-### 13.1 Capitaine
+### 13.1 Fenêtres de transfert
+
+- `TransferWindow` (`id`, `seasonId`, `label`, `opensAt`, `closesAt`) — saisi
+  librement par l'admin (`/admin/transfer-windows`, `POST/PUT/DELETE
+  /api/admin/transfer-windows`), aucune limite de nombre ni contrôle de
+  chevauchement. Dans la pratique : 2 trêves internationales + la trêve
+  hivernale par saison, mais rien ne l'impose au niveau du modèle.
+- Hors fenêtre, l'effectif est **gelé** (sauf joker médical, §13.6). Pendant une
+  fenêtre ouverte : **transferts illimités**, un par un, chacun un échange 1
+  joueur vendu ↔ 1 joueur acheté au même poste (`POST /api/my-team/transfer`,
+  `src/lib/transfers/validate.ts`).
+- Prix : **valeur marchande courante des deux côtés** au moment du transfert —
+  jamais un prix d'achat historique (`newBudget = budget + sellPlayer.marketValue
+  - buyPlayer.marketValue`, doit rester ≥ 0).
+- "Fenêtre ouverte" a deux définitions distinctes (`src/lib/transfers/window.ts`,
+  asymétrie déjà présente ailleurs dans le projet entre live et simulation) :
+  - **Live** (`isLiveTransferWindowOpen`) : `now` tombe dans `[opensAt, closesAt]`
+    d'au moins une fenêtre de la saison.
+  - **Simulation** (`isSimulationTransferWindowOpen`) : pas d'horloge réelle
+    pertinente (la saison avance à la demande de l'admin, §5), donc la fenêtre
+    est ouverte pour toute équipe dont la journée courante se situe entre la
+    dernière journée programmée avant `opensAt` et la première après
+    `closesAt`.
+- Vendre le capitaine réinitialise `captainId` à `null` (§13.4).
+
+### 13.2 Points → Budget
+
+Pendant une fenêtre ouverte, possibilité de convertir une partie des points de
+saison en budget de transfert (`POST /api/my-team/points-conversion`,
+`src/lib/budget/points-conversion.ts`) au taux `POINTS_TO_BUDGET_RATE` (défaut
+**0.1**, donc 10 points → 1.0 de budget). Les points convertis sortent
+**définitivement** de `totalPoints` (`FantasyTeam.pointsConverted`,
+`src/lib/scoring/compute.ts::recalcTotalPoints` les soustrait à chaque
+recompute pour que la conversion ne soit jamais écrasée) — pas réversible.
+
+### 13.3 Valorisation dynamique des joueurs
+
+Après chaque journée notée, les valeurs marchandes bougent automatiquement
+(`applyGameweekValueAdjustments`, appelé depuis `computeGameweekScores` en live
+comme en simulation — aucun déclenchement manuel requis) :
+- Classement par poste selon la note LNH du match du jour.
+- Les `VALUE_ADJUSTMENT_TOP_N` meilleurs (défaut **5**) gagnent
+  `VALUE_ADJUSTMENT_STEP` (défaut **+0.5**), les `VALUE_ADJUSTMENT_BOTTOM_N`
+  derniers (défaut **5**) perdent la même valeur — plancher
+  `VALUE_ADJUSTMENT_MIN` (défaut **1.0**).
+- Idempotent par `gameweekId` (`PlayerValueHistory` sert de garde) : un
+  recompute suite à une correction de note ne réapplique pas l'ajustement,
+  limite acceptée (voir [[simulation_value_history_idempotency]]).
+- Historisé dans `PlayerValueHistory` (une ligne par joueur par journée où sa
+  valeur a bougé).
+
+### 13.4 Capitaine
 
 - Un capitaine par équipe (`FantasyTeam.captainId` / `SimulationTeam.captainId`,
   nullable) parmi les 14 joueurs de l'effectif — `PUT /api/my-team/captain`.
 - **Choisi une fois pour la saison** : librement modifiable tant qu'aucun capitaine
   n'a jamais été désigné (`captainId === null`), puis **verrouillé** — modifiable
-  uniquement pendant une fenêtre de transfert ouverte (`CAPTAIN_LOCKED` sinon).
+  uniquement pendant une fenêtre de transfert ouverte (`CAPTAIN_LOCKED` sinon,
+  §13.1).
   Si le capitaine est vendu (transfert ou joker médical), `captainId` repasse à
   `null` et un nouveau choix libre redevient possible.
 - Effet scoring : ×`CAPTAIN_MULTIPLIER` (défaut **2.0**) au lieu de ×1.0, **mais
@@ -843,7 +896,7 @@ partagée entre jeu en direct et Mode Simulation.
   `playerId === captainId && role === "STARTER"`. Capitaine sur le banc → aucun
   bonus, juste le ×0.5 remplaçant habituel.
 
-### 13.2 Bonus de saison
+### 13.5 Bonus de saison
 
 4 bonus (`BonusType`), chacun activable **au maximum une fois par saison**, un
 seul actif par journée à la fois (`FantasyTeam.pendingBonus`, choisi via
@@ -854,16 +907,17 @@ l'alignement). Quota global `SEASON_BONUS_QUOTA_PER_SEASON` (défaut **3 sur les
 
 | Type | Effet | `GameConfig` |
 |---|---|---|
-| `TRIPLE_CAPTAIN` | Le capitaine passe de ×2.0 à ×3.0 (toujours sous réserve d'être titulaire, §13.1) | `TRIPLE_CAPTAIN_MULTIPLIER` (déf. 3.0) |
+| `TRIPLE_CAPTAIN` | Le capitaine passe de ×2.0 à ×3.0 (toujours sous réserve d'être titulaire, §13.4) | `TRIPLE_CAPTAIN_MULTIPLIER` (déf. 3.0) |
 | `BENCH_BOOST` | Le banc compte ×1.0 au lieu de ×0.5 | `BENCH_BOOST_MULTIPLIER` (déf. 1.0) |
 | `INSURANCE` | Chaque joueur individuel est plancherné à 0 avant sommation — aucun joueur ne peut faire perdre de points à l'équipe ce jour-là | — (logique dans `computeLineupPoints`) |
 | `STATISTICIAN` | Double le bonus/malus "leader de journée" (§ stats boxscore) | `STATISTICIAN_MULTIPLIER` (déf. 2.0) |
 
-### 13.3 Joker médical
+### 13.6 Joker médical
 
 Permet de remplacer un joueur blessé longue durée **sans attendre une fenêtre de
-transfert** — même route que les transferts classiques (`POST /api/my-team/transfer`),
-juste un chemin d'autorisation alternatif quand aucune fenêtre n'est ouverte.
+transfert** — même route que les transferts classiques (`POST /api/my-team/transfer`,
+§13.1), juste un chemin d'autorisation alternatif quand aucune fenêtre n'est
+ouverte.
 
 - Un joueur devient éligible quand l'admin déclare la blessure via
   `PUT /api/admin/players/[id]` (champ `Player.injuredAt`, distinct de `isActive`
@@ -875,7 +929,7 @@ juste un chemin d'autorisation alternatif quand aucune fenêtre n'est ouverte.
   cours de saison). Sinon → `TRANSFER_WINDOW_CLOSED` (aucune fenêtre ouverte, et
   pas de joker disponible pour ce joueur).
 - Mêmes règles qu'un transfert classique une fois l'éligibilité passée : même
-  poste obligatoire, prix au marché courant des deux côtés (§13.1 s'applique
+  poste obligatoire, prix au marché courant des deux côtés (§13.4 s'applique
   aussi si le joueur vendu était le capitaine : `captainId` repasse à `null`).
 - Consomme un joker (`jokersUsed` incrémenté) que le joueur remplaçant soit
   meilleur ou moins bon que le blessé — pas de remboursement si l'état du joueur
