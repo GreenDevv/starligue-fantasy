@@ -103,6 +103,7 @@ model User {
   ownedLeagues     League[]         @relation("LeagueOwner")
   accounts         Account[]
   simulationTeams  SimulationTeam[]
+  leagueChatMessages LeagueChatMessage[]
 }
 
 // Requis par @auth/prisma-adapter (OAuth Google + credentials)
@@ -740,8 +741,25 @@ model League {
   simulationTeams          SimulationTeam[]
   tradeProposals           TradeProposal[]
   simulationTradeProposals SimulationTradeProposal[]
+  chatMessages             LeagueChatMessage[]
 
   @@index([seasonId])
+}
+
+// Chat de ligue — trash talk uniquement, pas une messagerie générale : pas de DM,
+// pas de fil par match, un seul salon par League partagé entre live/simulation
+// (comme League elle-même, voir plan de fusion live/simulation étape 5). Contenu
+// validé par src/lib/leagues/chat.ts (fonction pure, trim + longueur max).
+model LeagueChatMessage {
+  id        String   @id @default(cuid())
+  leagueId  String
+  league    League   @relation(fields: [leagueId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([leagueId, createdAt])
 }
 
 model LeagueMember {

@@ -17,6 +17,7 @@ import {
   LeaveLeagueButton,
   DeleteLeagueButton,
 } from "@/components/leagues/LeagueDetailActions";
+import { LeagueChat } from "@/components/leagues/LeagueChat";
 import Link from "next/link";
 import { LinkButton } from "@/components/ui/Button";
 import type { SeasonMode } from "@/lib/team/active-team-context";
@@ -118,6 +119,9 @@ export default async function LeagueDetailPage({ params }: { params: { id: strin
         <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">Classement de la ligue</p>
         <LeaderboardList entries={league.standings} currentUserId={userId} pointsKey="totalPoints" />
       </div>
+
+      {/* Chat de ligue */}
+      <LeagueChat leagueId={league.id} currentUserId={userId} />
 
       {/* Classement général — seulement en live (pas de classement global simulation) */}
       {mode === "live" && (
