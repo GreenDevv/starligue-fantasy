@@ -65,13 +65,16 @@ pointsBruts = (noteLNH - 5) × 4        // note 8 → +12 ; note 3 → −8
 multiplicateur:
   TITULAIRE   → ×1.0
   REMPLACANT  → ×0.5
+  + si le joueur est capitaine ce jour-là ET titulaire : ×2.0 au lieu de ×1.0
+    (×3.0 si le bonus Triple Capitaine est actif — voir §13)
 pointsJoueur = round(pointsBruts × multiplicateur, 1)
 ```
 
 Cas particuliers (tous configurables dans `game_config`) :
 - Joueur non noté / n'a pas joué → **0 point** (pas de pénalité en v1).
 - Bonus victoire d'équipe : +2 si le club du joueur gagne et que le joueur a joué (optionnel, flag `WIN_BONUS_ENABLED`, défaut off en v1).
-- Toutes les constantes (`×4`, `5`, `×0.5`) vivent dans `game_config`, jamais en dur : tu pourras les régler après quelques journées de test.
+- Toutes les constantes (`×4`, `5`, `×0.5`, `×2.0`) vivent dans `game_config`, jamais en dur : tu pourras les régler après quelques journées de test.
+- Capitaine et bonus de saison : voir §13.
 
 `pointsGameweek(user) = Σ pointsJoueur des 14 joueurs sur la journée`
 `pointsSaison(user) = Σ pointsGameweek`
@@ -81,7 +84,7 @@ Cas particuliers (tous configurables dans `game_config`) :
 - Chaque journée (`gameweek`) a une `deadlineAt` = horaire du premier match − 1h.
 - Après la deadline : l'alignement (titulaires/remplaçants) et l'effectif sont **gelés** pour cette journée (snapshot en base, voir `fantasy_lineup`).
 - Les changements faits après deadline s'appliquent à la journée suivante.
-- Transferts en cours de saison : **hors scope v1** (l'effectif est fixe après la première validation). Prévu v2 : N transferts gratuits/journée, malus au-delà — le schéma de données le permet déjà via les snapshots.
+- Transferts en cours de saison : **livrés** (contrairement à la mention "hors scope v1" que cette ligne portait encore) — effectif modifiable sans limite de nombre pendant une fenêtre de transfert ouverte (`TransferWindow`, `POST /api/my-team/transfer`), verrouillé le reste du temps. Détail non encore rédigé dans ce document (à faire dans une section dédiée) ; code de référence : `src/lib/transfers/validate.ts`, `src/lib/transfers/window.ts`.
 
 ### 2.5 Ligues et classements
 
@@ -810,7 +813,51 @@ pnpm dev | pnpm test | pnpm prisma migrate dev | pnpm prisma db seed
 11. LnhScraperProvider (notes) avec alerting en cas d'échec de parsing.
 12. Admin : logs d'ingestion, recompute, édition de config.
 
-**v2 (plus tard)** : transferts en saison, valeurs marchandes dynamiques, capitaine (×2), notifications (deadline, points), classements de ligue par journée, PWA.
+**v2 (plus tard)** : notifications (deadline, points), classements de ligue par journée, PWA.
+
+*(Livrés depuis, contrairement à ce que cette liste indiquait encore : transferts en
+saison + fenêtres de transfert, valeurs marchandes dynamiques, capitaine ×2 — voir
+§2.3 et §13.)*
+
+---
+
+## 13. Capitaine et bonus de saison
+
+Fonctionnalités ajoutées après le v1 initial (le §12 les listait encore par erreur
+comme roadmap "v2" — corrigé). Logique pure dans `src/lib/scoring/engine.ts`
+(`computePlayerPoints`/`computeLineupPoints`/`applySeasonBonus`), orchestration
+partagée entre jeu en direct et Mode Simulation.
+
+### 13.1 Capitaine
+
+- Un capitaine par équipe (`FantasyTeam.captainId` / `SimulationTeam.captainId`,
+  nullable) parmi les 14 joueurs de l'effectif — `PUT /api/my-team/captain`.
+- **Choisi une fois pour la saison** : librement modifiable tant qu'aucun capitaine
+  n'a jamais été désigné (`captainId === null`), puis **verrouillé** — modifiable
+  uniquement pendant une fenêtre de transfert ouverte (`CAPTAIN_LOCKED` sinon).
+  Si le capitaine est vendu (transfert ou joker médical), `captainId` repasse à
+  `null` et un nouveau choix libre redevient possible.
+- Effet scoring : ×`CAPTAIN_MULTIPLIER` (défaut **2.0**) au lieu de ×1.0, **mais
+  seulement s'il est titulaire ce jour-là** — `isCaptain` est calculé au snapshot
+  de l'alignement (`src/app/api/cron/snapshot-lineups/route.ts`) comme
+  `playerId === captainId && role === "STARTER"`. Capitaine sur le banc → aucun
+  bonus, juste le ×0.5 remplaçant habituel.
+
+### 13.2 Bonus de saison
+
+4 bonus (`BonusType`), chacun activable **au maximum une fois par saison**, un
+seul actif par journée à la fois (`FantasyTeam.pendingBonus`, choisi via
+`PUT /api/my-team/bonus`, snapshoté sur `FantasyLineup.bonus` à la deadline comme
+l'alignement). Quota global `SEASON_BONUS_QUOTA_PER_SEASON` (défaut **3 sur les
+4 types** — un doit être sacrifié) ; historique dans `FantasyBonusUsage` /
+`SimulationBonusUsage` (`@@unique([teamId, type])`, garantit le "1×/saison").
+
+| Type | Effet | `GameConfig` |
+|---|---|---|
+| `TRIPLE_CAPTAIN` | Le capitaine passe de ×2.0 à ×3.0 (toujours sous réserve d'être titulaire, §13.1) | `TRIPLE_CAPTAIN_MULTIPLIER` (déf. 3.0) |
+| `BENCH_BOOST` | Le banc compte ×1.0 au lieu de ×0.5 | `BENCH_BOOST_MULTIPLIER` (déf. 1.0) |
+| `INSURANCE` | Chaque joueur individuel est plancherné à 0 avant sommation — aucun joueur ne peut faire perdre de points à l'équipe ce jour-là | — (logique dans `computeLineupPoints`) |
+| `STATISTICIAN` | Double le bonus/malus "leader de journée" (§ stats boxscore) | `STATISTICIAN_MULTIPLIER` (déf. 2.0) |
 
 ---
 
