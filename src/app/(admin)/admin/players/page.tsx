@@ -103,6 +103,37 @@ function PositionBadge({ position }: { position: Position }) {
   );
 }
 
+// Import depuis l'ordinateur : redimensionne + recompresse côté client (canvas)
+// avant stockage en data URI dans Player.photoUrl (TEXT, aucune limite pratique) —
+// pas de service de stockage externe à mettre en place pour ce besoin ponctuel.
+function resizeImageToDataUri(file: File, maxSize = 600, quality = 0.85): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Lecture du fichier impossible"));
+    reader.onload = () => {
+      const img = new window.Image();
+      img.onerror = () => reject(new Error("Image invalide"));
+      img.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Canvas indisponible"));
+          return;
+        }
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 // ---- Edit / Create Panel ----
 
 const emptyForm = {
@@ -145,6 +176,8 @@ function PlayerPanel({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState("");
   const [photoPreviewError, setPhotoPreviewError] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
   useEffect(() => {
     setPhotoPreviewError(false);
@@ -157,6 +190,22 @@ function PlayerPanel({
 
   function setPhotoCrop(crop: PhotoCrop) {
     setForm((f) => ({ ...f, photoCrop: crop }));
+  }
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // permet de resélectionner le même fichier ensuite
+    if (!file) return;
+    setUploading(true);
+    setUploadError("");
+    try {
+      const dataUri = await resizeImageToDataUri(file);
+      setForm((f) => ({ ...f, photoUrl: dataUri, photoCrop: { offsetX: 50, offsetY: 50, zoom: 1 } }));
+    } catch {
+      setUploadError("Import impossible, réessaie avec une autre image");
+    } finally {
+      setUploading(false);
+    }
   }
 
   function declareInjured() {
@@ -273,6 +322,13 @@ function PlayerPanel({
               <p className="mt-1 text-[10px] text-text-muted">
                 Colle l'URL d'une photo LNH ou autre
               </p>
+              <div className="mt-2 flex items-center gap-2">
+                <label className="cursor-pointer rounded border border-border px-3 py-1.5 text-xs text-text-muted transition-colors hover:border-accent/50 hover:text-text">
+                  {uploading ? "Import…" : "Importer depuis mon ordinateur"}
+                  <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={handleFileUpload} />
+                </label>
+              </div>
+              {uploadError && <p className="mt-1 text-[10px] text-points-neg">{uploadError}</p>}
             </div>
           </div>
 

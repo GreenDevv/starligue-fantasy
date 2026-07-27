@@ -25,9 +25,9 @@ const UpdateSchema = z.object({
   clubId: z.string().min(1).optional(),
   marketValue: z.coerce.number().min(0.5).max(99.9).optional(),
   photoUrl: z.string().url().optional().or(z.literal("")).optional(),
-  photoOffsetX: z.coerce.number().int().min(0).max(100).optional(),
-  photoOffsetY: z.coerce.number().int().min(0).max(100).optional(),
-  photoZoom: z.coerce.number().min(1).max(3).optional(),
+  photoOffsetX: z.coerce.number().int().min(-50).max(150).optional(),
+  photoOffsetY: z.coerce.number().int().min(-50).max(150).optional(),
+  photoZoom: z.coerce.number().min(1).max(5).optional(),
   isActive: z.boolean().optional(),
   injuredAt: z.string().datetime().nullable().optional(),
 });
