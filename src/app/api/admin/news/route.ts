@@ -25,7 +25,7 @@ export async function GET() {
   }
 
   const news = await prisma.newsItem.findMany({
-    where: { seasonId: season.id },
+    where: { seasonId: season.id, deletedAt: null },
     orderBy: { publishedAt: "desc" },
     take: 200,
     include: { club: { select: { shortName: true } }, player: { select: { firstName: true, lastName: true } } },

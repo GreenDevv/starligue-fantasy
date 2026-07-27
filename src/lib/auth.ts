@@ -10,7 +10,7 @@ const loginSchema = z.object({
   password: z.string().min(6),
 });
 
-const PROTECTED_PREFIXES = ["/team", "/market", "/leagues", "/leaderboard", "/matches", "/players", "/clubs", "/dashboard"];
+const PROTECTED_PREFIXES = ["/team", "/market", "/leagues", "/leaderboard", "/matches", "/players", "/clubs", "/dashboard", "/account"];
 const ADMIN_PREFIXES = ["/admin"];
 
 export const { handlers, signIn, signOut, auth } = NextAuth({

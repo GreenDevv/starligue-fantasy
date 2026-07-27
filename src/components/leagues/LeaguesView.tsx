@@ -43,10 +43,10 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
   }
 
   const isFirstLeague = leagues.length === 0;
-  // Simulation n'a pas de maillot à personnaliser (SimulationTeam n'a pas de
-  // jerseyConfig, divergence delibérée du schéma) — on saute l'étape identité.
-  const firstLeagueOnboardingHref = (leagueId: string) =>
-    mode === "simulation" ? `/team/build?league=${leagueId}` : `/team/identity?league=${leagueId}`;
+  // Va directement à la construction d'effectif après création/adhésion à une
+  // première ligue — /team/identity (personnalisation de maillot) reste
+  // accessible depuis /team mais n'est plus imposé à l'onboarding.
+  const firstLeagueOnboardingHref = (leagueId: string) => `/team/build?league=${leagueId}`;
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();

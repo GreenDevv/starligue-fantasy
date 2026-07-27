@@ -576,6 +576,8 @@ model NewsItem {
   player      Player?        @relation(fields: [playerId], references: [id])
   payload     Json? // structure par catégorie (TEAM_OF_WEEK/PERFORMANCE), voir src/lib/news/payload.ts — pas de contrainte DB
   createdAt   DateTime       @default(now())
+  deletedAt   DateTime? // suppression douce (admin, DELETE /api/admin/news/[id]) — jamais un delete() dur, sinon
+  // dedupeKey redevient libre et runNewsSync() (idempotent par présence en base) réinsère l'actu au run suivant.
 
   @@index([seasonId, publishedAt(sort: Desc)])
   @@index([seasonId, category, publishedAt(sort: Desc)])

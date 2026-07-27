@@ -42,6 +42,14 @@ export default async function GameLayout({
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
             {isAdmin && <SeasonToggle initialMode={seasonMode} />}
             <NavBar />
+            {session?.user && (
+              <Link
+                href="/account"
+                className="rounded-md px-2.5 py-1.5 text-sm text-text-muted transition-colors hover:text-text"
+              >
+                Compte
+              </Link>
+            )}
             <AuthButton userName={session?.user?.name} />
           </div>
         </div>

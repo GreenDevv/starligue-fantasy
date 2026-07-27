@@ -18,10 +18,18 @@ export interface NewsSourceSummary {
   fetched: number;
   inserted: number;
   duplicates: number;
+  tooOld: number;
   error: string | null;
 }
 
 export async function runNewsSync(seasonId: string): Promise<Record<string, NewsSourceSummary>> {
+  // Ne récupère que les actus publiées aujourd'hui ou plus tard — évite de
+  // ressortir du backlog ancien (et notamment des actus qu'un admin vient de
+  // supprimer : deletedAt les protège déjà de la réinsertion, mais ce filtre de
+  // date évite en plus de repêcher de vieux articles jamais vus jusque-là).
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
   const dbClubs = await prisma.club.findMany({ select: { id: true, externalIds: true } });
   const clubIdBySlug = new Map<string, string>();
   for (const c of dbClubs) {
@@ -44,12 +52,17 @@ export async function runNewsSync(seasonId: string): Promise<Record<string, News
   const perSource: Record<string, NewsSourceSummary> = {};
 
   for (const provider of NEWS_PROVIDERS) {
-    const summary: NewsSourceSummary = { fetched: 0, inserted: 0, duplicates: 0, error: null };
+    const summary: NewsSourceSummary = { fetched: 0, inserted: 0, duplicates: 0, tooOld: 0, error: null };
     try {
       const scraped: ScrapedNewsItem[] = await provider.fetchNews();
       summary.fetched = scraped.length;
 
       for (const item of scraped) {
+        if (item.publishedAt < todayStart) {
+          summary.tooOld++;
+          continue;
+        }
+
         const category = classifyNewsCategory(item.title, item.excerpt);
         const clubId = item.clubExternalSlug ? clubIdBySlug.get(item.clubExternalSlug.toLowerCase()) ?? null : null;
 

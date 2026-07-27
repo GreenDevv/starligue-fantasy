@@ -31,7 +31,7 @@ export async function getNewsFeed(
   const page = opts.page && opts.page > 0 ? opts.page : 1;
 
   const items = await prisma.newsItem.findMany({
-    where: { seasonId, ...(opts.category ? { category: opts.category } : {}) },
+    where: { seasonId, deletedAt: null, ...(opts.category ? { category: opts.category } : {}) },
     orderBy: { publishedAt: "desc" },
     skip: (page - 1) * PAGE_SIZE,
     take: PAGE_SIZE + 1,
@@ -63,8 +63,8 @@ export interface NewsItemDetail extends NewsFeedItem {
 
 /** Détail complet d'une actu — page /starligue/[id] (lecture de l'article sans quitter le site). */
 export async function getNewsItemById(id: string): Promise<NewsItemDetail | null> {
-  return prisma.newsItem.findUnique({
-    where: { id },
+  return prisma.newsItem.findFirst({
+    where: { id, deletedAt: null },
     select: {
       id: true,
       category: true,
@@ -85,7 +85,7 @@ export async function getNewsItemById(id: string): Promise<NewsItemDetail | null
 /** Dernier NewsItem généré d'une catégorie donnée (TEAM_OF_WEEK/PERFORMANCE) — pour les cartes dédiées de /starligue. */
 export async function getLatestGeneratedNews(seasonId: string, category: "TEAM_OF_WEEK" | "PERFORMANCE") {
   return prisma.newsItem.findFirst({
-    where: { seasonId, category, sourceType: "GENERATED" },
+    where: { seasonId, category, sourceType: "GENERATED", deletedAt: null },
     orderBy: { publishedAt: "desc" },
   });
 }

@@ -18,6 +18,7 @@ interface SourceSummary {
   fetched: number;
   inserted: number;
   duplicates: number;
+  tooOld: number;
   error: string | null;
 }
 
@@ -114,7 +115,7 @@ export default function AdminNewsPage() {
                 ) : (
                   <span className="text-text">
                     {s.fetched} récupérées · <span className="text-points-pos">{s.inserted} nouvelles</span> ·{" "}
-                    {s.duplicates} doublons
+                    {s.duplicates} doublons · {s.tooOld} trop anciennes
                   </span>
                 )}
               </div>
