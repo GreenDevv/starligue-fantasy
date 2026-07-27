@@ -53,10 +53,26 @@ export async function PUT(req: Request) {
 
   const { name, favoritePlayerId } = parsed.data;
 
-  if (favoritePlayerId) {
-    const player = await prisma.player.findUnique({ where: { id: favoritePlayerId }, select: { id: true } });
-    if (!player) {
-      return NextResponse.json({ error: { code: "INVALID_PLAYER", message: "Joueur préféré introuvable" } }, { status: 422 });
+  if (favoritePlayerId !== undefined) {
+    // Définitif une fois déclaré (à l'inscription ou ici la toute première fois) —
+    // évite les allers-retours ("mon joueur préféré" doit rester un vrai choix
+    // engageant, pas un champ qu'on retouche à chaque bonne/mauvaise perf).
+    const current = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { favoritePlayerId: true },
+    });
+    if (current?.favoritePlayerId && favoritePlayerId !== current.favoritePlayerId) {
+      return NextResponse.json(
+        { error: { code: "FAVORITE_PLAYER_LOCKED", message: "Le joueur préféré est définitif une fois déclaré" } },
+        { status: 409 },
+      );
+    }
+
+    if (favoritePlayerId) {
+      const player = await prisma.player.findUnique({ where: { id: favoritePlayerId }, select: { id: true } });
+      if (!player) {
+        return NextResponse.json({ error: { code: "INVALID_PLAYER", message: "Joueur préféré introuvable" } }, { status: 422 });
+      }
     }
   }
 

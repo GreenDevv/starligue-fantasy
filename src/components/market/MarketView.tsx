@@ -20,6 +20,9 @@ interface Player {
   marketValue: number;
   valueTrend: "up" | "down" | null;
   photoUrl?: string | null;
+  photoOffsetX?: number;
+  photoOffsetY?: number;
+  photoZoom?: number;
   club: { id: string; shortName: string; name: string; logoUrl?: string | null };
 }
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { PhotoPositionEditor, type PhotoCrop } from "@/components/admin/PhotoPositionEditor";
 
 // ---- Types ----
 
@@ -27,6 +28,9 @@ interface Player {
   marketValue: number;
   valuationPending: boolean;
   photoUrl: string | null;
+  photoOffsetX: number;
+  photoOffsetY: number;
+  photoZoom: number;
   isActive: boolean;
   injuredAt: string | null;
   club: Club;
@@ -71,7 +75,12 @@ function PlayerAvatar({ player, size = 36 }: { player: Player; size?: number }) 
         height={size}
         onError={() => setImgError(true)}
         className="rounded-full object-cover"
-        style={{ width: size, height: size }}
+        style={{
+          width: size,
+          height: size,
+          objectPosition: `${player.photoOffsetX}% ${player.photoOffsetY}%`,
+          transform: `scale(${player.photoZoom})`,
+        }}
       />
     );
   }
@@ -100,6 +109,7 @@ const emptyForm = {
   firstName: "", lastName: "", position: "CB" as Position,
   clubId: "", marketValue: "7.0", photoUrl: "", isActive: true,
   injuredAt: null as string | null,
+  photoCrop: { offsetX: 50, offsetY: 50, zoom: 1 } as PhotoCrop,
 };
 
 function PlayerPanel({
@@ -126,6 +136,7 @@ function PlayerPanel({
           photoUrl: player.photoUrl ?? "",
           isActive: player.isActive,
           injuredAt: player.injuredAt,
+          photoCrop: { offsetX: player.photoOffsetX, offsetY: player.photoOffsetY, zoom: player.photoZoom },
         }
       : emptyForm
   );
@@ -142,6 +153,10 @@ function PlayerPanel({
   function set(key: keyof typeof form, value: string | boolean) {
     setForm((f) => ({ ...f, [key]: value }));
     setError("");
+  }
+
+  function setPhotoCrop(crop: PhotoCrop) {
+    setForm((f) => ({ ...f, photoCrop: crop }));
   }
 
   function declareInjured() {
@@ -174,6 +189,9 @@ function PlayerPanel({
           clubId: form.clubId,
           marketValue: parseFloat(form.marketValue) || 5.0,
           photoUrl: form.photoUrl.trim() || undefined,
+          photoOffsetX: form.photoCrop.offsetX,
+          photoOffsetY: form.photoCrop.offsetY,
+          photoZoom: form.photoCrop.zoom,
           isActive: form.isActive,
           injuredAt: form.injuredAt,
         }),
@@ -257,6 +275,16 @@ function PlayerPanel({
               </p>
             </div>
           </div>
+
+          {/* Recadrage circulaire — même rendu que PlayerAvatar (pitch, marché…) */}
+          {form.photoUrl && !photoPreviewError && (
+            <div className="rounded-lg border border-border bg-bg/50 p-4">
+              <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
+                Cadrage (glisser pour repositionner, slider pour zoomer)
+              </p>
+              <PhotoPositionEditor photoUrl={form.photoUrl} crop={form.photoCrop} onChange={setPhotoCrop} />
+            </div>
+          )}
 
           {/* Nom / Prénom */}
           <div className="grid grid-cols-2 gap-3">

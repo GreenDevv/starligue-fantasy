@@ -6,7 +6,17 @@ import { POSITION_THEME, initials } from "./positionTheme";
 import { cn } from "@/lib/utils";
 
 interface PlayerAvatarProps {
-  player: { firstName: string; lastName: string; position: Position; photoUrl?: string | null };
+  player: {
+    firstName: string;
+    lastName: string;
+    position: Position;
+    photoUrl?: string | null;
+    // Recadrage réglé par un admin (/admin/players) — object-position + zoom sur
+    // la photo, jamais l'image originale rognée : absents = centré, pas de zoom.
+    photoOffsetX?: number | null;
+    photoOffsetY?: number | null;
+    photoZoom?: number | null;
+  };
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   className?: string;
 }
@@ -43,6 +53,10 @@ export function PlayerAvatar({ player, size = "md", className = "" }: PlayerAvat
           src={player.photoUrl!}
           alt={`${player.firstName} ${player.lastName}`}
           className="h-full w-full object-cover"
+          style={{
+            objectPosition: `${player.photoOffsetX ?? 50}% ${player.photoOffsetY ?? 50}%`,
+            transform: `scale(${player.photoZoom ?? 1})`,
+          }}
           loading="lazy"
           referrerPolicy="no-referrer"
           onError={() => setErrored(true)}

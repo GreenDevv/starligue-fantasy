@@ -13,6 +13,9 @@ interface PitchPlayer {
   lastName: string;
   position: string;
   photoUrl?: string | null;
+  photoOffsetX?: number;
+  photoOffsetY?: number;
+  photoZoom?: number;
   club: { shortName: string; logoUrl?: string | null };
   role: "STARTER" | "BENCH";
   points?: number;
@@ -51,11 +54,11 @@ const RING_R = 13.5; // rayon du halo coloré derrière l'avatar
 const SLOT_COORDS: Record<Position, { x: number; y: number }> = {
   GK: { x: 100.9, y: 174.7 },
   PV: { x: 100.3, y: 127.5 },
-  LB: { x: 35.6, y: 95.2 },
+  LB: { x: 165.4, y: 93 },
   CB: { x: 99.2, y: 82.8 },
-  RB: { x: 165.4, y: 93 },
-  LW: { x: 29, y: 154.5 },
-  RW: { x: 169.1, y: 151 },
+  RB: { x: 35.6, y: 95.2 },
+  LW: { x: 169.1, y: 151 },
+  RW: { x: 29, y: 154.5 },
 };
 
 // Taille de police du nom sur le terrain, réduite pour les noms longs plutôt que
@@ -90,6 +93,9 @@ function PitchSlotAvatar({
   firstName,
   lastName,
   photoUrl,
+  photoOffsetX = 50,
+  photoOffsetY = 50,
+  photoZoom = 1,
   clipId,
 }: {
   x: number;
@@ -98,6 +104,9 @@ function PitchSlotAvatar({
   firstName: string;
   lastName: string;
   photoUrl?: string | null;
+  photoOffsetX?: number;
+  photoOffsetY?: number;
+  photoZoom?: number;
   clipId: string;
 }) {
   const [errored, setErrored] = useState(false);
@@ -115,6 +124,14 @@ function PitchSlotAvatar({
     );
   }
 
+  // Même formule que object-position CSS (voir PlayerAvatar/PhotoPositionEditor,
+  // ce réglage doit rendre pareil partout) : l'image est dessinée plus grande que
+  // le cercle visible (diamètre × zoom) puis translatée selon le pourcentage.
+  const diameter = (r - 1) * 2;
+  const imgSize = diameter * photoZoom;
+  const imgX = x - (r - 1) + (diameter - imgSize) * (photoOffsetX / 100);
+  const imgY = y - (r - 1) + (diameter - imgSize) * (photoOffsetY / 100);
+
   return (
     <>
       <clipPath id={clipId}>
@@ -122,7 +139,7 @@ function PitchSlotAvatar({
       </clipPath>
       <image
         href={photoUrl!}
-        x={x - (r - 1)} y={y - (r - 1)} width={(r - 1) * 2} height={(r - 1) * 2}
+        x={imgX} y={imgY} width={imgSize} height={imgSize}
         clipPath={`url(#${clipId})`}
         preserveAspectRatio="xMidYMid slice"
         onError={() => setErrored(true)}
@@ -298,6 +315,9 @@ export function HandballPitch({
                       x={coords.x} y={coords.y} r={R}
                       firstName={player.firstName} lastName={player.lastName}
                       photoUrl={player.photoUrl}
+                      photoOffsetX={player.photoOffsetX}
+                      photoOffsetY={player.photoOffsetY}
+                      photoZoom={player.photoZoom}
                       clipId={`pitch-clip-${player.playerId}`}
                     />
                     <PitchClubBadge x={coords.x} y={coords.y} club={player.club} />

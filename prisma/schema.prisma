@@ -203,6 +203,9 @@ model Player {
   marketValue            Decimal                         @db.Decimal(5, 1) // ex: 12.5
   valuationPending       Boolean                         @default(true) // true = valeur encore approximative (placeholder), ND tant qu'aucune méthode de valorisation n'a été appliquée
   photoUrl               String?
+  photoOffsetX           Int                             @default(50) // % horizontal du recadrage circulaire (CSS object-position), 0=gauche 100=droite
+  photoOffsetY           Int                             @default(50) // % vertical du recadrage circulaire, 0=haut 100=bas
+  photoZoom              Decimal                         @default(1.0) @db.Decimal(3, 2) // 1.0 = pas de zoom, réglé admin (voir /admin/players)
   externalIds            Json                            @default("{}")
   isActive               Boolean                         @default(true) // blessure longue durée / départ
   injuredAt              DateTime? // déclaration manuelle admin — distinct de isActive (aussi utilisé pour "parti du club") ; seul injuredAt rend éligible au joker médical

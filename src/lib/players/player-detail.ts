@@ -26,6 +26,9 @@ export interface PlayerDetailData {
   lastName: string;
   position: Position;
   photoUrl: string | null;
+  photoOffsetX: number;
+  photoOffsetY: number;
+  photoZoom: number;
   club: { id: string; name: string; shortName: string; logoUrl: string | null };
   marketValue: number;
   seasonId: string;
@@ -136,6 +139,9 @@ export async function getPlayerDetailData(playerId: string): Promise<PlayerDetai
     lastName: player.lastName,
     position: player.position as Position,
     photoUrl: player.photoUrl,
+    photoOffsetX: player.photoOffsetX,
+    photoOffsetY: player.photoOffsetY,
+    photoZoom: Number(player.photoZoom),
     club: {
       id: player.club.id,
       name: player.club.name,

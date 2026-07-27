@@ -7,12 +7,17 @@ interface AccountData {
   name: string;
   email: string;
   favoritePlayerId: string | null;
+  favoritePlayer: { id: string; firstName: string; lastName: string; club: { shortName: string } } | null;
 }
 
 export default function AccountPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [favoritePlayerId, setFavoritePlayerId] = useState("");
+  // Verrouillé dès qu'un joueur préféré était déjà déclaré au chargement — un choix
+  // engageant, pas un champ qu'on retouche à chaque bonne/mauvaise perf (demande
+  // explicite). Reste modifiable uniquement tant qu'aucun choix n'a jamais été fait.
+  const [lockedFavoritePlayer, setLockedFavoritePlayer] = useState<AccountData["favoritePlayer"]>(null);
   const [players, setPlayers] = useState<PlayerSearchOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -32,6 +37,7 @@ export default function AccountPage() {
           setName(accountJson.data.name);
           setEmail(accountJson.data.email);
           setFavoritePlayerId(accountJson.data.favoritePlayerId ?? "");
+          setLockedFavoritePlayer(accountJson.data.favoritePlayer);
         }
         setPlayers(playersJson.data?.players ?? []);
         setLoading(false);
@@ -48,7 +54,8 @@ export default function AccountPage() {
     const res = await fetch("/api/account", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, favoritePlayerId: favoritePlayerId || null }),
+      // Verrouillé : on ne renvoie pas favoritePlayerId, rien à modifier côté serveur.
+      body: JSON.stringify(lockedFavoritePlayer ? { name } : { name, favoritePlayerId: favoritePlayerId || null }),
     });
     const json = (await res.json()) as { error?: { message: string } };
 
@@ -91,16 +98,26 @@ export default function AccountPage() {
 
         <div>
           <label className="mb-1 block text-xs uppercase tracking-widest text-text-muted">
-            Joueur préféré <span className="normal-case text-text-muted/70">(facultatif)</span>
+            Joueur préféré {!lockedFavoritePlayer && <span className="normal-case text-text-muted/70">(facultatif)</span>}
           </label>
-          <PlayerSearch
-            players={players}
-            value={favoritePlayerId}
-            onChange={(id) => {
-              setFavoritePlayerId(id);
-              setSaved(false);
-            }}
-          />
+          {lockedFavoritePlayer ? (
+            <>
+              <p className="rounded-lg border border-border bg-bg px-4 py-2.5 text-text">
+                {lockedFavoritePlayer.firstName} {lockedFavoritePlayer.lastName}{" "}
+                <span className="text-text-muted">— {lockedFavoritePlayer.club.shortName}</span>
+              </p>
+              <p className="mt-1 text-[11px] text-text-muted">Définitif, non modifiable une fois déclaré.</p>
+            </>
+          ) : (
+            <PlayerSearch
+              players={players}
+              value={favoritePlayerId}
+              onChange={(id) => {
+                setFavoritePlayerId(id);
+                setSaved(false);
+              }}
+            />
+          )}
         </div>
 
         {error && <p className="rounded-lg bg-points-neg/10 px-4 py-2 text-sm text-points-neg">{error}</p>}

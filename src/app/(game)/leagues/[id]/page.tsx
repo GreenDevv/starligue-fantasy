@@ -164,6 +164,9 @@ interface TeamWithSquad {
       lastName: string;
       position: string;
       photoUrl: string | null;
+      photoOffsetX: number;
+      photoOffsetY: number;
+      photoZoom: unknown;
       marketValue: unknown;
       club: { shortName: string; logoUrl: string | null };
     };
@@ -190,6 +193,9 @@ async function MyTeamSection({
     lastName: s.player.lastName,
     position: s.player.position,
     photoUrl: s.player.photoUrl,
+    photoOffsetX: s.player.photoOffsetX,
+    photoOffsetY: s.player.photoOffsetY,
+    photoZoom: Number(s.player.photoZoom),
     club: s.player.club,
     role: s.role as "STARTER" | "BENCH",
     marketValue: Number(s.player.marketValue),

@@ -17,6 +17,9 @@ interface SquadEntry {
   lastName: string;
   position: string;
   photoUrl?: string | null;
+  photoOffsetX?: number;
+  photoOffsetY?: number;
+  photoZoom?: number;
   club: { shortName: string; logoUrl?: string | null };
   role: "STARTER" | "BENCH";
   marketValue: number;
