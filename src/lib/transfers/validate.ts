@@ -1,13 +1,14 @@
 // Validation d'un transfert (vente + achat simultanés, même poste) — fonction
 // PURE, aucun import Prisma. Suit le pattern de src/lib/squad/validation.ts.
 
-import type { Position, SquadPlayer } from "@/lib/squad/validation";
+import { DEFAULT_SQUAD_CONFIG, type Position, type SquadPlayer } from "@/lib/squad/validation";
 
 export interface TransferBuyPlayer {
   id: string;
   position: Position;
   marketValue: number;
   isActive: boolean;
+  clubId: string;
 }
 
 export interface TransferInput {
@@ -15,6 +16,7 @@ export interface TransferInput {
   sellPlayerId: string;
   buyPlayer: TransferBuyPlayer;
   budget: number; // budget restant courant de l'équipe
+  maxPlayersPerClub?: number; // défaut DEFAULT_SQUAD_CONFIG.maxPlayersPerClub (3)
 }
 
 export type TransferError =
@@ -22,6 +24,7 @@ export type TransferError =
   | { code: "PLAYER_ALREADY_IN_SQUAD"; playerId: string }
   | { code: "POSITION_MISMATCH"; sellPosition: Position; buyPosition: Position }
   | { code: "INACTIVE_PLAYER"; playerId: string }
+  | { code: "TOO_MANY_PLAYERS_FROM_CLUB"; clubId: string; count: number; max: number }
   | { code: "BUDGET_EXCEEDED"; budget: number; shortfall: number };
 
 export interface TransferValidationResult {
@@ -36,7 +39,7 @@ export interface TransferValidationResult {
  * acheté — pas de prix d'achat historique.
  */
 export function validateTransfer(input: TransferInput): TransferValidationResult {
-  const { squad, sellPlayerId, buyPlayer, budget } = input;
+  const { squad, sellPlayerId, buyPlayer, budget, maxPlayersPerClub = DEFAULT_SQUAD_CONFIG.maxPlayersPerClub } = input;
   const errors: TransferError[] = [];
 
   const sellPlayer = squad.find((p) => p.id === sellPlayerId);
@@ -58,6 +61,13 @@ export function validateTransfer(input: TransferInput): TransferValidationResult
 
   if (!buyPlayer.isActive) {
     errors.push({ code: "INACTIVE_PLAYER", playerId: buyPlayer.id });
+  }
+
+  // Effectif résultant (vendu retiré, acheté ajouté) : le nouveau joueur ne doit
+  // pas faire dépasser la limite de joueurs d'un même club.
+  const resultingClubCount = squad.filter((p) => p.id !== sellPlayerId && p.clubId === buyPlayer.clubId).length + 1;
+  if (resultingClubCount > maxPlayersPerClub) {
+    errors.push({ code: "TOO_MANY_PLAYERS_FROM_CLUB", clubId: buyPlayer.clubId, count: resultingClubCount, max: maxPlayersPerClub });
   }
 
   const newBudget = sellPlayer ? budget + sellPlayer.marketValue - buyPlayer.marketValue : budget;

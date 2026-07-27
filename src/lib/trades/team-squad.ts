@@ -26,6 +26,7 @@ export async function loadTeamSquadForTrade(fantasyTeamId: string): Promise<Team
       position: s.player.position as SquadPlayer["position"],
       marketValue: Number(s.player.marketValue),
       isActive: s.player.isActive,
+      clubId: s.player.clubId,
     })),
   };
 }
@@ -47,6 +48,7 @@ export async function loadSimulationTeamSquadForTrade(simulationTeamId: string):
       position: s.player.position as SquadPlayer["position"],
       marketValue: Number(s.player.marketValue),
       isActive: s.player.isActive,
+      clubId: s.player.clubId,
     })),
   };
 }

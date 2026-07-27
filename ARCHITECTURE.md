@@ -48,6 +48,9 @@ PV  — Pivot
 
 Effectif obligatoire : exactement **2 joueurs par poste** (14 au total).
 Alignement par journée : exactement **1 titulaire par poste** (7 titulaires + 7 remplaçants).
+Maximum **3 joueurs d'un même club** dans l'effectif (`MAX_PLAYERS_PER_CLUB`, défaut 3) — contrôlé
+à la validation d'effectif (`validateSquad`), aux transferts (`validateTransfer`) et aux trades
+(`validateTradeExecution`), voir `src/lib/squad/validation.ts`.
 
 ### 2.2 Budget et valeurs marchandes
 

@@ -79,6 +79,9 @@ export async function POST(_request: Request, { params }: { params: { id: string
     return NextResponse.json({ error: { code: "NOT_FOUND", message: "Équipe introuvable" } }, { status: 404 });
   }
 
+  const maxPerClubConfig = await prisma.gameConfig.findUnique({ where: { key: "MAX_PLAYERS_PER_CLUB" } });
+  const maxPlayersPerClub = maxPerClubConfig ? parseInt(maxPerClubConfig.value, 10) : 3;
+
   const budgetAdjustment = Number(proposal.budgetAdjustment);
   const { valid, errors, newProposerBudget, newReceiverBudget } = validateTradeExecution({
     proposerSquad: proposerData.squad,
@@ -88,6 +91,7 @@ export async function POST(_request: Request, { params }: { params: { id: string
     offeredPlayerIds,
     requestedPlayerIds,
     budgetAdjustment,
+    maxPlayersPerClub,
   });
 
   if (!valid) {

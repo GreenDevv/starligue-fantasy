@@ -84,19 +84,22 @@ export async function POST(request: Request) {
     );
   }
 
-  const budgetConfig = await prisma.gameConfig.findUnique({
-    where: { key: "INITIAL_BUDGET" },
-  });
+  const [budgetConfig, maxPerClubConfig] = await Promise.all([
+    prisma.gameConfig.findUnique({ where: { key: "INITIAL_BUDGET" } }),
+    prisma.gameConfig.findUnique({ where: { key: "MAX_PLAYERS_PER_CLUB" } }),
+  ]);
   const budget = budgetConfig ? parseFloat(budgetConfig.value) : 100.0;
+  const maxPlayersPerClub = maxPerClubConfig ? parseInt(maxPerClubConfig.value, 10) : 3;
 
   const squadPlayers: SquadPlayer[] = players.map((p) => ({
     id: p.id,
     position: p.position as SquadPlayer["position"],
     marketValue: Number(p.marketValue),
     isActive: p.isActive,
+    clubId: p.clubId,
   }));
 
-  const { valid, errors } = validateSquad(squadPlayers, { playersPerPosition: 2, budget });
+  const { valid, errors } = validateSquad(squadPlayers, { playersPerPosition: 2, budget, maxPlayersPerClub });
   if (!valid) {
     return NextResponse.json(
       { error: { code: "SQUAD_INVALID", message: "Composition invalide", details: errors } },

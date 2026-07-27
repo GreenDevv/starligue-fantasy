@@ -4,10 +4,10 @@ import type { SquadPlayer } from "@/lib/squad/validation";
 
 function makeSquad(): SquadPlayer[] {
   return [
-    { id: "gk-1", position: "GK", marketValue: 10, isActive: true },
-    { id: "gk-2", position: "GK", marketValue: 8, isActive: true },
-    { id: "lw-1", position: "LW", marketValue: 9, isActive: true },
-    { id: "lw-2", position: "LW", marketValue: 7, isActive: true },
+    { id: "gk-1", position: "GK", marketValue: 10, isActive: true, clubId: "club-gk-1" },
+    { id: "gk-2", position: "GK", marketValue: 8, isActive: true, clubId: "club-gk-2" },
+    { id: "lw-1", position: "LW", marketValue: 9, isActive: true, clubId: "club-lw-1" },
+    { id: "lw-2", position: "LW", marketValue: 7, isActive: true, clubId: "club-lw-2" },
   ];
 }
 
@@ -16,7 +16,7 @@ describe("validateTransfer", () => {
     const result = validateTransfer({
       squad: makeSquad(),
       sellPlayerId: "gk-2",
-      buyPlayer: { id: "gk-3", position: "GK", marketValue: 8, isActive: true },
+      buyPlayer: { id: "gk-3", position: "GK", marketValue: 8, isActive: true, clubId: "club-gk-3" },
       budget: 5,
     });
     expect(result.valid).toBe(true);
@@ -27,7 +27,7 @@ describe("validateTransfer", () => {
     const result = validateTransfer({
       squad: makeSquad(),
       sellPlayerId: "unknown",
-      buyPlayer: { id: "gk-3", position: "GK", marketValue: 8, isActive: true },
+      buyPlayer: { id: "gk-3", position: "GK", marketValue: 8, isActive: true, clubId: "club-gk-3" },
       budget: 5,
     });
     expect(result.valid).toBe(false);
@@ -38,7 +38,7 @@ describe("validateTransfer", () => {
     const result = validateTransfer({
       squad: makeSquad(),
       sellPlayerId: "gk-2",
-      buyPlayer: { id: "gk-1", position: "GK", marketValue: 8, isActive: true },
+      buyPlayer: { id: "gk-1", position: "GK", marketValue: 8, isActive: true, clubId: "club-gk-1" },
       budget: 5,
     });
     expect(result.errors.some((e) => e.code === "PLAYER_ALREADY_IN_SQUAD")).toBe(true);
@@ -48,7 +48,7 @@ describe("validateTransfer", () => {
     const result = validateTransfer({
       squad: makeSquad(),
       sellPlayerId: "gk-2",
-      buyPlayer: { id: "lw-3", position: "LW", marketValue: 8, isActive: true },
+      buyPlayer: { id: "lw-3", position: "LW", marketValue: 8, isActive: true, clubId: "club-lw-3" },
       budget: 5,
     });
     expect(result.errors.some((e) => e.code === "POSITION_MISMATCH")).toBe(true);
@@ -58,7 +58,7 @@ describe("validateTransfer", () => {
     const result = validateTransfer({
       squad: makeSquad(),
       sellPlayerId: "gk-2",
-      buyPlayer: { id: "gk-3", position: "GK", marketValue: 8, isActive: false },
+      buyPlayer: { id: "gk-3", position: "GK", marketValue: 8, isActive: false, clubId: "club-gk-3" },
       budget: 5,
     });
     expect(result.errors.some((e) => e.code === "INACTIVE_PLAYER")).toBe(true);
@@ -68,7 +68,7 @@ describe("validateTransfer", () => {
     const result = validateTransfer({
       squad: makeSquad(),
       sellPlayerId: "gk-2",
-      buyPlayer: { id: "gk-3", position: "GK", marketValue: 15, isActive: true },
+      buyPlayer: { id: "gk-3", position: "GK", marketValue: 15, isActive: true, clubId: "club-gk-3" },
       budget: 1,
     });
     expect(result.valid).toBe(false);
@@ -80,10 +80,40 @@ describe("validateTransfer", () => {
     const result = validateTransfer({
       squad: makeSquad(),
       sellPlayerId: "gk-1",
-      buyPlayer: { id: "gk-3", position: "GK", marketValue: 4, isActive: true },
+      buyPlayer: { id: "gk-3", position: "GK", marketValue: 4, isActive: true, clubId: "club-gk-3" },
       budget: 0,
     });
     expect(result.valid).toBe(true);
     expect(result.newBudget).toBe(6); // 0 + 10 - 4
+  });
+
+  it("achat porte l'effectif à 3 joueurs du même club → valide", () => {
+    const squad = makeSquad();
+    squad[2] = { ...squad[2]!, clubId: "same-club" }; // lw-1
+    squad[3] = { ...squad[3]!, clubId: "same-club" }; // lw-2
+    const result = validateTransfer({
+      squad,
+      sellPlayerId: "gk-2",
+      buyPlayer: { id: "gk-3", position: "GK", marketValue: 8, isActive: true, clubId: "same-club" },
+      budget: 5,
+    });
+    expect(result.valid).toBe(true);
+  });
+
+  it("achat porte l'effectif à 4 joueurs du même club → TOO_MANY_PLAYERS_FROM_CLUB", () => {
+    const squad = makeSquad();
+    squad[1] = { ...squad[1]!, clubId: "same-club" }; // gk-2 (sera vendu, ne compte pas dans le résultat)
+    squad[2] = { ...squad[2]!, clubId: "same-club" }; // lw-1
+    squad[3] = { ...squad[3]!, clubId: "same-club" }; // lw-2
+    const result = validateTransfer({
+      squad,
+      sellPlayerId: "gk-1", // vend un joueur d'un AUTRE club, garde les 2 du "same-club" + en ajoute un 3e... donc 4e avec l'achat
+      buyPlayer: { id: "gk-3", position: "GK", marketValue: 8, isActive: true, clubId: "same-club" },
+      budget: 5,
+    });
+    expect(result.valid).toBe(false);
+    expect(
+      result.errors.some((e) => e.code === "TOO_MANY_PLAYERS_FROM_CLUB" && e.clubId === "same-club" && e.count === 4),
+    ).toBe(true);
   });
 });

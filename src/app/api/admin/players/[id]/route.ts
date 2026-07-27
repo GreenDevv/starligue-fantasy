@@ -42,18 +42,30 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
   const { photoUrl, injuredAt, ...rest } = parsed.data;
 
-  const before = injuredAt !== undefined ? await prisma.player.findUnique({ where: { id: params.id }, select: { injuredAt: true } }) : null;
+  const before = await prisma.player.findUnique({ where: { id: params.id }, select: { injuredAt: true, marketValue: true } });
 
-  const player = await prisma.player.update({
-    where: { id: params.id },
-    data: {
-      ...rest,
-      // Une valeur saisie à la main sort le joueur du statut "ND" (valorisation en attente).
-      ...(rest.marketValue !== undefined ? { valuationPending: false } : {}),
-      ...(photoUrl !== undefined ? { photoUrl: photoUrl === "" ? null : photoUrl } : {}),
-      ...(injuredAt !== undefined ? { injuredAt: injuredAt === null ? null : new Date(injuredAt) } : {}),
-    },
-    include: { club: { select: { id: true, name: true, shortName: true } } },
+  const valueChanged = rest.marketValue !== undefined && before !== null && rest.marketValue !== Number(before.marketValue);
+
+  const player = await prisma.$transaction(async (tx) => {
+    const updated = await tx.player.update({
+      where: { id: params.id },
+      data: {
+        ...rest,
+        // Une valeur saisie à la main sort le joueur du statut "ND" (valorisation en attente).
+        ...(rest.marketValue !== undefined ? { valuationPending: false } : {}),
+        ...(photoUrl !== undefined ? { photoUrl: photoUrl === "" ? null : photoUrl } : {}),
+        ...(injuredAt !== undefined ? { injuredAt: injuredAt === null ? null : new Date(injuredAt) } : {}),
+      },
+      include: { club: { select: { id: true, name: true, shortName: true } } },
+    });
+    // Trace la correction dans l'historique, au même titre que l'import .xlsx en
+    // masse (src/app/api/admin/import/player-values/route.ts) — sinon le graphique
+    // d'évolution de valeur du joueur ignore silencieusement les éditions faites
+    // une par une depuis ce formulaire.
+    if (valueChanged) {
+      await tx.playerValueHistory.create({ data: { playerId: updated.id, value: updated.marketValue } });
+    }
+    return updated;
   });
 
   // Actu générée pour la page publique /starligue — best-effort, jamais dans la même

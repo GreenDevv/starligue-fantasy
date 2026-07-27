@@ -6,8 +6,9 @@ function makePlayer(
   position: SquadPlayer["position"],
   marketValue = 8.0,
   isActive = true,
+  clubId = `club-${id}`, // unique par défaut : ne déclenche jamais TOO_MANY_PLAYERS_FROM_CLUB sans le vouloir
 ): SquadPlayer {
-  return { id, position, marketValue, isActive };
+  return { id, position, marketValue, isActive, clubId };
 }
 
 /** Effectif valide par défaut : 2 joueurs par poste, total = 7×2×8 = 112 > 100 → ajusté */
@@ -92,6 +93,38 @@ describe("validateSquad — joueurs inactifs / doublons", () => {
     squad[1] = { ...squad[0]! }; // même id que squad[0]
     const result = validateSquad(squad);
     expect(result.errors.some((e) => e.code === "DUPLICATE_PLAYER")).toBe(true);
+  });
+});
+
+describe("validateSquad — max joueurs par club", () => {
+  it("3 joueurs du même club → valide (limite par défaut)", () => {
+    const squad = makeValidSquad();
+    squad[0] = { ...squad[0]!, clubId: "same-club" };
+    squad[1] = { ...squad[1]!, clubId: "same-club" };
+    squad[2] = { ...squad[2]!, clubId: "same-club" };
+    expect(validateSquad(squad).valid).toBe(true);
+  });
+
+  it("4 joueurs du même club → TOO_MANY_PLAYERS_FROM_CLUB", () => {
+    const squad = makeValidSquad();
+    squad[0] = { ...squad[0]!, clubId: "same-club" };
+    squad[1] = { ...squad[1]!, clubId: "same-club" };
+    squad[2] = { ...squad[2]!, clubId: "same-club" };
+    squad[3] = { ...squad[3]!, clubId: "same-club" };
+    const result = validateSquad(squad);
+    expect(result.valid).toBe(false);
+    expect(
+      result.errors.some((e) => e.code === "TOO_MANY_PLAYERS_FROM_CLUB" && e.clubId === "same-club" && e.count === 4),
+    ).toBe(true);
+  });
+
+  it("limite personnalisée (maxPlayersPerClub: 2) → 3 du même club invalide", () => {
+    const squad = makeValidSquad();
+    squad[0] = { ...squad[0]!, clubId: "same-club" };
+    squad[1] = { ...squad[1]!, clubId: "same-club" };
+    squad[2] = { ...squad[2]!, clubId: "same-club" };
+    const result = validateSquad(squad, { playersPerPosition: 2, budget: 100.0, maxPlayersPerClub: 2 });
+    expect(result.errors.some((e) => e.code === "TOO_MANY_PLAYERS_FROM_CLUB")).toBe(true);
   });
 });
 

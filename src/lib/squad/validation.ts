@@ -9,16 +9,19 @@ export interface SquadPlayer {
   position: Position;
   marketValue: number;
   isActive: boolean;
+  clubId: string;
 }
 
 export interface SquadConfig {
   playersPerPosition: number; // 2
   budget: number;             // 100.0
+  maxPlayersPerClub: number;  // 3
 }
 
 export const DEFAULT_SQUAD_CONFIG: SquadConfig = {
   playersPerPosition: 2,
   budget: 100.0,
+  maxPlayersPerClub: 3,
 };
 
 export type ValidationError =
@@ -27,6 +30,7 @@ export type ValidationError =
   | { code: "BUDGET_EXCEEDED"; budget: number; total: number; overage: number }
   | { code: "INACTIVE_PLAYER"; playerId: string }
   | { code: "DUPLICATE_PLAYER"; playerId: string }
+  | { code: "TOO_MANY_PLAYERS_FROM_CLUB"; clubId: string; count: number; max: number }
   | { code: "WRONG_LINEUP_SIZE"; expected: number; got: number }
   | { code: "WRONG_STARTERS_AT_POSITION"; position: Position; expected: number; got: number }
   | { code: "PLAYER_NOT_IN_SQUAD"; playerId: string };
@@ -80,6 +84,17 @@ export function validateSquad(
         expected: config.playersPerPosition,
         got: count,
       });
+    }
+  }
+
+  // Max joueurs d'un même club (évite un effectif concentré sur un seul club)
+  const countByClub = new Map<string, number>();
+  for (const p of players) {
+    countByClub.set(p.clubId, (countByClub.get(p.clubId) ?? 0) + 1);
+  }
+  for (const [clubId, count] of countByClub) {
+    if (count > config.maxPlayersPerClub) {
+      errors.push({ code: "TOO_MANY_PLAYERS_FROM_CLUB", clubId, count, max: config.maxPlayersPerClub });
     }
   }
 

@@ -76,6 +76,7 @@ const GAME_CONFIG: Record<string, string> = {
   SQUAD_SIZE: "14",
   PLAYERS_PER_POSITION: "2",
   STARTERS_PER_POSITION: "1",
+  MAX_PLAYERS_PER_CLUB: "3",
   RATING_BASELINE: "5", // note neutre
   RATING_MULTIPLIER: "4", // pointsBruts = (note - 5) × 4
   STARTER_MULTIPLIER: "1.0",

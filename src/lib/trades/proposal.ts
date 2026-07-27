@@ -4,7 +4,7 @@
 // poste) sans re-checker le budget total du squad — comme validateTransfer, seul le
 // solde de budget après l'opération est contrôlé, pas la somme des marketValue.
 
-import { validateSquad, type SquadPlayer, type ValidationError } from "@/lib/squad/validation";
+import { validateSquad, DEFAULT_SQUAD_CONFIG, type SquadPlayer, type ValidationError } from "@/lib/squad/validation";
 
 export interface TradeExecutionInput {
   proposerSquad: SquadPlayer[];
@@ -14,6 +14,7 @@ export interface TradeExecutionInput {
   offeredPlayerIds: string[]; // pris dans proposerSquad, remis à receiverSquad
   requestedPlayerIds: string[]; // pris dans receiverSquad, remis à proposerSquad
   budgetAdjustment: number; // proposeur → destinataire (négatif = sens inverse)
+  maxPlayersPerClub?: number; // défaut DEFAULT_SQUAD_CONFIG.maxPlayersPerClub (3)
 }
 
 export type TradeError =
@@ -36,8 +37,16 @@ function swapSquad(squad: SquadPlayer[], remove: Set<string>, add: SquadPlayer[]
 }
 
 export function validateTradeExecution(input: TradeExecutionInput): TradeExecutionResult {
-  const { proposerSquad, proposerBudget, receiverSquad, receiverBudget, offeredPlayerIds, requestedPlayerIds, budgetAdjustment } =
-    input;
+  const {
+    proposerSquad,
+    proposerBudget,
+    receiverSquad,
+    receiverBudget,
+    offeredPlayerIds,
+    requestedPlayerIds,
+    budgetAdjustment,
+    maxPlayersPerClub = DEFAULT_SQUAD_CONFIG.maxPlayersPerClub,
+  } = input;
   const errors: TradeError[] = [];
 
   if (offeredPlayerIds.length === 0 && requestedPlayerIds.length === 0) {
@@ -77,6 +86,7 @@ export function validateTradeExecution(input: TradeExecutionInput): TradeExecuti
   const proposerSquadCheck = validateSquad(resultingProposerSquad, {
     playersPerPosition: 2,
     budget: Number.POSITIVE_INFINITY,
+    maxPlayersPerClub,
   });
   if (!proposerSquadCheck.valid) {
     errors.push({
@@ -89,6 +99,7 @@ export function validateTradeExecution(input: TradeExecutionInput): TradeExecuti
   const receiverSquadCheck = validateSquad(resultingReceiverSquad, {
     playersPerPosition: 2,
     budget: Number.POSITIVE_INFINITY,
+    maxPlayersPerClub,
   });
   if (!receiverSquadCheck.valid) {
     errors.push({

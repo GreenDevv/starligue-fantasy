@@ -82,7 +82,11 @@ export async function POST(request: Request) {
     position: s.player.position as SquadPlayer["position"],
     marketValue: Number(s.player.marketValue),
     isActive: s.player.isActive,
+    clubId: s.player.clubId,
   }));
+
+  const maxPerClubConfig = await prisma.gameConfig.findUnique({ where: { key: "MAX_PLAYERS_PER_CLUB" } });
+  const maxPlayersPerClub = maxPerClubConfig ? parseInt(maxPerClubConfig.value, 10) : 3;
 
   const { valid, errors, newBudget } = validateTransfer({
     squad: squadPlayers,
@@ -92,8 +96,10 @@ export async function POST(request: Request) {
       position: buyPlayer.position as SquadPlayer["position"],
       marketValue: Number(buyPlayer.marketValue),
       isActive: buyPlayer.isActive,
+      clubId: buyPlayer.clubId,
     },
     budget: Number(team.budget),
+    maxPlayersPerClub,
   });
 
   if (!valid) {

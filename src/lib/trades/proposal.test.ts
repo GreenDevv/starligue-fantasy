@@ -8,7 +8,8 @@ function fullSquad(overrides: Partial<Record<string, SquadPlayer>> = {}, prefix 
   for (const pos of positions) {
     for (let i = 1; i <= 2; i++) {
       const id = `${prefix}-${pos}-${i}`;
-      players.push(overrides[id] ?? { id, position: pos, marketValue: 8, isActive: true });
+      // clubId unique par joueur par défaut : ne déclenche jamais TOO_MANY_PLAYERS_FROM_CLUB sans le vouloir
+      players.push(overrides[id] ?? { id, position: pos, marketValue: 8, isActive: true, clubId: `club-${id}` });
     }
   }
   return players;
@@ -62,7 +63,10 @@ describe("validateTradeExecution", () => {
   it("joueur inactif (blessé/parti) inclus dans l'échange → INACTIVE_PLAYER", () => {
     const result = validateTradeExecution(
       baseInput({
-        receiverSquad: fullSquad({ "b-CB-1": { id: "b-CB-1", position: "CB", marketValue: 8, isActive: false } }, "b"),
+        receiverSquad: fullSquad(
+          { "b-CB-1": { id: "b-CB-1", position: "CB", marketValue: 8, isActive: false, clubId: "club-b-CB-1" } },
+          "b",
+        ),
       })
     );
     expect(result.errors.some((e) => e.code === "INACTIVE_PLAYER" && e.playerId === "b-CB-1")).toBe(true);
@@ -91,6 +95,30 @@ describe("validateTradeExecution", () => {
       baseInput({ offeredPlayerIds: ["a-CB-1", "a-CB-2"], requestedPlayerIds: ["b-CB-1", "b-CB-2"] })
     );
     expect(result.valid).toBe(true);
+  });
+
+  it("échange fait entrer un 4e joueur du même club côté proposeur → INVALID_RESULTING_SQUAD (PROPOSER)", () => {
+    const proposerSquad = fullSquad({}, "a").map((p, i) => (i < 3 ? { ...p, clubId: "same-club" } : p));
+    const receiverWithSameClubPlayer = fullSquad({}, "b").map((p) =>
+      p.id === "b-CB-1" ? { ...p, clubId: "same-club" } : p,
+    );
+    const result = validateTradeExecution(
+      baseInput({
+        proposerSquad,
+        receiverSquad: receiverWithSameClubPlayer,
+        offeredPlayerIds: ["a-RW-1"], // pas un des 3 same-club → les 3 restent dans l'effectif résultant
+        requestedPlayerIds: ["b-CB-1"], // rejoint same-club côté proposeur → 4e
+      })
+    );
+    expect(result.valid).toBe(false);
+    expect(
+      result.errors.some(
+        (e) =>
+          e.code === "INVALID_RESULTING_SQUAD" &&
+          e.side === "PROPOSER" &&
+          e.errors.some((inner) => inner.code === "TOO_MANY_PLAYERS_FROM_CLUB"),
+      ),
+    ).toBe(true);
   });
 });
 
