@@ -33,7 +33,7 @@ export async function GET(request: Request) {
     },
   } as const;
 
-  const [team, jokerQuotaConfig, pointsRateConfig, seasonBonusQuotaConfig, initialBudgetConfig, league] =
+  const [team, jokerQuotaConfig, pointsRateConfig, seasonBonusQuotaConfig, initialBudgetConfig, maxPerClubConfig, league] =
     await Promise.all([
       mode === "simulation"
         ? prisma.simulationTeam.findUnique({
@@ -48,6 +48,7 @@ export async function GET(request: Request) {
       prisma.gameConfig.findUnique({ where: { key: "POINTS_TO_BUDGET_RATE" } }),
       prisma.gameConfig.findUnique({ where: { key: "SEASON_BONUS_QUOTA_PER_SEASON" } }),
       prisma.gameConfig.findUnique({ where: { key: "INITIAL_BUDGET" } }),
+      prisma.gameConfig.findUnique({ where: { key: "MAX_PLAYERS_PER_CLUB" } }),
       prisma.league.findUnique({ where: { id: ctx.leagueId }, select: { name: true } }),
     ]);
 
@@ -59,6 +60,7 @@ export async function GET(request: Request) {
   }
 
   const initialBudget = parseFloat(initialBudgetConfig?.value ?? process.env.INITIAL_BUDGET ?? "100.0");
+  const maxPlayersPerClub = maxPerClubConfig ? parseInt(maxPerClubConfig.value, 10) : 3;
   const jokerQuota = jokerQuotaConfig ? parseInt(jokerQuotaConfig.value, 10) : 2;
   const pointsToBudgetRate = pointsRateConfig ? parseFloat(pointsRateConfig.value) : 0.1;
   const seasonBonusQuota = seasonBonusQuotaConfig ? parseInt(seasonBonusQuotaConfig.value, 10) : 3;
@@ -89,6 +91,7 @@ export async function GET(request: Request) {
       // revalider un effectif complet (reconstruction totale, pas achat/vente incrémental).
       budget: Number(team.budget),
       initialBudget,
+      maxPlayersPerClub,
       totalPoints: Number(team.totalPoints),
       pointsConverted: Number(team.pointsConverted),
       pointsToBudgetRate,

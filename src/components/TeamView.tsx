@@ -307,7 +307,7 @@ export function TeamView({
       )}
 
       {/* Pitch + bench */}
-      <HandballPitch starters={starters} bench={bench} onSwap={swapRole} />
+      <HandballPitch starters={starters} bench={bench} captainId={captainId} onSwap={swapRole} />
 
       {/* Capitaine */}
       <div className="pixel-corners flex items-center justify-between border border-accent-secondary/25 bg-surface px-4 py-2.5">

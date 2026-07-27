@@ -43,6 +43,7 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
   const [activePos, setActivePos] = useState<Position>("GK");
   const [search, setSearch] = useState("");
   const [initialBudget, setInitialBudget] = useState(100);
+  const [maxPlayersPerClub, setMaxPlayersPerClub] = useState(3);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +63,7 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
         {
           data?: {
             initialBudget: number;
+            maxPlayersPerClub: number;
             isValidated: boolean;
             seasonStarted: boolean;
             squad: Array<{ role: string; player: Player }>;
@@ -73,6 +75,7 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
         // restant post-validation — sinon un effectif déjà validé (quasi tout dépensé)
         // apparaît systématiquement "en dépassement" dès la réouverture de l'écran.
         if (teamRes.data?.initialBudget) setInitialBudget(teamRes.data.initialBudget);
+        if (teamRes.data?.maxPlayersPerClub) setMaxPlayersPerClub(teamRes.data.maxPlayersPerClub);
         if (teamRes.data?.isValidated && (teamRes.data.squad?.length ?? 0) === 14) {
           setAlreadyValidated(true);
           // Rebuild complet interdit une fois la saison commencée (voir
@@ -114,6 +117,17 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
         .reduce((s, p) => s + p!.marketValue, 0),
     [squad]
   );
+
+  // Nombre de joueurs déjà sélectionnés par club — sert à empêcher visuellement
+  // de dépasser MAX_PLAYERS_PER_CLUB avant même le rejet serveur (validateSquad).
+  const clubCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of Object.values(squad).flat()) {
+      if (!p) continue;
+      counts.set(p.club.id, (counts.get(p.club.id) ?? 0) + 1);
+    }
+    return counts;
+  }, [squad]);
 
   const squadFull = POSITIONS.every((pos) => squad[pos][0] !== null && squad[pos][1] !== null);
   const budgetOk = spent <= initialBudget;
@@ -187,14 +201,24 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
       });
       const data = await res.json() as {
         data?: { success: boolean };
-        error?: { code?: string; message: string };
+        error?: {
+          code?: string;
+          message: string;
+          details?: Array<{ code: string; clubId?: string; count?: number; max?: number }>;
+        };
       };
       if (data.data?.success) {
         router.push(`/team/start${leagueSuffix}`);
       } else if (data.error?.code === "NO_ACTIVE_LEAGUE") {
         router.push("/leagues");
       } else {
-        setError(data.error?.message ?? "Erreur lors de la validation");
+        const clubIssue = data.error?.details?.find((d) => d.code === "TOO_MANY_PLAYERS_FROM_CLUB");
+        if (clubIssue) {
+          const clubName = allPlayers.find((p) => p.club.id === clubIssue.clubId)?.club.shortName ?? "un club";
+          setError(`Trop de joueurs de ${clubName} (${clubIssue.count}/${clubIssue.max} max)`);
+        } else {
+          setError(data.error?.message ?? "Erreur lors de la validation");
+        }
       }
     } catch {
       setError("Erreur réseau");
@@ -347,12 +371,14 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
                       const wouldExceedBudget =
                         !selectedIds.has(player.id) &&
                         spent + player.marketValue > initialBudget;
+                      const clubCount = clubCounts.get(player.club.id) ?? 0;
+                      const wouldExceedClubLimit = !selectedIds.has(player.id) && clubCount >= maxPlayersPerClub;
                       return (
                         <motion.button
                           key={player.id}
                           variants={{ hidden: { opacity: 0, y: 6 }, show: { opacity: 1, y: 0, transition: { duration: 0.2 } } }}
                           onClick={() => addPlayer(player)}
-                          disabled={slotsFull || wouldExceedBudget}
+                          disabled={slotsFull || wouldExceedBudget || wouldExceedClubLimit}
                           className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-border/20 active:bg-border/30 disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           <PlayerAvatar player={player} size="sm" />
@@ -363,6 +389,11 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
                             <p className="flex items-center gap-1 text-xs text-text-muted">
                               <ClubLogo club={player.club} size="xs" />
                               {player.club.shortName}
+                              {clubCount > 0 && (
+                                <span className={wouldExceedClubLimit ? "text-points-neg" : "text-text-muted"}>
+                                  · {clubCount}/{maxPlayersPerClub}
+                                </span>
+                              )}
                             </p>
                           </div>
                           <span className="shrink-0 flex items-center gap-1.5">

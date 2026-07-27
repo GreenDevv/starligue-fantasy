@@ -174,7 +174,7 @@ export function StartView({ mode }: { mode: SeasonMode }) {
         <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">
           Titulaires · tap un joueur pour échanger avec son remplaçant
         </p>
-        <HandballPitch starters={starters} bench={bench} onSwap={swapRole} />
+        <HandballPitch starters={starters} bench={bench} captainId={captainId} onSwap={swapRole} />
       </div>
 
       <div>

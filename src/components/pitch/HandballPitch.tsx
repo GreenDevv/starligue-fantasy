@@ -24,6 +24,7 @@ interface PitchPlayer {
 interface HandballPitchProps {
   starters: PitchPlayer[];
   bench: PitchPlayer[];
+  captainId?: string | null;
   onSwap?: (playerId: string) => void;
   onEmptySlotClick?: (position: Position) => void;
   benchLabel?: string;
@@ -211,9 +212,29 @@ function PointsBadge({ x, y, points }: { x: number; y: number; points: number })
   );
 }
 
+// Brassard de capitaine — coin haut-droit, seul coin encore libre (club en bas-
+// droit, points éventuels en haut-gauche) pour ne jamais se superposer.
+function PitchCaptainBadge({ x, y }: { x: number; y: number }) {
+  const cx = x + 9.5;
+  const cy = y - 9.5;
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r="7" fill="#F59E0B" stroke="#0E1116" strokeWidth="1" />
+      <text
+        x={cx} y={cy + 2.6}
+        textAnchor="middle" fill="#0E1116" fontSize="8" fontWeight="700"
+        style={{ fontFamily: "var(--font-display), sans-serif" }}
+      >
+        C
+      </text>
+    </g>
+  );
+}
+
 export function HandballPitch({
   starters,
   bench,
+  captainId,
   onSwap,
   onEmptySlotClick,
   benchLabel = "Remplaçants · tap pour échanger",
@@ -331,6 +352,9 @@ export function HandballPitch({
                     {player.points !== undefined && (
                       <PointsBadge x={coords.x} y={coords.y} points={player.points} />
                     )}
+                    {captainId && player.playerId === captainId && (
+                      <PitchCaptainBadge x={coords.x} y={coords.y} />
+                    )}
                   </>
                 ) : (
                   <>
@@ -375,7 +399,14 @@ export function HandballPitch({
                 onClick={() => onSwap?.(p.playerId)}
                 className="pixel-corners-sm flex flex-col items-center gap-1 border border-border bg-surface px-1 py-2 text-center transition-colors active:scale-[0.96] hover:border-accent/50"
               >
-                <PlayerAvatar player={{ ...p, position: p.position as Position }} size="sm" />
+                <span className="relative">
+                  <PlayerAvatar player={{ ...p, position: p.position as Position }} size="sm" />
+                  {captainId && p.playerId === captainId && (
+                    <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border border-bg bg-accent-secondary text-[8px] font-bold leading-none text-bg">
+                      C
+                    </span>
+                  )}
+                </span>
                 <p className="w-full truncate text-[10px] font-medium leading-tight text-text">
                   {p.lastName}
                 </p>
