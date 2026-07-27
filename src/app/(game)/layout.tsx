@@ -14,6 +14,8 @@ export default async function GameLayout({
 }) {
   const [session, activeSeason] = await Promise.all([auth(), prisma.season.findFirst({ where: { isActive: true } })]);
   const seasonMode = resolveSeasonMode();
+  // @ts-expect-error — role étendu
+  const isAdmin = session?.user?.role === "ADMIN";
 
   const nextGameweek = activeSeason
     ? await prisma.gameweek.findFirst({
@@ -38,7 +40,7 @@ export default async function GameLayout({
             Starligue Fantasy
           </Link>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
-            <SeasonToggle initialMode={seasonMode} />
+            {isAdmin && <SeasonToggle initialMode={seasonMode} />}
             <NavBar />
             <AuthButton userName={session?.user?.name} />
           </div>
