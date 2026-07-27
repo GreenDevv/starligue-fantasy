@@ -33,6 +33,9 @@ export default async function AdminLayout({
             <a href="/admin/transfer-windows" className="text-text-muted transition-colors hover:text-text">
               Transferts
             </a>
+            <a href="/admin/news" className="text-text-muted transition-colors hover:text-text">
+              Actus
+            </a>
             <a href="/admin" className="text-text-muted transition-colors hover:text-text">
               Dashboard
             </a>
