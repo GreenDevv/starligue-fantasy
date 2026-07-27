@@ -302,15 +302,25 @@ function PlayerPanel({
       <div className="flex-1 overflow-y-auto p-5">
         <div className="flex flex-col gap-5">
 
-          {/* Photo preview */}
+          {/* Photo preview — même formule que PhotoPositionEditor (recadrage), sinon
+              cette vignette et le grand cercle de cadrage juste en dessous se
+              contredisent visuellement pour la même photo. */}
           <div className="flex items-center gap-4">
             {form.photoUrl && !photoPreviewError ? (
-              <img
-                src={form.photoUrl}
-                alt="Preview"
-                onError={() => setPhotoPreviewError(true)}
-                className="h-16 w-16 rounded-full object-cover border-2 border-border"
-              />
+              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-border">
+                <img
+                  src={form.photoUrl}
+                  alt="Preview"
+                  onError={() => setPhotoPreviewError(true)}
+                  className="absolute object-cover"
+                  style={{
+                    width: `${form.photoCrop.zoom * 100}%`,
+                    height: `${form.photoCrop.zoom * 100}%`,
+                    left: `${(100 - form.photoCrop.zoom * 100) * (form.photoCrop.offsetX / 100)}%`,
+                    top: `${(100 - form.photoCrop.zoom * 100) * (form.photoCrop.offsetY / 100)}%`,
+                  }}
+                />
+              </div>
             ) : (
               <div className={`flex h-16 w-16 items-center justify-center rounded-full border-2 border-border text-xl font-bold text-white ${form.position ? POS_AVATAR_BG[form.position] : "bg-surface"}`}>
                 {`${form.firstName[0] ?? ""}${form.lastName[0] ?? ""}`.toUpperCase() || "?"}
