@@ -48,14 +48,22 @@ export function PlayerAvatar({ player, size = "md", className = "" }: PlayerAvat
       )}
     >
       {showPhoto ? (
+        // Zoom implémenté en agrandissant la boîte de l'image elle-même (object-fit:
+        // cover recalculé à cette taille) plutôt qu'un transform:scale() post-crop —
+        // ce dernier ne fait que magnifier la fenêtre déjà sélectionnée par
+        // object-position au lieu de vraiment "dézoomer" sur plus de résolution/zone
+        // de la photo. Même formule que PitchSlotAvatar (rendu SVG du terrain) et
+        // PhotoPositionEditor (aperçu admin) — les trois doivent rester identiques.
         // eslint-disable-next-line @next/next/no-img-element -- photo hébergée sur des domaines de clubs externes/imprévisibles, incompatible avec next/image sans whitelist statique
         <img
           src={player.photoUrl!}
           alt={`${player.firstName} ${player.lastName}`}
-          className="h-full w-full object-cover"
+          className="absolute h-full w-full object-cover"
           style={{
-            objectPosition: `${player.photoOffsetX ?? 50}% ${player.photoOffsetY ?? 50}%`,
-            transform: `scale(${player.photoZoom ?? 1})`,
+            width: `${(player.photoZoom ?? 1) * 100}%`,
+            height: `${(player.photoZoom ?? 1) * 100}%`,
+            left: `${(100 - (player.photoZoom ?? 1) * 100) * ((player.photoOffsetX ?? 50) / 100)}%`,
+            top: `${(100 - (player.photoZoom ?? 1) * 100) * ((player.photoOffsetY ?? 50) / 100)}%`,
           }}
           loading="lazy"
           referrerPolicy="no-referrer"

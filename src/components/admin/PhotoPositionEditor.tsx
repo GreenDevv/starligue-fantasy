@@ -68,10 +68,12 @@ export function PhotoPositionEditor({
           src={photoUrl}
           alt="Recadrage"
           draggable={false}
-          className="pointer-events-none h-full w-full object-cover"
+          className="pointer-events-none absolute object-cover"
           style={{
-            objectPosition: `${crop.offsetX}% ${crop.offsetY}%`,
-            transform: `scale(${crop.zoom})`,
+            width: `${crop.zoom * 100}%`,
+            height: `${crop.zoom * 100}%`,
+            left: `${(100 - crop.zoom * 100) * (crop.offsetX / 100)}%`,
+            top: `${(100 - crop.zoom * 100) * (crop.offsetY / 100)}%`,
           }}
         />
       </div>

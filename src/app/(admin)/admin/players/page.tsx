@@ -67,21 +67,28 @@ function PlayerAvatar({ player, size = 36 }: { player: Player; size?: number }) 
   const initials = `${player.firstName[0] ?? ""}${player.lastName[0] ?? ""}`.toUpperCase();
 
   if (player.photoUrl && !imgError) {
+    // Même technique que src/components/ui/PlayerAvatar.tsx : boîte de l'image
+    // agrandie au zoom (object-fit:cover recalculé à cette taille) plutôt qu'un
+    // transform:scale() post-crop, pour matcher exactement l'aperçu de
+    // PhotoPositionEditor et le rendu réel (pitch/marché/etc).
     return (
-      <img
-        src={player.photoUrl}
-        alt={`${player.firstName} ${player.lastName}`}
-        width={size}
-        height={size}
-        onError={() => setImgError(true)}
-        className="rounded-full object-cover"
-        style={{
-          width: size,
-          height: size,
-          objectPosition: `${player.photoOffsetX}% ${player.photoOffsetY}%`,
-          transform: `scale(${player.photoZoom})`,
-        }}
-      />
+      <div
+        className="relative shrink-0 overflow-hidden rounded-full"
+        style={{ width: size, height: size }}
+      >
+        <img
+          src={player.photoUrl}
+          alt={`${player.firstName} ${player.lastName}`}
+          onError={() => setImgError(true)}
+          className="absolute object-cover"
+          style={{
+            width: `${player.photoZoom * 100}%`,
+            height: `${player.photoZoom * 100}%`,
+            left: `${(100 - player.photoZoom * 100) * (player.photoOffsetX / 100)}%`,
+            top: `${(100 - player.photoZoom * 100) * (player.photoOffsetY / 100)}%`,
+          }}
+        />
+      </div>
     );
   }
 
