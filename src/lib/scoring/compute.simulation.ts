@@ -84,6 +84,8 @@ export async function computeSimulationGameweekScores(
       penaltiesDrawn: stat.penaltiesDrawn,
       twoMinDrawn: stat.twoMinDrawn,
       neutralizations: stat.neutralizations,
+      saves: stat.saves,
+      savePercentage: stat.savePercentage !== null ? Number(stat.savePercentage) : null,
       turnovers: stat.turnovers,
       twoMinTaken: stat.twoMinTaken,
       disqualified: stat.disqualified,

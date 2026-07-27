@@ -17,6 +17,8 @@ function player(id: string, overrides: Partial<StatLeaderPlayerInput> = {}): Sta
     penaltiesDrawn: null,
     twoMinDrawn: null,
     neutralizations: null,
+    saves: null,
+    savePercentage: null,
     turnovers: null,
     twoMinTaken: null,
     disqualified: null,
@@ -104,5 +106,17 @@ describe("computeStatLeaderBonuses", () => {
 
   it("aucune ligne → Map vide", () => {
     expect(computeStatLeaderBonuses([], CONFIG).size).toBe(0);
+  });
+
+  it("gardien leader sur les arrêts reçoit le bonus, joueurs de champ (saves null) exclus", () => {
+    const rows = [
+      player("gk-a", { saves: 12, savePercentage: 60 }),
+      player("gk-b", { saves: 7, savePercentage: 40 }),
+      player("field"),
+    ];
+    const bonuses = computeStatLeaderBonuses(rows, CONFIG);
+    expect(bonuses.get("gk-a")).toBe(4); // leader sur saves ET savePercentage
+    expect(bonuses.has("gk-b")).toBe(false);
+    expect(bonuses.has("field")).toBe(false);
   });
 });

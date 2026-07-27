@@ -16,6 +16,8 @@ export interface StatLeaderPlayerInput {
   penaltiesDrawn: number | null;
   twoMinDrawn: number | null;
   neutralizations: number | null;
+  saves: number | null;
+  savePercentage: number | null;
   turnovers: number | null;
   twoMinTaken: number | null;
   disqualified: number | null;

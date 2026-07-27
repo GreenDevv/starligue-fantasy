@@ -99,6 +99,60 @@ export async function publishContainer(
   return data.id;
 }
 
+// Carrousel (2-10 images) — flow en 3 étapes : un conteneur "item" par image (pas de
+// caption dessus), puis un conteneur parent média_type=CAROUSEL référençant tous les
+// enfants (caption ici), puis publishContainer comme pour une image seule.
+export async function createCarouselItemContainer(
+  imageUrl: string,
+  creds: InstagramCredentials
+): Promise<string> {
+  const url = new URL(`${GRAPH_API_BASE}/${creds.businessAccountId}/media`);
+  url.searchParams.set("image_url", imageUrl);
+  url.searchParams.set("is_carousel_item", "true");
+  url.searchParams.set("access_token", creds.accessToken);
+
+  const res = await fetch(url, { method: "POST" });
+  const data = await parseGraphResponse(res, MediaContainerSchema);
+  return data.id;
+}
+
+export async function createCarouselContainer(
+  childrenIds: string[],
+  caption: string,
+  creds: InstagramCredentials
+): Promise<string> {
+  const url = new URL(`${GRAPH_API_BASE}/${creds.businessAccountId}/media`);
+  url.searchParams.set("media_type", "CAROUSEL");
+  url.searchParams.set("children", childrenIds.join(","));
+  url.searchParams.set("caption", caption);
+  url.searchParams.set("access_token", creds.accessToken);
+
+  const res = await fetch(url, { method: "POST" });
+  const data = await parseGraphResponse(res, MediaContainerSchema);
+  return data.id;
+}
+
+export interface PostCarouselParams {
+  imageUrls: string[]; // 2-10 images, ordre = ordre des slides
+  caption: string;
+}
+
+// Enchaîne les 3 étapes du flow carrousel. Les créations d'enfants sont séquentielles
+// (pas Promise.all) : plus simple à débugger si une image échoue au milieu, et la
+// Graph API n'a pas de gain de perf notable à paralléliser ces appels.
+export async function postCarousel(
+  params: PostCarouselParams,
+  creds: InstagramCredentials
+): Promise<PostImageResult> {
+  const childrenIds: string[] = [];
+  for (const imageUrl of params.imageUrls) {
+    childrenIds.push(await createCarouselItemContainer(imageUrl, creds));
+  }
+  const creationId = await createCarouselContainer(childrenIds, params.caption, creds);
+  const mediaId = await publishContainer(creationId, creds);
+  return { mediaId, creationId };
+}
+
 export interface PostImageParams {
   imageUrl: string;
   caption: string;

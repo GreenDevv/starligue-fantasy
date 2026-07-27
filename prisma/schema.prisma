@@ -413,8 +413,26 @@ model Gameweek {
   valueHistory          PlayerValueHistory[]
   bonusUsages           FantasyBonusUsage[]
   simulationBonusUsages SimulationBonusUsage[]
+  socialPosts           SocialPost[]
 
   @@unique([seasonId, number])
+}
+
+// Traçabilité idempotente des publications automatiques sur Instagram (posts "leaders
+// de stats" après chaque journée notée, cf. ARCHITECTURE.md §6.7). dedupeKey (ex:
+// "stat-leaders:attack:{gameweekId}") garantit qu'un même post n'est jamais republié
+// même si le cron retente — Instagram ne permet pas de supprimer un média publié via
+// l'API, donc l'idempotence doit être vérifiée AVANT tout appel Graph API, pas après.
+model SocialPost {
+  id         String   @id @default(cuid())
+  dedupeKey  String   @unique
+  gameweekId String
+  gameweek   Gameweek @relation(fields: [gameweekId], references: [id])
+  mediaId    String
+  permalink  String?
+  postedAt   DateTime @default(now())
+
+  @@index([gameweekId])
 }
 
 model Match {

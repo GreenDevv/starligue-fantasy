@@ -553,6 +553,16 @@ POST   /api/cron/snapshot-lineups         → gèle les alignements (à chaque d
 POST   /api/cron/compute-scores           → calcule points des journées complètes
 POST   /api/cron/compute-prediction-odds  → crée les marchés de pronostic des matchs sans cotes (§14)
 POST   /api/cron/sync-news                → scrape lnh.fr + sites de clubs, alimente la page /starligue (§16)
+POST   /api/cron/post-stat-leaders        → publie les 3 carrousels Instagram "Leaders Starligue"
+                                             (attaque/gardiens/défense) des journées notées pas encore
+                                             postées (matin J+1, après compute-scores) — §17.
+                                             Déclenché par GitHub Actions (.github/workflows/
+                                             post-stat-leaders.yml), pas par un cron Railway comme
+                                             les 8 autres — une image Docker `curlimages/curl` sur
+                                             Railway s'est révélée peu fiable (ENTRYPOINT déjà = curl,
+                                             donne "curl curl ...", et un échec sans log exploitable
+                                             ensuite) ; GitHub Actions évite ce problème et donne des
+                                             logs de run consultables dans l'onglet Actions du repo.
 ```
 
 ### 6.8 Pronostics (auth requise) — voir §14
@@ -1128,3 +1138,69 @@ Deux niveaux (`src/lib/news/dedupe.ts`) :
   applicative (similarité de Jaccard sur les tokens du titre, même club ou l'un des
   deux transverse, écart de date ≤ 2 jours), pas encodable en contrainte SQL.
   Publication automatique, pas de file de modération admin.
+
+## 17. Publication Instagram (@starliguefantasy)
+
+Compte Instagram Professionnel relié à une Page Facebook, publié uniquement via la
+Graph API (pas d'API "grand public" pour poster) : `src/lib/instagram/client.ts`
+(fetch pur, credentials injectées en paramètre, `getInstagramCredentialsFromEnv()` lit
+`INSTAGRAM_ACCESS_TOKEN`/`INSTAGRAM_BUSINESS_ACCOUNT_ID`). Deux flows Content
+Publishing API, tous deux en 2-3 étapes création-de-conteneur(s) puis publication,
+jamais d'upload de fichier binaire direct (image déjà hébergée sur une URL HTTPS
+publique) :
+- **Image seule** : `createImageContainer` → `publishContainer` (`postImage`).
+  Utilisé par `POST /api/admin/instagram/post` (admin manuel, image déjà hébergée) et
+  par la campagne teaser lancée à la main (images `public/social/*.png`, générées en
+  local via un artifact HTML/CSS rendu par Playwright, jamais par ce code).
+- **Carrousel (2-10 images)** : un `createCarouselItemContainer` par image
+  (`is_carousel_item=true`, pas de caption dessus) puis `createCarouselContainer`
+  (`media_type=CAROUSEL&children=...`, caption ici) puis `publishContainer`
+  (`postCarousel`).
+- L'API ne permet PAS de supprimer un média déjà publié (`DELETE` → erreur de
+  permission quel que soit le token) : toute idempotence doit être vérifiée AVANT
+  l'appel Graph API, jamais après.
+
+### 17.1 Posts automatiques "Leaders Starligue" (après chaque journée notée)
+
+`POST /api/cron/post-stat-leaders` (§6.7) publie 3 carrousels par journée notée
+(`Gameweek.isScored`) de la saison active, dès qu'ils n'ont pas encore été postés :
+
+| Post | Thème | Stats (top 5, total + moyenne/match) |
+|---|---|---|
+| `attack` | Attaque | Buts (tirs), total buts, penaltys, dernière passe — 8 slides |
+| `goalkeepers` | Gardiens | Arrêts — 2 slides |
+| `defense` | Défense/hustle | Interceptions (`ballsRecovered`), contres, neutralisations — 6 slides |
+
+(Un carrousel Instagram est plafonné à 10 images, d'où le découpage en 3 posts plutôt
+qu'un seul de 16 slides.)
+
+- **Idempotence** : modèle `SocialPost` (`dedupeKey` unique, ex.
+  `stat-leaders:attack:{gameweekId}`), vérifié avant tout appel Graph API — un des 3
+  posts peut échouer sans affecter les 2 autres, et sera retenté seul au tick suivant.
+- **Génération d'image** : `GET /api/og/stat-leaders?statKey=&scope=&seasonId=&gameweekNumber=`
+  (`ImageResponse` de `next/og`, runtime Node.js — pas edge, car il interroge Prisma
+  via `getStatLeaders()`, `src/lib/stats/get-stat-leaders.ts`, la même logique de
+  classement que `GET /api/stats/leaders`). Rendu à la demande à chaque appel
+  Instagram (pas de fichier stocké). Design "hero" (décision explicite de
+  l'utilisateur) : le n°1 en grand format (photo pleine largeur ~620px, ou repli
+  initiales géantes sur dégradé teal si `Player.photoUrl` est absent — ~119/252
+  joueurs couverts, cf. §2 photos) avec un masque dégradé sombre plaqué sur le bas de
+  la photo (généré en JSX, pas un fichier PNG séparé) pour la lisibilité du nom/club/
+  valeur en overlay, puis une mini-liste compacte des rangs 2 à 5 en dessous. Polices
+  Barlow Condensed Bold + Inter embarquées en fichiers `.ttf` sous
+  `src/lib/social/fonts/` (satori ne lit pas les `next/font`, il lui faut un buffer
+  TTF/OTF — la version variable d'Inter fait planter le parseur de police de
+  `@vercel/og`, une version statique est nécessaire).
+- **Vérification avant publication réelle** : `?dryRun=true` (utilisable en session
+  admin, `verifyCronAuth` accepte aussi bien le secret cron que l'admin) renvoie les
+  URLs d'image + légendes en JSON sans rien publier ni marquer en base.
+- **Légendes** : `buildStatLeadersCaption()` (`src/lib/instagram/stat-leaders-caption.ts`),
+  ton identique aux posts manuels (emojis + hashtags `#StarligueFantasy #Handball
+  #FantasyHandball #DaikinStarLigue #LNH`).
+- Déclenché par un workflow GitHub Actions planifié (`.github/workflows/
+  post-stat-leaders.yml`, `cron: "0 7 * * *"`), pas par Railway comme les 8 autres
+  crons du projet — voir §6.7 pour la raison (échec silencieux d'une image Docker
+  `curlimages/curl` sur Railway). Secret `CRON_SECRET` dupliqué en secret de repo
+  GitHub (Settings → Secrets and variables → Actions), même valeur que côté Railway.
+  Le workflow expose aussi un déclenchement manuel (`workflow_dispatch`, avec option
+  `dryRun`) pour tester sans attendre l'horaire planifié.

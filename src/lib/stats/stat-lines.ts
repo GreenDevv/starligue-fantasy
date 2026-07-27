@@ -25,6 +25,8 @@ export const STAT_LINES: StatLine[] = [
   { key: "penaltiesDrawn", label: "Penaltys provoqués", category: "bonus" },
   { key: "twoMinDrawn", label: "2 min provoquées", category: "bonus" },
   { key: "neutralizations", label: "Neutralisations", category: "bonus" },
+  { key: "saves", label: "Arrêts", category: "bonus" },
+  { key: "savePercentage", label: "% arrêts", category: "bonus" },
   { key: "turnovers", label: "Pertes de balle", category: "malus" },
   { key: "twoMinTaken", label: "2 min", category: "malus" },
   { key: "disqualified", label: "Disqualifications", category: "malus" },
