@@ -110,7 +110,7 @@ function PitchClubBadge({
   const [errored, setErrored] = useState(false);
   const showLogo = Boolean(club.logoUrl) && !errored;
   const needsWhiteBg = WHITE_BG_CLUBS.has(club.shortName);
-  const sizePct = ((9.5 * 2) / COURT) * 100;
+  const sizePct = (9.5 / COURT) * 100;
 
   return (
     <div
