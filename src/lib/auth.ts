@@ -32,6 +32,12 @@ function withLocale(locale: string, path: string): string {
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
+  // Auth.js ne fait confiance au Host de la requête que sur Vercel (détection
+  // automatique) ou en dev — sur Railway (et tout hébergeur non-Vercel), sans ce
+  // flag chaque requête est vue comme provenant d'un hôte non fiable
+  // ("UntrustedHost"), ce qui perturbe la gestion interne des cookies de
+  // session/CSRF au point de produire une boucle de redirection sur `/`.
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
