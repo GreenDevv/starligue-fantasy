@@ -84,71 +84,6 @@ const RING_HEX: Record<Position, string> = {
 
 const POSITIONS: Position[] = ["GK", "LW", "LB", "CB", "RB", "RW", "PV"];
 
-// Avatar posé directement sur le terrain — image SVG native <image> + clip circulaire
-// au lieu d'un <foreignObject>, dont le rendu HTML-dans-SVG est peu fiable selon les
-// navigateurs (photo qui se retrouve décalée à côté du rond plutôt que dedans).
-function PitchSlotAvatar({
-  x,
-  y,
-  r,
-  firstName,
-  lastName,
-  photoUrl,
-  photoOffsetX = 50,
-  photoOffsetY = 50,
-  photoZoom = 1,
-  clipId,
-}: {
-  x: number;
-  y: number;
-  r: number;
-  firstName: string;
-  lastName: string;
-  photoUrl?: string | null;
-  photoOffsetX?: number;
-  photoOffsetY?: number;
-  photoZoom?: number;
-  clipId: string;
-}) {
-  const [errored, setErrored] = useState(false);
-  const showPhoto = Boolean(photoUrl) && !errored;
-
-  if (!showPhoto) {
-    return (
-      <text
-        x={x} y={y + r * 0.32}
-        textAnchor="middle" fill="#F1F5F9" fontSize={r * 0.85} fontWeight="700"
-        style={{ fontFamily: "var(--font-display), sans-serif" }}
-      >
-        {initials(firstName, lastName)}
-      </text>
-    );
-  }
-
-  // Même formule que object-position CSS (voir PlayerAvatar/PhotoPositionEditor,
-  // ce réglage doit rendre pareil partout) : l'image est dessinée plus grande que
-  // le cercle visible (diamètre × zoom) puis translatée selon le pourcentage.
-  const diameter = (r - 1) * 2;
-  const imgSize = diameter * photoZoom;
-  const imgX = x - (r - 1) + (diameter - imgSize) * (photoOffsetX / 100);
-  const imgY = y - (r - 1) + (diameter - imgSize) * (photoOffsetY / 100);
-
-  return (
-    <>
-      <clipPath id={clipId}>
-        <circle cx={x} cy={y} r={r - 1} />
-      </clipPath>
-      <image
-        href={photoUrl!}
-        x={imgX} y={imgY} width={imgSize} height={imgSize}
-        clipPath={`url(#${clipId})`}
-        preserveAspectRatio="xMidYMid slice"
-        onError={() => setErrored(true)}
-      />
-    </>
-  );
-}
-
 // Écusson de club en incrustation, coin bas-droit de l'avatar — même idée qu'un
 // maillot de jeu de sport plutôt qu'une ligne de texte "club" séparée : plus
 // compact (le nom garde toute la place) et immédiatement reconnaissable. Le
@@ -231,6 +166,45 @@ function PitchCaptainBadge({ x, y }: { x: number; y: number }) {
   );
 }
 
+// Photo d'un titulaire, posée en HTML par-dessus le SVG (pas dans un <image>+
+// clipPath SVG) — même technique que PlayerAvatar (boîte de l'image agrandie au
+// zoom, object-fit:cover recalculé à cette taille, décalée en position absolue),
+// vérifiée fiable sur le banc (HTML) contrairement au rendu SVG précédent qui ne
+// donnait pas un résultat identique à l'aperçu admin malgré une formule pourtant
+// équivalente sur le papier — sans navigateur pour comparer pixel à pixel, la
+// version qui marche déjà (HTML) l'emporte sur la version SVG qu'on ne peut pas
+// vérifier ici.
+function PitchStarterPhoto({
+  photoUrl,
+  photoOffsetX = 50,
+  photoOffsetY = 50,
+  photoZoom = 1,
+  alt,
+}: {
+  photoUrl: string;
+  photoOffsetX?: number;
+  photoOffsetY?: number;
+  photoZoom?: number;
+  alt: string;
+}) {
+  const [errored, setErrored] = useState(false);
+  if (errored) return null;
+  return (
+    <img
+      src={photoUrl}
+      alt={alt}
+      className="absolute object-cover"
+      style={{
+        width: `${photoZoom * 100}%`,
+        height: `${photoZoom * 100}%`,
+        left: `${(100 - photoZoom * 100) * (photoOffsetX / 100)}%`,
+        top: `${(100 - photoZoom * 100) * (photoOffsetY / 100)}%`,
+      }}
+      onError={() => setErrored(true)}
+    />
+  );
+}
+
 export function HandballPitch({
   starters,
   bench,
@@ -301,14 +275,13 @@ export function HandballPitch({
             fill="url(#goalNet)" stroke="#2DD4BF" strokeWidth="1.5" strokeOpacity="0.8"
           />
 
-          {/* Postes joueurs */}
+          {/* Postes joueurs — anneaux + textes restent en SVG (pas de photo ici,
+              pas concernés par le recadrage) ; la photo elle-même est posée en HTML
+              par-dessus (voir la boucle juste après ce <svg>). */}
           {POSITIONS.map((pos) => {
             const coords = SLOT_COORDS[pos];
             const player = starterByPos.get(pos);
             const lastName = player?.lastName ?? null;
-
-            // Sans onSwap (affichage lecture seule, ex. widget "Équipe type" du
-            // dashboard), le tap ouvre la fiche du joueur plutôt que de rester inerte.
             const clickable = player ? true : Boolean(onEmptySlotClick);
 
             return (
@@ -332,15 +305,15 @@ export function HandballPitch({
                       cx={coords.x} cy={coords.y} r={R}
                       fill="#171C24" stroke={RING_HEX[pos]} strokeWidth="1.75" strokeOpacity="0.95"
                     />
-                    <PitchSlotAvatar
-                      x={coords.x} y={coords.y} r={R}
-                      firstName={player.firstName} lastName={player.lastName}
-                      photoUrl={player.photoUrl}
-                      photoOffsetX={player.photoOffsetX}
-                      photoOffsetY={player.photoOffsetY}
-                      photoZoom={player.photoZoom}
-                      clipId={`pitch-clip-${player.playerId}`}
-                    />
+                    {!player.photoUrl && (
+                      <text
+                        x={coords.x} y={coords.y + R * 0.32}
+                        textAnchor="middle" fill="#F1F5F9" fontSize={R * 0.85} fontWeight="700"
+                        style={{ fontFamily: "var(--font-display), sans-serif" }}
+                      >
+                        {initials(player.firstName, player.lastName)}
+                      </text>
+                    )}
                     <PitchClubBadge x={coords.x} y={coords.y} club={player.club} />
                     <text
                       x={coords.x} y={coords.y + R + 8}
@@ -383,6 +356,41 @@ export function HandballPitch({
             );
           })}
         </svg>
+
+        {/* Photos des titulaires — superposition HTML alignée sur les mêmes
+            coordonnées que le SVG (converties en %), au-dessus des anneaux mais
+            en-dessous des badges/texte (déjà peints avant dans le SVG, donc sous
+            cette couche : les badges débordent très peu sur le cercle photo, cf.
+            leurs coordonnées ±9.5 pour un rayon photo de 11). */}
+        {POSITIONS.map((pos) => {
+          const player = starterByPos.get(pos);
+          if (!player?.photoUrl) return null;
+          const coords = SLOT_COORDS[pos];
+          const leftPct = (coords.x / COURT) * 100;
+          const topPct = ((coords.y - VIEW_TOP) / VIEW_HEIGHT) * 100;
+          const sizePct = (((R - 1) * 2) / COURT) * 100;
+          return (
+            <div
+              key={pos}
+              className="pointer-events-none absolute overflow-hidden rounded-full"
+              style={{
+                left: `${leftPct}%`,
+                top: `${topPct}%`,
+                width: `${sizePct}%`,
+                aspectRatio: "1 / 1",
+                transform: "translate(-50%, -50%)",
+              }}
+            >
+              <PitchStarterPhoto
+                photoUrl={player.photoUrl}
+                photoOffsetX={player.photoOffsetX}
+                photoOffsetY={player.photoOffsetY}
+                photoZoom={player.photoZoom}
+                alt={`${player.firstName} ${player.lastName}`}
+              />
+            </div>
+          );
+        })}
       </div>
 
       {/* Banc — horizontal sous le terrain (ARCHITECTURE.md §8.1), grille compacte
