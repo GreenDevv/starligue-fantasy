@@ -15,6 +15,9 @@ interface SquadEntry {
   lastName: string;
   position: Position;
   photoUrl?: string | null;
+  photoOffsetX?: number;
+  photoOffsetY?: number;
+  photoZoom?: number;
   club: { shortName: string; logoUrl?: string | null };
   role: "STARTER" | "BENCH";
 }
@@ -30,6 +33,9 @@ interface TeamResponse {
         lastName: string;
         position: Position;
         photoUrl?: string | null;
+        photoOffsetX?: number;
+        photoOffsetY?: number;
+        photoZoom?: number;
         club: { shortName: string; logoUrl?: string | null };
       };
     }>;
@@ -58,6 +64,9 @@ export function StartView({ mode }: { mode: SeasonMode }) {
             lastName: s.player.lastName,
             position: s.player.position,
             photoUrl: s.player.photoUrl,
+            photoOffsetX: s.player.photoOffsetX,
+            photoOffsetY: s.player.photoOffsetY,
+            photoZoom: s.player.photoZoom,
             club: s.player.club,
             role: s.role as "STARTER" | "BENCH",
           }));

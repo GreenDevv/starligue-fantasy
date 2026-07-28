@@ -16,6 +16,9 @@ interface SquadPlayerRow {
   position: Position;
   marketValue: number;
   photoUrl?: string | null;
+  photoOffsetX?: number;
+  photoOffsetY?: number;
+  photoZoom?: number;
   isActive: boolean;
   club: { shortName: string; logoUrl?: string | null };
 }
