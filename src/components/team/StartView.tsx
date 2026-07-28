@@ -167,7 +167,7 @@ export function StartView({ mode }: { mode: SeasonMode }) {
   const bench = squad.filter((p) => p.role === "BENCH");
 
   return (
-    <div className="flex flex-col gap-6 pb-28">
+    <div className="flex flex-col gap-6 pb-36">
       <div>
         {isSimulation && (
           <p className="text-xs font-semibold uppercase tracking-widest text-accent-secondary">Mode Simulation</p>
@@ -193,7 +193,10 @@ export function StartView({ mode }: { mode: SeasonMode }) {
         <CaptainPicker squad={squad} captainId={captainId} onSelect={setCaptainId} />
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-bg/95 px-4 py-4 backdrop-blur-sm">
+      {/* bottom décalé au-dessus de la MobileTabBar (fixed elle aussi, ~52px + zone
+          de sécurité iOS) sous sm: — sinon le bouton se retrouve sous la nav mobile,
+          inaccessible. sm:bottom-0 replaque au ras du bas quand la tab bar disparaît. */}
+      <div className="fixed inset-x-0 bottom-[calc(52px+env(safe-area-inset-bottom))] border-t border-border bg-bg/95 px-4 py-4 backdrop-blur-sm sm:bottom-0">
         <div className="mx-auto max-w-2xl">
           {error && <p className="mb-2 text-center text-sm text-points-neg">{error}</p>}
           <button

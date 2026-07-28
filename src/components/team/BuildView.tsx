@@ -265,7 +265,7 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
   ).length;
 
   return (
-    <div className="pb-28">
+    <div className="pb-36">
       {/* Header */}
       <div className="mb-4">
         {mode === "simulation" && (
@@ -429,8 +429,9 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
         </div>
       </div>
 
-      {/* Sticky validation footer */}
-      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-bg/95 px-4 py-4 backdrop-blur-sm">
+      {/* Sticky validation footer — bottom décalé au-dessus de la MobileTabBar sous
+          sm: (sinon le bouton se retrouve sous la nav mobile, inaccessible). */}
+      <div className="fixed inset-x-0 bottom-[calc(52px+env(safe-area-inset-bottom))] border-t border-border bg-bg/95 px-4 py-4 backdrop-blur-sm sm:bottom-0">
         <div className="mx-auto max-w-2xl">
           {error && (
             <p className="mb-2 text-center text-sm text-points-neg">{error}</p>
