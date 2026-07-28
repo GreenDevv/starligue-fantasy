@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import type { Position } from "@/lib/squad/validation";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { PositionBadge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 import type { SeasonMode } from "@/lib/team/active-team-context";
+import { resolveApiError } from "@/lib/api/error-messages";
 
 interface SquadPlayerRow {
   id: string;
@@ -49,15 +52,11 @@ interface TradeProposalRow {
   requestedPlayers: TradePlayer[];
 }
 
-const STATUS_LABEL: Record<TradeProposalRow["status"], string> = {
-  PENDING: "En attente",
-  ACCEPTED: "Accepté",
-  REJECTED: "Refusé",
-  CANCELLED: "Annulé",
-  EXPIRED: "Expiré",
-};
-
 export function TradesView({ mode }: { mode: SeasonMode }) {
+  const t = useTranslations("team");
+  const tLabels = useTranslations("labels");
+  const tCommon = useTranslations("common");
+  const tRoot = useTranslations();
   const router = useRouter();
   const leagueId = useSearchParams().get("league");
   const leagueSuffix = leagueId ? `?league=${leagueId}` : "";
@@ -139,18 +138,18 @@ export function TradesView({ mode }: { mode: SeasonMode }) {
           ...(leagueId ? { leagueId } : {}),
         }),
       });
-      const data = (await res.json()) as { data?: { id: string }; error?: { message: string } };
+      const data = (await res.json()) as { data?: { id: string }; error?: { code?: string; message: string } };
       if (data.data) {
-        setSuccess("Proposition envoyée.");
+        setSuccess(t("trades.proposalSent"));
         setOffered(new Set());
         setRequested(new Set());
         setBudgetAdjustment("0");
         loadAll();
       } else {
-        setError(data.error?.message ?? "Proposition impossible");
+        setError(resolveApiError(tRoot, "team", data.error?.code));
       }
     } catch {
-      setError("Erreur réseau");
+      setError(resolveApiError(tRoot, "team", "NETWORK"));
     }
     setSubmitting(false);
   }
@@ -163,7 +162,7 @@ export function TradesView({ mode }: { mode: SeasonMode }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <p className="text-text-muted">Chargement…</p>
+        <p className="text-text-muted">{tCommon("loading")}</p>
       </div>
     );
   }
@@ -173,23 +172,22 @@ export function TradesView({ mode }: { mode: SeasonMode }) {
       <div className="flex items-center justify-between">
         <div>
           {isSimulation && (
-            <p className="text-xs font-semibold uppercase tracking-widest text-accent-secondary">Mode Simulation</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-accent-secondary">{t("common.simulationMode")}</p>
           )}
-          <h1 className="text-2xl text-text">Trades</h1>
+          <h1 className="text-2xl text-text">{t("trades.title")}</h1>
         </div>
         <button onClick={() => router.push(leagueId ? `/leagues/${leagueId}` : "/leagues")} className="text-xs text-text-muted hover:text-text">
-          ← Mon équipe
+          ← {t("common.backToTeam")}
         </button>
       </div>
 
       <div className="rounded-lg border border-points-pos/40 bg-points-pos/10 px-4 py-3 text-sm text-points-pos">
-        Les trades sont autorisés toute la saison, même en dehors des fenêtres de transfert — un trade accepté
-        s&apos;exécute immédiatement.
+        {t("trades.infoBanner")}
       </div>
 
       {/* Proposer un trade */}
       <div className="flex flex-col gap-3">
-        <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">Proposer un trade</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">{t("trades.proposeTitle")}</p>
 
         <select
           value={opponentId}
@@ -203,7 +201,7 @@ export function TradesView({ mode }: { mode: SeasonMode }) {
             isSimulation ? "focus:border-accent-secondary focus:shadow-glow-amber" : "focus:border-accent focus:shadow-glow-accent"
           )}
         >
-          <option value="">Choisir un adversaire…</option>
+          <option value="">{t("trades.chooseOpponent")}</option>
           {opponents.map((o) => (
             <option key={o.teamId} value={o.teamId}>
               {o.teamName} ({o.userName})
@@ -214,9 +212,9 @@ export function TradesView({ mode }: { mode: SeasonMode }) {
         {opponentId && (
           <>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <SquadPicker title="Tu offres" players={mySquad} selected={offered} onToggle={(id) => toggle(offered, setOffered, id)} isSimulation={isSimulation} />
+              <SquadPicker title={t("trades.offerLabelYou")} players={mySquad} selected={offered} onToggle={(id) => toggle(offered, setOffered, id)} isSimulation={isSimulation} />
               <SquadPicker
-                title="Tu demandes"
+                title={t("trades.requestSectionTitle")}
                 players={opponentSquad}
                 selected={requested}
                 onToggle={(id) => toggle(requested, setRequested, id)}
@@ -226,7 +224,7 @@ export function TradesView({ mode }: { mode: SeasonMode }) {
             </div>
 
             <div className="flex items-center gap-2">
-              <label className="text-xs text-text-muted">Ajustement budget (tu donnes si positif)</label>
+              <label className="text-xs text-text-muted">{t("trades.budgetAdjustmentLabel")}</label>
               <input
                 type="number"
                 step={0.1}
@@ -251,7 +249,7 @@ export function TradesView({ mode }: { mode: SeasonMode }) {
                 isSimulation ? "bg-accent-secondary hover:bg-accent-secondary/90" : "bg-accent hover:bg-accent/90"
               )}
             >
-              {submitting ? "Envoi…" : "Proposer le trade"}
+              {submitting ? t("trades.sending") : t("trades.submitCta")}
             </button>
           </>
         )}
@@ -259,25 +257,27 @@ export function TradesView({ mode }: { mode: SeasonMode }) {
 
       {/* Mes propositions */}
       <div className="flex flex-col gap-2">
-        <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">Mes propositions</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">{t("trades.myProposals")}</p>
         {proposals.length === 0 ? (
-          <p className="text-sm text-text-muted">Aucune proposition pour le moment.</p>
+          <p className="text-sm text-text-muted">{t("trades.noProposals")}</p>
         ) : (
           proposals.map((p) => (
             <div key={p.id} className="pixel-corners flex flex-col gap-2 border border-border bg-surface px-4 py-3">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-text">
-                  {p.direction === "outgoing" ? `Vers ${p.receivingTeam.name}` : `De ${p.proposingTeam.name}`}
+                  {p.direction === "outgoing"
+                    ? t("trades.toTeam", { name: p.receivingTeam.name })
+                    : t("trades.fromTeam", { name: p.proposingTeam.name })}
                 </p>
                 <span className="pixel-corners-sm border border-border px-2 py-0.5 text-[10px] uppercase tracking-wide text-text-muted">
-                  {STATUS_LABEL[p.status]}
+                  {tLabels(`tradeStatus.${p.status}`)}
                 </span>
               </div>
               <p className="text-xs text-text-muted">
-                {p.direction === "outgoing" ? "Tu offres" : "Il t'offre"} :{" "}
+                {p.direction === "outgoing" ? t("trades.offerLabelYou") : t("trades.offerLabelThem")} :{" "}
                 {p.offeredPlayers.map((pl) => `${pl.firstName} ${pl.lastName}`).join(", ") || "—"}
                 {" · "}
-                {p.direction === "outgoing" ? "tu demandes" : "il te demande"} :{" "}
+                {p.direction === "outgoing" ? t("trades.requestLabelYou") : t("trades.requestLabelThem")} :{" "}
                 {p.requestedPlayers.map((pl) => `${pl.firstName} ${pl.lastName}`).join(", ") || "—"}
                 {p.budgetAdjustment !== 0 && ` · ${p.budgetAdjustment > 0 ? "+" : ""}${p.budgetAdjustment.toFixed(1)}M`}
               </p>
@@ -289,13 +289,13 @@ export function TradesView({ mode }: { mode: SeasonMode }) {
                         onClick={() => respond(p.id, "accept")}
                         className="pixel-corners-sm bg-points-pos/15 px-3 py-1 text-xs font-semibold text-points-pos transition-colors hover:bg-points-pos/25"
                       >
-                        Accepter
+                        {t("trades.accept")}
                       </button>
                       <button
                         onClick={() => respond(p.id, "reject")}
                         className="pixel-corners-sm border border-border px-3 py-1 text-xs text-text-muted transition-colors hover:text-text"
                       >
-                        Refuser
+                        {t("trades.reject")}
                       </button>
                     </>
                   ) : (
@@ -303,7 +303,7 @@ export function TradesView({ mode }: { mode: SeasonMode }) {
                       onClick={() => respond(p.id, "cancel")}
                       className="pixel-corners-sm border border-border px-3 py-1 text-xs text-text-muted transition-colors hover:text-text"
                     >
-                      Annuler
+                      {t("trades.cancel")}
                     </button>
                   )}
                 </div>
@@ -331,12 +331,13 @@ function SquadPicker({
   loading?: boolean;
   isSimulation?: boolean;
 }) {
+  const tCommon = useTranslations("common");
   return (
     <div>
       <p className="mb-1.5 text-xs text-text-muted">{title}</p>
       <div className="pixel-corners max-h-72 overflow-y-auto border border-border bg-surface">
         {loading ? (
-          <p className="py-6 text-center text-sm text-text-muted">Chargement…</p>
+          <p className="py-6 text-center text-sm text-text-muted">{tCommon("loading")}</p>
         ) : players.length === 0 ? (
           <p className="py-6 text-center text-sm text-text-muted">—</p>
         ) : (

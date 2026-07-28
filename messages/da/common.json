@@ -1,0 +1,17 @@
+{
+  "loading": "Indlæser…",
+  "save": "Gem",
+  "cancel": "Annuller",
+  "confirm": "Bekræft",
+  "close": "Luk",
+  "back": "Tilbage",
+  "edit": "Rediger",
+  "delete": "Slet",
+  "yes": "Ja",
+  "no": "Nej",
+  "cookieBanner": {
+    "text": "Dette site bruger kun tekniske cookies, som er nødvendige for dets funktion (login, indstillinger). Ingen sporings- eller reklamecookies.",
+    "learnMore": "Læs mere",
+    "dismiss": "Forstået"
+  }
+}

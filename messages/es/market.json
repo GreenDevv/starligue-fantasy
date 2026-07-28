@@ -1,0 +1,19 @@
+{
+  "title": "Mercado",
+  "playerCount": "{count, plural, one {# jugador} other {# jugadores}} · {seasonMode}",
+  "searchPlaceholder": "Busca un jugador o club…",
+  "allPositions": "Todos",
+  "sortByValue": "↓ Valor",
+  "sortByName": "↓ Nombre",
+  "noPlayersFound": "No se han encontrado jugadores",
+  "trend": {
+    "up": "Al alza",
+    "down": "A la baja"
+  },
+  "budget": {
+    "label": "Presupuesto",
+    "remaining": "{value}M restantes",
+    "over": "{value}M de exceso",
+    "spent": "Gastado: {value}M"
+  }
+}

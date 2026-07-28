@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import type { Position } from "@/lib/squad/validation";
 import { getStatLine } from "@/lib/stats/stat-lines";
 import { getComputedStatLine } from "@/lib/stats/computed-stat-lines";
@@ -27,12 +28,6 @@ interface LeaderApiRow {
 
 type StatScope = "gameweek" | "season" | "average";
 
-const SCOPE_LABEL: Record<StatScope, string> = {
-  gameweek: "Journée",
-  season: "Saison",
-  average: "Par match",
-};
-
 interface MyTeam {
   teamId: string;
   teamName: string;
@@ -43,20 +38,21 @@ interface MyTeam {
 // jointe de ligue) — pour repérer d'un coup d'œil "je possède déjà ce joueur",
 // sans se confondre avec l'anneau de poste de PlayerAvatar (axe différent).
 function OwnershipDots({ playerId, myTeams }: { playerId: string; myTeams: MyTeam[] }) {
+  const t = useTranslations("dashboard");
   const owningTeams = myTeams
-    .map((t, i) => ({ ...t, color: teamColor(i) }))
-    .filter((t) => t.playerIds.includes(playerId));
+    .map((team, i) => ({ ...team, color: teamColor(i) }))
+    .filter((team) => team.playerIds.includes(playerId));
   if (owningTeams.length === 0) return null;
   return (
     <span
       className="inline-flex shrink-0 items-center gap-0.5"
-      title={`Dans ${owningTeams.map((t) => t.teamName).join(", ")}`}
+      title={t("statLeaderCard.ownedByTeams", { teams: owningTeams.map((team) => team.teamName).join(", ") })}
     >
-      {owningTeams.map((t) => (
+      {owningTeams.map((team) => (
         <span
-          key={t.teamId}
+          key={team.teamId}
           className="h-1.5 w-1.5 rounded-full"
-          style={{ backgroundColor: t.color, boxShadow: `0 0 4px ${t.color}` }}
+          style={{ backgroundColor: team.color, boxShadow: `0 0 4px ${team.color}` }}
         />
       ))}
     </span>
@@ -76,6 +72,9 @@ export function StatLeaderCard({
   showRemove?: boolean;
   size?: WidgetSize;
 }) {
+  const t = useTranslations("dashboard");
+  const tLabels = useTranslations("labels");
+  const tCommon = useTranslations("common");
   const line = getStatLine(statKey) ?? getComputedStatLine(statKey);
   const compact = size === "mini";
   const showPhotos = !compact;
@@ -129,11 +128,11 @@ export function StatLeaderCard({
     <div className="pixel-corners border border-border bg-surface p-3">
       <div className="mb-2 flex flex-col gap-1.5">
         <div className="flex items-start justify-between gap-2">
-          <p className="line-clamp-2 min-h-[2.5rem] text-sm font-medium text-text">{line.label}</p>
+          <p className="line-clamp-2 min-h-[2.5rem] text-sm font-medium text-text">{tLabels(`statLine.${line.key}`)}</p>
           {showRemove && (
             <button
               onClick={onRemove}
-              aria-label={`Retirer ${line.label} du tableau de bord`}
+              aria-label={t("statLeaderCard.removeAriaLabel", { label: tLabels(`statLine.${line.key}`) })}
               className="shrink-0 px-1 text-text-muted transition-colors hover:text-points-neg"
             >
               ×
@@ -153,16 +152,16 @@ export function StatLeaderCard({
                 scope === s ? "bg-accent text-bg" : "text-text-muted hover:text-text"
               }`}
             >
-              {SCOPE_LABEL[s]}
+              {tLabels(`statScope.${s}`)}
             </button>
           ))}
         </div>
       </div>
 
       {loading ? (
-        <p className="py-4 text-center text-xs text-text-muted">Chargement…</p>
+        <p className="py-4 text-center text-xs text-text-muted">{tCommon("loading")}</p>
       ) : leaders.length === 0 ? (
-        <p className="py-4 text-center text-xs text-text-muted">Aucune donnée pour l'instant.</p>
+        <p className="py-4 text-center text-xs text-text-muted">{t("statLeaderCard.noData")}</p>
       ) : (
         <div className="flex flex-col gap-2">
           {top && (

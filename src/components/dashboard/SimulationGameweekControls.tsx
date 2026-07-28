@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
+import { resolveApiError } from "@/lib/api/error-messages";
 
 // Contrôle admin de la progression de la saison simulée (avance/recule TOUTES les
 // SimulationTeam à la fois) — au niveau du titre Dashboard, pas dans un widget en
@@ -14,6 +16,8 @@ export interface SimulationAdminControls {
 }
 
 export function SimulationGameweekControls({ controls }: { controls: SimulationAdminControls }) {
+  const t = useTranslations();
+  const tDashboard = useTranslations("dashboard");
   const router = useRouter();
   const [pending, setPending] = useState<"advance" | "revert" | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -25,9 +29,9 @@ export function SimulationGameweekControls({ controls }: { controls: SimulationA
       const path =
         direction === "advance" ? "/api/admin/simulation/advance-gameweek" : "/api/admin/simulation/revert-gameweek";
       const res = await fetch(path, { method: "POST" });
-      const json = (await res.json()) as { error?: { message: string } };
+      const json = (await res.json()) as { error?: { code?: string; message: string } };
       if (!res.ok) {
-        setError(json.error?.message ?? "Erreur");
+        setError(resolveApiError(t, "dashboard", json.error?.code));
         return;
       }
       router.refresh();
@@ -48,17 +52,20 @@ export function SimulationGameweekControls({ controls }: { controls: SimulationA
         disabled={atStart || pending !== null}
         className="pixel-corners-sm border border-border px-2 py-1 text-[10px] text-text-muted transition-colors hover:border-accent/50 hover:text-text disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {pending === "revert" ? "…" : "← Journée précédente"}
+        {pending === "revert" ? "…" : tDashboard("simulationControls.prevGameweek")}
       </button>
       <span className="shrink-0 text-[10px] uppercase tracking-widest text-text-muted">
-        Simu J{controls.gameweekNumber}/{controls.totalGameweeks}
+        {tDashboard("simulationControls.counter", {
+          current: controls.gameweekNumber,
+          total: controls.totalGameweeks,
+        })}
       </span>
       <button
         onClick={() => trigger("advance")}
         disabled={atEnd || pending !== null}
         className="pixel-corners-sm border border-border px-2 py-1 text-[10px] text-text-muted transition-colors hover:border-accent/50 hover:text-text disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {pending === "advance" ? "…" : "Journée suivante →"}
+        {pending === "advance" ? "…" : tDashboard("simulationControls.nextGameweek")}
       </button>
       {error && <p className="text-[10px] text-points-neg">{error}</p>}
     </div>

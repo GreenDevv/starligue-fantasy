@@ -1,0 +1,9 @@
+{
+  "common": {
+    "UNAUTHORIZED": "Login necessário",
+    "FORBIDDEN": "Ação não autorizada",
+    "NOT_FOUND": "Não encontrado",
+    "INVALID_INPUT": "Campos inválidos",
+    "generic": "Ocorreu um erro"
+  }
+}

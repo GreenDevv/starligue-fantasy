@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   DndContext,
@@ -69,6 +70,8 @@ export function DashboardView({
   clubStandings,
   simulationAdmin,
 }: DashboardViewProps) {
+  const t = useTranslations("dashboard");
+  const tLabels = useTranslations("labels");
   const [widgets, setWidgets] = useState<DashboardWidget[]>(DEFAULT_LAYOUT);
   const [showAddPanel, setShowAddPanel] = useState(false);
   const [showStatPicker, setShowStatPicker] = useState(false);
@@ -126,20 +129,20 @@ export function DashboardView({
   // le DeadlineBanner global (layout), pas dupliqué ici.
   const status: { text: string; cta: { label: string; href: string } | null; tone: "action" | "calm" } = !hasLeagues
     ? {
-        text: "Rejoins ou crée une ligue pour commencer l'aventure.",
-        cta: { label: "Rejoindre une ligue", href: "/leagues" },
+        text: t("dashboardView.status.noLeague"),
+        cta: { label: t("dashboardView.status.joinLeagueCta"), href: "/leagues" },
         tone: "action",
       }
     : setupLeagueId
       ? {
-          text: "Ton effectif n'est pas encore validé.",
-          cta: { label: "Construire mon effectif", href: `/team/build?league=${setupLeagueId}` },
+          text: t("dashboardView.status.squadNotValidated"),
+          cta: { label: t("dashboardView.status.buildSquadCta"), href: `/team/build?league=${setupLeagueId}` },
           tone: "action",
         }
       : {
           text: nextGameweekNumber
-            ? `Effectif prêt — rendez-vous en journée ${nextGameweekNumber}.`
-            : "Effectif prêt pour la saison.",
+            ? t("dashboardView.status.readyWithGameweek", { number: nextGameweekNumber })
+            : t("dashboardView.status.readyForSeason"),
           cta: null,
           tone: "calm",
         };
@@ -147,10 +150,10 @@ export function DashboardView({
   return (
     <div className="flex flex-col gap-4 pb-8">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl text-text">Dashboard</h1>
+        <h1 className="text-2xl text-text">{t("page.title")}</h1>
         <div className="flex items-center gap-3">
           <Link href="/" className="text-xs uppercase tracking-widest text-accent hover:underline">
-            Actus Starligue →
+            {t("dashboardView.newsLink")}
           </Link>
           {simulationAdmin && <SimulationGameweekControls controls={simulationAdmin} />}
         </div>
@@ -164,7 +167,10 @@ export function DashboardView({
         )}
       >
         <p className="text-sm text-text-muted">
-          <span className="text-text">{firstName ? `Salut ${firstName}` : "Bienvenue"}</span> — {status.text}
+          <span className="text-text">
+            {firstName ? t("dashboardView.status.greeting", { name: firstName }) : t("dashboardView.status.greetingGuest")}
+          </span>{" "}
+          — {status.text}
         </p>
         {status.cta && (
           <Link
@@ -198,7 +204,7 @@ export function DashboardView({
 
       {widgets.length === 0 && (
         <p className="py-8 text-center text-sm text-text-muted">
-          Tous les widgets ont été retirés — ajoutes-en depuis le panneau ci-dessous.
+          {t("dashboardView.allWidgetsRemoved")}
         </p>
       )}
 
@@ -212,7 +218,7 @@ export function DashboardView({
             transition={{ duration: 0.15 }}
             className="pixel-corners border border-accent/30 bg-surface p-4"
           >
-            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-text-muted">Ajouter un widget</p>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-text-muted">{t("dashboardView.addWidgetTitle")}</p>
 
             {missingSingletons.length > 0 && (
               <div className="mb-2 flex flex-wrap gap-1.5">
@@ -222,7 +228,7 @@ export function DashboardView({
                     onClick={() => addSingleton(s.type)}
                     className="pixel-corners-sm border border-border px-2.5 py-1.5 text-xs text-text-muted transition-colors hover:border-accent/50 hover:text-text"
                   >
-                    {s.label}
+                    {tLabels(`widgetType.${s.type}`)}
                   </button>
                 ))}
               </div>
@@ -232,7 +238,7 @@ export function DashboardView({
               onClick={() => setShowStatPicker((v) => !v)}
               className="pixel-corners-sm border border-dashed border-border px-2.5 py-1.5 text-xs text-text-muted transition-colors hover:border-accent/50 hover:text-text"
             >
-              {showStatPicker ? "Masquer les stats" : "+ Ajouter une stat"}
+              {showStatPicker ? t("dashboardView.hideStats") : t("dashboardView.addStat")}
             </button>
 
             <AnimatePresence>
@@ -251,7 +257,7 @@ export function DashboardView({
                         onClick={() => addStatWidget(line.key)}
                         className="pixel-corners-sm border border-border px-2.5 py-1.5 text-xs text-text-muted transition-colors hover:border-accent/50 hover:text-text"
                       >
-                        {line.label}
+                        {tLabels(`statLine.${line.key}`)}
                       </button>
                     ))}
                   </div>
@@ -261,7 +267,7 @@ export function DashboardView({
 
             {missingSingletons.length === 0 && !showStatPicker && (
               <p className="mt-2 text-xs text-text-muted">
-                Tous les widgets fixes sont déjà affichés — tu peux encore ajouter des stats.
+                {t("dashboardView.allFixedWidgetsVisible")}
               </p>
             )}
 
@@ -272,7 +278,7 @@ export function DashboardView({
               }}
               className="mt-3 text-xs text-text-muted transition-colors hover:text-text"
             >
-              Fermer
+              {t("dashboardView.close")}
             </button>
           </motion.div>
         ) : (
@@ -285,7 +291,7 @@ export function DashboardView({
             onClick={() => setShowAddPanel(true)}
             className="pixel-corners-sm border border-dashed border-border py-2.5 text-xs uppercase tracking-wide text-text-muted transition-colors hover:border-accent/50 hover:text-text"
           >
-            + Ajouter un widget
+            {t("dashboardView.addWidgetCta")}
           </motion.button>
         )}
       </AnimatePresence>

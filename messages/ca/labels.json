@@ -1,0 +1,95 @@
+{
+  "position": {
+    "GK": "Porter",
+    "LW": "Extrem esquerre",
+    "LB": "Lateral esquerre",
+    "CB": "Central",
+    "RB": "Lateral dret",
+    "RW": "Extrem dret",
+    "PV": "Pivot"
+  },
+  "positionShort": {
+    "GK": "POR",
+    "LW": "EE",
+    "LB": "LE",
+    "CB": "C",
+    "RB": "LD",
+    "RW": "ED",
+    "PV": "PIV"
+  },
+  "bonus": {
+    "TRIPLE_CAPTAIN": "Capità Triple",
+    "BENCH_BOOST": "Impuls de la Banqueta",
+    "INSURANCE": "Assegurança",
+    "STATISTICIAN": "Estadístic"
+  },
+  "newsCategory": {
+    "TRANSFER": "Traspàs",
+    "INJURY": "Lesió",
+    "TEAM_OF_WEEK": "Equip de la Setmana",
+    "PERFORMANCE": "Rendiment",
+    "GENERAL": "Notícia"
+  },
+  "predictionOutcome": {
+    "HOME": "Local",
+    "DRAW": "Empat",
+    "AWAY": "Visitant"
+  },
+  "venueFilter": {
+    "all": "Tots",
+    "home": "Local",
+    "away": "Visitant"
+  },
+  "kitZone": {
+    "jersey": "Samarreta",
+    "shorts": "Pantalons",
+    "socks": "Mitjons"
+  },
+  "jerseyCollar": {
+    "crew": "Rodó",
+    "v-neck": "Pic",
+    "polo": "Polo"
+  },
+  "statScope": {
+    "gameweek": "Jornada",
+    "season": "Temporada",
+    "average": "Per partit"
+  },
+  "tradeStatus": {
+    "PENDING": "Pendent",
+    "ACCEPTED": "Acceptat",
+    "REJECTED": "Rebutjat",
+    "CANCELLED": "Cancel·lat",
+    "EXPIRED": "Caducat"
+  },
+  "seasonMode": {
+    "live": "temporada 2026/27",
+    "simulation": "Simulació 2025/26"
+  },
+  "statLine": {
+    "goalsPlay": "Gols (tirs)",
+    "goalsPenalty": "Gols (penal)",
+    "goalsTotal": "Total gols",
+    "shotPercentage": "% tirs",
+    "assists": "Última passada",
+    "ballsRecovered": "Pilotes recuperades",
+    "opponentShotsBlocked": "Tirs rivals blocats",
+    "penaltiesDrawn": "Penals provocats",
+    "twoMinDrawn": "2 min provocats",
+    "neutralizations": "Neutralitzacions",
+    "saves": "Aturades",
+    "savePercentage": "% aturades",
+    "turnovers": "Pèrdues de pilota",
+    "twoMinTaken": "2 min",
+    "disqualified": "Desqualificacions",
+    "fantasyPoints": "Punts fantasy (titular)"
+  },
+  "widgetType": {
+    "leaderboard-global": "Classificació general",
+    "leaderboard-leagues": "Les meves lligues",
+    "last-results": "Últims resultats",
+    "upcoming-matches": "Pròxims partits",
+    "club-standings": "Classificació Starligue",
+    "best-xi": "Equip de la temporada"
+  }
+}

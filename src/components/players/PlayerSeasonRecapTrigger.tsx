@@ -3,8 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { InfoIcon } from "@/components/ui/icons";
 import type { PlayerSeasonRecap } from "@/lib/players/season-recap";
+
+// Saison affichée dans le popup de récap — pas encore branchée sur GameConfig
+// (limitation pré-existante, hors périmètre de cette traduction), on ne fait
+// que paramétrer les chaînes traduites avec cette valeur.
+const RECAP_SEASON_LABEL = "2025/2026";
 
 interface PlayerSeasonRecapTriggerProps {
   playerId: string;
@@ -22,6 +28,7 @@ type FetchState =
 // getBoundingClientRect de l'icône. Survol (desktop) ou tap (mobile), fetch
 // paresseux au premier hover/tap, mis en cache ensuite pour ce trigger.
 export function PlayerSeasonRecapTrigger({ playerId, isGoalkeeper }: PlayerSeasonRecapTriggerProps) {
+  const t = useTranslations("players");
   const triggerRef = useRef<HTMLSpanElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [open, setOpen] = useState(false);
@@ -67,7 +74,7 @@ export function PlayerSeasonRecapTrigger({ playerId, isGoalkeeper }: PlayerSeaso
       */}
       <span
         ref={triggerRef}
-        aria-label="Statistiques saison 2025/2026"
+        aria-label={t("recap.ariaLabel", { season: RECAP_SEASON_LABEL })}
         onMouseEnter={show}
         onMouseLeave={scheduleHide}
         onClick={(e) => {
@@ -94,28 +101,30 @@ export function PlayerSeasonRecapTrigger({ playerId, isGoalkeeper }: PlayerSeaso
                 className="pixel-corners-sm w-52 border border-border bg-surface p-2.5 shadow-lg"
               >
                 <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-widest text-text-muted">
-                  Saison 2025/2026
+                  {t("recap.title", { season: RECAP_SEASON_LABEL })}
                 </p>
                 {state.status !== "done" ? (
-                  <p className="py-1 text-xs text-text-muted">Chargement…</p>
+                  <p className="py-1 text-xs text-text-muted">{t("recap.loading")}</p>
                 ) : state.recap === null ? (
-                  <p className="py-1 text-xs text-text-muted">Pas de stats 2025/2026 disponibles.</p>
+                  <p className="py-1 text-xs text-text-muted">
+                    {t("recap.noStats", { season: RECAP_SEASON_LABEL })}
+                  </p>
                 ) : (
                   <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
-                    <RecapStat label="Matchs" value={state.recap.matchesPlayed} />
-                    <RecapStat label="Note LNH" value={state.recap.avgRating ?? "—"} />
+                    <RecapStat label={t("recap.matches")} value={state.recap.matchesPlayed} />
+                    <RecapStat label={t("recap.rating")} value={state.recap.avgRating ?? "—"} />
                     {isGoalkeeper ? (
                       <>
-                        <RecapStat label="Arrêts" value={state.recap.saves ?? "—"} />
+                        <RecapStat label={t("recap.saves")} value={state.recap.saves ?? "—"} />
                         <RecapStat
-                          label="% Arrêts"
+                          label={t("recap.savePercentage")}
                           value={state.recap.savePercentage !== null ? `${state.recap.savePercentage}%` : "—"}
                         />
                       </>
                     ) : (
                       <>
-                        <RecapStat label="Buts" value={state.recap.goalsTotal ?? "—"} />
-                        <RecapStat label="Passes déc." value={state.recap.assists ?? "—"} />
+                        <RecapStat label={t("recap.goals")} value={state.recap.goalsTotal ?? "—"} />
+                        <RecapStat label={t("recap.assists")} value={state.recap.assists ?? "—"} />
                       </>
                     )}
                   </div>

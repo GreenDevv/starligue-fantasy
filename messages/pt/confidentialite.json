@@ -1,0 +1,41 @@
+{
+  "backLink": "← Voltar ao início",
+  "title": "Privacidade e cookies",
+  "intro": "O Starligue Fantasy é um <strong>projeto pessoal</strong>, sem qualquer relação oficial com a LNH ou a Daikin StarLigue, desenvolvido e alojado a título não comercial. Esta página explica de forma simples que dados são recolhidos, porquê, e que cookies são utilizados.",
+  "sections": {
+    "data": {
+      "title": "Dados recolhidos",
+      "intro": "Ao criar uma conta, são registados:",
+      "items": {
+        "email": "o teu endereço de email (identificador de login, nunca partilhado)",
+        "password": "a tua palavra-passe, nunca guardada em texto simples (encriptada com bcrypt)",
+        "name": "o teu nome/alcunha exibido na aplicação",
+        "favoritePlayer": "o teu jogador preferido, caso escolhas indicar um (facultativo)"
+      },
+      "gameDataNote": "Ao jogares, também geras dados de jogo: plantéis, alinhamentos, ligas, pontos, histórico — necessários ao próprio funcionamento do jogo, nunca utilizados para outros fins."
+    },
+    "notDone": {
+      "title": "O que NÃO é feito",
+      "items": {
+        "analytics": "nenhuma ferramenta de análise de audiência (Google Analytics ou equivalente)",
+        "ads": "nenhum cookie ou pixel publicitário",
+        "resale": "nenhuma revenda nem partilha de dados com terceiros",
+        "profiling": "nenhuma definição de perfis"
+      }
+    },
+    "cookies": {
+      "title": "Cookies utilizados",
+      "intro": "Este site utiliza apenas cookies <strong>técnicos/funcionais</strong>, estritamente necessários ao seu funcionamento — não é exigido consentimento para este tipo de cookie, e nenhum outro cookie é colocado.",
+      "table": {
+        "headers": { "cookie": "Cookie", "role": "Função", "duration": "Duração" },
+        "session": { "role": "Mantém-te com sessão iniciada", "duration": "30 dias ou até terminares a sessão" },
+        "seasonMode": { "role": "Memoriza o modo de época em curso/simulação escolhido", "duration": "Persistente" },
+        "activeLeague": { "role": "Memoriza a tua liga ativa se tiveres várias", "duration": "Persistente" }
+      }
+    },
+    "rights": {
+      "title": "Os teus direitos",
+      "text": "Podes a qualquer momento solicitar o acesso, a correção ou a eliminação dos teus dados. Tratando-se de um projeto pessoal sem suporte dedicado, a forma mais simples continua a ser contactar diretamente a pessoa que to deu a conhecer."
+    }
+  }
+}

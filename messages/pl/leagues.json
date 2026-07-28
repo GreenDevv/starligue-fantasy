@@ -1,0 +1,57 @@
+{
+  "list": {
+    "title": "Moje ligi",
+    "count": "{count, plural, one {# liga} few {# ligi} many {# lig} other {# ligi}}",
+    "seasonBadge": {
+      "live": "26/27",
+      "simulation": "Symu 25/26"
+    },
+    "joinButton": "Dołącz",
+    "createButton": "+ Utwórz",
+    "createdTitle": "Liga utworzona!",
+    "createFormTitle": "Utwórz ligę",
+    "createNamePlaceholder": "Nazwa ligi…",
+    "creating": "Tworzenie…",
+    "createSubmit": "Utwórz →",
+    "joinFormTitle": "Dołącz z kodem",
+    "joinCodePlaceholder": "ABCD1234",
+    "joining": "Wyszukiwanie…",
+    "joinSubmit": "Dołącz →",
+    "emptyState": "Twoja drużyna jest powiązana z ligą — załóż swoją lub dołącz do ligi znajomego, aby zacząć.",
+    "memberCount": "{count, plural, one {# członek} few {# członków} many {# członków} other {# członka}}",
+    "ownerBadge": "admin",
+    "points": "{points} pkt"
+  },
+  "detail": {
+    "memberRatio": "{count}/{max} członków",
+    "buildSquadTitle": "Ułóż swój skład",
+    "buildSquadDescription": "Nie masz jeszcze skompletowanego składu 14 zawodników dla tej ligi.",
+    "buildSquadCta": "Stwórz mój skład →",
+    "leagueLeaderboardTitle": "Klasyfikacja ligi",
+    "globalLeaderboardTitle": "Klasyfikacja generalna",
+    "globalLeaderboardSubtitle": "Wszystkie ligi razem"
+  },
+  "inviteCodeLabel": "Kod zaproszenia",
+  "actions": {
+    "copied": "Skopiowano ✓",
+    "copyInvite": "{code} — kopiuj",
+    "leaveLeague": "Opuść ligę",
+    "deleteConfirm": "Usuń na zawsze",
+    "deleteLeague": "Usuń ligę"
+  },
+  "chat": {
+    "title": "Czat ligi",
+    "badge": "Tylko przytyki",
+    "emptyState": "Nikt jeszcze nie rzucił pierwszej złośliwości. Twoja kolej.",
+    "you": "Ty",
+    "inputPlaceholder": "Wbij szpilkę przeciwnikom…",
+    "send": "Wyślij"
+  },
+  "errors": {
+    "NO_ACTIVE_SEASON": "Brak aktywnego sezonu w tej chwili",
+    "WRONG_SEASON_MODE": "Ta liga należy do innego sezonu — przełącz tryb sezonu, aby do niej dołączyć.",
+    "LEAGUE_FULL": "Liga jest pełna",
+    "ALREADY_MEMBER": "Jesteś już członkiem tej ligi",
+    "OWNER_CANNOT_LEAVE": "Założyciel nie może opuścić własnej ligi. Usuń ją lub przekaż innej osobie."
+  }
+}

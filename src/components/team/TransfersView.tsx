@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import type { Position } from "@/lib/squad/validation";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
@@ -9,6 +11,7 @@ import { PositionBadge } from "@/components/ui/Badge";
 import { Skeleton, SkeletonRow } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 import type { SeasonMode } from "@/lib/team/active-team-context";
+import { resolveApiError } from "@/lib/api/error-messages";
 
 interface MarketPlayer {
   id: string;
@@ -34,6 +37,8 @@ interface TeamResponse {
 }
 
 export function TransfersView({ mode }: { mode: SeasonMode }) {
+  const t = useTranslations("team");
+  const tRoot = useTranslations();
   const router = useRouter();
   const leagueId = useSearchParams().get("league");
   const leagueSuffix = leagueId ? `?league=${leagueId}` : "";
@@ -97,17 +102,17 @@ export function TransfersView({ mode }: { mode: SeasonMode }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sellPlayerId: sellPlayer.id, buyPlayerId: buyPlayer.id, ...(leagueId ? { leagueId } : {}) }),
       });
-      const data = (await res.json()) as { data?: { success: boolean }; error?: { message: string } };
+      const data = (await res.json()) as { data?: { success: boolean }; error?: { code?: string; message: string } };
       if (data.data?.success) {
-        setSuccess(`${buyPlayer.firstName} ${buyPlayer.lastName} rejoint ton effectif.`);
+        setSuccess(t("transfers.transferSuccess", { name: `${buyPlayer.firstName} ${buyPlayer.lastName}` }));
         setSellPlayerId(null);
         setSearch("");
         load();
       } else {
-        setError(data.error?.message ?? "Transfert impossible");
+        setError(resolveApiError(tRoot, "team", data.error?.code));
       }
     } catch {
-      setError("Erreur réseau");
+      setError(resolveApiError(tRoot, "team", "NETWORK"));
     }
     setSubmitting(false);
   }
@@ -130,12 +135,12 @@ export function TransfersView({ mode }: { mode: SeasonMode }) {
       <div className="flex items-center justify-between">
         <div>
           {isSimulation && (
-            <p className="text-xs font-semibold uppercase tracking-widest text-accent-secondary">Mode Simulation</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-accent-secondary">{t("common.simulationMode")}</p>
           )}
-          <h1 className="text-2xl text-text">Transferts</h1>
+          <h1 className="text-2xl text-text">{t("transfers.title")}</h1>
         </div>
         <button onClick={() => router.push(leagueId ? `/leagues/${leagueId}` : "/leagues")} className="text-xs text-text-muted transition-colors hover:text-text">
-          ← Mon équipe
+          ← {t("common.backToTeam")}
         </button>
       </div>
 
@@ -148,19 +153,19 @@ export function TransfersView({ mode }: { mode: SeasonMode }) {
         }`}
       >
         {windowOpen ? (
-          "Fenêtre de transfert ouverte — vends et achète librement."
+          t("transfers.windowOpen")
         ) : (
           <>
-            Pas de fenêtre de transfert ouverte en ce moment.{" "}
+            {t("transfers.windowClosed")}{" "}
             {jokersRemaining > 0
-              ? `Joker médical disponible (${jokersRemaining} restant${jokersRemaining > 1 ? "s" : ""}) pour un joueur blessé.`
-              : "Aucun joker médical restant."}
+              ? t("transfers.jokerAvailable", { count: jokersRemaining })
+              : t("transfers.noJokersLeft")}
           </>
         )}
       </div>
 
       <p className="text-sm text-text-muted">
-        Budget restant : <span className="font-arcade text-lg text-accent-secondary">{budget.toFixed(1)}M</span>
+        {t("transfers.remainingBudgetLabel")} <span className="font-arcade text-lg text-accent-secondary">{budget.toFixed(1)}M</span>
       </p>
 
       {error && <p className="text-sm text-points-neg">{error}</p>}
@@ -169,7 +174,7 @@ export function TransfersView({ mode }: { mode: SeasonMode }) {
       {/* Effectif — choix du joueur à vendre */}
       <div>
         <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">
-          Ton effectif · sélectionne un joueur à vendre
+          {t("transfers.squadHint")}
         </p>
         <div className="pixel-corners overflow-hidden border border-border bg-surface">
           {squad.map((p) => {
@@ -194,7 +199,7 @@ export function TransfersView({ mode }: { mode: SeasonMode }) {
                     {p.firstName} {p.lastName}
                     {injured && (
                       <span className="pixel-corners-sm bg-points-neg/15 px-1.5 py-0.5 text-[9px] font-semibold text-points-neg">
-                        BLESSÉ
+                        {t("transfers.injuredBadge")}
                       </span>
                     )}
                   </p>
@@ -218,15 +223,15 @@ export function TransfersView({ mode }: { mode: SeasonMode }) {
         <div>
           <div className="mb-2 flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">
-              Remplaçant pour {sellPlayer.firstName} {sellPlayer.lastName}
+              {t("transfers.replacementFor", { name: `${sellPlayer.firstName} ${sellPlayer.lastName}` })}
             </p>
             {!canTransferNow && (
-              <span className="text-xs text-points-neg">Transfert indisponible actuellement</span>
+              <span className="text-xs text-points-neg">{t("transfers.transferUnavailable")}</span>
             )}
           </div>
           <input
             type="text"
-            placeholder="Chercher un joueur ou club…"
+            placeholder={t("transfers.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={cn(
@@ -236,7 +241,7 @@ export function TransfersView({ mode }: { mode: SeasonMode }) {
           />
           <div className="pixel-corners overflow-hidden border border-border bg-surface">
             {buyCandidates.length === 0 ? (
-              <p className="py-6 text-center text-sm text-text-muted">Aucun joueur trouvé</p>
+              <p className="py-6 text-center text-sm text-text-muted">{t("transfers.noPlayersFound")}</p>
             ) : (
               buyCandidates.slice(0, 40).map((p) => {
                 const newBudget = budget + sellPlayer.marketValue - p.marketValue;

@@ -1,0 +1,41 @@
+{
+  "vs": "vs",
+  "list": {
+    "title": "Spielplan",
+    "noActiveSeason": "Keine aktive Saison.",
+    "gameweekShort": "ST{number}",
+    "gameweek": "Spieltag {number}",
+    "notFound": "Spieltag nicht gefunden.",
+    "empty": "Kein Spiel an diesem Spieltag.",
+    "live": "Live",
+    "deadline": "Deadline: {date}"
+  },
+  "detail": {
+    "summary": "Spieltag {number} · {date} · {season}",
+    "statsTitle": "Spielstatistik",
+    "noStats": "Keine Statistik für dieses Team verfügbar.",
+    "goalkeeper": "Torwart",
+    "player": "Spieler",
+    "saves": "Paraden",
+    "savePercentage": "% Paraden",
+    "rating": "Bewertung"
+  },
+  "panel": {
+    "recentResults": "Letzte Ergebnisse",
+    "noResults": "Kein Ergebnis für diesen Filter.",
+    "upcoming": "Nächste Spiele",
+    "noUpcoming": "Kein bevorstehendes Spiel für diesen Filter."
+  },
+  "charts": {
+    "goalsFor": "Erzielte Tore",
+    "goalsAgainst": "Gegentore",
+    "emptyDefault": "Bisher keine Statistik verfügbar.",
+    "selectAtLeastOne": "Wähle mindestens eine anzuzeigende Statistik aus.",
+    "thisPlayer": "Dieser Spieler",
+    "gameweekTooltip": "Spieltag {number}",
+    "gameweekAxis": "ST{number}",
+    "noValuation": "Noch keine Bewertung.",
+    "initialValue": "Anfangswert: {value} Mio. — noch keine Wertentwicklung erfasst.",
+    "preseason": "Vorsaison"
+  }
+}

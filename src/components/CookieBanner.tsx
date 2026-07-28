@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 const DISMISSED_KEY = "cookieBannerDismissed";
 
@@ -10,6 +11,7 @@ const DISMISSED_KEY = "cookieBannerDismissed";
 // aucun consentement n'est requis pour ce type de cookie (recommandation CNIL) —
 // voir /confidentialite pour le détail. Juste une notice dismissible une fois.
 export function CookieBanner() {
+  const t = useTranslations("common");
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -28,17 +30,16 @@ export function CookieBanner() {
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface/95 px-4 py-3 backdrop-blur-sm sm:bottom-4 sm:left-4 sm:right-auto sm:max-w-sm sm:rounded-lg sm:border">
       <p className="text-xs text-text-muted">
-        Ce site utilise uniquement des cookies techniques nécessaires à son fonctionnement (connexion,
-        préférences). Aucun cookie de suivi ni de publicité.{" "}
+        {t("cookieBanner.text")}{" "}
         <Link href="/confidentialite" className="text-accent hover:underline">
-          En savoir plus
+          {t("cookieBanner.learnMore")}
         </Link>
       </p>
       <button
         onClick={dismiss}
         className="mt-2 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-bg transition-opacity hover:opacity-90"
       >
-        Compris
+        {t("cookieBanner.dismiss")}
       </button>
     </div>
   );

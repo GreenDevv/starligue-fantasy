@@ -1,0 +1,14 @@
+{
+  "title": "Mein Konto",
+  "emailLabel": "E-Mail",
+  "nameLabel": "Benutzername",
+  "favoritePlayerLabel": "Lieblingsspieler",
+  "optional": "(optional)",
+  "favoritePlayerLocked": "Endgültig, nach der Angabe nicht mehr änderbar.",
+  "savedMessage": "Gespeichert! Der oben angezeigte Benutzername wird bei der nächsten Anmeldung aktualisiert.",
+  "saving": "Wird gespeichert…",
+  "errors": {
+    "FAVORITE_PLAYER_LOCKED": "Der Lieblingsspieler ist nach der Angabe endgültig",
+    "INVALID_PLAYER": "Lieblingsspieler nicht gefunden"
+  }
+}

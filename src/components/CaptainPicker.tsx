@@ -1,9 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { Position } from "@/lib/squad/validation";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
-import { POSITION_SHORT } from "@/components/ui/positionTheme";
 
 export interface CaptainPickerPlayer {
   playerId: string;
@@ -25,6 +25,7 @@ interface CaptainPickerProps {
 // pour désigner. Composant partagé jeu en direct / simulation (ARCHITECTURE.md §8.1
 // palette + composants).
 export function CaptainPicker({ squad, captainId, onSelect, disabled = false }: CaptainPickerProps) {
+  const t = useTranslations("labels");
   return (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
       {squad.map((p) => {
@@ -50,7 +51,7 @@ export function CaptainPicker({ squad, captainId, onSelect, disabled = false }: 
               </p>
               <p className="flex items-center gap-1 text-[10px] leading-tight text-text-muted">
                 <ClubLogo club={p.club} size="xs" className="h-2.5 w-2.5" />
-                {POSITION_SHORT[p.position]} · {p.club.shortName}
+                {t(`positionShort.${p.position}`)} · {p.club.shortName}
               </p>
             </div>
             <span

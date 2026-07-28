@@ -1,24 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useTranslations, useFormatter } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import type { ClubPageMatch } from "@/lib/clubs/club-page-data";
 
 type VenueFilter = "all" | "home" | "away";
 
-const VENUE_LABEL: Record<VenueFilter, string> = {
-  all: "Tous",
-  home: "Domicile",
-  away: "Extérieur",
-};
-
-function formatDate(date: Date | string): string {
-  const d = typeof date === "string" ? new Date(date) : date;
-  return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" });
-}
-
 function MatchRow({ clubId, match, showScore }: { clubId: string; match: ClubPageMatch; showScore: boolean }) {
+  const tLabels = useTranslations("labels");
+  const format = useFormatter();
+  const formatDate = (date: Date | string) => {
+    const d = typeof date === "string" ? new Date(date) : date;
+    return format.dateTime(d, { day: "2-digit", month: "short" });
+  };
+
   const decided = match.ownScore !== null && match.opponentScore !== null;
   const outcome =
     decided && showScore
@@ -40,7 +37,7 @@ function MatchRow({ clubId, match, showScore }: { clubId: string; match: ClubPag
         <div className="flex min-w-0 flex-col">
           <span className="truncate text-sm text-text">{match.opponent.name}</span>
           <span className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-text-muted">
-            {match.isHome ? "Domicile" : "Extérieur"} · {formatDate(match.kickoffAt)}
+            {match.isHome ? tLabels("venueFilter.home") : tLabels("venueFilter.away")} · {formatDate(match.kickoffAt)}
           </span>
         </div>
       </div>
@@ -60,6 +57,8 @@ function MatchRow({ clubId, match, showScore }: { clubId: string; match: ClubPag
 }
 
 export function ClubMatchesPanel({ clubId, results, upcoming }: { clubId: string; results: ClubPageMatch[]; upcoming: ClubPageMatch[] }) {
+  const t = useTranslations("matches");
+  const tLabels = useTranslations("labels");
   const [venue, setVenue] = useState<VenueFilter>("all");
 
   const matchesFilter = (m: ClubPageMatch) => venue === "all" || (venue === "home" ? m.isHome : !m.isHome);
@@ -78,16 +77,16 @@ export function ClubMatchesPanel({ clubId, results, upcoming }: { clubId: string
               venue === v ? "bg-accent text-bg shadow-glow-accent" : "text-text-muted hover:text-text"
             }`}
           >
-            {VENUE_LABEL[v]}
+            {tLabels(`venueFilter.${v}`)}
           </button>
         ))}
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">Derniers résultats</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">{t("panel.recentResults")}</p>
         <div className="overflow-hidden pixel-corners border border-border bg-surface">
           {filteredResults.length === 0 ? (
-            <p className="px-3 py-6 text-center text-xs text-text-muted">Aucun résultat pour ce filtre.</p>
+            <p className="px-3 py-6 text-center text-xs text-text-muted">{t("panel.noResults")}</p>
           ) : (
             <div className="divide-y divide-border">
               {filteredResults.map((m) => (
@@ -99,10 +98,10 @@ export function ClubMatchesPanel({ clubId, results, upcoming }: { clubId: string
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">Prochains matchs</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">{t("panel.upcoming")}</p>
         <div className="overflow-hidden pixel-corners border border-border bg-surface">
           {filteredUpcoming.length === 0 ? (
-            <p className="px-3 py-6 text-center text-xs text-text-muted">Aucun match à venir pour ce filtre.</p>
+            <p className="px-3 py-6 text-center text-xs text-text-muted">{t("panel.noUpcoming")}</p>
           ) : (
             <div className="divide-y divide-border">
               {filteredUpcoming.map((m) => (

@@ -1,0 +1,198 @@
+{
+  "common": {
+    "backToTeam": "My team",
+    "backToHistory": "History",
+    "simulationMode": "Simulation Mode",
+    "simulationModeSeason": "Simulation Mode · 2025/26",
+    "transfers": "Transfers",
+    "trades": "Trades",
+    "starters": "Starters",
+    "bench": "Bench",
+    "validating": "Validating…",
+    "matchday": "Matchday {number}"
+  },
+  "errors": {
+    "NO_ACTIVE_LEAGUE": "No active league",
+    "SQUAD_NOT_VALIDATED": "Squad not validated",
+    "DEADLINE_PASSED": "This matchday's deadline has passed",
+    "LINEUP_INVALID": "Invalid lineup",
+    "BONUS_ALREADY_USED": "This bonus has already been used this season",
+    "BONUS_QUOTA_REACHED": "Bonus quota reached for this season",
+    "TRANSFER_WINDOW_CLOSED": "No transfer window is currently open",
+    "CONVERSION_INVALID": "Invalid conversion",
+    "SEASON_STARTED": "Squad locked for the season — use Transfers or Trades to change it",
+    "PLAYERS_NOT_FOUND": "Some players could not be found",
+    "SQUAD_INVALID": "Invalid squad",
+    "PLAYER_NOT_FOUND": "Player not found",
+    "TRANSFER_INVALID": "Invalid transfer",
+    "PLAYER_NOT_IN_SQUAD": "This player isn't in your squad",
+    "CAPTAIN_LOCKED": "The captain can only be changed during a transfer window",
+    "NOT_APPLICABLE": "Jersey customization isn't available in Simulation mode",
+    "SELF_TRADE": "You can't propose a trade to your own team",
+    "TEAM_NOT_IN_LEAGUE": "Receiving team not found in this league",
+    "TRADE_INVALID": "This trade isn't valid",
+    "TRADE_NOT_PENDING": "This proposal is no longer pending",
+    "NETWORK": "Network error"
+  },
+  "history": {
+    "title": "History",
+    "teamSummary": "{name} · {points} pts",
+    "teamSummarySeason": "{name} · {points} season pts",
+    "emptyLive": "No matchday snapshotted yet.",
+    "emptySim": "No matchday advanced yet.",
+    "emptyHintLive": "Snapshots are created automatically before each deadline.",
+    "emptyHintSim": "Once an admin advances the simulation, matchdays will appear here.",
+    "pending": "Pending",
+    "ptsArrow": "pts →"
+  },
+  "gameweekDetail": {
+    "statusSimScored": "Matchday scored",
+    "statusSimPending": "Not scored yet",
+    "statusLiveScored": "Matchday scored",
+    "statusLivePending": "Awaiting scores",
+    "bonusActive": "Active bonus · {bonus}"
+  },
+  "identity": {
+    "title": "Your team",
+    "subtitle": "Pick a name and customize your jersey — visible everywhere your team appears."
+  },
+  "build": {
+    "titleCreate": "Create my squad",
+    "titleEdit": "Edit my squad",
+    "loadingPlayers": "Loading players…",
+    "lockedTitle": "Squad locked for the season",
+    "lockedBody": "The season has started: the squad can no longer be replaced in bulk. Use Transfers or Trades to evolve it.",
+    "progress": "{completed}/7 positions filled · {picked}/14 players",
+    "squadHint": "Your squad · tap an empty slot to pick, tap a player to remove them",
+    "searchPlaceholder": "Search for a {position}…",
+    "slotsFull": "Both slots are filled",
+    "noPlayersAvailable": "No players available",
+    "tooManyFromClub": "Too many players from {club} ({count}/{max} max)",
+    "unknownClub": "a club",
+    "missingPlayers": "{count, plural, one {You're missing # player} other {You're missing # players}}",
+    "budgetExceeded": "Budget exceeded by {amount}M",
+    "validateCta": "Validate my squad →",
+    "updateCta": "Update squad"
+  },
+  "start": {
+    "chooseCaptainFirst": "Pick a captain before validating",
+    "title": "Set your starting lineup",
+    "subtitle": "Choose your 7 starters and your captain (×2 points). The captain can only be changed during a transfer window.",
+    "startersHint": "Starters · tap a player to swap with their bench partner",
+    "captainHint": "Captain · ×2 points if they're a starter on matchday",
+    "submitCta": "Let's go →"
+  },
+  "trades": {
+    "title": "Trades",
+    "infoBanner": "Trades are allowed all season long, even outside transfer windows — an accepted trade takes effect immediately.",
+    "proposeTitle": "Propose a trade",
+    "chooseOpponent": "Choose an opponent…",
+    "offerLabelYou": "You offer",
+    "offerLabelThem": "They offer",
+    "requestSectionTitle": "You request",
+    "requestLabelYou": "you request",
+    "requestLabelThem": "they request",
+    "budgetAdjustmentLabel": "Budget adjustment (you give if positive)",
+    "proposalSent": "Proposal sent.",
+    "submitCta": "Propose the trade",
+    "sending": "Sending…",
+    "myProposals": "My proposals",
+    "noProposals": "No proposals yet.",
+    "toTeam": "To {name}",
+    "fromTeam": "From {name}",
+    "accept": "Accept",
+    "reject": "Reject",
+    "cancel": "Cancel"
+  },
+  "transfers": {
+    "title": "Transfers",
+    "windowOpen": "Transfer window open — buy and sell freely.",
+    "windowClosed": "No transfer window is open right now.",
+    "jokerAvailable": "{count, plural, one {Medical joker available (# left) for an injured player.} other {Medical joker available (# left) for an injured player.}}",
+    "noJokersLeft": "No medical jokers left.",
+    "remainingBudgetLabel": "Remaining budget:",
+    "squadHint": "Your squad · select a player to sell",
+    "injuredBadge": "INJURED",
+    "replacementFor": "Replacement for {name}",
+    "transferUnavailable": "Transfer currently unavailable",
+    "searchPlaceholder": "Search for a player or club…",
+    "noPlayersFound": "No players found",
+    "transferSuccess": "{name} has joined your squad."
+  },
+  "view": {
+    "editSquad": "Edit squad",
+    "customizeJersey": "Customize jersey",
+    "ptsSeasonLabel": "season pts",
+    "captainLabel": "Captain · ×2 pts",
+    "noCaptain": "None",
+    "changeCaptain": "Change",
+    "locked": "Locked",
+    "lockedTitle": "Only editable during a transfer window",
+    "seasonBonusTitle": "Season bonuses",
+    "bonusUsedCount": "{used}/{quota} used",
+    "convertTitle": "Convert points into budget",
+    "budgetLabel": "Budget:",
+    "convertRate": "1 pt = {rate}M · convertible balance: {points, plural, one {# pt} other {# pts}}",
+    "convertPlaceholder": "Points to convert",
+    "convertAll": "All",
+    "convertCta": "Convert",
+    "convertPreview": "→ +{amount}M in budget",
+    "convertClosedHint": "Converting points into budget is only possible during a transfer window.",
+    "budgetGained": "+{amount}M in budget",
+    "lastGameweekLabel": "Last matchday",
+    "viewDetail": "pts · see details →",
+    "viewFullHistory": "See full history",
+    "lineupSaved": "Lineup saved ✓",
+    "saving": "Saving…",
+    "lineupSavedButton": "Lineup saved",
+    "saveLineupCta": "Save lineup"
+  },
+  "jersey": {
+    "loading3d": "Loading 3D preview…",
+    "teamNameLabel": "Team name",
+    "teamNamePlaceholder": "Tish's All-Stars",
+    "dragToRotate": "Drag to rotate",
+    "patternLabel": "Pattern",
+    "collarSleeveColor": "Collar / sleeve color",
+    "collarLabel": "Collar",
+    "contrastSleeves": "Contrast sleeves",
+    "numberLabel": "Number",
+    "nameFlockLabel": "Name print",
+    "nameFlockPlaceholder": "TISH",
+    "chooseNameError": "Pick a team name",
+    "saving": "Saving…",
+    "submitCta": "Confirm →",
+    "customColor": "Custom color",
+    "colorSlotFallback": "Color {n}",
+    "slotLabels": {
+      "0": "Main color",
+      "1": "Secondary color",
+      "2": "Trim",
+      "3": "Detail"
+    }
+  },
+  "pitch": {
+    "svgAriaLabel": "Handball half-court (20m × 20m), framed on the playing area",
+    "benchLabel": "Bench · tap to swap"
+  },
+  "bonus": {
+    "TRIPLE_CAPTAIN": {
+      "description": "×3 on the captain this matchday"
+    },
+    "BENCH_BOOST": {
+      "description": "Bench players count at ×1 this matchday"
+    },
+    "INSURANCE": {
+      "description": "No player ends up negative this matchday"
+    },
+    "STATISTICIAN": {
+      "description": "×2 on the matchday leader bonus/malus"
+    },
+    "status": {
+      "active": "Active this matchday",
+      "used": "Already used",
+      "quotaReached": "Quota reached",
+      "available": "Available"
+    }
+  }
+}

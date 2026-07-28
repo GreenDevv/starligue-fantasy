@@ -1,0 +1,41 @@
+{
+  "vs": "vs",
+  "list": {
+    "title": "Calendrier",
+    "noActiveSeason": "Aucune saison active.",
+    "gameweekShort": "J{number}",
+    "gameweek": "Journée {number}",
+    "notFound": "Journée introuvable.",
+    "empty": "Aucun match pour cette journée.",
+    "live": "Live",
+    "deadline": "Deadline : {date}"
+  },
+  "detail": {
+    "summary": "Journée {number} · {date} · {season}",
+    "statsTitle": "Statistiques du match",
+    "noStats": "Aucune statistique disponible pour cette équipe.",
+    "goalkeeper": "Gardien",
+    "player": "Joueur",
+    "saves": "Arrêts",
+    "savePercentage": "% Arrêts",
+    "rating": "Note"
+  },
+  "panel": {
+    "recentResults": "Derniers résultats",
+    "noResults": "Aucun résultat pour ce filtre.",
+    "upcoming": "Prochains matchs",
+    "noUpcoming": "Aucun match à venir pour ce filtre."
+  },
+  "charts": {
+    "goalsFor": "Buts marqués",
+    "goalsAgainst": "Buts encaissés",
+    "emptyDefault": "Aucune statistique disponible pour l'instant.",
+    "selectAtLeastOne": "Sélectionne au moins une statistique à afficher.",
+    "thisPlayer": "Ce joueur",
+    "gameweekTooltip": "Journée {number}",
+    "gameweekAxis": "J{number}",
+    "noValuation": "Pas encore de valorisation.",
+    "initialValue": "Valeur initiale : {value}M — pas encore d'historique de variation.",
+    "preseason": "Pré-saison"
+  }
+}

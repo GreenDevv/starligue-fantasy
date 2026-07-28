@@ -2,25 +2,9 @@ import type { Position } from "@/lib/squad/validation";
 
 // Thème visuel unique par poste — source de vérité pour badges, avatars, terrain.
 // Palette dérivée de ARCHITECTURE.md §8.1 (teal/ambre/points) + extensions neutres.
-export const POSITION_LABELS: Record<Position, string> = {
-  GK: "Gardien",
-  LW: "Ailier gauche",
-  LB: "Arrière gauche",
-  CB: "Demi-centre",
-  RB: "Arrière droit",
-  RW: "Ailier droit",
-  PV: "Pivot",
-};
-
-export const POSITION_SHORT: Record<Position, string> = {
-  GK: "GB",
-  LW: "AG",
-  LB: "ARG",
-  CB: "DC",
-  RB: "ARD",
-  RW: "AD",
-  PV: "PIV",
-};
+// Les libellés (noms complets/abrégés) vivent dans messages/<locale>/labels.json
+// (namespace "labels", clés position.<CODE>/positionShort.<CODE>) — pas ici, pour
+// rester traduisibles ; ce fichier ne garde que ce qui ne dépend pas de la langue.
 
 interface PositionTheme {
   text: string;

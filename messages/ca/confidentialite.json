@@ -1,0 +1,41 @@
+{
+  "backLink": "← Tornar a l'inici",
+  "title": "Privacitat i galetes",
+  "intro": "Starligue Fantasy és un <strong>projecte personal</strong>, sense cap relació oficial amb la LNH ni amb la Daikin StarLigue, desenvolupat i allotjat sense finalitat comercial. Aquesta pàgina explica quines dades es recullen, per què, i quines galetes s'utilitzen.",
+  "sections": {
+    "data": {
+      "title": "Dades recollides",
+      "intro": "En crear un compte, es registren:",
+      "items": {
+        "email": "la teva adreça de correu (identificador d'accés, mai compartit)",
+        "password": "la teva contrasenya, mai emmagatzemada en text pla (xifrada amb bcrypt)",
+        "name": "el teu nom/àlies mostrat a l'app",
+        "favoritePlayer": "el teu jugador preferit, si tries indicar-ne un (opcional)"
+      },
+      "gameDataNote": "En jugar, també generes dades de joc: plantilles, alineacions, lligues, punts, historial — necessàries pel funcionament del propi joc, mai utilitzades amb altres finalitats."
+    },
+    "notDone": {
+      "title": "El que NO es fa",
+      "items": {
+        "analytics": "cap eina d'anàlisi d'audiència (Google Analytics o similar)",
+        "ads": "cap galeta o píxel publicitari",
+        "resale": "cap revenda ni cessió de dades a tercers",
+        "profiling": "cap perfilat"
+      }
+    },
+    "cookies": {
+      "title": "Galetes utilitzades",
+      "intro": "Aquest lloc només utilitza galetes <strong>tècniques/funcionals</strong>, estrictament necessàries pel seu funcionament — no cal cap consentiment per a aquest tipus de galeta (recomanació de la CNIL), i no es col·loca cap altra galeta.",
+      "table": {
+        "headers": { "cookie": "Galeta", "role": "Funció", "duration": "Durada" },
+        "session": { "role": "Et manté connectat/da", "duration": "30 dies o tancament de sessió" },
+        "seasonMode": { "role": "Recorda el mode de temporada triat (actual/simulació)", "duration": "Persistent" },
+        "activeLeague": { "role": "Recorda la teva lliga activa si en tens diverses", "duration": "Persistent" }
+      }
+    },
+    "rights": {
+      "title": "Els teus drets",
+      "text": "Pots demanar en qualsevol moment l'accés, la correcció o la supressió de les teves dades. Com que es tracta d'un projecte personal sense suport dedicat, la manera més senzilla és contactar directament amb qui te'l va fer conèixer."
+    }
+  }
+}

@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { HandballPitch } from "@/components/pitch/HandballPitch";
 import { Button } from "@/components/ui/Button";
 import { JerseyBadge } from "@/components/jersey/JerseyBadge";
 import { BonusPicker, type BonusType } from "@/components/BonusPicker";
 import { MatchesStrip } from "@/components/dashboard/MatchesStrip";
 import { StatLeadersPanel } from "@/components/dashboard/StatLeadersPanel";
-import Link from "next/link";
+import { resolveApiError } from "@/lib/api/error-messages";
 
 interface SquadEntry {
   squadEntryId: string;
@@ -85,6 +86,8 @@ export function TeamView({
   usedBonusTypes = [],
   seasonBonusQuota = 3,
 }: TeamViewProps) {
+  const t = useTranslations("team");
+  const tRoot = useTranslations();
   const router = useRouter();
   const [squad, setSquad] = useState(initialSquad);
   const [saving, setSaving] = useState(false);
@@ -144,14 +147,14 @@ export function TeamView({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ starters, leagueId }),
       });
-      const data = await res.json() as { data?: { success: boolean }; error?: { message: string } };
+      const data = await res.json() as { data?: { success: boolean }; error?: { code?: string; message: string } };
       if (data.data?.success) {
         setSaved(true);
       } else {
-        setError(data.error?.message ?? "Erreur lors de la sauvegarde");
+        setError(resolveApiError(tRoot, "team", data.error?.code));
       }
     } catch {
-      setError("Erreur réseau");
+      setError(resolveApiError(tRoot, "team", "NETWORK"));
     }
     setSaving(false);
   }
@@ -168,15 +171,15 @@ export function TeamView({
       });
       const data = (await res.json()) as {
         data?: { pendingBonus: BonusType | null };
-        error?: { message: string };
+        error?: { code?: string; message: string };
       };
       if (data.data) {
         setPendingBonus(data.data.pendingBonus);
       } else {
-        setBonusError(data.error?.message ?? "Bonus impossible à activer");
+        setBonusError(resolveApiError(tRoot, "team", data.error?.code));
       }
     } catch {
-      setBonusError("Erreur réseau");
+      setBonusError(resolveApiError(tRoot, "team", "NETWORK"));
     }
     setBonusSaving(false);
   }
@@ -194,18 +197,18 @@ export function TeamView({
       });
       const data = (await res.json()) as {
         data?: { success: boolean; budgetGained: number; pointsSpent: number };
-        error?: { message: string };
+        error?: { code?: string; message: string };
       };
       if (data.data?.success) {
         setPoints((p) => Math.round((p - data.data!.pointsSpent) * 10) / 10);
         setTeamBudget((b) => Math.round((b + data.data!.budgetGained) * 10) / 10);
         setConvertAmount("");
-        setConvertSuccess(`+${data.data.budgetGained.toFixed(1)}M de budget`);
+        setConvertSuccess(t("view.budgetGained", { amount: data.data.budgetGained.toFixed(1) }));
       } else {
-        setConvertError(data.error?.message ?? "Conversion impossible");
+        setConvertError(resolveApiError(tRoot, "team", data.error?.code));
       }
     } catch {
-      setConvertError("Erreur réseau");
+      setConvertError(resolveApiError(tRoot, "team", "NETWORK"));
     }
     setConverting(false);
   }
@@ -245,7 +248,7 @@ export function TeamView({
               <span className="font-arcade text-3xl leading-none tracking-wide text-accent drop-shadow-[0_0_8px_rgba(45,212,191,0.6)]">
                 {points}
               </span>
-              <span className="text-[10px] uppercase tracking-widest text-text-muted">pts saison</span>
+              <span className="text-[10px] uppercase tracking-widest text-text-muted">{t("view.ptsSeasonLabel")}</span>
             </p>
           </div>
         </div>
@@ -255,13 +258,13 @@ export function TeamView({
               href={`/team/transfers?league=${leagueId}`}
               className="pixel-corners-sm border border-border bg-surface px-3 py-1.5 text-xs uppercase tracking-wide text-text-muted transition-colors hover:text-text"
             >
-              Transferts
+              {t("common.transfers")}
             </Link>
             <Link
               href={`/team/trades?league=${leagueId}`}
               className="pixel-corners-sm border border-border bg-surface px-3 py-1.5 text-xs uppercase tracking-wide text-text-muted transition-colors hover:text-text"
             >
-              Trades
+              {t("common.trades")}
             </Link>
             {/* Rebuild complet interdit une fois la saison commencée — seuls
                 Transferts/Trades modifient l'effectif ensuite (src/lib/squad/season-lock.ts) */}
@@ -270,7 +273,7 @@ export function TeamView({
                 href={`/team/build?league=${leagueId}`}
                 className="pixel-corners-sm border border-border bg-surface px-3 py-1.5 text-xs uppercase tracking-wide text-text-muted transition-colors hover:text-text"
               >
-                Modifier effectif
+                {t("view.editSquad")}
               </Link>
             )}
           </div>
@@ -279,7 +282,7 @@ export function TeamView({
               href={`/team/identity?league=${leagueId}&from=team`}
               className="text-[10px] text-text-muted transition-colors hover:text-text"
             >
-              Personnaliser le maillot
+              {t("view.customizeJersey")}
             </Link>
           )}
         </div>
@@ -312,11 +315,11 @@ export function TeamView({
       {/* Capitaine */}
       <div className="pixel-corners flex items-center justify-between border border-accent-secondary/25 bg-surface px-4 py-2.5">
         <div>
-          <p className="text-[10px] uppercase tracking-widest text-text-muted">Capitaine · ×2 pts</p>
+          <p className="text-[10px] uppercase tracking-widest text-text-muted">{t("view.captainLabel")}</p>
           <p className="text-sm font-medium text-text">
             {(() => {
               const captain = squad.find((p) => p.playerId === captainId);
-              return captain ? `${captain.firstName} ${captain.lastName}` : "Aucun";
+              return captain ? `${captain.firstName} ${captain.lastName}` : t("view.noCaptain");
             })()}
           </p>
         </div>
@@ -325,11 +328,11 @@ export function TeamView({
             href={`/team/start?league=${leagueId}`}
             className="pixel-corners-sm border border-accent-secondary/50 px-3 py-1 text-xs uppercase tracking-wide text-accent-secondary shadow-glow-amber transition-colors hover:bg-accent-secondary/10"
           >
-            Changer
+            {t("view.changeCaptain")}
           </Link>
         ) : (
-          <span className="text-xs text-text-muted" title="Modifiable seulement en période de transfert">
-            Verrouillé
+          <span className="text-xs text-text-muted" title={t("view.lockedTitle")}>
+            {t("view.locked")}
           </span>
         )}
       </div>
@@ -338,9 +341,9 @@ export function TeamView({
           activations sur la saison (voir FantasyBonusUsage/SimulationBonusUsage) */}
       <div className="pixel-corners border border-accent-secondary/25 bg-surface px-4 py-2.5">
         <div className="mb-2 flex items-center justify-between">
-          <p className="text-[10px] uppercase tracking-widest text-text-muted">Bonus de saison</p>
+          <p className="text-[10px] uppercase tracking-widest text-text-muted">{t("view.seasonBonusTitle")}</p>
           <p className="text-[10px] text-text-muted">
-            {usedBonusTypes.length}/{seasonBonusQuota} utilisés
+            {t("view.bonusUsedCount", { used: usedBonusTypes.length, quota: seasonBonusQuota })}
           </p>
         </div>
         <BonusPicker
@@ -357,13 +360,13 @@ export function TeamView({
       {transferWindowOpen ? (
         <div className="pixel-corners border border-accent-secondary/25 bg-surface px-4 py-3">
           <div className="flex items-center justify-between">
-            <p className="text-[10px] uppercase tracking-widest text-text-muted">Convertir des points en budget</p>
+            <p className="text-[10px] uppercase tracking-widest text-text-muted">{t("view.convertTitle")}</p>
             <p className="text-xs text-text-muted">
-              Budget : <span className="font-semibold text-accent-secondary">{teamBudget.toFixed(1)}M</span>
+              {t("view.budgetLabel")} <span className="font-semibold text-accent-secondary">{teamBudget.toFixed(1)}M</span>
             </p>
           </div>
           <p className="mt-1 text-xs text-text-muted">
-            1 pt = {pointsToBudgetRate.toFixed(2)}M · solde convertible : {points} pt{points > 1 ? "s" : ""}
+            {t("view.convertRate", { rate: pointsToBudgetRate.toFixed(2), points })}
           </p>
           <div className="mt-2 flex items-center gap-2">
             <input
@@ -373,7 +376,7 @@ export function TeamView({
               step={0.1}
               value={convertAmount}
               onChange={(e) => setConvertAmount(e.target.value)}
-              placeholder="Points à convertir"
+              placeholder={t("view.convertPlaceholder")}
               className="w-0 flex-1 rounded-lg border border-border bg-bg px-3 py-1.5 text-sm text-text placeholder:text-text-muted focus:border-accent focus:outline-none"
             />
             <button
@@ -381,19 +384,19 @@ export function TeamView({
               disabled={points <= 0}
               className="pixel-corners-sm shrink-0 border border-border px-2.5 py-1.5 text-xs text-text-muted transition-colors hover:text-text disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Tout
+              {t("view.convertAll")}
             </button>
             <button
               onClick={() => convertPoints(parseFloat(convertAmount))}
               disabled={converting || !convertAmount || !(parseFloat(convertAmount) > 0) || parseFloat(convertAmount) > points}
               className="pixel-corners-sm shrink-0 bg-accent-secondary px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-bg transition-colors hover:bg-accent-secondary/90 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {converting ? "…" : "Convertir"}
+              {converting ? "…" : t("view.convertCta")}
             </button>
           </div>
           {convertAmount && parseFloat(convertAmount) > 0 && (
             <p className="mt-1.5 text-xs text-text-muted">
-              → +{(Math.round(parseFloat(convertAmount) * pointsToBudgetRate * 10) / 10).toFixed(1)}M de budget
+              {t("view.convertPreview", { amount: (Math.round(parseFloat(convertAmount) * pointsToBudgetRate * 10) / 10).toFixed(1) })}
             </p>
           )}
           {convertError && <p className="mt-1.5 text-xs text-points-neg">{convertError}</p>}
@@ -401,7 +404,7 @@ export function TeamView({
         </div>
       ) : (
         <p className="text-center text-xs text-text-muted">
-          Convertir des points en budget est possible pendant une fenêtre de transfert.
+          {t("view.convertClosedHint")}
         </p>
       )}
 
@@ -413,10 +416,10 @@ export function TeamView({
         >
           <div>
             <p className="text-xs uppercase tracking-widest text-text-muted">
-              Dernière journée
+              {t("view.lastGameweekLabel")}
             </p>
             <p className="mt-0.5 text-sm font-medium text-text">
-              Journée {lastScoredGameweek.number}
+              {t("common.matchday", { number: lastScoredGameweek.number })}
             </p>
           </div>
           <div className="text-right">
@@ -429,7 +432,7 @@ export function TeamView({
                 ? `+${lastScoredGameweek.points}`
                 : lastScoredGameweek.points}
             </p>
-            <p className="mt-0.5 text-xs text-text-muted">pts · voir détail →</p>
+            <p className="mt-0.5 text-xs text-text-muted">{t("view.viewDetail")}</p>
           </div>
         </Link>
       )}
@@ -439,7 +442,7 @@ export function TeamView({
         href={`/team/history?league=${leagueId}`}
         className="text-center text-xs text-text-muted transition-colors hover:text-text"
       >
-        Voir l'historique complet
+        {t("view.viewFullHistory")}
       </Link>
 
       {/* Save button */}
@@ -447,7 +450,7 @@ export function TeamView({
         {error && <p className="mb-2 text-center text-sm text-points-neg">{error}</p>}
         {saved && (
           <p className="mb-2 text-center text-sm text-points-pos">
-            Alignement sauvegardé ✓
+            {t("view.lineupSaved")}
           </p>
         )}
         <Button
@@ -457,7 +460,7 @@ export function TeamView({
           size="lg"
           className="w-full"
         >
-          {saving ? "Sauvegarde…" : saved ? "Alignement sauvegardé" : "Sauvegarder l'alignement"}
+          {saving ? t("view.saving") : saved ? t("view.lineupSavedButton") : t("view.saveLineupCta")}
         </Button>
       </div>
 

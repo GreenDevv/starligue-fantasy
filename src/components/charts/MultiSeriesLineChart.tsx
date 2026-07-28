@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 
 // Graphique SVG à la main (même convention que ValueHistoryChart — pas de
@@ -46,7 +47,7 @@ export function MultiSeriesLineChart({
   series,
   entries,
   defaultActiveKeys,
-  emptyMessage = "Aucune statistique disponible pour l'instant.",
+  emptyMessage,
   primaryLabel,
   compareEntries,
   compareLabel,
@@ -65,6 +66,9 @@ export function MultiSeriesLineChart({
   compareEntries?: ChartGameweekEntry[];
   compareLabel?: string;
 }) {
+  const t = useTranslations("matches");
+  const resolvedEmptyMessage = emptyMessage ?? t("charts.emptyDefault");
+  const resolvedPrimaryLabel = primaryLabel ?? t("charts.thisPlayer");
   const svgRef = useRef<SVGSVGElement>(null);
   const [hoverGw, setHoverGw] = useState<number | null>(null);
   const [activeKeys, setActiveKeys] = useState<string[]>(
@@ -86,7 +90,7 @@ export function MultiSeriesLineChart({
   ).sort((a, b) => a - b);
 
   if (allGameweeks.length === 0) {
-    return <p className="py-6 text-center text-xs text-text-muted">{emptyMessage}</p>;
+    return <p className="py-6 text-center text-xs text-text-muted">{resolvedEmptyMessage}</p>;
   }
 
   const activeLines = series.filter((l) => activeKeys.includes(l.key));
@@ -159,7 +163,7 @@ export function MultiSeriesLineChart({
         <div className="flex items-center gap-3 text-[11px] text-text-muted">
           <span className="flex items-center gap-1.5">
             <span className="h-0.5 w-4 shrink-0 bg-text-muted" />
-            {primaryLabel ?? "Ce joueur"}
+            {resolvedPrimaryLabel}
           </span>
           <span className="flex items-center gap-1.5">
             <span
@@ -172,7 +176,7 @@ export function MultiSeriesLineChart({
       )}
 
       {activeLines.length === 0 ? (
-        <p className="py-6 text-center text-xs text-text-muted">Sélectionne au moins une statistique à afficher.</p>
+        <p className="py-6 text-center text-xs text-text-muted">{t("charts.selectAtLeastOne")}</p>
       ) : (
         <div className="relative">
           <svg
@@ -196,7 +200,7 @@ export function MultiSeriesLineChart({
             {allGameweeks.map((gw, i) =>
               i % labelEvery === 0 || i === allGameweeks.length - 1 ? (
                 <text key={gw} x={x(gw)} y={VIEW_H - PAD_BOTTOM + 14} textAnchor="middle" fontSize={9} fill={TEXT_MUTED}>
-                  J{gw}
+                  {t("charts.gameweekAxis", { number: gw })}
                 </text>
               ) : null
             )}
@@ -313,13 +317,13 @@ export function MultiSeriesLineChart({
                 maxWidth: "180px",
               }}
             >
-              <p className="mb-1 font-semibold text-text">Journée {hoverGw}</p>
+              <p className="mb-1 font-semibold text-text">{t("charts.gameweekTooltip", { number: hoverGw })}</p>
 
               {hoveredPrimary?.opponent && (
                 <div className="mb-1 flex items-center gap-1.5 text-text-muted">
                   <ClubLogo club={hoveredPrimary.opponent} size="xs" />
                   <span className="truncate">
-                    {isComparing && primaryLabel ? `${primaryLabel} vs ` : "vs "}
+                    {isComparing && primaryLabel ? `${primaryLabel} ${t("vs")} ` : `${t("vs")} `}
                     {hoveredPrimary.opponent.shortName}
                   </span>
                 </div>
@@ -328,7 +332,7 @@ export function MultiSeriesLineChart({
                 <div className="mb-1 flex items-center gap-1.5 text-text-muted">
                   <ClubLogo club={hoveredCompare.opponent} size="xs" />
                   <span className="truncate">
-                    {compareLabel} vs {hoveredCompare.opponent.shortName}
+                    {compareLabel} {t("vs")} {hoveredCompare.opponent.shortName}
                   </span>
                 </div>
               )}

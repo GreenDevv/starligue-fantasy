@@ -1,0 +1,41 @@
+{
+  "backLink": "← Powrót do strony głównej",
+  "title": "Prywatność i pliki cookie",
+  "intro": "Starligue Fantasy to <strong>projekt osobisty</strong>, niezwiązany oficjalnie z LNH ani z Daikin StarLigue, tworzony i utrzymywany niekomercyjnie. Ta strona wyjaśnia, jakie dane są zbierane, w jakim celu i jakie pliki cookie są wykorzystywane.",
+  "sections": {
+    "data": {
+      "title": "Zbierane dane",
+      "intro": "Przy zakładaniu konta zapisywane są:",
+      "items": {
+        "email": "Twój adres email (identyfikator logowania, nigdy nieudostępniany)",
+        "password": "Twoje hasło, nigdy niezapisywane jawnym tekstem (haszowane algorytmem bcrypt)",
+        "name": "Twoje imię/pseudonim wyświetlane w aplikacji",
+        "favoritePlayer": "Twój ulubiony zawodnik, jeśli zdecydujesz się go wskazać (opcjonalnie)"
+      },
+      "gameDataNote": "Grając, generujesz też dane związane z rozgrywką: składy, ustawienia, ligi, punkty, historię — niezbędne do działania samej gry, nigdy niewykorzystywane w innych celach."
+    },
+    "notDone": {
+      "title": "Czego NIE robimy",
+      "items": {
+        "analytics": "żadnych narzędzi analizy ruchu (Google Analytics czy podobnych)",
+        "ads": "żadnych plików cookie ani pikseli reklamowych",
+        "resale": "żadnej odsprzedaży ani udostępniania danych osobom trzecim",
+        "profiling": "żadnego profilowania"
+      }
+    },
+    "cookies": {
+      "title": "Wykorzystywane pliki cookie",
+      "intro": "Ta strona wykorzystuje wyłącznie pliki cookie <strong>techniczne/funkcjonalne</strong>, ściśle niezbędne do jej działania — dla tego typu plików cookie zgoda nie jest wymagana (zgodnie z zaleceniami organów ochrony danych), a żadne inne pliki cookie nie są instalowane.",
+      "table": {
+        "headers": { "cookie": "Cookie", "role": "Funkcja", "duration": "Czas trwania" },
+        "session": { "role": "Utrzymuje Cię zalogowanego/zalogowaną", "duration": "30 dni lub do wylogowania" },
+        "seasonMode": { "role": "Zapamiętuje wybrany tryb sezonu (na żywo/symulacja)", "duration": "Stałe" },
+        "activeLeague": { "role": "Zapamiętuje Twoją aktywną ligę, jeśli masz ich kilka", "duration": "Stałe" }
+      }
+    },
+    "rights": {
+      "title": "Twoje prawa",
+      "text": "W każdej chwili możesz poprosić o dostęp do swoich danych, ich poprawienie lub usunięcie. Ponieważ jest to projekt osobisty bez dedykowanego wsparcia, najprostszym sposobem pozostaje bezpośredni kontakt z osobą, która Ci go poleciła."
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "detail": {
+    "backToMarket": "Mercat",
+    "avgRatingShort": "mitjana {rating}/10",
+    "valueEvolution": "Evolució del valor",
+    "seasonStats": "Stats temporada {season}",
+    "shotPercentage": "% tirs",
+    "statsByGameweek": "Stats per jornada",
+    "simulation": "Simulació",
+    "season": "Temporada",
+    "noLnhHistory": "Nou a la Daikin StarLigue — sense historial de nota LNH.",
+    "lnhHistory": "Historial LNH",
+    "lnhHistoryHeaders": {
+      "season": "Temporada",
+      "matches": "Partits",
+      "avgScore": "Nota LNH mitjana"
+    },
+    "noStats": "Cap estadística disponible de moment.",
+    "fallbackClubNote": "{name} jugava a {club} el {season}",
+    "fallbackStatsNote": "La temporada en curs encara no ha començat: es mostren les estadístiques de la temporada anterior a mode informatiu.",
+    "matchByMatch": "Estadístiques partit a partit",
+    "matchLogHeaders": {
+      "gameweek": "J.",
+      "opponent": "Riv.",
+      "rating": "Nota",
+      "points": "Pts (tit.)"
+    }
+  },
+  "compare": {
+    "comparedTo": "Comparat amb",
+    "remove": "Treure",
+    "addCompare": "Comparar amb un jugador",
+    "searchPlaceholder": "Nom del jugador...",
+    "searching": "Cercant...",
+    "noPlayerFound": "Cap jugador trobat.",
+    "loading": "Carregant..."
+  },
+  "search": {
+    "change": "Canviar",
+    "placeholder": "Cerca un nom…",
+    "noResults": "Cap jugador trobat"
+  },
+  "recap": {
+    "ariaLabel": "Estadístiques temporada {season}",
+    "title": "Temporada {season}",
+    "loading": "Carregant…",
+    "noStats": "Sense estadístiques {season} disponibles.",
+    "matches": "Partits",
+    "rating": "Nota LNH",
+    "saves": "Aturades",
+    "savePercentage": "% Aturades",
+    "goals": "Gols",
+    "assists": "Assistències"
+  }
+}

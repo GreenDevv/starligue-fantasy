@@ -1,0 +1,41 @@
+{
+  "vs": "vs",
+  "list": {
+    "title": "Terminarz",
+    "noActiveSeason": "Brak aktywnego sezonu.",
+    "gameweekShort": "K{number}",
+    "gameweek": "Kolejka {number}",
+    "notFound": "Nie znaleziono kolejki.",
+    "empty": "Brak meczów w tej kolejce.",
+    "live": "Na żywo",
+    "deadline": "Termin: {date}"
+  },
+  "detail": {
+    "summary": "Kolejka {number} · {date} · {season}",
+    "statsTitle": "Statystyki meczu",
+    "noStats": "Brak dostępnych statystyk dla tej drużyny.",
+    "goalkeeper": "Bramkarz",
+    "player": "Zawodnik",
+    "saves": "Obrony",
+    "savePercentage": "% Obron",
+    "rating": "Ocena"
+  },
+  "panel": {
+    "recentResults": "Ostatnie wyniki",
+    "noResults": "Brak wyników dla tego filtra.",
+    "upcoming": "Nadchodzące mecze",
+    "noUpcoming": "Brak nadchodzących meczów dla tego filtra."
+  },
+  "charts": {
+    "goalsFor": "Gole strzelone",
+    "goalsAgainst": "Gole stracone",
+    "emptyDefault": "Brak dostępnych statystyk na razie.",
+    "selectAtLeastOne": "Wybierz co najmniej jedną statystykę do wyświetlenia.",
+    "thisPlayer": "Ten zawodnik",
+    "gameweekTooltip": "Kolejka {number}",
+    "gameweekAxis": "K{number}",
+    "noValuation": "Brak wyceny na razie.",
+    "initialValue": "Wartość początkowa: {value}M — brak jeszcze historii zmian.",
+    "preseason": "Przedsezon"
+  }
+}

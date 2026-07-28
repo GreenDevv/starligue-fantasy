@@ -1,0 +1,9 @@
+{
+  "common": {
+    "UNAUTHORIZED": "Connexion requise",
+    "FORBIDDEN": "Action non autorisée",
+    "NOT_FOUND": "Introuvable",
+    "INVALID_INPUT": "Champs invalides",
+    "generic": "Une erreur est survenue"
+  }
+}

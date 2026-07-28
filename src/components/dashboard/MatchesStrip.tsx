@@ -1,4 +1,7 @@
-import Link from "next/link";
+"use client";
+
+import { useTranslations, useFormatter } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import type { WidgetSize } from "@/lib/dashboard/layout";
 
@@ -42,13 +45,15 @@ const SIZE_CONFIG: Record<WidgetSize, { logo: "xs" | "sm" | "md" | "lg"; gridCol
   wide: { logo: "lg", gridCols: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4", boxPad: "px-1.5 py-1.5", outerGap: "gap-2" },
 };
 
-function formatDayMonth(date: Date): string {
-  return date.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" });
+type DateFormatter = ReturnType<typeof useFormatter>;
+
+function formatDayMonth(format: DateFormatter, date: Date): string {
+  return format.dateTime(date, { day: "2-digit", month: "short" });
 }
 
 // Plage de dates couvrant toute la journée (ex: "13-14 déc.") plutôt que la date de
 // chaque match individuel — les matchs d'une même journée s'étalent sur 2-3 jours.
-function formatGameweekRange(dates: (string | Date)[]): string | null {
+function formatGameweekRange(format: DateFormatter, dates: (string | Date)[]): string | null {
   if (dates.length === 0) return null;
   const parsed = dates.map((d) => (typeof d === "string" ? new Date(d) : d)).sort((a, b) => a.getTime() - b.getTime());
   const first = parsed[0];
@@ -56,13 +61,13 @@ function formatGameweekRange(dates: (string | Date)[]): string | null {
   if (!first || !last) return null;
 
   if (first.toDateString() === last.toDateString()) {
-    return formatDayMonth(first);
+    return formatDayMonth(format, first);
   }
   const sameMonth = first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear();
   if (sameMonth) {
-    return `${first.getDate()}-${formatDayMonth(last)}`;
+    return `${first.getDate()}-${formatDayMonth(format, last)}`;
   }
-  return `${formatDayMonth(first)} - ${formatDayMonth(last)}`;
+  return `${formatDayMonth(format, first)} - ${formatDayMonth(format, last)}`;
 }
 
 // Bandeau compact "résultats dernière journée" / "prochains matchs" — logos club
@@ -70,8 +75,10 @@ function formatGameweekRange(dates: (string | Date)[]): string | null {
 // journée sans scroll. Réutilisé par TeamView (saison 2026/27) et SimulationView
 // (2025/26) — ARCHITECTURE.md §8.1.
 export function MatchesStrip({ variant, gameweekNumber, matches, size = "wide", fixedColumns }: MatchesStripProps) {
-  const title = variant === "results" ? "Résultats" : "Prochains matchs";
-  const dateRange = formatGameweekRange(matches.map((m) => m.kickoffAt));
+  const t = useTranslations("dashboard");
+  const format = useFormatter();
+  const title = variant === "results" ? t("matchesStrip.results") : t("matchesStrip.upcoming");
+  const dateRange = formatGameweekRange(format, matches.map((m) => m.kickoffAt));
   const { logo, gridCols: responsiveGridCols, boxPad, outerGap } = SIZE_CONFIG[size];
   const gridCols = fixedColumns ? (fixedColumns === 2 ? "grid-cols-2" : "grid-cols-3") : responsiveGridCols;
 
@@ -81,7 +88,7 @@ export function MatchesStrip({ variant, gameweekNumber, matches, size = "wide", 
         <p className="text-[10px] uppercase tracking-widest text-text-muted">{title}</p>
         {gameweekNumber !== null && (
           <p className="text-[10px] uppercase tracking-widest text-text-muted">
-            Journée {gameweekNumber}
+            {t("matchesStrip.gameweek", { number: gameweekNumber })}
             {dateRange && <span className="text-text-muted/70"> · {dateRange}</span>}
           </p>
         )}
@@ -89,7 +96,7 @@ export function MatchesStrip({ variant, gameweekNumber, matches, size = "wide", 
 
       {matches.length === 0 ? (
         <p className="py-2 text-center text-xs text-text-muted">
-          {variant === "results" ? "Aucun résultat pour l'instant." : "Aucun match programmé."}
+          {variant === "results" ? t("matchesStrip.noResults") : t("matchesStrip.noUpcoming")}
         </p>
       ) : (
         <div className={`grid ${gridCols} ${outerGap}`}>

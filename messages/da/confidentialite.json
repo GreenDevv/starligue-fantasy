@@ -1,0 +1,41 @@
+{
+  "backLink": "← Tilbage til forsiden",
+  "title": "Privatliv & cookies",
+  "intro": "Starligue Fantasy er et <strong>personligt projekt</strong> uden officiel tilknytning til LNH eller Daikin StarLigue, udviklet og driftet uden kommercielt formål. Denne side beskriver kort, hvilke data der indsamles, hvorfor, og hvilke cookies der anvendes.",
+  "sections": {
+    "data": {
+      "title": "Indsamlede data",
+      "intro": "Når du opretter en konto, registreres:",
+      "items": {
+        "email": "din emailadresse (login-id, deles aldrig med andre)",
+        "password": "din adgangskode, som aldrig gemmes i klartekst (den hashes med bcrypt)",
+        "name": "dit fornavn/brugernavn, som vises i appen",
+        "favoritePlayer": "din yndlingsspiller, hvis du vælger at angive en (valgfrit)"
+      },
+      "gameDataNote": "Når du spiller, genererer du desuden spildata: trupper, opstillinger, ligaer, point, historik — nødvendige for selve spillets funktion og bruges aldrig til andre formål."
+    },
+    "notDone": {
+      "title": "Hvad der IKKE gøres",
+      "items": {
+        "analytics": "intet analyseværktøj til trafikmåling (Google Analytics eller lignende)",
+        "ads": "ingen reklamecookies eller -pixels",
+        "resale": "ingen videresalg eller deling af data med tredjeparter",
+        "profiling": "ingen profilering"
+      }
+    },
+    "cookies": {
+      "title": "Anvendte cookies",
+      "intro": "Dette site anvender udelukkende <strong>tekniske/funktionelle</strong> cookies, som er strengt nødvendige for dets funktion — der kræves ikke samtykke til denne type cookies (i overensstemmelse med gældende anbefalinger), og der placeres ingen andre cookies.",
+      "table": {
+        "headers": { "cookie": "Cookie", "role": "Funktion", "duration": "Varighed" },
+        "session": { "role": "Holder dig logget ind", "duration": "30 dage eller til du logger ud" },
+        "seasonMode": { "role": "Husker den valgte sæsontilstand (igangværende/simulation)", "duration": "Permanent" },
+        "activeLeague": { "role": "Husker din aktive liga, hvis du er medlem af flere", "duration": "Permanent" }
+      }
+    },
+    "rights": {
+      "title": "Dine rettigheder",
+      "text": "Du kan til enhver tid anmode om indsigt i, rettelse af eller sletning af dine data. Da der er tale om et personligt projekt uden dedikeret support, er den enkleste fremgangsmåde at kontakte den person, der introducerede dig til det, direkte."
+    }
+  }
+}

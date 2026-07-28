@@ -1,0 +1,167 @@
+{
+  "widgetShell": {
+    "reorder": "Reorder this widget",
+    "remove": "Remove this widget from the dashboard",
+    "sizeLabel": "{size} size",
+    "size": {
+      "mini": "Mini",
+      "square": "Square",
+      "wide": "Wide"
+    }
+  },
+  "comingSoon": {
+    "seasonBadge": "SEASON 2026 / 2027",
+    "tagline": "The <strong>handball fantasy</strong> game based on real Daikin StarLigue players. Build your team and score points on their real performances, matchday after matchday.",
+    "badge": "SOON",
+    "previewAriaLabel": "Game preview",
+    "footerDisclaimer": "Personal project, not officially affiliated with the LNH or the Daikin StarLigue — launching before the season kicks off.",
+    "features": {
+      "squad": {
+        "title": "Build your squad",
+        "description": "14 players across the 16 Starligue clubs, a tight budget, one position at a time — goalkeeper, wings, backs, centre back, pivot."
+      },
+      "lineup": {
+        "title": "Set your lineup every matchday",
+        "description": "7 starters on the pitch, 7 substitutes on the bench. A deadline before every kickoff, just like the real thing."
+      },
+      "score": {
+        "title": "Score on the real thing",
+        "description": "Goals, saves, assists: every match stat counts towards your matchday score."
+      },
+      "challenge": {
+        "title": "Challenge your friends",
+        "description": "Create your private league, follow the live standings, trade players between matchdays."
+      }
+    }
+  },
+  "home": {
+    "metadataTitle": "Coming soon",
+    "metadataDescription": "Starligue Fantasy is on its way: the handball fantasy game based on the Daikin Starligue. Build your team with real D1 handball players before the season kicks off.",
+    "noActiveSeason": "No season running right now.",
+    "seasonLabel": "Daikin Starligue · {label}",
+    "title": "Starligue",
+    "welcomeBack": "Welcome back, <b>{name}</b>!",
+    "welcomeGuest": "Welcome — live Daikin StarLigue results, standings and news.",
+    "ctaLoggedIn": "Go to Fantasy Starligue →",
+    "ctaGuest": "Create my Fantasy team →",
+    "footerDisclaimer": "Personal project, not officially affiliated with the LNH or the Daikin StarLigue.",
+    "footerPrivacyLink": "Privacy & cookies"
+  },
+  "page": {
+    "title": "Dashboard",
+    "noActiveSeason": "No active season right now."
+  },
+  "matchesStrip": {
+    "results": "Results",
+    "upcoming": "Upcoming matches",
+    "gameweek": "Matchday {number}",
+    "noResults": "No results yet.",
+    "noUpcoming": "No matches scheduled."
+  },
+  "simulationControls": {
+    "prevGameweek": "← Previous matchday",
+    "nextGameweek": "Next matchday →",
+    "counter": "Sim MD{current}/{total}"
+  },
+  "statLeaderCard": {
+    "removeAriaLabel": "Remove {label} from dashboard",
+    "ownedByTeams": "In {teams}",
+    "noData": "No data yet."
+  },
+  "statLeadersPanel": {
+    "title": "Leaders",
+    "addStatLabel": "Add a stat",
+    "allLinesVisible": "All stats are already shown.",
+    "addStatCta": "+ Add a stat"
+  },
+  "bestXIWidget": {
+    "subtitle": "Team of the season · best players by position",
+    "noData": "No matchday scored yet."
+  },
+  "clubStandingsWidget": {
+    "title": "Starligue standings",
+    "beforeGameweek1": "Before MD1",
+    "afterGameweek": "After MD{number}",
+    "notAvailable": "Standings not available yet.",
+    "seasonNotStarted": "The season hasn't started yet — standings are all at zero, that's normal.",
+    "col": {
+      "club": "Club",
+      "played": "P",
+      "wins": "W",
+      "draws": "D",
+      "losses": "L",
+      "goalsFor": "GF",
+      "goalsAgainst": "GA",
+      "diff": "Diff",
+      "points": "Pts"
+    }
+  },
+  "leaguesWidget": {
+    "title": "My leagues",
+    "seeAll": "See all →",
+    "noLeagues": "You haven't joined a league yet.",
+    "joinLeague": "Join a league →",
+    "memberCount": "{count, plural, one {# member} other {# members}}"
+  },
+  "globalLeaderboardWidget": {
+    "title": "Global leaderboard",
+    "seeAll": "See all →",
+    "noTeams": "No ranked teams yet."
+  },
+  "newsFeed": {
+    "title": "Starligue news",
+    "filterAll": "All",
+    "filterTransfers": "Transfers",
+    "filterInjuries": "Injuries",
+    "filterTeamOfWeek": "Team of the week",
+    "filterPerformances": "Performances",
+    "filterGeneral": "News",
+    "noNews": "No news yet.",
+    "seeMore": "See more"
+  },
+  "standingsSection": {
+    "title": "Standings",
+    "gameweek": "Matchday {number}",
+    "notAvailable": "Standings not available yet.",
+    "col": {
+      "club": "Club",
+      "played": "P",
+      "diff": "+/-",
+      "points": "Pts"
+    }
+  },
+  "bestXICard": {
+    "subtitle": "Team of the week · matchday {number}"
+  },
+  "performancesCard": {
+    "subtitle": "Best performances · matchday {number}"
+  },
+  "statLeadersSection": {
+    "subtitle": "Leaders · matchday {number}"
+  },
+  "errors": {
+    "SEASON_COMPLETE": "All matchdays of the simulated season have already been played",
+    "CONFLICT": "The season was updated in the meantime — try again",
+    "ALREADY_AT_START": "The simulated season is already at its starting point"
+  },
+  "dashboardView": {
+    "newsLink": "Starligue news →",
+    "allWidgetsRemoved": "All widgets have been removed — add some back from the panel below.",
+    "addWidgetTitle": "Add a widget",
+    "hideStats": "Hide stats",
+    "addStat": "+ Add a stat",
+    "allFixedWidgetsVisible": "All fixed widgets are already shown — you can still add stats.",
+    "close": "Close",
+    "addWidgetCta": "+ Add a widget",
+    "status": {
+      "greeting": "Hi {name}",
+      "greetingGuest": "Welcome",
+      "noLeague": "Join or create a league to start the adventure.",
+      "joinLeagueCta": "Join a league",
+      "squadNotValidated": "Your squad isn't validated yet.",
+      "buildSquadCta": "Build my squad",
+      "readyWithGameweek": "Squad ready — see you on matchday {number}.",
+      "readyForSeason": "Squad ready for the season."
+    }
+  }
+}

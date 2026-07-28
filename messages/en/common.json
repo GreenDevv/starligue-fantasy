@@ -1,0 +1,17 @@
+{
+  "loading": "Loading…",
+  "save": "Save",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "close": "Close",
+  "back": "Back",
+  "edit": "Edit",
+  "delete": "Delete",
+  "yes": "Yes",
+  "no": "No",
+  "cookieBanner": {
+    "text": "This site only uses technical cookies required for it to work (login, preferences). No tracking or advertising cookies.",
+    "learnMore": "Learn more",
+    "dismiss": "Got it"
+  }
+}

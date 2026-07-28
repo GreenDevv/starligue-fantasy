@@ -1,0 +1,9 @@
+{
+  "common": {
+    "UNAUTHORIZED": "Cal iniciar sessió",
+    "FORBIDDEN": "Acció no permesa",
+    "NOT_FOUND": "No trobat",
+    "INVALID_INPUT": "Camps no vàlids",
+    "generic": "S'ha produït un error"
+  }
+}

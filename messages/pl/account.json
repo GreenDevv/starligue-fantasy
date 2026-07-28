@@ -1,0 +1,14 @@
+{
+  "title": "Moje konto",
+  "emailLabel": "Email",
+  "nameLabel": "Pseudonim",
+  "favoritePlayerLabel": "Ulubiony zawodnik",
+  "optional": "(opcjonalnie)",
+  "favoritePlayerLocked": "Wybór jest ostateczny i nie można go zmienić po zapisaniu.",
+  "savedMessage": "Zapisano! Pseudonim widoczny u góry zaktualizuje się przy następnym logowaniu.",
+  "saving": "Zapisywanie…",
+  "errors": {
+    "FAVORITE_PLAYER_LOCKED": "Ulubiony zawodnik jest ostateczny po zapisaniu",
+    "INVALID_PLAYER": "Nie znaleziono ulubionego zawodnika"
+  }
+}

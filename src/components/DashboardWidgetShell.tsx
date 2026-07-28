@@ -3,13 +3,14 @@
 import type { ReactNode } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useTranslations } from "next-intl";
 import { DragHandleIcon } from "@/components/ui/icons";
 import type { WidgetSize } from "@/lib/dashboard/layout";
 
-const SIZE_OPTIONS: { size: WidgetSize; label: string; preview: string }[] = [
-  { size: "mini", label: "Mini", preview: "h-1.5 w-1.5" },
-  { size: "square", label: "Carré", preview: "h-2.5 w-2.5" },
-  { size: "wide", label: "Long", preview: "h-1.5 w-3.5" },
+const SIZE_OPTIONS: { size: WidgetSize; preview: string }[] = [
+  { size: "mini", preview: "h-1.5 w-1.5" },
+  { size: "square", preview: "h-2.5 w-2.5" },
+  { size: "wide", preview: "h-1.5 w-3.5" },
 ];
 
 // Chrome générique (poignée de drag + taille + retrait) autour de chaque widget du
@@ -34,6 +35,7 @@ export function DashboardWidgetShell({
   showRemove?: boolean;
   className?: string;
 }) {
+  const t = useTranslations("dashboard");
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
 
   const style = {
@@ -53,7 +55,7 @@ export function DashboardWidgetShell({
         <button
           {...attributes}
           {...listeners}
-          aria-label="Réorganiser ce widget"
+          aria-label={t("widgetShell.reorder")}
           className="cursor-grab touch-none rounded p-0.5 text-text-muted transition-colors hover:text-text active:cursor-grabbing"
         >
           <DragHandleIcon className="h-3.5 w-3.5" />
@@ -65,9 +67,9 @@ export function DashboardWidgetShell({
               <button
                 key={opt.size}
                 onClick={() => onSizeChange(opt.size)}
-                aria-label={`Taille ${opt.label}`}
+                aria-label={t("widgetShell.sizeLabel", { size: t(`widgetShell.size.${opt.size}`) })}
                 aria-pressed={size === opt.size}
-                title={opt.label}
+                title={t(`widgetShell.size.${opt.size}`)}
                 className={`flex h-5 w-5 items-center justify-center rounded transition-colors ${
                   size === opt.size ? "bg-accent/20" : "hover:bg-border/40"
                 }`}
@@ -79,7 +81,7 @@ export function DashboardWidgetShell({
           {showRemove && (
             <button
               onClick={onRemove}
-              aria-label="Retirer ce widget du tableau de bord"
+              aria-label={t("widgetShell.remove")}
               className="rounded px-1 text-sm text-text-muted transition-colors hover:text-points-neg"
             >
               ×

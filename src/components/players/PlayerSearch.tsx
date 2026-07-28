@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 export interface PlayerSearchOption {
   id: string;
@@ -28,6 +29,7 @@ export function PlayerSearch({
   value: string;
   onChange: (playerId: string) => void;
 }) {
+  const t = useTranslations("players");
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -64,7 +66,7 @@ export function PlayerSearch({
           }}
           className="shrink-0 text-xs text-text-muted hover:text-text"
         >
-          Changer
+          {t("search.change")}
         </button>
       </div>
     );
@@ -80,13 +82,13 @@ export function PlayerSearch({
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}
-        placeholder="Cherche un nom…"
+        placeholder={t("search.placeholder")}
         className="w-full rounded-lg border border-border bg-bg px-4 py-2.5 text-text placeholder-text-muted outline-none focus:border-accent"
       />
       {open && query.trim() !== "" && (
         <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-border bg-surface shadow-lg">
           {results.length === 0 ? (
-            <p className="px-4 py-2.5 text-sm text-text-muted">Aucun joueur trouvé</p>
+            <p className="px-4 py-2.5 text-sm text-text-muted">{t("search.noResults")}</p>
           ) : (
             results.map((p) => (
               <button

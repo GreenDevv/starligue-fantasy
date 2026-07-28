@@ -1,0 +1,21 @@
+{
+  "title": "Tips",
+  "subtitle": "Gratis og ubegrænset. Et godt tip booster multiplikatoren på dine runde-point (×0.5 til ×2.0) — aldrig straf for et forkert tip eller manglende tip.",
+  "gwLabel": "Runde {number}",
+  "gwShort": "R{number}",
+  "opensAfterDeadline": "Åbner efter deadline for runde {number}",
+  "nextGwLocked": "Runde {next} åbner, når deadline for runde {current} er passeret.",
+  "loading": "Indlæser…",
+  "noMatches": "Ingen kampe i denne runde.",
+  "lockedWithPick": "Tip låst: {outcome}",
+  "lockedNoPick": "Låst — intet tip afgivet",
+  "oddsUnavailable": "Odds ikke tilgængelige endnu",
+  "networkError": "Netværksfejl",
+  "errors": {
+    "NOT_AVAILABLE_IN_SIMULATION": "Tips er kun tilgængelige i live-spil for øjeblikket",
+    "NO_ACTIVE_LEAGUE": "Ingen aktiv liga",
+    "GW_NOT_OPEN": "Denne runde er endnu ikke åben for tips",
+    "MARKET_NOT_READY": "Odds ikke tilgængelige endnu for denne kamp",
+    "MATCH_LOCKED": "Tip låst — kampen starter snart"
+  }
+}

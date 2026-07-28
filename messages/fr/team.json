@@ -1,0 +1,198 @@
+{
+  "common": {
+    "backToTeam": "Mon équipe",
+    "backToHistory": "Historique",
+    "simulationMode": "Mode Simulation",
+    "simulationModeSeason": "Mode Simulation · 2025/26",
+    "transfers": "Transferts",
+    "trades": "Trades",
+    "starters": "Titulaires",
+    "bench": "Remplaçants",
+    "validating": "Validation…",
+    "matchday": "Journée {number}"
+  },
+  "errors": {
+    "NO_ACTIVE_LEAGUE": "Aucune ligue active",
+    "SQUAD_NOT_VALIDATED": "Effectif non validé",
+    "DEADLINE_PASSED": "La deadline de cette journée est passée",
+    "LINEUP_INVALID": "Alignement invalide",
+    "BONUS_ALREADY_USED": "Ce bonus a déjà été utilisé cette saison",
+    "BONUS_QUOTA_REACHED": "Quota de bonus atteint pour cette saison",
+    "TRANSFER_WINDOW_CLOSED": "Aucune fenêtre de transfert ouverte",
+    "CONVERSION_INVALID": "Conversion invalide",
+    "SEASON_STARTED": "Effectif verrouillé pour la saison — utilise Transferts ou Trades pour le modifier",
+    "PLAYERS_NOT_FOUND": "Certains joueurs sont introuvables",
+    "SQUAD_INVALID": "Composition invalide",
+    "PLAYER_NOT_FOUND": "Joueur introuvable",
+    "TRANSFER_INVALID": "Transfert invalide",
+    "PLAYER_NOT_IN_SQUAD": "Ce joueur n'est pas dans ton effectif",
+    "CAPTAIN_LOCKED": "Le capitaine ne peut être changé que pendant une fenêtre de transfert",
+    "NOT_APPLICABLE": "Pas de personnalisation de maillot en mode Simulation",
+    "SELF_TRADE": "Impossible de proposer un trade à sa propre équipe",
+    "TEAM_NOT_IN_LEAGUE": "Équipe destinataire introuvable dans cette ligue",
+    "TRADE_INVALID": "Ce trade n'est pas valide",
+    "TRADE_NOT_PENDING": "Cette proposition n'est plus en attente",
+    "NETWORK": "Erreur réseau"
+  },
+  "history": {
+    "title": "Historique",
+    "teamSummary": "{name} · {points} pts",
+    "teamSummarySeason": "{name} · {points} pts saison",
+    "emptyLive": "Aucune journée snapshotée pour l'instant.",
+    "emptySim": "Aucune journée avancée pour l'instant.",
+    "emptyHintLive": "Les snapshots sont créés automatiquement avant chaque deadline.",
+    "emptyHintSim": "Une fois qu'un admin fait avancer la simulation, les journées apparaissent ici.",
+    "pending": "En attente",
+    "ptsArrow": "pts →"
+  },
+  "gameweekDetail": {
+    "statusSimScored": "Journée calculée",
+    "statusSimPending": "Pas encore calculée",
+    "statusLiveScored": "Journée scorée",
+    "statusLivePending": "En attente des notes",
+    "bonusActive": "Bonus actif · {bonus}"
+  },
+  "identity": {
+    "title": "Ton équipe",
+    "subtitle": "Choisis un nom et personnalise ton maillot — visible partout où ton équipe apparaît."
+  },
+  "build": {
+    "titleCreate": "Créer mon effectif",
+    "titleEdit": "Modifier mon effectif",
+    "loadingPlayers": "Chargement des joueurs…",
+    "lockedTitle": "Effectif verrouillé pour la saison",
+    "lockedBody": "La saison a commencé : l'effectif ne peut plus être remplacé en bloc. Utilise Transferts ou Trades pour le faire évoluer.",
+    "progress": "{completed}/7 postes complets · {picked}/14 joueurs",
+    "squadHint": "Ton effectif · tap un emplacement vide pour choisir, tap un joueur pour le retirer",
+    "searchPlaceholder": "Chercher un {position}…",
+    "slotsFull": "Les 2 slots sont remplis",
+    "noPlayersAvailable": "Aucun joueur disponible",
+    "tooManyFromClub": "Trop de joueurs de {club} ({count}/{max} max)",
+    "unknownClub": "un club",
+    "missingPlayers": "{count, plural, one {Il manque # joueur} other {Il manque # joueurs}}",
+    "budgetExceeded": "Budget dépassé de {amount}M",
+    "validateCta": "Valider mon effectif →",
+    "updateCta": "Mettre à jour l'effectif"
+  },
+  "start": {
+    "chooseCaptainFirst": "Choisis un capitaine avant de valider",
+    "title": "Compose ton équipe de départ",
+    "subtitle": "Choisis tes 7 titulaires et ton capitaine (×2 points). Le capitaine ne pourra être changé qu'en période de transfert.",
+    "startersHint": "Titulaires · tap un joueur pour échanger avec son remplaçant",
+    "captainHint": "Capitaine · ×2 points s'il est titulaire à la journée",
+    "submitCta": "C'est parti →"
+  },
+  "trades": {
+    "title": "Trades",
+    "infoBanner": "Les trades sont autorisés toute la saison, même en dehors des fenêtres de transfert — un trade accepté s'exécute immédiatement.",
+    "proposeTitle": "Proposer un trade",
+    "chooseOpponent": "Choisir un adversaire…",
+    "offerLabelYou": "Tu offres",
+    "offerLabelThem": "Il t'offre",
+    "requestSectionTitle": "Tu demandes",
+    "requestLabelYou": "tu demandes",
+    "requestLabelThem": "il te demande",
+    "budgetAdjustmentLabel": "Ajustement budget (tu donnes si positif)",
+    "proposalSent": "Proposition envoyée.",
+    "submitCta": "Proposer le trade",
+    "sending": "Envoi…",
+    "myProposals": "Mes propositions",
+    "noProposals": "Aucune proposition pour le moment.",
+    "toTeam": "Vers {name}",
+    "fromTeam": "De {name}",
+    "accept": "Accepter",
+    "reject": "Refuser",
+    "cancel": "Annuler"
+  },
+  "transfers": {
+    "title": "Transferts",
+    "windowOpen": "Fenêtre de transfert ouverte — vends et achète librement.",
+    "windowClosed": "Pas de fenêtre de transfert ouverte en ce moment.",
+    "jokerAvailable": "{count, plural, one {Joker médical disponible (# restant) pour un joueur blessé.} other {Joker médical disponible (# restants) pour un joueur blessé.}}",
+    "noJokersLeft": "Aucun joker médical restant.",
+    "remainingBudgetLabel": "Budget restant :",
+    "squadHint": "Ton effectif · sélectionne un joueur à vendre",
+    "injuredBadge": "BLESSÉ",
+    "replacementFor": "Remplaçant pour {name}",
+    "transferUnavailable": "Transfert indisponible actuellement",
+    "searchPlaceholder": "Chercher un joueur ou club…",
+    "noPlayersFound": "Aucun joueur trouvé",
+    "transferSuccess": "{name} rejoint ton effectif."
+  },
+  "view": {
+    "editSquad": "Modifier effectif",
+    "customizeJersey": "Personnaliser le maillot",
+    "ptsSeasonLabel": "pts saison",
+    "captainLabel": "Capitaine · ×2 pts",
+    "noCaptain": "Aucun",
+    "changeCaptain": "Changer",
+    "locked": "Verrouillé",
+    "lockedTitle": "Modifiable seulement en période de transfert",
+    "seasonBonusTitle": "Bonus de saison",
+    "bonusUsedCount": "{used}/{quota} utilisés",
+    "convertTitle": "Convertir des points en budget",
+    "budgetLabel": "Budget :",
+    "convertRate": "1 pt = {rate}M · solde convertible : {points, plural, one {# pt} other {# pts}}",
+    "convertPlaceholder": "Points à convertir",
+    "convertAll": "Tout",
+    "convertCta": "Convertir",
+    "convertPreview": "→ +{amount}M de budget",
+    "convertClosedHint": "Convertir des points en budget est possible pendant une fenêtre de transfert.",
+    "budgetGained": "+{amount}M de budget",
+    "lastGameweekLabel": "Dernière journée",
+    "viewDetail": "pts · voir détail →",
+    "viewFullHistory": "Voir l'historique complet",
+    "lineupSaved": "Alignement sauvegardé ✓",
+    "saving": "Sauvegarde…",
+    "lineupSavedButton": "Alignement sauvegardé",
+    "saveLineupCta": "Sauvegarder l'alignement"
+  },
+  "jersey": {
+    "loading3d": "Chargement de l'aperçu 3D…",
+    "teamNameLabel": "Nom de l'équipe",
+    "teamNamePlaceholder": "Les Experts de Tish",
+    "dragToRotate": "Glisser pour faire tourner",
+    "patternLabel": "Motif",
+    "collarSleeveColor": "Couleur du col / manches",
+    "collarLabel": "Col",
+    "contrastSleeves": "Manches contrastées",
+    "numberLabel": "Numéro",
+    "nameFlockLabel": "Nom floqué",
+    "nameFlockPlaceholder": "TISH",
+    "chooseNameError": "Choisis un nom d'équipe",
+    "saving": "Sauvegarde…",
+    "submitCta": "Valider →",
+    "customColor": "Couleur personnalisée",
+    "colorSlotFallback": "Couleur {n}",
+    "slotLabels": {
+      "0": "Couleur principale",
+      "1": "Couleur secondaire",
+      "2": "Liseré",
+      "3": "Détail"
+    }
+  },
+  "pitch": {
+    "svgAriaLabel": "Demi-terrain de handball (20m × 20m), cadré sur la zone de jeu",
+    "benchLabel": "Remplaçants · tap pour échanger"
+  },
+  "bonus": {
+    "TRIPLE_CAPTAIN": {
+      "description": "×3 sur le capitaine cette journée"
+    },
+    "BENCH_BOOST": {
+      "description": "Les remplaçants comptent en ×1 cette journée"
+    },
+    "INSURANCE": {
+      "description": "Aucun joueur ne finit en négatif cette journée"
+    },
+    "STATISTICIAN": {
+      "description": "×2 sur le bonus/malus leader de journée"
+    },
+    "status": {
+      "active": "Actif cette journée",
+      "used": "Déjà utilisé",
+      "quotaReached": "Quota atteint",
+      "available": "Disponible"
+    }
+  }
+}

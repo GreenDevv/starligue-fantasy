@@ -1,7 +1,8 @@
 "use client";
 
 import { Fragment, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import type { Position } from "@/lib/squad/validation";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo, WHITE_BG_CLUBS } from "@/components/ui/ClubLogo";
@@ -225,8 +226,10 @@ export function HandballPitch({
   captainId,
   onSwap,
   onEmptySlotClick,
-  benchLabel = "Remplaçants · tap pour échanger",
+  benchLabel,
 }: HandballPitchProps) {
+  const t = useTranslations("team");
+  const resolvedBenchLabel = benchLabel ?? t("pitch.benchLabel");
   const starterByPos = new Map(starters.map((p) => [p.position as Position, p]));
   const router = useRouter();
 
@@ -238,7 +241,7 @@ export function HandballPitch({
         <svg
           viewBox={`0 ${VIEW_TOP} ${COURT} ${VIEW_HEIGHT}`}
           className="w-full"
-          aria-label="Demi-terrain de handball (20m × 20m), cadré sur la zone de jeu"
+          aria-label={t("pitch.svgAriaLabel")}
         >
           <defs>
             <radialGradient id="courtFill" cx="50%" cy="15%" r="95%">
@@ -410,7 +413,7 @@ export function HandballPitch({
       {bench.length > 0 && (
         <div>
           <p className="mb-2 text-[10px] font-semibold uppercase leading-tight tracking-widest text-text-muted">
-            {benchLabel}
+            {resolvedBenchLabel}
           </p>
           <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-7">
             {bench.map((p) => (

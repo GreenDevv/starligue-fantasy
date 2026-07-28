@@ -1,0 +1,14 @@
+{
+  "title": "My account",
+  "emailLabel": "Email",
+  "nameLabel": "Username",
+  "favoritePlayerLabel": "Favorite player",
+  "optional": "(optional)",
+  "favoritePlayerLocked": "Final choice, can't be changed once set.",
+  "savedMessage": "Saved! Your displayed username will update next time you log in.",
+  "saving": "Saving…",
+  "errors": {
+    "FAVORITE_PLAYER_LOCKED": "The favorite player choice is final once set",
+    "INVALID_PLAYER": "Favorite player not found"
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "position": {
+    "GK": "Bramkarz",
+    "LW": "Lewoskrzydłowy",
+    "LB": "Lewy rozgrywający",
+    "CB": "Rozgrywający",
+    "RB": "Prawy rozgrywający",
+    "RW": "Prawoskrzydłowy",
+    "PV": "Obrotowy"
+  },
+  "positionShort": {
+    "GK": "BR",
+    "LW": "LS",
+    "LB": "LR",
+    "CB": "RG",
+    "RB": "PR",
+    "RW": "PS",
+    "PV": "OB"
+  },
+  "bonus": {
+    "TRIPLE_CAPTAIN": "Potrójny Kapitan",
+    "BENCH_BOOST": "Bench Boost",
+    "INSURANCE": "Ubezpieczenie",
+    "STATISTICIAN": "Statystyk"
+  },
+  "newsCategory": {
+    "TRANSFER": "Transfer",
+    "INJURY": "Kontuzja",
+    "TEAM_OF_WEEK": "Drużyna kolejki",
+    "PERFORMANCE": "Wyczyn",
+    "GENERAL": "Aktualność"
+  },
+  "predictionOutcome": {
+    "HOME": "Gospodarze",
+    "DRAW": "Remis",
+    "AWAY": "Goście"
+  },
+  "venueFilter": {
+    "all": "Wszystkie",
+    "home": "Domowe",
+    "away": "Wyjazdowe"
+  },
+  "kitZone": {
+    "jersey": "Koszulka",
+    "shorts": "Spodenki",
+    "socks": "Getry"
+  },
+  "jerseyCollar": {
+    "crew": "Okrągły",
+    "v-neck": "V",
+    "polo": "Polo"
+  },
+  "statScope": {
+    "gameweek": "Kolejka",
+    "season": "Sezon",
+    "average": "Na mecz"
+  },
+  "tradeStatus": {
+    "PENDING": "Oczekująca",
+    "ACCEPTED": "Zaakceptowana",
+    "REJECTED": "Odrzucona",
+    "CANCELLED": "Anulowana",
+    "EXPIRED": "Wygasła"
+  },
+  "seasonMode": {
+    "live": "sezon 2026/27",
+    "simulation": "Symulacja 2025/26"
+  },
+  "statLine": {
+    "goalsPlay": "Gole (z gry)",
+    "goalsPenalty": "Gole (z rzutu karnego)",
+    "goalsTotal": "Gole razem",
+    "shotPercentage": "% skuteczności",
+    "assists": "Asysty",
+    "ballsRecovered": "Odzyskane piłki",
+    "opponentShotsBlocked": "Zablokowane rzuty przeciwnika",
+    "penaltiesDrawn": "Wywalczone rzuty karne",
+    "twoMinDrawn": "Wywalczone 2 min",
+    "neutralizations": "Neutralizacje",
+    "saves": "Obrony",
+    "savePercentage": "% obron",
+    "turnovers": "Straty",
+    "twoMinTaken": "2 min",
+    "disqualified": "Dyskwalifikacje",
+    "fantasyPoints": "Punkty fantasy (w podstawie)"
+  },
+  "widgetType": {
+    "leaderboard-global": "Klasyfikacja generalna",
+    "leaderboard-leagues": "Moje ligi",
+    "last-results": "Ostatnie wyniki",
+    "upcoming-matches": "Nadchodzące mecze",
+    "club-standings": "Tabela Starligue",
+    "best-xi": "Najlepsza siódemka sezonu"
+  }
+}

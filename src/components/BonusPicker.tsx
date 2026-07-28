@@ -1,16 +1,16 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { TripleCaptainIcon, BenchBoostIcon, InsuranceIcon, StatisticianIcon } from "@/components/ui/icons";
-import { BONUS_LABELS } from "@/lib/scoring/bonus-labels";
 import type { BonusType } from "@/lib/scoring/engine";
 
 export type { BonusType };
 
-const BONUS_INFO: Record<BonusType, { description: string; Icon: typeof TripleCaptainIcon }> = {
-  TRIPLE_CAPTAIN: { description: "×3 sur le capitaine cette journée", Icon: TripleCaptainIcon },
-  BENCH_BOOST: { description: "Les remplaçants comptent en ×1 cette journée", Icon: BenchBoostIcon },
-  INSURANCE: { description: "Aucun joueur ne finit en négatif cette journée", Icon: InsuranceIcon },
-  STATISTICIAN: { description: "×2 sur le bonus/malus leader de journée", Icon: StatisticianIcon },
+const BONUS_ICONS: Record<BonusType, typeof TripleCaptainIcon> = {
+  TRIPLE_CAPTAIN: TripleCaptainIcon,
+  BENCH_BOOST: BenchBoostIcon,
+  INSURANCE: InsuranceIcon,
+  STATISTICIAN: StatisticianIcon,
 };
 
 interface BonusPickerProps {
@@ -30,12 +30,14 @@ export function BonusPicker({
   onSelect,
   disabled = false,
 }: BonusPickerProps) {
+  const tLabels = useTranslations("labels");
+  const t = useTranslations("team");
   const quotaReached = usedBonusTypes.length >= seasonBonusQuota;
 
   return (
     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-      {(Object.keys(BONUS_INFO) as BonusType[]).map((type) => {
-        const info = BONUS_INFO[type];
+      {(Object.keys(BONUS_ICONS) as BonusType[]).map((type) => {
+        const Icon = BONUS_ICONS[type];
         const isUsed = usedBonusTypes.includes(type);
         const isActive = pendingBonus === type;
         // Un type jamais utilisé ne peut plus être choisi une fois le quota
@@ -56,12 +58,12 @@ export function BonusPicker({
               isDisabled ? "cursor-not-allowed opacity-50" : "active:bg-border/20",
             ].join(" ")}
           >
-            <info.Icon
+            <Icon
               className={`h-5 w-5 ${isActive ? "text-accent-secondary" : "text-text-muted"}`}
               strokeWidth={isActive ? 2.1 : 1.8}
             />
-            <span className="text-sm font-semibold text-text">{BONUS_LABELS[type]}</span>
-            <span className="text-[10px] text-text-muted">{info.description}</span>
+            <span className="text-sm font-semibold text-text">{tLabels(`bonus.${type}`)}</span>
+            <span className="text-[10px] text-text-muted">{t(`bonus.${type}.description`)}</span>
             <span
               className={[
                 "text-[10px] uppercase tracking-widest",
@@ -69,12 +71,12 @@ export function BonusPicker({
               ].join(" ")}
             >
               {isActive
-                ? "Actif cette journée"
+                ? t("bonus.status.active")
                 : isUsed
-                  ? "Déjà utilisé"
+                  ? t("bonus.status.used")
                   : isBlockedByQuota
-                    ? "Quota atteint"
-                    : "Disponible"}
+                    ? t("bonus.status.quotaReached")
+                    : t("bonus.status.available")}
             </span>
           </button>
         );

@@ -1,0 +1,57 @@
+{
+  "list": {
+    "title": "Mine ligaer",
+    "count": "{count, plural, one {# liga} other {# ligaer}}",
+    "seasonBadge": {
+      "live": "26/27",
+      "simulation": "Sim 25/26"
+    },
+    "joinButton": "Deltag",
+    "createButton": "+ Opret",
+    "createdTitle": "Liga oprettet!",
+    "createFormTitle": "Opret en liga",
+    "createNamePlaceholder": "Ligaens navn…",
+    "creating": "Opretter…",
+    "createSubmit": "Opret →",
+    "joinFormTitle": "Deltag med en kode",
+    "joinCodePlaceholder": "ABCD1234",
+    "joining": "Søger…",
+    "joinSubmit": "Deltag →",
+    "emptyState": "Dit hold er knyttet til en liga — opret din egen eller deltag i en vens liga for at komme i gang.",
+    "memberCount": "{count, plural, one {# medlem} other {# medlemmer}}",
+    "ownerBadge": "admin",
+    "points": "{points} point"
+  },
+  "detail": {
+    "memberRatio": "{count}/{max} medlemmer",
+    "buildSquadTitle": "Sammensæt din trup",
+    "buildSquadDescription": "Du har endnu ikke sammensat din trup på 14 spillere til denne liga.",
+    "buildSquadCta": "Opret min trup →",
+    "leagueLeaderboardTitle": "Ligastilling",
+    "globalLeaderboardTitle": "Samlet stilling",
+    "globalLeaderboardSubtitle": "På tværs af alle ligaer"
+  },
+  "inviteCodeLabel": "Invitationskode",
+  "actions": {
+    "copied": "Kopieret ✓",
+    "copyInvite": "{code} — kopiér",
+    "leaveLeague": "Forlad ligaen",
+    "deleteConfirm": "Slet permanent",
+    "deleteLeague": "Slet ligaen"
+  },
+  "chat": {
+    "title": "Ligachat",
+    "badge": "Kun trash talk",
+    "emptyState": "Ingen har endnu indledt fjendtlighederne. Æren er din.",
+    "you": "Dig",
+    "inputPlaceholder": "Send en gliring til dine modstandere…",
+    "send": "Send"
+  },
+  "errors": {
+    "NO_ACTIVE_SEASON": "Ingen aktiv sæson for øjeblikket",
+    "WRONG_SEASON_MODE": "Denne liga tilhører en anden sæson — skift sæsontilstand for at deltage.",
+    "LEAGUE_FULL": "Ligaen er fuld",
+    "ALREADY_MEMBER": "Du er allerede medlem af denne liga",
+    "OWNER_CANNOT_LEAVE": "Ejeren kan ikke forlade sin egen liga. Slet den, eller overdrag den."
+  }
+}

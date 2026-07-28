@@ -1,0 +1,55 @@
+{
+  "detail": {
+    "backToMarket": "Rynek",
+    "avgRatingShort": "śr. {rating}/10",
+    "valueEvolution": "Zmiana wartości",
+    "seasonStats": "Statystyki sezonu {season}",
+    "shotPercentage": "% skuteczności",
+    "statsByGameweek": "Statystyki w kolejkach",
+    "simulation": "Symulacja",
+    "season": "Sezon",
+    "noLnhHistory": "Nowy w Daikin StarLigue — brak historii oceny LNH.",
+    "lnhHistory": "Historia LNH",
+    "lnhHistoryHeaders": {
+      "season": "Sezon",
+      "matches": "Mecze",
+      "avgScore": "Śr. ocena LNH"
+    },
+    "noStats": "Brak dostępnych statystyk na razie.",
+    "fallbackClubNote": "{name} grał(a) w klubie {club} w sezonie {season}",
+    "fallbackStatsNote": "Obecny sezon jeszcze się nie rozpoczął: pokazano statystyki z poprzedniego sezonu tytułem orientacyjnym.",
+    "matchByMatch": "Statystyki mecz po meczu",
+    "matchLogHeaders": {
+      "gameweek": "Kol.",
+      "opponent": "Przec.",
+      "rating": "Ocena",
+      "points": "Pkt (w podst.)"
+    }
+  },
+  "compare": {
+    "comparedTo": "Porównanie z",
+    "remove": "Usuń",
+    "addCompare": "Porównaj z zawodnikiem",
+    "searchPlaceholder": "Nazwisko zawodnika...",
+    "searching": "Wyszukiwanie...",
+    "noPlayerFound": "Nie znaleziono zawodnika.",
+    "loading": "Ładowanie..."
+  },
+  "search": {
+    "change": "Zmień",
+    "placeholder": "Szukaj nazwiska…",
+    "noResults": "Nie znaleziono zawodnika"
+  },
+  "recap": {
+    "ariaLabel": "Statystyki sezonu {season}",
+    "title": "Sezon {season}",
+    "loading": "Ładowanie…",
+    "noStats": "Brak statystyk za sezon {season}.",
+    "matches": "Mecze",
+    "rating": "Ocena LNH",
+    "saves": "Obrony",
+    "savePercentage": "% Obron",
+    "goals": "Gole",
+    "assists": "Asysty"
+  }
+}

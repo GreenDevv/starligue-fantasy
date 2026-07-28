@@ -1,0 +1,57 @@
+{
+  "list": {
+    "title": "Les meves lligues",
+    "count": "{count, plural, one {# lliga} other {# lligues}}",
+    "seasonBadge": {
+      "live": "26/27",
+      "simulation": "Sim 25/26"
+    },
+    "joinButton": "Unir-se",
+    "createButton": "+ Crear",
+    "createdTitle": "Lliga creada!",
+    "createFormTitle": "Crear una lliga",
+    "createNamePlaceholder": "Nom de la lliga…",
+    "creating": "Creant…",
+    "createSubmit": "Crear →",
+    "joinFormTitle": "Unir-se amb un codi",
+    "joinCodePlaceholder": "ABCD1234",
+    "joining": "Cercant…",
+    "joinSubmit": "Unir-se →",
+    "emptyState": "El teu equip està lligat a una lliga — crea la teva o uneix-te a la d'un amic per començar.",
+    "memberCount": "{count, plural, one {# membre} other {# membres}}",
+    "ownerBadge": "admin",
+    "points": "{points} pts"
+  },
+  "detail": {
+    "memberRatio": "{count}/{max} membres",
+    "buildSquadTitle": "Compon el teu equip",
+    "buildSquadDescription": "Encara no has format el teu equip de 14 jugadors per a aquesta lliga.",
+    "buildSquadCta": "Crear el meu equip →",
+    "leagueLeaderboardTitle": "Classificació de la lliga",
+    "globalLeaderboardTitle": "Classificació general",
+    "globalLeaderboardSubtitle": "Totes les lligues juntes"
+  },
+  "inviteCodeLabel": "Codi d'invitació",
+  "actions": {
+    "copied": "Copiat ✓",
+    "copyInvite": "{code} — copiar",
+    "leaveLeague": "Sortir de la lliga",
+    "deleteConfirm": "Eliminar definitivament",
+    "deleteLeague": "Eliminar la lliga"
+  },
+  "chat": {
+    "title": "Xat de la lliga",
+    "badge": "Trash talk only",
+    "emptyState": "Ningú ha començat les hostilitats encara. L'honor és teu.",
+    "you": "Tu",
+    "inputPlaceholder": "Envia una punxada als teus rivals…",
+    "send": "Enviar"
+  },
+  "errors": {
+    "NO_ACTIVE_SEASON": "No hi ha cap temporada activa ara mateix",
+    "WRONG_SEASON_MODE": "Aquesta lliga pertany a una altra temporada — canvia l'interruptor de temporada per unir-t'hi.",
+    "LEAGUE_FULL": "Aquesta lliga està completa",
+    "ALREADY_MEMBER": "Ja ets membre d'aquesta lliga",
+    "OWNER_CANNOT_LEAVE": "El creador no pot sortir de la seva pròpia lliga. Elimina-la o transfereix-ne la propietat."
+  }
+}

@@ -1,4 +1,7 @@
-import Link from "next/link";
+"use client";
+
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { JerseyBadge } from "@/components/jersey/JerseyBadge";
 
 export interface GlobalStandingRow {
@@ -11,16 +14,17 @@ export interface GlobalStandingRow {
 }
 
 export function LeaderboardGlobalWidget({ standings }: { standings: GlobalStandingRow[] }) {
+  const t = useTranslations("dashboard");
   return (
     <div className="pixel-corners border border-border bg-surface p-3">
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-[10px] uppercase tracking-widest text-text-muted">Classement général</p>
+        <p className="text-[10px] uppercase tracking-widest text-text-muted">{t("globalLeaderboardWidget.title")}</p>
         <Link href="/leaderboard" className="text-[10px] text-text-muted transition-colors hover:text-text">
-          Voir tout →
+          {t("globalLeaderboardWidget.seeAll")}
         </Link>
       </div>
       {standings.length === 0 ? (
-        <p className="py-4 text-center text-xs text-text-muted">Aucune équipe classée pour l'instant.</p>
+        <p className="py-4 text-center text-xs text-text-muted">{t("globalLeaderboardWidget.noTeams")}</p>
       ) : (
         <div className="flex flex-col gap-1.5">
           {standings.map((s) => (

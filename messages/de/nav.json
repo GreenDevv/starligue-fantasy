@@ -1,0 +1,13 @@
+{
+  "dashboard": "Dashboard",
+  "market": "Markt",
+  "predictions": "Tipps",
+  "leagues": "Ligen",
+  "leaderboard": "Rangliste",
+  "matches": "Spielplan",
+  "connexion": "Anmelden",
+  "deconnexion": "Abmelden",
+  "deconnexionAriaLabel": "Abmelden",
+  "deconnexionTitle": "Abmelden ({name})",
+  "languageSelector": "Sprache ändern"
+}

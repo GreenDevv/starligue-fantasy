@@ -1,0 +1,95 @@
+{
+  "position": {
+    "GK": "Goalkeeper",
+    "LW": "Left Wing",
+    "LB": "Left Back",
+    "CB": "Centre Back",
+    "RB": "Right Back",
+    "RW": "Right Wing",
+    "PV": "Pivot"
+  },
+  "positionShort": {
+    "GK": "GK",
+    "LW": "LW",
+    "LB": "LB",
+    "CB": "CB",
+    "RB": "RB",
+    "RW": "RW",
+    "PV": "PV"
+  },
+  "bonus": {
+    "TRIPLE_CAPTAIN": "Triple Captain",
+    "BENCH_BOOST": "Bench Boost",
+    "INSURANCE": "Insurance",
+    "STATISTICIAN": "Statistician"
+  },
+  "newsCategory": {
+    "TRANSFER": "Transfer",
+    "INJURY": "Injury",
+    "TEAM_OF_WEEK": "Team of the Week",
+    "PERFORMANCE": "Performance",
+    "GENERAL": "News"
+  },
+  "predictionOutcome": {
+    "HOME": "Home",
+    "DRAW": "Draw",
+    "AWAY": "Away"
+  },
+  "venueFilter": {
+    "all": "All",
+    "home": "Home",
+    "away": "Away"
+  },
+  "kitZone": {
+    "jersey": "Jersey",
+    "shorts": "Shorts",
+    "socks": "Socks"
+  },
+  "jerseyCollar": {
+    "crew": "Crew",
+    "v-neck": "V-neck",
+    "polo": "Polo"
+  },
+  "statScope": {
+    "gameweek": "Matchday",
+    "season": "Season",
+    "average": "Per match"
+  },
+  "tradeStatus": {
+    "PENDING": "Pending",
+    "ACCEPTED": "Accepted",
+    "REJECTED": "Rejected",
+    "CANCELLED": "Cancelled",
+    "EXPIRED": "Expired"
+  },
+  "seasonMode": {
+    "live": "2026/27 season",
+    "simulation": "2025/26 Simulation"
+  },
+  "statLine": {
+    "goalsPlay": "Goals (shots)",
+    "goalsPenalty": "Goals (penalty)",
+    "goalsTotal": "Total goals",
+    "shotPercentage": "Shot %",
+    "assists": "Assists",
+    "ballsRecovered": "Balls recovered",
+    "opponentShotsBlocked": "Opponent shots blocked",
+    "penaltiesDrawn": "Penalties drawn",
+    "twoMinDrawn": "2-min drawn",
+    "neutralizations": "Neutralizations",
+    "saves": "Saves",
+    "savePercentage": "Save %",
+    "turnovers": "Turnovers",
+    "twoMinTaken": "2-min",
+    "disqualified": "Disqualifications",
+    "fantasyPoints": "Fantasy points (starter)"
+  },
+  "widgetType": {
+    "leaderboard-global": "Global leaderboard",
+    "leaderboard-leagues": "My leagues",
+    "last-results": "Latest results",
+    "upcoming-matches": "Upcoming fixtures",
+    "club-standings": "Starligue standings",
+    "best-xi": "Team of the season"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "title": "Stilling",
+  "tabs": {
+    "global": "Samlet",
+    "gameweek": "Denne runde"
+  },
+  "loading": "Indlæser…",
+  "totalTeams": "{count, plural, one {# hold i alt} other {# hold i alt}}",
+  "pagination": {
+    "prev": "Forr.",
+    "next": "Næste"
+  },
+  "gameweekLabel": "Runde {number}",
+  "notScoredYet": "Runden er ikke bedømt endnu",
+  "list": {
+    "empty": "Ingen hold i denne stilling endnu."
+  }
+}

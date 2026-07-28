@@ -1,0 +1,19 @@
+{
+  "title": "Mercat",
+  "playerCount": "{count, plural, one {# jugador} other {# jugadors}} · {seasonMode}",
+  "searchPlaceholder": "Cerca un jugador o club…",
+  "allPositions": "Tots",
+  "sortByValue": "↓ Valor",
+  "sortByName": "↓ Nom",
+  "noPlayersFound": "No s'ha trobat cap jugador",
+  "trend": {
+    "up": "En pujada",
+    "down": "En baixada"
+  },
+  "budget": {
+    "label": "Pressupost",
+    "remaining": "{value}M restants",
+    "over": "{value}M de sobrecost",
+    "spent": "Gastat: {value}M"
+  }
+}

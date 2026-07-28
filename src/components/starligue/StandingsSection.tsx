@@ -1,28 +1,32 @@
+import { getTranslations } from "next-intl/server";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import type { ClubStandingsResult } from "@/lib/standings/get";
 
-export function StandingsSection({ gameweekNumber, rows }: ClubStandingsResult) {
+export async function StandingsSection({ gameweekNumber, rows }: ClubStandingsResult) {
+  const t = await getTranslations("dashboard");
   return (
     <div className="pixel-corners border border-border bg-surface p-3">
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-[10px] uppercase tracking-widest text-text-muted">Classement</p>
+        <p className="text-[10px] uppercase tracking-widest text-text-muted">{t("standingsSection.title")}</p>
         {gameweekNumber !== null && (
-          <p className="text-[10px] uppercase tracking-widest text-text-muted">Journée {gameweekNumber}</p>
+          <p className="text-[10px] uppercase tracking-widest text-text-muted">
+            {t("standingsSection.gameweek", { number: gameweekNumber })}
+          </p>
         )}
       </div>
 
       {rows.length === 0 ? (
-        <p className="py-4 text-center text-xs text-text-muted">Classement pas encore disponible.</p>
+        <p className="py-4 text-center text-xs text-text-muted">{t("standingsSection.notAvailable")}</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
               <tr className="text-text-muted">
                 <th className="w-6 py-1 text-left font-normal">#</th>
-                <th className="py-1 text-left font-normal">Club</th>
-                <th className="w-8 py-1 text-right font-normal">J</th>
-                <th className="w-10 py-1 text-right font-normal">+/-</th>
-                <th className="w-8 py-1 text-right font-normal">Pts</th>
+                <th className="py-1 text-left font-normal">{t("standingsSection.col.club")}</th>
+                <th className="w-8 py-1 text-right font-normal">{t("standingsSection.col.played")}</th>
+                <th className="w-10 py-1 text-right font-normal">{t("standingsSection.col.diff")}</th>
+                <th className="w-8 py-1 text-right font-normal">{t("standingsSection.col.points")}</th>
               </tr>
             </thead>
             <tbody>

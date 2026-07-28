@@ -1,0 +1,30 @@
+{
+  "detail": {
+    "backToDashboard": "Inicio",
+    "simulation": "Simulación",
+    "season": "Temporada",
+    "goalsByGameweek": "Goles por jornada",
+    "rosterCount": "Plantilla — {count, plural, one {# jugador} other {# jugadores}}",
+    "noPlayers": "Ningún jugador registrado por ahora."
+  },
+  "compare": {
+    "vs": "VS",
+    "currentSeason": "Temporada en curso",
+    "standingsUnavailable": "Clasificación aún no disponible.",
+    "headToHead": "Enfrentamientos directos",
+    "headToHeadCount": "{count, plural, one {último # encuentro} other {últimos # encuentros}}",
+    "noHeadToHead": "No se ha encontrado ningún enfrentamiento entre estos dos clubes.",
+    "headToHeadSummary": "{winsA, plural, one {# victoria} other {# victorias}} {clubA} · {draws, plural, one {# empate} other {# empates}} · {winsB, plural, one {# victoria} other {# victorias}} {clubB}",
+    "stats": {
+      "rank": "Puesto",
+      "points": "Puntos",
+      "played": "Jugados",
+      "wins": "Victorias",
+      "draws": "Empates",
+      "losses": "Derrotas",
+      "goalsFor": "Goles a favor",
+      "goalsAgainst": "Goles en contra",
+      "goalDiff": "Dif."
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "title": "Clasificación",
+  "tabs": {
+    "global": "General",
+    "gameweek": "Esta jornada"
+  },
+  "loading": "Cargando…",
+  "totalTeams": "{count, plural, one {# equipo en total} other {# equipos en total}}",
+  "pagination": {
+    "prev": "Ant.",
+    "next": "Sig."
+  },
+  "gameweekLabel": "Jornada {number}",
+  "notScoredYet": "Jornada aún sin puntuar",
+  "list": {
+    "empty": "Todavía no hay equipos en esta clasificación."
+  }
+}

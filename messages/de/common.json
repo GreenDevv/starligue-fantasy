@@ -1,0 +1,17 @@
+{
+  "loading": "Wird geladen…",
+  "save": "Speichern",
+  "cancel": "Abbrechen",
+  "confirm": "Bestätigen",
+  "close": "Schließen",
+  "back": "Zurück",
+  "edit": "Bearbeiten",
+  "delete": "Löschen",
+  "yes": "Ja",
+  "no": "Nein",
+  "cookieBanner": {
+    "text": "Diese Website verwendet ausschließlich technisch notwendige Cookies für ihren Betrieb (Anmeldung, Einstellungen). Keine Tracking- oder Werbecookies.",
+    "learnMore": "Mehr erfahren",
+    "dismiss": "Verstanden"
+  }
+}

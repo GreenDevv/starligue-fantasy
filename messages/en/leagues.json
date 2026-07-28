@@ -1,0 +1,57 @@
+{
+  "list": {
+    "title": "My leagues",
+    "count": "{count, plural, one {# league} other {# leagues}}",
+    "seasonBadge": {
+      "live": "26/27",
+      "simulation": "Sim 25/26"
+    },
+    "joinButton": "Join",
+    "createButton": "+ Create",
+    "createdTitle": "League created!",
+    "createFormTitle": "Create a league",
+    "createNamePlaceholder": "League name…",
+    "creating": "Creating…",
+    "createSubmit": "Create →",
+    "joinFormTitle": "Join with a code",
+    "joinCodePlaceholder": "ABCD1234",
+    "joining": "Looking…",
+    "joinSubmit": "Join →",
+    "emptyState": "Your team is tied to a league — create your own or join a friend's to get started.",
+    "memberCount": "{count, plural, one {# member} other {# members}}",
+    "ownerBadge": "admin",
+    "points": "{points} pts"
+  },
+  "detail": {
+    "memberRatio": "{count}/{max} members",
+    "buildSquadTitle": "Build your squad",
+    "buildSquadDescription": "You haven't put together your 14-player squad for this league yet.",
+    "buildSquadCta": "Build my squad →",
+    "leagueLeaderboardTitle": "League leaderboard",
+    "globalLeaderboardTitle": "Overall leaderboard",
+    "globalLeaderboardSubtitle": "All leagues combined"
+  },
+  "inviteCodeLabel": "Invite code",
+  "actions": {
+    "copied": "Copied ✓",
+    "copyInvite": "{code} — copy",
+    "leaveLeague": "Leave league",
+    "deleteConfirm": "Delete permanently",
+    "deleteLeague": "Delete league"
+  },
+  "chat": {
+    "title": "League chat",
+    "badge": "Trash talk only",
+    "emptyState": "No one's started the beef yet. Do the honors.",
+    "you": "You",
+    "inputPlaceholder": "Send a jab at your rivals…",
+    "send": "Send"
+  },
+  "errors": {
+    "NO_ACTIVE_SEASON": "No active season right now",
+    "WRONG_SEASON_MODE": "This league belongs to another season — switch the season toggle to join it.",
+    "LEAGUE_FULL": "This league is full",
+    "ALREADY_MEMBER": "You're already a member of this league",
+    "OWNER_CANNOT_LEAVE": "The creator can't leave their own league. Delete it or transfer ownership."
+  }
+}

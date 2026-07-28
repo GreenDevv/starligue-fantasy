@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db";
 import { compare } from "bcryptjs";
 import { z } from "zod";
+import { routing } from "@/i18n/routing";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -12,6 +13,22 @@ const loginSchema = z.object({
 
 const PROTECTED_PREFIXES = ["/team", "/market", "/leagues", "/leaderboard", "/matches", "/players", "/clubs", "/dashboard", "/account"];
 const ADMIN_PREFIXES = ["/admin"];
+
+// localePrefix "as-needed" : le FR (défaut) n'a pas de préfixe (/team), les
+// autres langues en ont un (/en/team). PROTECTED_PREFIXES/ADMIN_PREFIXES sont
+// écrits sans préfixe — il faut le retirer avant de comparer, sinon /en/team
+// ne matche plus jamais "/team".startsWith et la route se retrouve déprotégée.
+function splitLocale(pathname: string): { locale: string; rest: string } {
+  const [, maybeLocale, ...restSegs] = pathname.split("/");
+  if (maybeLocale && (routing.locales as readonly string[]).includes(maybeLocale)) {
+    return { locale: maybeLocale, rest: "/" + restSegs.join("/") };
+  }
+  return { locale: routing.defaultLocale, rest: pathname };
+}
+
+function withLocale(locale: string, path: string): string {
+  return locale === routing.defaultLocale ? path : `/${locale}${path}`;
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -41,14 +58,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     authorized({ auth: session, request }) {
       const { pathname } = request.nextUrl;
-      const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
-      const isAdmin = ADMIN_PREFIXES.some((p) => pathname.startsWith(p));
+      const { locale, rest } = splitLocale(pathname);
+      const isProtected = PROTECTED_PREFIXES.some((p) => rest.startsWith(p));
+      const isAdmin = ADMIN_PREFIXES.some((p) => rest.startsWith(p));
 
-      if ((isProtected || isAdmin) && !session) return false;
+      // pages.signIn ci-dessous est une valeur statique (impossible d'y
+      // injecter la locale courante) : les redirections métier passent donc
+      // par Response.redirect explicite, locale-aware, plutôt que de s'y fier.
+      if ((isProtected || isAdmin) && !session) {
+        const loginUrl = new URL(withLocale(locale, "/login"), request.url);
+        loginUrl.searchParams.set("callbackUrl", pathname);
+        return Response.redirect(loginUrl);
+      }
 
       // @ts-expect-error — role étendu
       if (isAdmin && session?.user?.role !== "ADMIN") {
-        return Response.redirect(new URL("/", request.url));
+        return Response.redirect(new URL(withLocale(locale, "/"), request.url));
       }
 
       return true;

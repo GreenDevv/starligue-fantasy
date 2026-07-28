@@ -1,0 +1,21 @@
+{
+  "title": "Pronósticos",
+  "subtitle": "Gratis e ilimitado. Un buen pronóstico aumenta el multiplicador de tus puntos de la jornada (×0.5 a ×2.0) — nunca hay penalización por acertar mal ni por no arriesgar un pronóstico.",
+  "gwLabel": "Jornada {number}",
+  "gwShort": "J{number}",
+  "opensAfterDeadline": "Se abre después de la deadline de la jornada {number}",
+  "nextGwLocked": "La jornada {next} se abrirá cuando pase la deadline de la jornada {current}.",
+  "loading": "Cargando…",
+  "noMatches": "No hay partidos para esta jornada.",
+  "lockedWithPick": "Pronóstico bloqueado: {outcome}",
+  "lockedNoPick": "Bloqueado — ningún pronóstico realizado",
+  "oddsUnavailable": "Cuotas aún no disponibles",
+  "networkError": "Error de red",
+  "errors": {
+    "NOT_AVAILABLE_IN_SIMULATION": "Los pronósticos solo están disponibles en juego en directo por ahora",
+    "NO_ACTIVE_LEAGUE": "Ninguna liga activa",
+    "GW_NOT_OPEN": "Esta jornada todavía no está abierta a pronósticos",
+    "MARKET_NOT_READY": "Cuotas aún no disponibles para este partido",
+    "MATCH_LOCKED": "Pronóstico bloqueado — el partido empieza pronto"
+  }
+}

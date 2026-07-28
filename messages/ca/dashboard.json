@@ -1,0 +1,167 @@
+{
+  "widgetShell": {
+    "reorder": "Reorganitzar aquest widget",
+    "remove": "Treure aquest widget del tauler",
+    "sizeLabel": "Mida {size}",
+    "size": {
+      "mini": "Mini",
+      "square": "Quadrat",
+      "wide": "Llarg"
+    }
+  },
+  "comingSoon": {
+    "seasonBadge": "TEMPORADA 2026 / 2027",
+    "tagline": "El joc de <strong>fantasy d'handbol</strong> basat en els jugadors reals de la Daikin StarLigue. Forma el teu equip i suma punts amb el seu rendiment real, jornada rere jornada.",
+    "badge": "AVIAT",
+    "previewAriaLabel": "Previsualització del joc",
+    "footerDisclaimer": "Projecte personal, sense relació oficial amb la LNH ni la Daikin StarLigue — obertura abans del començament de la temporada.",
+    "features": {
+      "squad": {
+        "title": "Forma el teu equip",
+        "description": "14 jugadors entre els 16 clubs de Starligue, un pressupost ajustat, una posició cada vegada — porter, extrems, laterals, central, pivot."
+      },
+      "lineup": {
+        "title": "Alinea't cada jornada",
+        "description": "7 titulars a la pista, 7 suplents a la banqueta. Data límit abans de cada inici, com a la realitat."
+      },
+      "score": {
+        "title": "Puntua amb el real",
+        "description": "Gols, aturades, assistències: cada estadística del partit compta en la teva puntuació de la jornada."
+      },
+      "challenge": {
+        "title": "Desafia els teus amics",
+        "description": "Crea la teva lliga privada, segueix la classificació en directe, intercanvia jugadors entre jornades."
+      }
+    }
+  },
+  "home": {
+    "metadataTitle": "Properament",
+    "metadataDescription": "Starligue Fantasy està en camí: el joc de fantasy d'handbol basat en la Daikin Starligue. Crea el teu equip amb jugadors reals d'handbol D1 abans que comenci la temporada.",
+    "noActiveSeason": "Ara mateix no hi ha cap temporada en curs.",
+    "seasonLabel": "Daikin Starligue · {label}",
+    "title": "Starligue",
+    "welcomeBack": "Benvingut de nou, <b>{name}</b>!",
+    "welcomeGuest": "Benvingut — resultats, classificació i notícies de la Daikin StarLigue en directe.",
+    "ctaLoggedIn": "Anar a Fantasy Starligue →",
+    "ctaGuest": "Crear el meu equip Fantasy →",
+    "footerDisclaimer": "Projecte personal, sense relació oficial amb la LNH ni la Daikin StarLigue.",
+    "footerPrivacyLink": "Privacitat i cookies"
+  },
+  "page": {
+    "title": "Inici",
+    "noActiveSeason": "Ara mateix no hi ha cap temporada activa."
+  },
+  "matchesStrip": {
+    "results": "Resultats",
+    "upcoming": "Propers partits",
+    "gameweek": "Jornada {number}",
+    "noResults": "Encara no hi ha resultats.",
+    "noUpcoming": "No hi ha partits programats."
+  },
+  "simulationControls": {
+    "prevGameweek": "← Jornada anterior",
+    "nextGameweek": "Jornada següent →",
+    "counter": "Sim J{current}/{total}"
+  },
+  "statLeaderCard": {
+    "removeAriaLabel": "Treure {label} del dashboard",
+    "ownedByTeams": "A {teams}",
+    "noData": "Encara no hi ha dades."
+  },
+  "statLeadersPanel": {
+    "title": "Líders",
+    "addStatLabel": "Afegir una estadística",
+    "allLinesVisible": "Ja es mostren totes les estadístiques.",
+    "addStatCta": "+ Afegir una estadística"
+  },
+  "bestXIWidget": {
+    "subtitle": "Equip tipus de la temporada · millors jugadors per posició",
+    "noData": "Encara no hi ha cap jornada puntuada."
+  },
+  "clubStandingsWidget": {
+    "title": "Classificació Starligue",
+    "beforeGameweek1": "Abans de J1",
+    "afterGameweek": "Després de J{number}",
+    "notAvailable": "Classificació encara no disponible.",
+    "seasonNotStarted": "La temporada encara no ha començat — la classificació és a zero a tot arreu, és normal.",
+    "col": {
+      "club": "Club",
+      "played": "J",
+      "wins": "V",
+      "draws": "E",
+      "losses": "D",
+      "goalsFor": "GF",
+      "goalsAgainst": "GC",
+      "diff": "Dif",
+      "points": "Pts"
+    }
+  },
+  "leaguesWidget": {
+    "title": "Les meves lligues",
+    "seeAll": "Veure-ho tot →",
+    "noLeagues": "Encara no t'has unit a cap lliga.",
+    "joinLeague": "Unir-te a una lliga →",
+    "memberCount": "{count, plural, one {# membre} other {# membres}}"
+  },
+  "globalLeaderboardWidget": {
+    "title": "Classificació general",
+    "seeAll": "Veure-ho tot →",
+    "noTeams": "Encara no hi ha equips classificats."
+  },
+  "newsFeed": {
+    "title": "Notícies Starligue",
+    "filterAll": "Tot",
+    "filterTransfers": "Traspassos",
+    "filterInjuries": "Lesions",
+    "filterTeamOfWeek": "Equip de la setmana",
+    "filterPerformances": "Rendiments",
+    "filterGeneral": "Notícies",
+    "noNews": "Encara no hi ha notícies.",
+    "seeMore": "Veure més"
+  },
+  "standingsSection": {
+    "title": "Classificació",
+    "gameweek": "Jornada {number}",
+    "notAvailable": "Classificació encara no disponible.",
+    "col": {
+      "club": "Club",
+      "played": "J",
+      "diff": "+/-",
+      "points": "Pts"
+    }
+  },
+  "bestXICard": {
+    "subtitle": "Equip tipus · jornada {number}"
+  },
+  "performancesCard": {
+    "subtitle": "Millors rendiments · jornada {number}"
+  },
+  "statLeadersSection": {
+    "subtitle": "Líders · jornada {number}"
+  },
+  "errors": {
+    "SEASON_COMPLETE": "Ja s'han jugat totes les jornades de la temporada simulada",
+    "CONFLICT": "La temporada s'ha modificat mentrestant — torna-ho a provar",
+    "ALREADY_AT_START": "La temporada simulada ja és al seu punt de partida"
+  },
+  "dashboardView": {
+    "newsLink": "Notícies Starligue →",
+    "allWidgetsRemoved": "S'han eliminat tots els widgets — afegeix-ne des del tauler de sota.",
+    "addWidgetTitle": "Afegir un widget",
+    "hideStats": "Amagar estadístiques",
+    "addStat": "+ Afegir una estadística",
+    "allFixedWidgetsVisible": "Tots els widgets fixos ja es mostren — encara pots afegir estadístiques.",
+    "close": "Tancar",
+    "addWidgetCta": "+ Afegir un widget",
+    "status": {
+      "greeting": "Hola {name}",
+      "greetingGuest": "Benvingut",
+      "noLeague": "Uneix-te o crea una lliga per començar l'aventura.",
+      "joinLeagueCta": "Unir-se a una lliga",
+      "squadNotValidated": "El teu equip encara no està validat.",
+      "buildSquadCta": "Formar el meu equip",
+      "readyWithGameweek": "Equip preparat — ens veiem a la jornada {number}.",
+      "readyForSeason": "Equip preparat per a la temporada."
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "title": "Classement",
+  "tabs": {
+    "global": "Général",
+    "gameweek": "Cette journée"
+  },
+  "loading": "Chargement…",
+  "totalTeams": "{count, plural, one {# équipe au total} other {# équipes au total}}",
+  "pagination": {
+    "prev": "Préc.",
+    "next": "Suiv."
+  },
+  "gameweekLabel": "Journée {number}",
+  "notScoredYet": "Journée non encore scorée",
+  "list": {
+    "empty": "Aucune équipe dans ce classement pour l'instant."
+  }
+}

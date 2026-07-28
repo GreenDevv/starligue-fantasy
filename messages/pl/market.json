@@ -1,0 +1,19 @@
+{
+  "title": "Rynek",
+  "playerCount": "{count, plural, one {# zawodnik} few {# zawodników} many {# zawodników} other {# zawodnika}} · {seasonMode}",
+  "searchPlaceholder": "Szukaj zawodnika lub klubu…",
+  "allPositions": "Wszyscy",
+  "sortByValue": "↓ Wartość",
+  "sortByName": "↓ Nazwisko",
+  "noPlayersFound": "Nie znaleziono zawodnika",
+  "trend": {
+    "up": "W górę",
+    "down": "W dół"
+  },
+  "budget": {
+    "label": "Budżet",
+    "remaining": "Pozostało {value}M",
+    "over": "Przekroczenie o {value}M",
+    "spent": "Wydano: {value}M"
+  }
+}

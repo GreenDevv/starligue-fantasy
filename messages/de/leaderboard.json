@@ -1,0 +1,18 @@
+{
+  "title": "Rangliste",
+  "tabs": {
+    "global": "Gesamt",
+    "gameweek": "Dieser Spieltag"
+  },
+  "loading": "Wird geladen…",
+  "totalTeams": "{count, plural, one {# Team insgesamt} other {# Teams insgesamt}}",
+  "pagination": {
+    "prev": "Zurück",
+    "next": "Weiter"
+  },
+  "gameweekLabel": "Spieltag {number}",
+  "notScoredYet": "Spieltag noch nicht ausgewertet",
+  "list": {
+    "empty": "Bisher kein Team in dieser Rangliste."
+  }
+}

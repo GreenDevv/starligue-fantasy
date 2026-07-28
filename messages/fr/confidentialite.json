@@ -1,0 +1,41 @@
+{
+  "backLink": "← Retour à l'accueil",
+  "title": "Confidentialité & cookies",
+  "intro": "Starligue Fantasy est un <strong>projet personnel</strong>, sans rapport officiel avec la LNH ou la Daikin StarLigue, développé et hébergé à titre non commercial. Cette page explique simplement quelles données sont collectées, pourquoi, et quels cookies sont utilisés.",
+  "sections": {
+    "data": {
+      "title": "Données collectées",
+      "intro": "À la création d'un compte, sont enregistrés :",
+      "items": {
+        "email": "ton adresse email (identifiant de connexion, jamais partagée)",
+        "password": "ton mot de passe, jamais stocké en clair (haché avec bcrypt)",
+        "name": "ton prénom/pseudo affiché dans l'app",
+        "favoritePlayer": "ton joueur préféré, si tu choisis d'en indiquer un (facultatif)"
+      },
+      "gameDataNote": "En jouant, tu génères aussi des données de jeu : effectifs, alignements, ligues, points, historique — nécessaires au fonctionnement du jeu lui-même, jamais utilisées à d'autres fins."
+    },
+    "notDone": {
+      "title": "Ce qui n'est PAS fait",
+      "items": {
+        "analytics": "aucun outil d'analyse d'audience (Google Analytics ou équivalent)",
+        "ads": "aucun cookie ou pixel publicitaire",
+        "resale": "aucune revente ni partage de données à des tiers",
+        "profiling": "aucun profilage"
+      }
+    },
+    "cookies": {
+      "title": "Cookies utilisés",
+      "intro": "Ce site utilise uniquement des cookies <strong>techniques/fonctionnels</strong>, strictement nécessaires à son fonctionnement — aucun consentement n'est requis pour ce type de cookie (recommandation CNIL), et aucun autre cookie n'est déposé.",
+      "table": {
+        "headers": { "cookie": "Cookie", "role": "Rôle", "duration": "Durée" },
+        "session": { "role": "Te garde connecté(e)", "duration": "30 jours ou déconnexion" },
+        "seasonMode": { "role": "Mémorise le mode saison en cours/simulation choisi", "duration": "Persistant" },
+        "activeLeague": { "role": "Mémorise ta ligue active si tu en as plusieurs", "duration": "Persistant" }
+      }
+    },
+    "rights": {
+      "title": "Tes droits",
+      "text": "Tu peux à tout moment demander l'accès, la correction ou la suppression de tes données. Comme il s'agit d'un projet personnel sans support dédié, la façon la plus simple reste de contacter directement la personne qui te l'a fait découvrir."
+    }
+  }
+}

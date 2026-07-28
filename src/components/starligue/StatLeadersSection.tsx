@@ -1,15 +1,18 @@
+import { getTranslations } from "next-intl/server";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import type { WeeklyLeadersResult } from "@/lib/stats/get-weekly-leaders";
 
-export function StatLeadersSection({ gameweekNumber, categories }: WeeklyLeadersResult) {
+export async function StatLeadersSection({ gameweekNumber, categories }: WeeklyLeadersResult) {
   const withLeaders = categories.filter((c) => c.leaders.length > 0);
   if (withLeaders.length === 0) return null;
+
+  const t = await getTranslations("dashboard");
 
   return (
     <div className="pixel-corners border border-border bg-surface p-3">
       <p className="mb-3 text-[10px] uppercase tracking-widest text-text-muted">
-        Leaders · journée {gameweekNumber}
+        {t("statLeadersSection.subtitle", { number: gameweekNumber ?? 0 })}
       </p>
       <div className="flex flex-col gap-3">
         {withLeaders.map((cat) => (

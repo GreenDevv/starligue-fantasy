@@ -1,0 +1,18 @@
+{
+  "title": "Klasyfikacja",
+  "tabs": {
+    "global": "Generalna",
+    "gameweek": "Ta kolejka"
+  },
+  "loading": "Ładowanie…",
+  "totalTeams": "{count, plural, one {# drużyna łącznie} few {# drużyny łącznie} many {# drużyn łącznie} other {# drużyny łącznie}}",
+  "pagination": {
+    "prev": "Poprz.",
+    "next": "Nast."
+  },
+  "gameweekLabel": "Kolejka {number}",
+  "notScoredYet": "Kolejka jeszcze nierozliczona",
+  "list": {
+    "empty": "Brak drużyn w tej klasyfikacji na razie."
+  }
+}

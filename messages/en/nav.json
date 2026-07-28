@@ -1,0 +1,13 @@
+{
+  "dashboard": "Dashboard",
+  "market": "Market",
+  "predictions": "Predictions",
+  "leagues": "Leagues",
+  "leaderboard": "Leaderboard",
+  "matches": "Fixtures",
+  "connexion": "Log in",
+  "deconnexion": "Log out",
+  "deconnexionAriaLabel": "Log out",
+  "deconnexionTitle": "Log out ({name})",
+  "languageSelector": "Change language"
+}

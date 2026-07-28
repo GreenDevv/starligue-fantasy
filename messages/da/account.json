@@ -1,0 +1,14 @@
+{
+  "title": "Min konto",
+  "emailLabel": "Email",
+  "nameLabel": "Brugernavn",
+  "favoritePlayerLabel": "Yndlingsspiller",
+  "optional": "(valgfrit)",
+  "favoritePlayerLocked": "Endelig, kan ikke ændres når den først er valgt.",
+  "savedMessage": "Gemt! Brugernavnet øverst opdateres ved næste login.",
+  "saving": "Gemmer…",
+  "errors": {
+    "FAVORITE_PLAYER_LOCKED": "Yndlingsspilleren er endelig, når den først er valgt",
+    "INVALID_PLAYER": "Yndlingsspiller ikke fundet"
+  }
+}

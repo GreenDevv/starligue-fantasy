@@ -1,0 +1,55 @@
+{
+  "detail": {
+    "backToMarket": "Marché",
+    "avgRatingShort": "moy. {rating}/10",
+    "valueEvolution": "Évolution de la valeur",
+    "seasonStats": "Stats saison {season}",
+    "shotPercentage": "% tirs",
+    "statsByGameweek": "Stats par journée",
+    "simulation": "Simulation",
+    "season": "Saison",
+    "noLnhHistory": "Nouveau en Daikin StarLigue — pas d'historique de score LNH.",
+    "lnhHistory": "Historique LNH",
+    "lnhHistoryHeaders": {
+      "season": "Saison",
+      "matches": "Matchs",
+      "avgScore": "Score LNH moy."
+    },
+    "noStats": "Aucune statistique disponible pour l'instant.",
+    "fallbackClubNote": "{name} évoluait à {club} en {season}",
+    "fallbackStatsNote": "Saison en cours pas encore commencée : stats de la saison précédente affichées à titre indicatif.",
+    "matchByMatch": "Statistiques match par match",
+    "matchLogHeaders": {
+      "gameweek": "J.",
+      "opponent": "Adv.",
+      "rating": "Note",
+      "points": "Pts (tit.)"
+    }
+  },
+  "compare": {
+    "comparedTo": "Comparé à",
+    "remove": "Retirer",
+    "addCompare": "Comparer à un joueur",
+    "searchPlaceholder": "Nom du joueur...",
+    "searching": "Recherche...",
+    "noPlayerFound": "Aucun joueur trouvé.",
+    "loading": "Chargement..."
+  },
+  "search": {
+    "change": "Changer",
+    "placeholder": "Cherche un nom…",
+    "noResults": "Aucun joueur trouvé"
+  },
+  "recap": {
+    "ariaLabel": "Statistiques saison {season}",
+    "title": "Saison {season}",
+    "loading": "Chargement…",
+    "noStats": "Pas de stats {season} disponibles.",
+    "matches": "Matchs",
+    "rating": "Note LNH",
+    "saves": "Arrêts",
+    "savePercentage": "% Arrêts",
+    "goals": "Buts",
+    "assists": "Passes déc."
+  }
+}

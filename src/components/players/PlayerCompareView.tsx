@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { PositionBadge } from "@/components/ui/Badge";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
@@ -24,6 +25,8 @@ interface SearchResult {
 // comparé est chargé au clic via GET /api/players/[id]/detail, qui applique
 // exactement la même logique (fonction partagée getPlayerDetailData).
 export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
+  const t = useTranslations("players");
+  const tLabels = useTranslations("labels");
   const [panelOpen, setPanelOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -75,7 +78,7 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
 
   const compareByKey = new Map(compare?.seasonStatTotals.map((s) => [s.key, s]) ?? []);
   const statRows = primary.seasonStatTotals
-    .map((s) => ({ key: s.key, label: s.label, category: s.category, a: s.total, b: compareByKey.get(s.key)?.total ?? 0 }))
+    .map((s) => ({ key: s.key, category: s.category, a: s.total, b: compareByKey.get(s.key)?.total ?? 0 }))
     .filter((r) => r.a > 0 || r.b > 0);
   const showSeasonStats = compare
     ? statRows.length > 0 || primary.seasonShotPercentage !== null || compare.seasonShotPercentage !== null
@@ -88,10 +91,10 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
         {compare ? (
           <div className="flex items-center gap-2 text-[11px] text-text-muted">
             <span>
-              Comparé à <span className="font-semibold text-text">{compareLabel}</span>
+              {t("compare.comparedTo")} <span className="font-semibold text-text">{compareLabel}</span>
             </span>
             <button type="button" onClick={() => setCompare(null)} className="text-text-muted underline hover:text-text">
-              Retirer
+              {t("compare.remove")}
             </button>
           </div>
         ) : (
@@ -101,7 +104,7 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
               onClick={() => setPanelOpen((v) => !v)}
               className="pixel-corners-sm border border-border px-2 py-1 text-[11px] text-text-muted transition-colors hover:text-text"
             >
-              + Comparer à un joueur
+              + {t("compare.addCompare")}
             </button>
             {panelOpen && (
               <div className="pixel-corners-sm absolute left-0 top-full z-30 mt-1 w-56 border border-border bg-surface p-2 shadow-lg">
@@ -109,13 +112,13 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
                   autoFocus
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Nom du joueur..."
+                  placeholder={t("compare.searchPlaceholder")}
                   className="w-full border border-border bg-bg px-2 py-1 text-xs text-text outline-none focus:border-accent"
                 />
                 <div className="mt-1 max-h-48 overflow-y-auto">
-                  {searching && <p className="px-1 py-1 text-[11px] text-text-muted">Recherche...</p>}
+                  {searching && <p className="px-1 py-1 text-[11px] text-text-muted">{t("compare.searching")}</p>}
                   {!searching && query.trim().length >= 2 && results.length === 0 && (
-                    <p className="px-1 py-1 text-[11px] text-text-muted">Aucun joueur trouvé.</p>
+                    <p className="px-1 py-1 text-[11px] text-text-muted">{t("compare.noPlayerFound")}</p>
                   )}
                   {results.map((p) => (
                     <button
@@ -135,7 +138,7 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
             )}
           </div>
         )}
-        {loadingCompare && <span className="text-[11px] text-text-muted">Chargement...</span>}
+        {loadingCompare && <span className="text-[11px] text-text-muted">{t("compare.loading")}</span>}
       </div>
 
       {/* Player header — hero, distinct du reste (glow ambre sur la valeur, la
@@ -162,7 +165,9 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
                   {primary.marketValue.toFixed(1)}M
                 </p>
                 {primary.avgRating !== null && (
-                  <p className="mt-1 text-xs tabular-nums text-text-muted">moy. {primary.avgRating.toFixed(1)}/10</p>
+                  <p className="mt-1 text-xs tabular-nums text-text-muted">
+                    {t("detail.avgRatingShort", { rating: primary.avgRating.toFixed(1) })}
+                  </p>
                 )}
               </div>
             </div>
@@ -194,7 +199,9 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
                     {p.marketValue.toFixed(1)}M
                   </p>
                   {p.avgRating !== null && (
-                    <p className="mt-1 text-[11px] tabular-nums text-text-muted">moy. {p.avgRating.toFixed(1)}/10</p>
+                    <p className="mt-1 text-[11px] tabular-nums text-text-muted">
+                      {t("detail.avgRatingShort", { rating: p.avgRating.toFixed(1) })}
+                    </p>
                   )}
                 </div>
               </div>
@@ -205,7 +212,9 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
 
       {/* Évolution de la valeur marchande */}
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">Évolution de la valeur</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">
+          {t("detail.valueEvolution")}
+        </p>
         <div className="pixel-corners border border-border bg-surface p-4">
           <ValueHistoryChart
             entries={primary.valueHistoryPoints}
@@ -220,15 +229,40 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
       {showSeasonStats && (
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">
-            Stats saison {primary.seasonLabel}
+            {t("detail.seasonStats", { season: primary.statsSeasonLabel })}
           </p>
+          {(primary.isFallbackSeason || compare?.isFallbackSeason) && (
+            <div className="-mt-1.5 mb-2 flex flex-col gap-1 text-[11px] text-text-muted/70">
+              <p>{t("detail.fallbackStatsNote")}</p>
+              {primary.isFallbackSeason && primary.statsClub && (
+                <p className="flex items-center gap-1.5">
+                  <ClubLogo club={primary.statsClub} size="xs" />
+                  {t("detail.fallbackClubNote", {
+                    name: primaryLabel,
+                    club: primary.statsClub.name,
+                    season: primary.statsSeasonLabel,
+                  })}
+                </p>
+              )}
+              {compare?.isFallbackSeason && compare.statsClub && (
+                <p className="flex items-center gap-1.5">
+                  <ClubLogo club={compare.statsClub} size="xs" />
+                  {t("detail.fallbackClubNote", {
+                    name: compareLabel ?? "",
+                    club: compare.statsClub.name,
+                    season: compare.statsSeasonLabel,
+                  })}
+                </p>
+              )}
+            </div>
+          )}
           {!compare ? (
             <div className="grid grid-cols-2 gap-2 pixel-corners border border-border bg-surface p-4">
               {primary.seasonStatTotals
                 .filter((s) => s.total > 0)
                 .map((s) => (
                   <div key={s.key} className="flex items-center justify-between gap-2">
-                    <span className="text-xs text-text-muted">{s.label}</span>
+                    <span className="text-xs text-text-muted">{tLabels(`statLine.${s.key}`)}</span>
                     <span
                       className={`text-sm font-semibold tabular-nums ${
                         s.category === "malus" ? "text-points-neg" : "text-text"
@@ -240,7 +274,7 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
                 ))}
               {primary.seasonShotPercentage !== null && (
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs text-text-muted">% tirs</span>
+                  <span className="text-xs text-text-muted">{t("detail.shotPercentage")}</span>
                   <span className="text-sm font-semibold tabular-nums text-text">{primary.seasonShotPercentage}%</span>
                 </div>
               )}
@@ -255,7 +289,7 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
               <div className="divide-y divide-border">
                 {statRows.map((row) => (
                   <div key={row.key} className="grid grid-cols-3 items-center px-3 py-2 text-sm">
-                    <span className="text-xs text-text-muted">{row.label}</span>
+                    <span className="text-xs text-text-muted">{tLabels(`statLine.${row.key}`)}</span>
                     <span
                       className={`text-center font-semibold tabular-nums ${
                         row.category === "malus" ? "text-points-neg" : "text-text"
@@ -274,7 +308,7 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
                 ))}
                 {(primary.seasonShotPercentage !== null || compare.seasonShotPercentage !== null) && (
                   <div className="grid grid-cols-3 items-center px-3 py-2 text-sm">
-                    <span className="text-xs text-text-muted">% tirs</span>
+                    <span className="text-xs text-text-muted">{t("detail.shotPercentage")}</span>
                     <span className="text-center font-semibold tabular-nums text-text">
                       {primary.seasonShotPercentage !== null ? `${primary.seasonShotPercentage}%` : "—"}
                     </span>
@@ -292,7 +326,8 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
       {/* Stats par journée (graphique multi-séries) */}
       <div>
         <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">
-          Stats par journée — {primary.isSimulation ? "Simulation" : "Saison"} {primary.seasonLabel}
+          {t("detail.statsByGameweek")} —{" "}
+          {primary.isSimulation ? t("detail.simulation") : t("detail.season")} {primary.statsSeasonLabel}
         </p>
         <div className="pixel-corners border border-border bg-surface p-4">
           <PlayerStatsChart
@@ -316,11 +351,14 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
 }
 
 function LnhHistorySection({ player, label }: { player: PlayerDetailData; label?: string }) {
+  const t = useTranslations("players");
+
   if (player.lnhSeasonStats.length === 0) {
     return (
       <div className="pixel-corners-sm border border-dashed border-border px-4 py-3 text-center">
         <p className="text-xs text-text-muted">
-          {label ? `${label} — ` : ""}Nouveau en Daikin StarLigue — pas d'historique de score LNH.
+          {label ? `${label} — ` : ""}
+          {t("detail.noLnhHistory")}
         </p>
       </div>
     );
@@ -329,14 +367,15 @@ function LnhHistorySection({ player, label }: { player: PlayerDetailData; label?
   return (
     <div>
       <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">
-        Historique LNH{label ? ` — ${label}` : ""}
+        {t("detail.lnhHistory")}
+        {label ? ` — ${label}` : ""}
       </p>
       <div className="pixel-corners overflow-hidden border border-border bg-surface">
         <div className="divide-y divide-border">
           <div className="grid grid-cols-3 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
-            <span>Saison</span>
-            <span className="text-center">Matchs</span>
-            <span className="text-right">Score LNH moy.</span>
+            <span>{t("detail.lnhHistoryHeaders.season")}</span>
+            <span className="text-center">{t("detail.lnhHistoryHeaders.matches")}</span>
+            <span className="text-right">{t("detail.lnhHistoryHeaders.avgScore")}</span>
           </div>
           {player.lnhSeasonStats.map((s) => (
             <div key={s.id} className="grid grid-cols-3 items-center px-3 py-2.5 text-sm">
@@ -352,11 +391,14 @@ function LnhHistorySection({ player, label }: { player: PlayerDetailData; label?
 }
 
 function MatchLogSection({ player, label }: { player: PlayerDetailData; label?: string }) {
+  const t = useTranslations("players");
+
   if (player.matchLog.length === 0) {
     return (
       <div className="pixel-corners border border-border bg-surface px-4 py-8 text-center">
         <p className="text-sm text-text-muted">
-          {label ? `${label} — ` : ""}Aucune statistique disponible pour l'instant.
+          {label ? `${label} — ` : ""}
+          {t("detail.noStats")}
         </p>
       </div>
     );
@@ -365,15 +407,16 @@ function MatchLogSection({ player, label }: { player: PlayerDetailData; label?: 
   return (
     <div>
       <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">
-        Statistiques match par match{label ? ` — ${label}` : ""}
+        {t("detail.matchByMatch")}
+        {label ? ` — ${label}` : ""}
       </p>
       <div className="pixel-corners overflow-hidden border border-border bg-surface">
         <div className="divide-y divide-border">
           <div className="grid grid-cols-4 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
-            <span>J.</span>
-            <span>Adv.</span>
-            <span className="text-center">Note</span>
-            <span className="text-right">Pts (tit.)</span>
+            <span>{t("detail.matchLogHeaders.gameweek")}</span>
+            <span>{t("detail.matchLogHeaders.opponent")}</span>
+            <span className="text-center">{t("detail.matchLogHeaders.rating")}</span>
+            <span className="text-right">{t("detail.matchLogHeaders.points")}</span>
           </div>
           {player.matchLog.map((s: PlayerDetailMatchLogEntry) => (
             <div key={s.id} className="grid grid-cols-4 items-center px-3 py-2.5 text-sm">

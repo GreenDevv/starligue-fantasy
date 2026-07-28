@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import type { Position } from "@/lib/squad/validation";
 import { POSITIONS } from "@/lib/squad/validation";
-import { POSITION_SHORT } from "@/components/ui/positionTheme";
 import { PositionBadge } from "@/components/ui/Badge";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
@@ -35,14 +35,11 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.2 } },
 };
 
-const SEASON_LABEL: Record<SeasonMode, string> = {
-  live: "saison 2026/27",
-  simulation: "Simulation 2025/26",
-};
-
 // La saison affichée est résolue côté serveur (cookie seasonMode, voir page.tsx) —
 // ce composant ne fait que fetch /api/players, qui lit le même cookie pour filtrer.
 export function MarketView({ mode }: { mode: SeasonMode }) {
+  const t = useTranslations("market");
+  const tLabels = useTranslations("labels");
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -82,10 +79,10 @@ export function MarketView({ mode }: { mode: SeasonMode }) {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-2xl text-text">Marché</h1>
+        <h1 className="text-2xl text-text">{t("title")}</h1>
         {!loading && (
           <p className="mt-1 text-sm text-text-muted">
-            {players.length} joueurs · {SEASON_LABEL[mode]}
+            {t("playerCount", { count: players.length, seasonMode: tLabels(`seasonMode.${mode}`) })}
           </p>
         )}
       </div>
@@ -93,7 +90,7 @@ export function MarketView({ mode }: { mode: SeasonMode }) {
       {/* Search */}
       <input
         type="text"
-        placeholder="Chercher un joueur ou club…"
+        placeholder={t("searchPlaceholder")}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className="pixel-corners w-full border border-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text-muted focus:border-accent-secondary focus:shadow-glow-amber focus:outline-none"
@@ -113,7 +110,7 @@ export function MarketView({ mode }: { mode: SeasonMode }) {
                   : "border border-border text-text-muted hover:border-accent/50 hover:text-text",
               ].join(" ")}
             >
-              {pos === "ALL" ? "Tous" : POSITION_SHORT[pos]}
+              {pos === "ALL" ? t("allPositions") : tLabels(`positionShort.${pos}`)}
             </button>
           ))}
         </div>
@@ -123,7 +120,7 @@ export function MarketView({ mode }: { mode: SeasonMode }) {
           }
           className="pixel-corners-sm shrink-0 border border-border px-3 py-1 text-xs uppercase tracking-wide text-text-muted transition-colors hover:text-text"
         >
-          {sortBy === "marketValue" ? "↓ Valeur" : "↓ Nom"}
+          {sortBy === "marketValue" ? t("sortByValue") : t("sortByName")}
         </button>
       </div>
 
@@ -138,7 +135,7 @@ export function MarketView({ mode }: { mode: SeasonMode }) {
         <div className="pixel-corners overflow-hidden border border-border bg-surface">
           {filtered.length === 0 ? (
             <p className="py-8 text-center text-sm text-text-muted">
-              Aucun joueur trouvé
+              {t("noPlayersFound")}
             </p>
           ) : (
             <motion.div className="divide-y divide-border" initial="hidden" animate="show" variants={listVariants}>
@@ -160,8 +157,8 @@ export function MarketView({ mode }: { mode: SeasonMode }) {
                     </div>
                     <PositionBadge position={player.position} className="shrink-0" />
                     <span className="flex w-20 shrink-0 items-center justify-end gap-1 text-right font-arcade text-lg tracking-wide text-accent-secondary">
-                      {player.valueTrend === "up" && <span className="text-sm text-points-pos" title="En hausse">▲</span>}
-                      {player.valueTrend === "down" && <span className="text-sm text-points-neg" title="En baisse">▼</span>}
+                      {player.valueTrend === "up" && <span className="text-sm text-points-pos" title={t("trend.up")}>▲</span>}
+                      {player.valueTrend === "down" && <span className="text-sm text-points-neg" title={t("trend.down")}>▼</span>}
                       {player.marketValue.toFixed(1)}M
                     </span>
                   </Link>

@@ -1,4 +1,7 @@
-import Link from "next/link";
+"use client";
+
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 export interface MyLeagueRow {
   id: string;
@@ -9,13 +12,14 @@ export interface MyLeagueRow {
 }
 
 export function LeaderboardLeaguesWidget({ leagues }: { leagues: MyLeagueRow[] }) {
+  const t = useTranslations("dashboard");
   return (
     <div className="pixel-corners border border-border bg-surface p-3">
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-[10px] uppercase tracking-widest text-text-muted">Mes ligues</p>
+        <p className="text-[10px] uppercase tracking-widest text-text-muted">{t("leaguesWidget.title")}</p>
         {leagues.length > 0 && (
           <Link href="/leagues" className="text-[10px] text-text-muted transition-colors hover:text-text">
-            Voir tout →
+            {t("leaguesWidget.seeAll")}
           </Link>
         )}
       </div>
@@ -23,9 +27,9 @@ export function LeaderboardLeaguesWidget({ leagues }: { leagues: MyLeagueRow[] }
         // CTA volontairement discret ici (lien, pas de bouton plein) — celui du
         // bandeau de statut en haut de page porte déjà cette action en avant.
         <p className="py-4 text-center text-xs text-text-muted">
-          Tu n'as pas encore rejoint de ligue.{" "}
+          {t("leaguesWidget.noLeagues")}{" "}
           <Link href="/leagues" className="text-accent hover:underline">
-            Rejoindre une ligue →
+            {t("leaguesWidget.joinLeague")}
           </Link>
         </p>
       ) : (
@@ -38,7 +42,9 @@ export function LeaderboardLeaguesWidget({ leagues }: { leagues: MyLeagueRow[] }
             >
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-text">{l.name}</p>
-                <p className="truncate text-[10px] text-text-muted">{l.memberCount} membre{l.memberCount > 1 ? "s" : ""}</p>
+                <p className="truncate text-[10px] text-text-muted">
+                  {t("leaguesWidget.memberCount", { count: l.memberCount })}
+                </p>
               </div>
               <span className="shrink-0 text-xs text-text-muted">#{l.myRank}</span>
               <span className="shrink-0 text-sm font-semibold tabular-nums text-accent">{l.myPoints}</span>

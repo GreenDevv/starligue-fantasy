@@ -1,15 +1,8 @@
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { getTranslations, getFormatter } from "next-intl/server";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import type { NewsFeedItem } from "@/lib/news/get-feed";
-
-const CATEGORY_LABEL: Record<NewsFeedItem["category"], string> = {
-  TRANSFER: "Transfert",
-  INJURY: "Blessure",
-  TEAM_OF_WEEK: "Équipe type",
-  PERFORMANCE: "Performance",
-  GENERAL: "Actu",
-};
 
 const CATEGORY_COLOR: Record<NewsFeedItem["category"], string> = {
   TRANSFER: "text-accent-secondary",
@@ -19,11 +12,11 @@ const CATEGORY_COLOR: Record<NewsFeedItem["category"], string> = {
   GENERAL: "text-text-muted",
 };
 
-function formatDate(date: Date): string {
-  return new Date(date).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" });
-}
+export async function NewsCard({ item }: { item: NewsFeedItem }) {
+  const t = await getTranslations("labels");
+  const format = await getFormatter();
+  const formattedDate = format.dateTime(new Date(item.publishedAt), { day: "2-digit", month: "short" });
 
-export function NewsCard({ item }: { item: NewsFeedItem }) {
   const content = (
     <div className="flex gap-3 border-t border-border/60 py-3 first:border-t-0 first:pt-0">
       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-bg">
@@ -37,8 +30,8 @@ export function NewsCard({ item }: { item: NewsFeedItem }) {
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest">
-          <span className={CATEGORY_COLOR[item.category]}>{CATEGORY_LABEL[item.category]}</span>
-          <span className="text-text-muted/70">{formatDate(item.publishedAt)}</span>
+          <span className={CATEGORY_COLOR[item.category]}>{t(`newsCategory.${item.category}`)}</span>
+          <span className="text-text-muted/70">{formattedDate}</span>
           {item.club && <span className="truncate text-text-muted/70">· {item.club.shortName}</span>}
         </div>
         <p className="mt-1 line-clamp-2 text-sm text-text">{item.title}</p>

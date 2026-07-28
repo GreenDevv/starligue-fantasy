@@ -1,0 +1,167 @@
+{
+  "widgetShell": {
+    "reorder": "Omorganiser denne widget",
+    "remove": "Fjern denne widget fra dashboardet",
+    "sizeLabel": "Størrelse {size}",
+    "size": {
+      "mini": "Mini",
+      "square": "Kvadrat",
+      "wide": "Bred"
+    }
+  },
+  "comingSoon": {
+    "seasonBadge": "SÆSON 2026/2027",
+    "tagline": "Fantasy-spillet for <strong>håndbold</strong>, baseret på de rigtige spillere fra Daikin StarLigue. Saml dit hold og score point på deres reelle præstationer, runde efter runde.",
+    "badge": "SNART",
+    "previewAriaLabel": "Forhåndsvisning af spillet",
+    "footerDisclaimer": "Personligt projekt, uden officiel tilknytning til LNH eller Daikin StarLigue — åbner inden sæsonstart.",
+    "features": {
+      "squad": {
+        "title": "Sammensæt din trup",
+        "description": "14 spillere blandt Starligues 16 klubber, et stramt budget, én position ad gangen — målmand, fløje, backs, playmaker, streger."
+      },
+      "lineup": {
+        "title": "Stil op hver runde",
+        "description": "7 startspillere på banen, 7 på bænken. Deadline før hver kamp, ligesom i virkeligheden."
+      },
+      "score": {
+        "title": "Score på det virkelige",
+        "description": "Mål, redninger, assists: hver eneste kampstatistik tæller i din runde-score."
+      },
+      "challenge": {
+        "title": "Udfordr dine venner",
+        "description": "Opret din private liga, følg stillingen live, byt spillere mellem runderne."
+      }
+    }
+  },
+  "home": {
+    "metadataTitle": "Snart tilgængelig",
+    "metadataDescription": "Starligue Fantasy er på vej: fantasy-spillet for håndbold baseret på Daikin Starligue. Saml dit hold med rigtige håndboldspillere fra den bedste franske række inden sæsonstart.",
+    "noActiveSeason": "Ingen igangværende sæson for nu.",
+    "seasonLabel": "Daikin Starligue · {label}",
+    "title": "Starligue",
+    "welcomeBack": "Velkommen tilbage, <b>{name}</b>!",
+    "welcomeGuest": "Velkommen — resultater, stilling og nyheder fra Daikin StarLigue live.",
+    "ctaLoggedIn": "Gå til Fantasy Starligue →",
+    "ctaGuest": "Opret mit Fantasy-hold →",
+    "footerDisclaimer": "Personligt projekt, uden officiel tilknytning til LNH eller Daikin StarLigue.",
+    "footerPrivacyLink": "Privatliv & cookies"
+  },
+  "page": {
+    "title": "Dashboard",
+    "noActiveSeason": "Ingen aktiv sæson for nu."
+  },
+  "matchesStrip": {
+    "results": "Resultater",
+    "upcoming": "Kommende kampe",
+    "gameweek": "Runde {number}",
+    "noResults": "Ingen resultater endnu.",
+    "noUpcoming": "Ingen planlagte kampe."
+  },
+  "simulationControls": {
+    "prevGameweek": "← Forrige runde",
+    "nextGameweek": "Næste runde →",
+    "counter": "Sim R{current}/{total}"
+  },
+  "statLeaderCard": {
+    "removeAriaLabel": "Fjern {label} fra dashboardet",
+    "ownedByTeams": "Hos {teams}",
+    "noData": "Ingen data endnu."
+  },
+  "statLeadersPanel": {
+    "title": "Topscorere",
+    "addStatLabel": "Tilføj en statistik",
+    "allLinesVisible": "Alle linjer vises allerede.",
+    "addStatCta": "+ Tilføj en statistik"
+  },
+  "bestXIWidget": {
+    "subtitle": "Sæsonens ideelle hold · bedste spillere pr. position",
+    "noData": "Ingen bedømt runde endnu."
+  },
+  "clubStandingsWidget": {
+    "title": "Starligue-stilling",
+    "beforeGameweek1": "Før R1",
+    "afterGameweek": "Efter R{number}",
+    "notAvailable": "Stillingen er ikke tilgængelig endnu.",
+    "seasonNotStarted": "Sæsonen er ikke startet endnu — stillingen er nul overalt, det er normalt.",
+    "col": {
+      "club": "Klub",
+      "played": "K",
+      "wins": "S",
+      "draws": "U",
+      "losses": "N",
+      "goalsFor": "SM",
+      "goalsAgainst": "IM",
+      "diff": "Diff",
+      "points": "Point"
+    }
+  },
+  "leaguesWidget": {
+    "title": "Mine ligaer",
+    "seeAll": "Se alle →",
+    "noLeagues": "Du er endnu ikke med i nogen liga.",
+    "joinLeague": "Deltag i en liga →",
+    "memberCount": "{count, plural, one {# medlem} other {# medlemmer}}"
+  },
+  "globalLeaderboardWidget": {
+    "title": "Samlet stilling",
+    "seeAll": "Se alle →",
+    "noTeams": "Ingen hold placeret endnu."
+  },
+  "newsFeed": {
+    "title": "Starligue-nyheder",
+    "filterAll": "Alle",
+    "filterTransfers": "Transfers",
+    "filterInjuries": "Skader",
+    "filterTeamOfWeek": "Ideelt hold",
+    "filterPerformances": "Præstationer",
+    "filterGeneral": "Nyheder",
+    "noNews": "Ingen nyheder endnu.",
+    "seeMore": "Se mere"
+  },
+  "standingsSection": {
+    "title": "Stilling",
+    "gameweek": "Runde {number}",
+    "notAvailable": "Stillingen er ikke tilgængelig endnu.",
+    "col": {
+      "club": "Klub",
+      "played": "K",
+      "diff": "+/-",
+      "points": "Point"
+    }
+  },
+  "bestXICard": {
+    "subtitle": "Ideelt hold · runde {number}"
+  },
+  "performancesCard": {
+    "subtitle": "Bedste præstationer · runde {number}"
+  },
+  "statLeadersSection": {
+    "subtitle": "Topscorere · runde {number}"
+  },
+  "errors": {
+    "SEASON_COMPLETE": "Alle runder i den simulerede sæson er allerede spillet",
+    "CONFLICT": "Sæsonen er blevet ændret i mellemtiden — prøv igen",
+    "ALREADY_AT_START": "Den simulerede sæson er allerede ved sit udgangspunkt"
+  },
+  "dashboardView": {
+    "newsLink": "Starligue-nyheder →",
+    "allWidgetsRemoved": "Alle widgets er blevet fjernet — tilføj nogle fra panelet nedenfor.",
+    "addWidgetTitle": "Tilføj en widget",
+    "hideStats": "Skjul statistikker",
+    "addStat": "+ Tilføj en statistik",
+    "allFixedWidgetsVisible": "Alle faste widgets vises allerede — du kan stadig tilføje statistikker.",
+    "close": "Luk",
+    "addWidgetCta": "+ Tilføj en widget",
+    "status": {
+      "greeting": "Hej {name}",
+      "greetingGuest": "Velkommen",
+      "noLeague": "Deltag i eller opret en liga for at komme i gang.",
+      "joinLeagueCta": "Deltag i en liga",
+      "squadNotValidated": "Din trup er ikke bekræftet endnu.",
+      "buildSquadCta": "Byg min trup",
+      "readyWithGameweek": "Trup klar — vi ses i runde {number}.",
+      "readyForSeason": "Trup klar til sæsonen."
+    }
+  }
+}

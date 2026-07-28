@@ -19,7 +19,9 @@ export interface PlayerSeasonRecap {
   savePercentage: number | null;
 }
 
-async function findArchivedPlayerId(
+// Exportée : réutilisée par player-detail.ts pour le repli stats saison
+// précédente sur /players/[id] (même logique de matching nom+club).
+export async function findArchivedPlayerId(
   ref: { firstName: string; lastName: string; clubId: string },
   archivedSeasonId: string
 ): Promise<string | null> {

@@ -2,27 +2,33 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import {
   CURATED_JERSEY_SWATCHES,
   JERSEY_COLLARS,
   KIT_ZONES,
-  type JerseyCollar,
   type JerseyConfig,
   type KitZoneName,
 } from "@/lib/team/jersey";
 import { KIT_PATTERNS, getPattern } from "@/lib/team/kitPatterns";
 import { KIT_SILHOUETTES, silhouetteToSvgPath } from "@/lib/team/kitSilhouettes";
 import { Button } from "@/components/ui/Button";
+import { resolveApiError } from "@/lib/api/error-messages";
+
+function KitViewer3DLoading() {
+  const t = useTranslations("team");
+  return (
+    <div className="flex h-72 items-center justify-center text-xs uppercase tracking-widest text-text-muted lg:h-80">
+      {t("jersey.loading3d")}
+    </div>
+  );
+}
 
 // KitViewer3D importe three.js — chargé uniquement ici, jamais depuis les
 // composants de liste (JerseyBadge), via next/dynamic + ssr:false.
 const KitViewer3D = dynamic(() => import("./KitViewer3D"), {
   ssr: false,
-  loading: () => (
-    <div className="flex h-72 items-center justify-center text-xs uppercase tracking-widest text-text-muted lg:h-80">
-      Chargement de l'aperçu 3D…
-    </div>
-  ),
+  loading: () => <KitViewer3DLoading />,
 });
 
 interface JerseyEditorProps {
@@ -31,20 +37,6 @@ interface JerseyEditorProps {
   initialConfig: JerseyConfig;
   onSaved: (result: { name: string; jerseyConfig: JerseyConfig }) => void;
 }
-
-const ZONE_LABELS: Record<KitZoneName, string> = {
-  jersey: "Maillot",
-  shorts: "Short",
-  socks: "Chaussettes",
-};
-
-const SLOT_LABELS = ["Couleur principale", "Couleur secondaire", "Liseré", "Détail"];
-
-const COLLAR_LABELS: Record<JerseyCollar, string> = {
-  crew: "Rond",
-  "v-neck": "V",
-  polo: "Polo",
-};
 
 function resizeColors(colors: string[], slots: number): string[] {
   if (colors.length === slots) return colors;
@@ -62,6 +54,7 @@ function ColorPicker({
   value: string;
   onChange: (hex: string) => void;
 }) {
+  const t = useTranslations("team");
   const [customOpen, setCustomOpen] = useState(false);
 
   return (
@@ -88,7 +81,7 @@ function ColorPicker({
           type="button"
           onClick={() => setCustomOpen((v) => !v)}
           className="flex h-7 w-7 items-center justify-center rounded-full border border-dashed border-border text-[10px] text-text-muted hover:text-text"
-          aria-label="Couleur personnalisée"
+          aria-label={t("jersey.customColor")}
         >
           +
         </button>
@@ -157,6 +150,9 @@ function PatternThumb({
 }
 
 export function JerseyEditor({ leagueId, initialName, initialConfig, onSaved }: JerseyEditorProps) {
+  const t = useTranslations("team");
+  const tLabels = useTranslations("labels");
+  const tRoot = useTranslations();
   const [name, setName] = useState(initialName);
   const [config, setConfig] = useState<JerseyConfig>(initialConfig);
   const [activeZone, setActiveZone] = useState<KitZoneName>("jersey");
@@ -186,7 +182,7 @@ export function JerseyEditor({ leagueId, initialName, initialConfig, onSaved }: 
 
   async function handleSubmit() {
     if (!name.trim()) {
-      setError("Choisis un nom d'équipe");
+      setError(t("jersey.chooseNameError"));
       return;
     }
     setSaving(true);
@@ -199,16 +195,16 @@ export function JerseyEditor({ leagueId, initialName, initialConfig, onSaved }: 
       });
       const data = (await res.json()) as {
         data?: { name: string; jerseyConfig: JerseyConfig };
-        error?: { message: string };
+        error?: { code?: string; message: string };
       };
       if (data.data) {
         onSaved(data.data);
       } else {
-        setError(data.error?.message ?? "Erreur lors de la sauvegarde");
+        setError(resolveApiError(tRoot, "team", data.error?.code));
         setSaving(false);
       }
     } catch {
-      setError("Erreur réseau");
+      setError(resolveApiError(tRoot, "team", "NETWORK"));
       setSaving(false);
     }
   }
@@ -220,14 +216,14 @@ export function JerseyEditor({ leagueId, initialName, initialConfig, onSaved }: 
     <div className="flex flex-col gap-5">
       <div>
         <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-text-muted">
-          Nom de l'équipe
+          {t("jersey.teamNameLabel")}
         </p>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           maxLength={50}
-          placeholder="Les Experts de Tish"
+          placeholder={t("jersey.teamNamePlaceholder")}
           className="pixel-corners w-full border border-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text-muted focus:border-accent focus:outline-none"
         />
       </div>
@@ -239,7 +235,7 @@ export function JerseyEditor({ leagueId, initialName, initialConfig, onSaved }: 
             <KitViewer3D config={config} className="h-72 w-full lg:h-80" />
           </div>
           <p className="mt-2 text-center text-[10px] uppercase tracking-widest text-text-muted">
-            Glisser pour faire tourner
+            {t("jersey.dragToRotate")}
           </p>
         </div>
 
@@ -257,7 +253,7 @@ export function JerseyEditor({ leagueId, initialName, initialConfig, onSaved }: 
                     : "border border-border text-text-muted"
                 }`}
               >
-                {ZONE_LABELS[zone]}
+                {tLabels(`kitZone.${zone}`)}
               </button>
             ))}
           </div>
@@ -265,7 +261,7 @@ export function JerseyEditor({ leagueId, initialName, initialConfig, onSaved }: 
           {/* Galerie de motifs de la zone active */}
           <div>
             <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-text-muted">
-              Motif
+              {t("jersey.patternLabel")}
             </p>
             <div className="grid max-h-64 grid-cols-5 gap-2 overflow-y-auto pr-1">
               {KIT_PATTERNS.map((p) => (
@@ -291,7 +287,7 @@ export function JerseyEditor({ leagueId, initialName, initialConfig, onSaved }: 
             {Array.from({ length: activePattern.slots }, (_, slot) => (
               <ColorPicker
                 key={slot}
-                label={SLOT_LABELS[slot] ?? `Couleur ${slot + 1}`}
+                label={t.has(`jersey.slotLabels.${slot}`) ? t(`jersey.slotLabels.${slot}`) : t("jersey.colorSlotFallback", { n: slot + 1 })}
                 value={activeZoneConfig.colors[slot] ?? activeZoneConfig.colors[0] ?? "#2DD4BF"}
                 onChange={(hex) => setZoneColor(activeZone, slot, hex)}
               />
@@ -301,10 +297,10 @@ export function JerseyEditor({ leagueId, initialName, initialConfig, onSaved }: 
           {/* Col / manches — spécifiques au maillot */}
           {activeZone === "jersey" && (
             <>
-              <ColorPicker label="Couleur du col / manches" value={config.trimColor} onChange={(v) => set("trimColor", v)} />
+              <ColorPicker label={t("jersey.collarSleeveColor")} value={config.trimColor} onChange={(v) => set("trimColor", v)} />
 
               <div>
-                <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-text-muted">Col</p>
+                <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-text-muted">{t("jersey.collarLabel")}</p>
                 <div className="grid grid-cols-3 gap-2">
                   {JERSEY_COLLARS.map((c) => (
                     <button
@@ -315,14 +311,14 @@ export function JerseyEditor({ leagueId, initialName, initialConfig, onSaved }: 
                         config.collar === c ? "border-accent text-accent shadow-glow-accent border" : "border border-border text-text-muted"
                       }`}
                     >
-                      {COLLAR_LABELS[c]}
+                      {tLabels(`jerseyCollar.${c}`)}
                     </button>
                   ))}
                 </div>
               </div>
 
               <label className="pixel-corners-sm flex items-center justify-between border border-border bg-surface px-3 py-2.5">
-                <span className="text-xs uppercase tracking-wide text-text-muted">Manches contrastées</span>
+                <span className="text-xs uppercase tracking-wide text-text-muted">{t("jersey.contrastSleeves")}</span>
                 <input
                   type="checkbox"
                   checked={config.contrastSleeves}
@@ -337,7 +333,7 @@ export function JerseyEditor({ leagueId, initialName, initialConfig, onSaved }: 
 
       <div className="flex gap-3">
         <div className="flex-1">
-          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-text-muted">Numéro</p>
+          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-text-muted">{t("jersey.numberLabel")}</p>
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -357,13 +353,13 @@ export function JerseyEditor({ leagueId, initialName, initialConfig, onSaved }: 
           </div>
         </div>
         <div className="flex-1">
-          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-text-muted">Nom floqué</p>
+          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-text-muted">{t("jersey.nameFlockLabel")}</p>
           <input
             type="text"
             value={config.nameFlock}
             onChange={(e) => set("nameFlock", e.target.value.toUpperCase().slice(0, 12))}
             maxLength={12}
-            placeholder="TISH"
+            placeholder={t("jersey.nameFlockPlaceholder")}
             className="pixel-corners w-full border border-border bg-surface px-3 py-2 text-sm uppercase text-text placeholder:text-text-muted focus:border-accent focus:outline-none"
           />
         </div>
@@ -371,7 +367,7 @@ export function JerseyEditor({ leagueId, initialName, initialConfig, onSaved }: 
 
       {error && <p className="text-center text-sm text-points-neg">{error}</p>}
       <Button onClick={handleSubmit} disabled={saving} variant="primary" size="lg" className="w-full">
-        {saving ? "Sauvegarde…" : "Valider →"}
+        {saving ? t("jersey.saving") : t("jersey.submitCta")}
       </Button>
     </div>
   );

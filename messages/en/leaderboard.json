@@ -1,0 +1,18 @@
+{
+  "title": "Leaderboard",
+  "tabs": {
+    "global": "Overall",
+    "gameweek": "This matchday"
+  },
+  "loading": "Loading…",
+  "totalTeams": "{count, plural, one {# team overall} other {# teams overall}}",
+  "pagination": {
+    "prev": "Prev.",
+    "next": "Next"
+  },
+  "gameweekLabel": "Matchday {number}",
+  "notScoredYet": "Matchday not scored yet",
+  "list": {
+    "empty": "No teams in this leaderboard yet."
+  }
+}

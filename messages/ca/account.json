@@ -1,0 +1,14 @@
+{
+  "title": "El meu compte",
+  "emailLabel": "Correu electrònic",
+  "nameLabel": "Nom d'usuari",
+  "favoritePlayerLabel": "Jugador preferit",
+  "optional": "(opcional)",
+  "favoritePlayerLocked": "Definitiu, no es pot modificar un cop declarat.",
+  "savedMessage": "Desat! El nom d'usuari que es mostra a dalt s'actualitzarà la propera vegada que iniciïs sessió.",
+  "saving": "Desant…",
+  "errors": {
+    "FAVORITE_PLAYER_LOCKED": "El jugador preferit és definitiu un cop declarat",
+    "INVALID_PLAYER": "Jugador preferit no trobat"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "loading": "Carregant…",
+  "save": "Desar",
+  "cancel": "Cancel·lar",
+  "confirm": "Confirmar",
+  "close": "Tancar",
+  "back": "Tornar",
+  "edit": "Editar",
+  "delete": "Eliminar",
+  "yes": "Sí",
+  "no": "No",
+  "cookieBanner": {
+    "text": "Aquest lloc només utilitza galetes tècniques necessàries per al seu funcionament (connexió, preferències). Cap galeta de seguiment ni de publicitat.",
+    "learnMore": "Saber-ne més",
+    "dismiss": "Entesos"
+  }
+}

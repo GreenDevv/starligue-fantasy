@@ -1,12 +1,14 @@
+import { getTranslations } from "next-intl/server";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import type { PerformancesCardData } from "@/lib/news/get-weekly-cards";
 
-export function StarliguePerformancesCard({ gameweekNumber, entries }: PerformancesCardData) {
+export async function StarliguePerformancesCard({ gameweekNumber, entries }: PerformancesCardData) {
+  const t = await getTranslations("dashboard");
   return (
     <div className="pixel-corners border border-border bg-surface p-3">
       <p className="mb-3 text-[10px] uppercase tracking-widest text-text-muted">
-        Meilleures performances · journée {gameweekNumber}
+        {t("performancesCard.subtitle", { number: gameweekNumber })}
       </p>
       <ol className="flex flex-col gap-2">
         {entries.map((e, i) => (

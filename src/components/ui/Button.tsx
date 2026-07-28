@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, AnchorHTMLAttributes } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export type ButtonSize = "sm" | "md" | "lg";

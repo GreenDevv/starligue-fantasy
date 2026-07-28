@@ -1,0 +1,30 @@
+{
+  "detail": {
+    "backToDashboard": "Inici",
+    "simulation": "Simulació",
+    "season": "Temporada",
+    "goalsByGameweek": "Gols per jornada",
+    "rosterCount": "Plantilla — {count, plural, one {# jugador} other {# jugadors}}",
+    "noPlayers": "Cap jugador registrat de moment."
+  },
+  "compare": {
+    "vs": "VS",
+    "currentSeason": "Temporada en curs",
+    "standingsUnavailable": "Classificació encara no disponible.",
+    "headToHead": "Enfrontaments directes",
+    "headToHeadCount": "{count, plural, one {darrer # enfrontament} other {darrers # enfrontaments}}",
+    "noHeadToHead": "No s'ha trobat cap enfrontament entre aquests dos clubs.",
+    "headToHeadSummary": "{winsA, plural, one {# victòria} other {# victòries}} {clubA} · {draws, plural, one {# empat} other {# empats}} · {winsB, plural, one {# victòria} other {# victòries}} {clubB}",
+    "stats": {
+      "rank": "Posició",
+      "points": "Punts",
+      "played": "Jugats",
+      "wins": "Victòries",
+      "draws": "Empats",
+      "losses": "Derrotes",
+      "goalsFor": "Gols a favor",
+      "goalsAgainst": "Gols en contra",
+      "goalDiff": "Dif."
+    }
+  }
+}

@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import type { Position } from "@/lib/squad/validation";
 import { HandballPitch } from "@/components/pitch/HandballPitch";
 import { CaptainPicker } from "@/components/CaptainPicker";
 import { Skeleton, SkeletonRow } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 import type { SeasonMode } from "@/lib/team/active-team-context";
+import { resolveApiError } from "@/lib/api/error-messages";
 
 interface SquadEntry {
   playerId: string;
@@ -43,6 +46,8 @@ interface TeamResponse {
 }
 
 export function StartView({ mode }: { mode: SeasonMode }) {
+  const t = useTranslations("team");
+  const tRoot = useTranslations();
   const router = useRouter();
   const leagueId = useSearchParams().get("league");
   const leagueSuffix = leagueId ? `?league=${leagueId}` : "";
@@ -108,7 +113,7 @@ export function StartView({ mode }: { mode: SeasonMode }) {
 
   async function handleSubmit() {
     if (!captainId) {
-      setError("Choisis un capitaine avant de valider");
+      setError(t("start.chooseCaptainFirst"));
       return;
     }
     setSubmitting(true);
@@ -126,7 +131,7 @@ export function StartView({ mode }: { mode: SeasonMode }) {
           router.push("/leagues");
           return;
         }
-        setError(lineupData.error?.message ?? "Erreur lors de la sauvegarde de l'alignement");
+        setError(resolveApiError(tRoot, "team", lineupData.error?.code));
         setSubmitting(false);
         return;
       }
@@ -136,16 +141,16 @@ export function StartView({ mode }: { mode: SeasonMode }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ playerId: captainId, ...(leagueId ? { leagueId } : {}) }),
       });
-      const captainData = (await captainRes.json()) as { data?: { captainId: string }; error?: { message: string } };
+      const captainData = (await captainRes.json()) as { data?: { captainId: string }; error?: { code?: string; message: string } };
       if (!captainData.data) {
-        setError(captainData.error?.message ?? "Erreur lors de la désignation du capitaine");
+        setError(resolveApiError(tRoot, "team", captainData.error?.code));
         setSubmitting(false);
         return;
       }
 
       router.push(leagueId ? `/leagues/${leagueId}` : "/leagues");
     } catch {
-      setError("Erreur réseau");
+      setError(resolveApiError(tRoot, "team", "NETWORK"));
       setSubmitting(false);
     }
   }
@@ -170,25 +175,24 @@ export function StartView({ mode }: { mode: SeasonMode }) {
     <div className="flex flex-col gap-6 pb-36">
       <div>
         {isSimulation && (
-          <p className="text-xs font-semibold uppercase tracking-widest text-accent-secondary">Mode Simulation</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-accent-secondary">{t("common.simulationMode")}</p>
         )}
-        <h1 className="text-2xl text-text">Compose ton équipe de départ</h1>
+        <h1 className="text-2xl text-text">{t("start.title")}</h1>
         <p className="mt-1 text-sm text-text-muted">
-          Choisis tes 7 titulaires et ton capitaine (×2 points). Le capitaine ne
-          pourra être changé qu'en période de transfert.
+          {t("start.subtitle")}
         </p>
       </div>
 
       <div>
         <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">
-          Titulaires · tap un joueur pour échanger avec son remplaçant
+          {t("start.startersHint")}
         </p>
         <HandballPitch starters={starters} bench={bench} captainId={captainId} onSwap={swapRole} />
       </div>
 
       <div>
         <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">
-          Capitaine · ×2 points s'il est titulaire à la journée
+          {t("start.captainHint")}
         </p>
         <CaptainPicker squad={squad} captainId={captainId} onSelect={setCaptainId} />
       </div>
@@ -209,7 +213,7 @@ export function StartView({ mode }: { mode: SeasonMode }) {
                 : "bg-accent shadow-[0_4px_0_0_theme(colors.accent.DEFAULT/0.4),0_0_16px_rgba(45,212,191,0.35)] hover:bg-accent/90 active:translate-y-[3px] active:shadow-[0_1px_0_0_theme(colors.accent.DEFAULT/0.4)]"
             )}
           >
-            {submitting ? "Validation…" : "C'est parti →"}
+            {submitting ? t("common.validating") : t("start.submitCta")}
           </button>
         </div>
       </div>

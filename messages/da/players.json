@@ -1,0 +1,55 @@
+{
+  "detail": {
+    "backToMarket": "Marked",
+    "avgRatingShort": "gns. {rating}/10",
+    "valueEvolution": "Værdiudvikling",
+    "seasonStats": "Sæsonstatistik {season}",
+    "shotPercentage": "% skud",
+    "statsByGameweek": "Statistik pr. runde",
+    "simulation": "Simulation",
+    "season": "Sæson",
+    "noLnhHistory": "Ny i Daikin StarLigue — ingen LNH-scorehistorik.",
+    "lnhHistory": "LNH-historik",
+    "lnhHistoryHeaders": {
+      "season": "Sæson",
+      "matches": "Kampe",
+      "avgScore": "Gns. LNH-score"
+    },
+    "noStats": "Ingen statistik tilgængelig endnu.",
+    "fallbackClubNote": "{name} spillede for {club} i {season}-sæsonen",
+    "fallbackStatsNote": "Den igangværende sæson er ikke startet endnu: statistik fra forrige sæson vises til orientering.",
+    "matchByMatch": "Statistik kamp for kamp",
+    "matchLogHeaders": {
+      "gameweek": "R.",
+      "opponent": "Mods.",
+      "rating": "Karakter",
+      "points": "Point (start.)"
+    }
+  },
+  "compare": {
+    "comparedTo": "Sammenlignet med",
+    "remove": "Fjern",
+    "addCompare": "Sammenlign med en spiller",
+    "searchPlaceholder": "Spillerens navn...",
+    "searching": "Søger...",
+    "noPlayerFound": "Ingen spiller fundet.",
+    "loading": "Indlæser..."
+  },
+  "search": {
+    "change": "Skift",
+    "placeholder": "Søg efter et navn…",
+    "noResults": "Ingen spiller fundet"
+  },
+  "recap": {
+    "ariaLabel": "Sæsonstatistik {season}",
+    "title": "Sæson {season}",
+    "loading": "Indlæser…",
+    "noStats": "Ingen statistik for {season} tilgængelig.",
+    "matches": "Kampe",
+    "rating": "LNH-karakter",
+    "saves": "Redninger",
+    "savePercentage": "% Redninger",
+    "goals": "Mål",
+    "assists": "Assists"
+  }
+}

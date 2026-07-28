@@ -1,0 +1,19 @@
+{
+  "title": "Marked",
+  "playerCount": "{count, plural, one {# spiller} other {# spillere}} · {seasonMode}",
+  "searchPlaceholder": "Søg efter en spiller eller klub…",
+  "allPositions": "Alle",
+  "sortByValue": "↓ Værdi",
+  "sortByName": "↓ Navn",
+  "noPlayersFound": "Ingen spillere fundet",
+  "trend": {
+    "up": "Stigende",
+    "down": "Faldende"
+  },
+  "budget": {
+    "label": "Budget",
+    "remaining": "{value}M tilbage",
+    "over": "{value}M over budget",
+    "spent": "Brugt: {value}M"
+  }
+}

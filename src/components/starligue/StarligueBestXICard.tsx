@@ -1,8 +1,10 @@
+import { getTranslations } from "next-intl/server";
 import { HandballPitch } from "@/components/pitch/HandballPitch";
 import type { TeamOfWeekCardData } from "@/lib/news/get-weekly-cards";
 
 // Lecture seule (comme BestXIWidget) — équipe type de LA SEMAINE, pas de la saison.
-export function StarligueBestXICard({ gameweekNumber, entries }: TeamOfWeekCardData) {
+export async function StarligueBestXICard({ gameweekNumber, entries }: TeamOfWeekCardData) {
+  const t = await getTranslations("dashboard");
   const starters = entries.map((e) => ({
     playerId: e.playerId,
     firstName: e.firstName,
@@ -17,7 +19,7 @@ export function StarligueBestXICard({ gameweekNumber, entries }: TeamOfWeekCardD
   return (
     <div className="pixel-corners border border-border bg-surface p-3">
       <p className="mb-2 text-[10px] uppercase tracking-widest text-text-muted">
-        Équipe type · journée {gameweekNumber}
+        {t("bestXICard.subtitle", { number: gameweekNumber })}
       </p>
       <HandballPitch starters={starters} bench={[]} benchLabel="" />
     </div>

@@ -1,0 +1,19 @@
+{
+  "title": "Markt",
+  "playerCount": "{count, plural, one {# Spieler} other {# Spieler}} · {seasonMode}",
+  "searchPlaceholder": "Spieler oder Verein suchen…",
+  "allPositions": "Alle",
+  "sortByValue": "↓ Wert",
+  "sortByName": "↓ Name",
+  "noPlayersFound": "Kein Spieler gefunden",
+  "trend": {
+    "up": "Steigend",
+    "down": "Fallend"
+  },
+  "budget": {
+    "label": "Budget",
+    "remaining": "{value} Mio. übrig",
+    "over": "{value} Mio. Überschreitung",
+    "spent": "Ausgegeben: {value} Mio."
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "list": {
+    "title": "Mes ligues",
+    "count": "{count, plural, one {# ligue} other {# ligues}}",
+    "seasonBadge": {
+      "live": "26/27",
+      "simulation": "Simu 25/26"
+    },
+    "joinButton": "Rejoindre",
+    "createButton": "+ Créer",
+    "createdTitle": "Ligue créée !",
+    "createFormTitle": "Créer une ligue",
+    "createNamePlaceholder": "Nom de la ligue…",
+    "creating": "Création…",
+    "createSubmit": "Créer →",
+    "joinFormTitle": "Rejoindre avec un code",
+    "joinCodePlaceholder": "ABCD1234",
+    "joining": "Recherche…",
+    "joinSubmit": "Rejoindre →",
+    "emptyState": "Ton équipe est liée à une ligue — crée la tienne ou rejoins celle d'un ami pour commencer.",
+    "memberCount": "{count, plural, one {# membre} other {# membres}}",
+    "ownerBadge": "admin",
+    "points": "{points} pts"
+  },
+  "detail": {
+    "memberRatio": "{count}/{max} membres",
+    "buildSquadTitle": "Compose ton effectif",
+    "buildSquadDescription": "Tu n'as pas encore constitué ton effectif de 14 joueurs pour cette ligue.",
+    "buildSquadCta": "Créer mon effectif →",
+    "leagueLeaderboardTitle": "Classement de la ligue",
+    "globalLeaderboardTitle": "Classement général",
+    "globalLeaderboardSubtitle": "Toutes ligues confondues"
+  },
+  "inviteCodeLabel": "Code d'invitation",
+  "actions": {
+    "copied": "Copié ✓",
+    "copyInvite": "{code} — copier",
+    "leaveLeague": "Quitter la ligue",
+    "deleteConfirm": "Supprimer définitivement",
+    "deleteLeague": "Supprimer la ligue"
+  },
+  "chat": {
+    "title": "Chat de ligue",
+    "badge": "Trash talk only",
+    "emptyState": "Personne n'a encore lancé les hostilités. À toi l'honneur.",
+    "you": "Toi",
+    "inputPlaceholder": "Envoie une pique à tes adversaires…",
+    "send": "Envoyer"
+  },
+  "errors": {
+    "NO_ACTIVE_SEASON": "Aucune saison active pour le moment",
+    "WRONG_SEASON_MODE": "Cette ligue appartient à une autre saison — bascule le toggle de saison pour la rejoindre.",
+    "LEAGUE_FULL": "La ligue est complète",
+    "ALREADY_MEMBER": "Tu es déjà membre de cette ligue",
+    "OWNER_CANNOT_LEAVE": "Le créateur ne peut pas quitter sa ligue. Supprime-la ou transfère-la."
+  }
+}

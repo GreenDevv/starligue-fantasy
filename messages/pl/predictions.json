@@ -1,0 +1,21 @@
+{
+  "title": "Typy",
+  "subtitle": "Za darmo i bez limitu. Trafny typ podbija mnożnik Twoich punktów w danej kolejce (×0.5 do ×2.0) — nigdy żadnej kary za błędny typ ani za brak typu.",
+  "gwLabel": "Kolejka {number}",
+  "gwShort": "K{number}",
+  "opensAfterDeadline": "Otwiera się po terminie kolejki {number}",
+  "nextGwLocked": "Kolejka {next} otworzy się, gdy minie termin kolejki {current}.",
+  "loading": "Ładowanie…",
+  "noMatches": "Brak meczów w tej kolejce.",
+  "lockedWithPick": "Typ zablokowany: {outcome}",
+  "lockedNoPick": "Zablokowane — brak typu",
+  "oddsUnavailable": "Kursy jeszcze niedostępne",
+  "networkError": "Błąd sieci",
+  "errors": {
+    "NOT_AVAILABLE_IN_SIMULATION": "Typy dostępne na razie tylko w grze na żywo",
+    "NO_ACTIVE_LEAGUE": "Brak aktywnej ligi",
+    "GW_NOT_OPEN": "Ta kolejka nie jest jeszcze otwarta na typy",
+    "MARKET_NOT_READY": "Kursy jeszcze niedostępne dla tego meczu",
+    "MATCH_LOCKED": "Typ zablokowany — mecz zaczyna się wkrótce"
+  }
+}

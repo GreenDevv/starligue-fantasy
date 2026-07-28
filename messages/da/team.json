@@ -1,0 +1,198 @@
+{
+  "common": {
+    "backToTeam": "Mit hold",
+    "backToHistory": "Historik",
+    "simulationMode": "Simulationstilstand",
+    "simulationModeSeason": "Simulationstilstand · 2025/26",
+    "transfers": "Transfers",
+    "trades": "Trades",
+    "starters": "Startspillere",
+    "bench": "Reserver",
+    "validating": "Bekræfter…",
+    "matchday": "Runde {number}"
+  },
+  "errors": {
+    "NO_ACTIVE_LEAGUE": "Ingen aktiv liga",
+    "SQUAD_NOT_VALIDATED": "Trup ikke bekræftet",
+    "DEADLINE_PASSED": "Deadline for denne runde er overskredet",
+    "LINEUP_INVALID": "Ugyldig opstilling",
+    "BONUS_ALREADY_USED": "Denne bonus er allerede brugt denne sæson",
+    "BONUS_QUOTA_REACHED": "Bonuskvoten er nået for denne sæson",
+    "TRANSFER_WINDOW_CLOSED": "Intet åbent transfervindue",
+    "CONVERSION_INVALID": "Ugyldig konvertering",
+    "SEASON_STARTED": "Trup låst for sæsonen — brug Transfers eller Trades for at ændre den",
+    "PLAYERS_NOT_FOUND": "Nogle spillere blev ikke fundet",
+    "SQUAD_INVALID": "Ugyldig sammensætning",
+    "PLAYER_NOT_FOUND": "Spiller ikke fundet",
+    "TRANSFER_INVALID": "Ugyldig transfer",
+    "PLAYER_NOT_IN_SQUAD": "Denne spiller er ikke i din trup",
+    "CAPTAIN_LOCKED": "Anføreren kan kun ændres i et transfervindue",
+    "NOT_APPLICABLE": "Ingen trøjetilpasning i simulationstilstand",
+    "SELF_TRADE": "Kan ikke foreslå en trade til sit eget hold",
+    "TEAM_NOT_IN_LEAGUE": "Modtagerholdet blev ikke fundet i denne liga",
+    "TRADE_INVALID": "Denne trade er ikke gyldig",
+    "TRADE_NOT_PENDING": "Dette forslag afventer ikke længere",
+    "NETWORK": "Netværksfejl"
+  },
+  "history": {
+    "title": "Historik",
+    "teamSummary": "{name} · {points} point",
+    "teamSummarySeason": "{name} · {points} sæsonpoint",
+    "emptyLive": "Ingen runde er gemt som snapshot endnu.",
+    "emptySim": "Ingen runde er rykket frem endnu.",
+    "emptyHintLive": "Snapshots oprettes automatisk før hver deadline.",
+    "emptyHintSim": "Når en admin rykker simulationen frem, vises runderne her.",
+    "pending": "Afventer",
+    "ptsArrow": "point →"
+  },
+  "gameweekDetail": {
+    "statusSimScored": "Runde beregnet",
+    "statusSimPending": "Ikke beregnet endnu",
+    "statusLiveScored": "Runde bedømt",
+    "statusLivePending": "Afventer karakterer",
+    "bonusActive": "Aktiv bonus · {bonus}"
+  },
+  "identity": {
+    "title": "Dit hold",
+    "subtitle": "Vælg et navn og tilpas din trøje — synlig overalt hvor dit hold vises."
+  },
+  "build": {
+    "titleCreate": "Opret min trup",
+    "titleEdit": "Rediger min trup",
+    "loadingPlayers": "Indlæser spillere…",
+    "lockedTitle": "Trup låst for sæsonen",
+    "lockedBody": "Sæsonen er startet: truppen kan ikke længere udskiftes samlet. Brug Transfers eller Trades for at udvikle den.",
+    "progress": "{completed}/7 positioner fuldført · {picked}/14 spillere",
+    "squadHint": "Din trup · tryk på en tom plads for at vælge, tryk på en spiller for at fjerne",
+    "searchPlaceholder": "Søg en {position}…",
+    "slotsFull": "Begge pladser er fyldt",
+    "noPlayersAvailable": "Ingen spillere tilgængelige",
+    "tooManyFromClub": "For mange spillere fra {club} ({count}/{max} maks.)",
+    "unknownClub": "en klub",
+    "missingPlayers": "{count, plural, one {Der mangler # spiller} other {Der mangler # spillere}}",
+    "budgetExceeded": "Budget overskredet med {amount}M",
+    "validateCta": "Bekræft min trup →",
+    "updateCta": "Opdater truppen"
+  },
+  "start": {
+    "chooseCaptainFirst": "Vælg en anfører før du bekræfter",
+    "title": "Sæt din startopstilling",
+    "subtitle": "Vælg dine 7 startspillere og din anfører (×2 point). Anføreren kan først ændres i en transferperiode.",
+    "startersHint": "Startspillere · tryk på en spiller for at bytte med hans reserve",
+    "captainHint": "Anfører · ×2 point hvis han er i startopstillingen den pågældende runde",
+    "submitCta": "Kom i gang →"
+  },
+  "trades": {
+    "title": "Trades",
+    "infoBanner": "Trades er tilladt hele sæsonen, også uden for transfervinduerne — en accepteret trade udføres med det samme.",
+    "proposeTitle": "Foreslå en trade",
+    "chooseOpponent": "Vælg en modstander…",
+    "offerLabelYou": "Du tilbyder",
+    "offerLabelThem": "Han tilbyder dig",
+    "requestSectionTitle": "Du beder om",
+    "requestLabelYou": "du beder om",
+    "requestLabelThem": "han beder dig om",
+    "budgetAdjustmentLabel": "Budgetjustering (du giver, hvis positiv)",
+    "proposalSent": "Forslag sendt.",
+    "submitCta": "Foreslå trade",
+    "sending": "Sender…",
+    "myProposals": "Mine forslag",
+    "noProposals": "Ingen forslag for øjeblikket.",
+    "toTeam": "Til {name}",
+    "fromTeam": "Fra {name}",
+    "accept": "Accepter",
+    "reject": "Afvis",
+    "cancel": "Annuller"
+  },
+  "transfers": {
+    "title": "Transfers",
+    "windowOpen": "Transfervindue åbent — sælg og køb frit.",
+    "windowClosed": "Intet åbent transfervindue lige nu.",
+    "jokerAvailable": "{count, plural, one {Medicinsk joker tilgængelig (# tilbage) til en skadet spiller.} other {Medicinsk joker tilgængelig (# tilbage) til en skadet spiller.}}",
+    "noJokersLeft": "Ingen medicinske jokere tilbage.",
+    "remainingBudgetLabel": "Resterende budget:",
+    "squadHint": "Din trup · vælg en spiller at sælge",
+    "injuredBadge": "SKADET",
+    "replacementFor": "Erstatning for {name}",
+    "transferUnavailable": "Transfer ikke tilgængelig i øjeblikket",
+    "searchPlaceholder": "Søg en spiller eller klub…",
+    "noPlayersFound": "Ingen spillere fundet",
+    "transferSuccess": "{name} er nu en del af din trup."
+  },
+  "view": {
+    "editSquad": "Rediger trup",
+    "customizeJersey": "Tilpas trøje",
+    "ptsSeasonLabel": "sæsonpoint",
+    "captainLabel": "Anfører · ×2 point",
+    "noCaptain": "Ingen",
+    "changeCaptain": "Skift",
+    "locked": "Låst",
+    "lockedTitle": "Kan kun ændres i en transferperiode",
+    "seasonBonusTitle": "Sæsonbonus",
+    "bonusUsedCount": "{used}/{quota} brugt",
+    "convertTitle": "Konverter point til budget",
+    "budgetLabel": "Budget:",
+    "convertRate": "1 point = {rate}M · konverterbar saldo: {points, plural, one {# point} other {# point}}",
+    "convertPlaceholder": "Point at konvertere",
+    "convertAll": "Alle",
+    "convertCta": "Konverter",
+    "convertPreview": "→ +{amount}M i budget",
+    "convertClosedHint": "Det er muligt at konvertere point til budget i et transfervindue.",
+    "budgetGained": "+{amount}M i budget",
+    "lastGameweekLabel": "Seneste runde",
+    "viewDetail": "point · se detaljer →",
+    "viewFullHistory": "Se hele historikken",
+    "lineupSaved": "Opstilling gemt ✓",
+    "saving": "Gemmer…",
+    "lineupSavedButton": "Opstilling gemt",
+    "saveLineupCta": "Gem opstilling"
+  },
+  "jersey": {
+    "loading3d": "Indlæser 3D-visning…",
+    "teamNameLabel": "Holdets navn",
+    "teamNamePlaceholder": "Tishs Eksperter",
+    "dragToRotate": "Træk for at rotere",
+    "patternLabel": "Mønster",
+    "collarSleeveColor": "Farve på krave/ærmer",
+    "collarLabel": "Krave",
+    "contrastSleeves": "Kontrastærmer",
+    "numberLabel": "Nummer",
+    "nameFlockLabel": "Navn på ryggen",
+    "nameFlockPlaceholder": "TISH",
+    "chooseNameError": "Vælg et holdnavn",
+    "saving": "Gemmer…",
+    "submitCta": "Bekræft →",
+    "customColor": "Brugerdefineret farve",
+    "colorSlotFallback": "Farve {n}",
+    "slotLabels": {
+      "0": "Primærfarve",
+      "1": "Sekundærfarve",
+      "2": "Kant",
+      "3": "Detalje"
+    }
+  },
+  "pitch": {
+    "svgAriaLabel": "Håndboldbane (halvdel, 20m × 20m), afgrænset til spillezonen",
+    "benchLabel": "Reserver · tryk for at bytte"
+  },
+  "bonus": {
+    "TRIPLE_CAPTAIN": {
+      "description": "×3 på anføreren denne runde"
+    },
+    "BENCH_BOOST": {
+      "description": "Reserverne tæller med ×1 denne runde"
+    },
+    "INSURANCE": {
+      "description": "Ingen spiller ender i minus denne runde"
+    },
+    "STATISTICIAN": {
+      "description": "×2 på rundens leder-bonus/malus"
+    },
+    "status": {
+      "active": "Aktiv denne runde",
+      "used": "Allerede brugt",
+      "quotaReached": "Kvote nået",
+      "available": "Tilgængelig"
+    }
+  }
+}

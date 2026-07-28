@@ -1,0 +1,9 @@
+{
+  "common": {
+    "UNAUTHORIZED": "Login påkrævet",
+    "FORBIDDEN": "Handling ikke tilladt",
+    "NOT_FOUND": "Ikke fundet",
+    "INVALID_INPUT": "Ugyldige felter",
+    "generic": "Der opstod en fejl"
+  }
+}

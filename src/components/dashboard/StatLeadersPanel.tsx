@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { STAT_LINES } from "@/lib/stats/stat-lines";
 import { COMPUTED_STAT_LINES } from "@/lib/stats/computed-stat-lines";
 import { StatLeaderCard } from "./StatLeaderCard";
@@ -28,6 +29,9 @@ export function StatLeadersPanel({
   seasonId: string;
   context: "live" | "simulation";
 }) {
+  const t = useTranslations("dashboard");
+  const tCommon = useTranslations("common");
+  const tLabels = useTranslations("labels");
   const [visibleKeys, setVisibleKeys] = useState<string[]>(DEFAULT_VISIBLE_KEYS);
   const [showPicker, setShowPicker] = useState(false);
 
@@ -53,7 +57,7 @@ export function StatLeadersPanel({
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[10px] uppercase tracking-widest text-text-muted">Leaders</p>
+      <p className="text-[10px] uppercase tracking-widest text-text-muted">{t("statLeadersPanel.title")}</p>
 
       {visibleKeys.map((key) => (
         <StatLeaderCard
@@ -66,9 +70,9 @@ export function StatLeadersPanel({
 
       {showPicker ? (
         <div className="pixel-corners border border-border bg-surface p-3">
-          <p className="mb-2 text-xs text-text-muted">Ajouter une stat</p>
+          <p className="mb-2 text-xs text-text-muted">{t("statLeadersPanel.addStatLabel")}</p>
           {hiddenLines.length === 0 ? (
-            <p className="text-xs text-text-muted">Toutes les lignes sont déjà affichées.</p>
+            <p className="text-xs text-text-muted">{t("statLeadersPanel.allLinesVisible")}</p>
           ) : (
             <div className="flex flex-wrap gap-1.5">
               {hiddenLines.map((line) => (
@@ -80,7 +84,7 @@ export function StatLeadersPanel({
                   }}
                   className="pixel-corners-sm border border-border px-2 py-1 text-xs text-text-muted transition-colors hover:text-text"
                 >
-                  {line.label}
+                  {tLabels(`statLine.${line.key}`)}
                 </button>
               ))}
             </div>
@@ -89,7 +93,7 @@ export function StatLeadersPanel({
             onClick={() => setShowPicker(false)}
             className="mt-2 text-xs text-text-muted transition-colors hover:text-text"
           >
-            Fermer
+            {tCommon("close")}
           </button>
         </div>
       ) : (
@@ -97,7 +101,7 @@ export function StatLeadersPanel({
           onClick={() => setShowPicker(true)}
           className="pixel-corners-sm border border-dashed border-border py-2 text-xs uppercase tracking-wide text-text-muted transition-colors hover:text-text"
         >
-          + Ajouter une stat
+          {t("statLeadersPanel.addStatCta")}
         </button>
       )}
     </div>

@@ -1,0 +1,198 @@
+{
+  "common": {
+    "backToTeam": "El meu equip",
+    "backToHistory": "Historial",
+    "simulationMode": "Mode Simulació",
+    "simulationModeSeason": "Mode Simulació · 2025/26",
+    "transfers": "Traspassos",
+    "trades": "Trades",
+    "starters": "Titulars",
+    "bench": "Suplents",
+    "validating": "Validant…",
+    "matchday": "Jornada {number}"
+  },
+  "errors": {
+    "NO_ACTIVE_LEAGUE": "No hi ha cap lliga activa",
+    "SQUAD_NOT_VALIDATED": "Plantilla no validada",
+    "DEADLINE_PASSED": "La data límit d'aquesta jornada ja ha passat",
+    "LINEUP_INVALID": "Alineació no vàlida",
+    "BONUS_ALREADY_USED": "Aquest bonus ja s'ha fet servir aquesta temporada",
+    "BONUS_QUOTA_REACHED": "S'ha arribat a la quota de bonus de la temporada",
+    "TRANSFER_WINDOW_CLOSED": "No hi ha cap finestra de traspassos oberta",
+    "CONVERSION_INVALID": "Conversió no vàlida",
+    "SEASON_STARTED": "Plantilla bloquejada per a la temporada — fes servir Traspassos o Trades per modificar-la",
+    "PLAYERS_NOT_FOUND": "Alguns jugadors no s'han trobat",
+    "SQUAD_INVALID": "Plantilla no vàlida",
+    "PLAYER_NOT_FOUND": "Jugador no trobat",
+    "TRANSFER_INVALID": "Traspàs no vàlid",
+    "PLAYER_NOT_IN_SQUAD": "Aquest jugador no és a la teva plantilla",
+    "CAPTAIN_LOCKED": "El capità només es pot canviar durant una finestra de traspassos",
+    "NOT_APPLICABLE": "La personalització de la samarreta no està disponible en mode Simulació",
+    "SELF_TRADE": "No pots proposar un trade al teu propi equip",
+    "TEAM_NOT_IN_LEAGUE": "No s'ha trobat l'equip destinatari en aquesta lliga",
+    "TRADE_INVALID": "Aquest trade no és vàlid",
+    "TRADE_NOT_PENDING": "Aquesta proposta ja no està pendent",
+    "NETWORK": "Error de xarxa"
+  },
+  "history": {
+    "title": "Historial",
+    "teamSummary": "{name} · {points} pts",
+    "teamSummarySeason": "{name} · {points} pts de temporada",
+    "emptyLive": "Encara no hi ha cap jornada desada.",
+    "emptySim": "Encara no s'ha avançat cap jornada.",
+    "emptyHintLive": "Les instantànies es creen automàticament abans de cada data límit.",
+    "emptyHintSim": "Quan un admin avanci la simulació, les jornades apareixeran aquí.",
+    "pending": "Pendent",
+    "ptsArrow": "pts →"
+  },
+  "gameweekDetail": {
+    "statusSimScored": "Jornada calculada",
+    "statusSimPending": "Encara no calculada",
+    "statusLiveScored": "Jornada puntuada",
+    "statusLivePending": "Esperant les notes",
+    "bonusActive": "Bonus actiu · {bonus}"
+  },
+  "identity": {
+    "title": "El teu equip",
+    "subtitle": "Tria un nom i personalitza la teva samarreta — visible a tot arreu on aparegui el teu equip."
+  },
+  "build": {
+    "titleCreate": "Crear la meva plantilla",
+    "titleEdit": "Modificar la meva plantilla",
+    "loadingPlayers": "Carregant jugadors…",
+    "lockedTitle": "Plantilla bloquejada per a la temporada",
+    "lockedBody": "La temporada ja ha començat: la plantilla ja no es pot substituir en bloc. Fes servir Traspassos o Trades per fer-la evolucionar.",
+    "progress": "{completed}/7 posicions completes · {picked}/14 jugadors",
+    "squadHint": "La teva plantilla · toca un lloc buit per triar, toca un jugador per treure'l",
+    "searchPlaceholder": "Cerca un {position}…",
+    "slotsFull": "Els 2 llocs estan plens",
+    "noPlayersAvailable": "No hi ha cap jugador disponible",
+    "tooManyFromClub": "Massa jugadors de {club} ({count}/{max} màx.)",
+    "unknownClub": "un club",
+    "missingPlayers": "{count, plural, one {Et falta # jugador} other {Et falten # jugadors}}",
+    "budgetExceeded": "Pressupost superat en {amount}M",
+    "validateCta": "Valida la meva plantilla →",
+    "updateCta": "Actualitza la plantilla"
+  },
+  "start": {
+    "chooseCaptainFirst": "Tria un capità abans de validar",
+    "title": "Compon el teu onze inicial",
+    "subtitle": "Tria els teus 7 titulars i el teu capità (×2 punts). El capità només es podrà canviar durant una finestra de traspassos.",
+    "startersHint": "Titulars · toca un jugador per intercanviar-lo amb el seu suplent",
+    "captainHint": "Capità · ×2 punts si és titular a la jornada",
+    "submitCta": "Som-hi! →"
+  },
+  "trades": {
+    "title": "Trades",
+    "infoBanner": "Els trades estan permesos durant tota la temporada, fins i tot fora de les finestres de traspassos — un trade acceptat s'executa immediatament.",
+    "proposeTitle": "Proposar un trade",
+    "chooseOpponent": "Tria un rival…",
+    "offerLabelYou": "Tu ofereixes",
+    "offerLabelThem": "Ell t'ofereix",
+    "requestSectionTitle": "Tu demanes",
+    "requestLabelYou": "tu demanes",
+    "requestLabelThem": "ell et demana",
+    "budgetAdjustmentLabel": "Ajust de pressupost (tu dones si és positiu)",
+    "proposalSent": "Proposta enviada.",
+    "submitCta": "Proposar el trade",
+    "sending": "Enviant…",
+    "myProposals": "Les meves propostes",
+    "noProposals": "Encara no hi ha cap proposta.",
+    "toTeam": "Cap a {name}",
+    "fromTeam": "De {name}",
+    "accept": "Acceptar",
+    "reject": "Rebutjar",
+    "cancel": "Cancel·lar"
+  },
+  "transfers": {
+    "title": "Traspassos",
+    "windowOpen": "Finestra de traspassos oberta — compra i ven amb llibertat.",
+    "windowClosed": "No hi ha cap finestra de traspassos oberta ara mateix.",
+    "jokerAvailable": "{count, plural, one {Joker mèdic disponible (# restant) per a un jugador lesionat.} other {Joker mèdic disponible (# restants) per a un jugador lesionat.}}",
+    "noJokersLeft": "No queda cap joker mèdic.",
+    "remainingBudgetLabel": "Pressupost restant:",
+    "squadHint": "La teva plantilla · selecciona un jugador per vendre",
+    "injuredBadge": "LESIONAT",
+    "replacementFor": "Substitut per a {name}",
+    "transferUnavailable": "Traspàs no disponible en aquest moment",
+    "searchPlaceholder": "Cerca un jugador o club…",
+    "noPlayersFound": "No s'ha trobat cap jugador",
+    "transferSuccess": "{name} s'uneix a la teva plantilla."
+  },
+  "view": {
+    "editSquad": "Modificar plantilla",
+    "customizeJersey": "Personalitzar samarreta",
+    "ptsSeasonLabel": "pts de temporada",
+    "captainLabel": "Capità · ×2 pts",
+    "noCaptain": "Cap",
+    "changeCaptain": "Canviar",
+    "locked": "Bloquejat",
+    "lockedTitle": "Només es pot modificar durant una finestra de traspassos",
+    "seasonBonusTitle": "Bonus de temporada",
+    "bonusUsedCount": "{used}/{quota} utilitzats",
+    "convertTitle": "Convertir punts en pressupost",
+    "budgetLabel": "Pressupost:",
+    "convertRate": "1 pt = {rate}M · saldo convertible: {points, plural, one {# pt} other {# pts}}",
+    "convertPlaceholder": "Punts a convertir",
+    "convertAll": "Tot",
+    "convertCta": "Convertir",
+    "convertPreview": "→ +{amount}M de pressupost",
+    "convertClosedHint": "Convertir punts en pressupost només és possible durant una finestra de traspassos.",
+    "budgetGained": "+{amount}M de pressupost",
+    "lastGameweekLabel": "Última jornada",
+    "viewDetail": "pts · veure detall →",
+    "viewFullHistory": "Veure l'historial complet",
+    "lineupSaved": "Alineació desada ✓",
+    "saving": "Desant…",
+    "lineupSavedButton": "Alineació desada",
+    "saveLineupCta": "Desar alineació"
+  },
+  "jersey": {
+    "loading3d": "Carregant la vista prèvia 3D…",
+    "teamNameLabel": "Nom de l'equip",
+    "teamNamePlaceholder": "Els Cracks d'en Tish",
+    "dragToRotate": "Arrossega per girar",
+    "patternLabel": "Patró",
+    "collarSleeveColor": "Color de coll / mànigues",
+    "collarLabel": "Coll",
+    "contrastSleeves": "Mànigues de contrast",
+    "numberLabel": "Número",
+    "nameFlockLabel": "Nom estampat",
+    "nameFlockPlaceholder": "TISH",
+    "chooseNameError": "Tria un nom d'equip",
+    "saving": "Desant…",
+    "submitCta": "Confirmar →",
+    "customColor": "Color personalitzat",
+    "colorSlotFallback": "Color {n}",
+    "slotLabels": {
+      "0": "Color principal",
+      "1": "Color secundari",
+      "2": "Vora",
+      "3": "Detall"
+    }
+  },
+  "pitch": {
+    "svgAriaLabel": "Mitja pista d'handbol (20m × 20m), enquadrada sobre la zona de joc",
+    "benchLabel": "Suplents · toca per intercanviar"
+  },
+  "bonus": {
+    "TRIPLE_CAPTAIN": {
+      "description": "×3 en el capità aquesta jornada"
+    },
+    "BENCH_BOOST": {
+      "description": "Els suplents compten a ×1 aquesta jornada"
+    },
+    "INSURANCE": {
+      "description": "Cap jugador acaba en negatiu aquesta jornada"
+    },
+    "STATISTICIAN": {
+      "description": "×2 en el bonus/malus del líder de la jornada"
+    },
+    "status": {
+      "active": "Actiu aquesta jornada",
+      "used": "Ja utilitzat",
+      "quotaReached": "Quota assolida",
+      "available": "Disponible"
+    }
+  }
+}

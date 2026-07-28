@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations, useFormatter } from "next-intl";
+import { resolveApiError } from "@/lib/api/error-messages";
 
 interface ChatMessage {
   id: string;
@@ -12,10 +14,6 @@ interface ChatMessage {
 
 const POLL_INTERVAL_MS = 5000;
 
-function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
-}
-
 // Fusionne en dédupliquant par id — un fetchNew() lancé avant l'envoi optimiste
 // d'un message peut résoudre après coup et renvoyer ce même message (course entre
 // le polling et handleSend), voir memory "double POST React Strict Mode".
@@ -25,6 +23,9 @@ function mergeMessages(prev: ChatMessage[], incoming: ChatMessage[]): ChatMessag
 }
 
 export function LeagueChat({ leagueId, currentUserId }: { leagueId: string; currentUserId: string }) {
+  const t = useTranslations("leagues");
+  const tRoot = useTranslations();
+  const format = useFormatter();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
@@ -67,14 +68,14 @@ export function LeagueChat({ leagueId, currentUserId }: { leagueId: string; curr
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content }),
     });
-    const json = (await res.json()) as { data?: { message: ChatMessage }; error?: { message: string } };
+    const json = (await res.json()) as { data?: { message: ChatMessage }; error?: { code?: string; message: string } };
     if (json.data) {
       const sent = json.data.message;
       setMessages((prev) => mergeMessages(prev, [sent]));
       latestCreatedAt.current = sent.createdAt;
       setDraft("");
     } else {
-      setError(json.error?.message ?? "Erreur d'envoi");
+      setError(resolveApiError(tRoot, "leagues", json.error?.code));
     }
     setSending(false);
   }
@@ -82,14 +83,14 @@ export function LeagueChat({ leagueId, currentUserId }: { leagueId: string; curr
   return (
     <div className="pixel-corners border border-border bg-surface">
       <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
-        <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">Chat de ligue</p>
-        <span className="text-[10px] uppercase tracking-widest text-amber-400">Trash talk only</span>
+        <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">{t("chat.title")}</p>
+        <span className="text-[10px] uppercase tracking-widest text-amber-400">{t("chat.badge")}</span>
       </div>
 
       <div ref={listRef} className="flex max-h-72 flex-col gap-2 overflow-y-auto px-4 py-3">
         {messages.length === 0 ? (
           <p className="py-4 text-center text-sm text-text-muted">
-            Personne n'a encore lancé les hostilités. À toi l'honneur.
+            {t("chat.emptyState")}
           </p>
         ) : (
           messages.map((m) => {
@@ -97,7 +98,7 @@ export function LeagueChat({ leagueId, currentUserId }: { leagueId: string; curr
             return (
               <div key={m.id} className={mine ? "self-end text-right" : "self-start"}>
                 <p className="text-[10px] text-text-muted">
-                  {mine ? "Toi" : m.userName} · {formatTime(m.createdAt)}
+                  {mine ? t("chat.you") : m.userName} · {format.dateTime(new Date(m.createdAt), { hour: "2-digit", minute: "2-digit" })}
                 </p>
                 <p
                   className={[
@@ -118,7 +119,7 @@ export function LeagueChat({ leagueId, currentUserId }: { leagueId: string; curr
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           maxLength={500}
-          placeholder="Envoie une pique à tes adversaires…"
+          placeholder={t("chat.inputPlaceholder")}
           className="flex-1 bg-transparent text-sm text-text placeholder:text-text-muted focus:outline-none"
         />
         <button
@@ -126,7 +127,7 @@ export function LeagueChat({ leagueId, currentUserId }: { leagueId: string; curr
           disabled={sending || draft.trim().length === 0}
           className="pixel-corners-sm border border-accent/40 px-3 py-1.5 text-xs text-accent transition-colors hover:bg-accent/10 disabled:opacity-40"
         >
-          Envoyer
+          {t("chat.send")}
         </button>
       </form>
       {error && <p className="px-4 pb-2 text-xs text-points-neg">{error}</p>}

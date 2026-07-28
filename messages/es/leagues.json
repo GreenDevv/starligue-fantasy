@@ -1,0 +1,57 @@
+{
+  "list": {
+    "title": "Mis ligas",
+    "count": "{count, plural, one {# liga} other {# ligas}}",
+    "seasonBadge": {
+      "live": "26/27",
+      "simulation": "Sim 25/26"
+    },
+    "joinButton": "Unirse",
+    "createButton": "+ Crear",
+    "createdTitle": "¡Liga creada!",
+    "createFormTitle": "Crear una liga",
+    "createNamePlaceholder": "Nombre de la liga…",
+    "creating": "Creando…",
+    "createSubmit": "Crear →",
+    "joinFormTitle": "Unirse con un código",
+    "joinCodePlaceholder": "ABCD1234",
+    "joining": "Buscando…",
+    "joinSubmit": "Unirse →",
+    "emptyState": "Tu equipo está ligado a una liga — crea la tuya o únete a la de un amigo para empezar.",
+    "memberCount": "{count, plural, one {# miembro} other {# miembros}}",
+    "ownerBadge": "admin",
+    "points": "{points} pts"
+  },
+  "detail": {
+    "memberRatio": "{count}/{max} miembros",
+    "buildSquadTitle": "Arma tu plantilla",
+    "buildSquadDescription": "Todavía no has formado tu plantilla de 14 jugadores para esta liga.",
+    "buildSquadCta": "Crear mi plantilla →",
+    "leagueLeaderboardTitle": "Clasificación de la liga",
+    "globalLeaderboardTitle": "Clasificación general",
+    "globalLeaderboardSubtitle": "Todas las ligas juntas"
+  },
+  "inviteCodeLabel": "Código de invitación",
+  "actions": {
+    "copied": "Copiado ✓",
+    "copyInvite": "{code} — copiar",
+    "leaveLeague": "Salir de la liga",
+    "deleteConfirm": "Eliminar definitivamente",
+    "deleteLeague": "Eliminar la liga"
+  },
+  "chat": {
+    "title": "Chat de la liga",
+    "badge": "Trash talk only",
+    "emptyState": "Nadie ha empezado las hostilidades todavía. El honor es tuyo.",
+    "you": "Tú",
+    "inputPlaceholder": "Manda una pulla a tus rivales…",
+    "send": "Enviar"
+  },
+  "errors": {
+    "NO_ACTIVE_SEASON": "No hay ninguna temporada activa ahora mismo",
+    "WRONG_SEASON_MODE": "Esta liga pertenece a otra temporada — cambia el interruptor de temporada para unirte.",
+    "LEAGUE_FULL": "Esta liga está completa",
+    "ALREADY_MEMBER": "Ya eres miembro de esta liga",
+    "OWNER_CANNOT_LEAVE": "El creador no puede salir de su propia liga. Elimínala o transfiere la propiedad."
+  }
+}

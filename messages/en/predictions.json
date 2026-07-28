@@ -1,0 +1,21 @@
+{
+  "title": "Predictions",
+  "subtitle": "Free and unlimited. A good prediction boosts your gameweek points multiplier (×0.5 to ×2.0) — never a penalty for a wrong guess or a prediction you skip.",
+  "gwLabel": "Gameweek {number}",
+  "gwShort": "GW{number}",
+  "opensAfterDeadline": "Opens after gameweek {number}'s deadline",
+  "nextGwLocked": "Gameweek {next} will open once gameweek {current}'s deadline has passed.",
+  "loading": "Loading…",
+  "noMatches": "No matches for this gameweek.",
+  "lockedWithPick": "Prediction locked: {outcome}",
+  "lockedNoPick": "Locked — no prediction made",
+  "oddsUnavailable": "Odds not available yet",
+  "networkError": "Network error",
+  "errors": {
+    "NOT_AVAILABLE_IN_SIMULATION": "Predictions are only available in live play for now",
+    "NO_ACTIVE_LEAGUE": "No active league",
+    "GW_NOT_OPEN": "This gameweek isn't open for predictions yet",
+    "MARKET_NOT_READY": "Odds not available yet for this match",
+    "MATCH_LOCKED": "Prediction locked — kickoff is coming up"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "detail": {
+    "backToDashboard": "Dashboard",
+    "simulation": "Simulation",
+    "season": "Sæson",
+    "goalsByGameweek": "Mål pr. runde",
+    "rosterCount": "Trup — {count, plural, one {# spiller} other {# spillere}}",
+    "noPlayers": "Ingen spillere registreret endnu."
+  },
+  "compare": {
+    "vs": "VS",
+    "currentSeason": "Igangværende sæson",
+    "standingsUnavailable": "Stillingen er ikke tilgængelig endnu.",
+    "headToHead": "Direkte opgør",
+    "headToHeadCount": "{count, plural, one {# seneste} other {# seneste}}",
+    "noHeadToHead": "Ingen opgør fundet mellem disse to klubber.",
+    "headToHeadSummary": "{winsA, plural, one {# sejr} other {# sejre}} {clubA} · {draws, plural, one {# uafgjort} other {# uafgjorte}} · {winsB, plural, one {# sejr} other {# sejre}} {clubB}",
+    "stats": {
+      "rank": "Placering",
+      "points": "Point",
+      "played": "Spillet",
+      "wins": "Sejre",
+      "draws": "Uafgjort",
+      "losses": "Nederlag",
+      "goalsFor": "Scorede mål",
+      "goalsAgainst": "Indkasserede mål",
+      "goalDiff": "Diff."
+    }
+  }
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { JerseyBadge } from "@/components/jersey/JerseyBadge";
 
 interface StandingEntry {
@@ -31,10 +32,12 @@ export function LeaderboardList({
   currentUserId,
   pointsKey = "totalPoints",
 }: LeaderboardListProps) {
+  const t = useTranslations("leaderboard");
+
   if (entries.length === 0) {
     return (
       <div className="pixel-corners border border-border bg-surface px-4 py-8 text-center">
-        <p className="text-sm text-text-muted">Aucune équipe dans ce classement pour l'instant.</p>
+        <p className="text-sm text-text-muted">{t("list.empty")}</p>
       </div>
     );
   }

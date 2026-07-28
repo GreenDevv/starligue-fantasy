@@ -1,33 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
-const FEATURES: { title: string; description: string; dotClassName: string }[] = [
-  {
-    title: "Compose ton effectif",
-    description:
-      "14 joueurs parmi les 16 clubs de Starligue, un budget serré, un poste à la fois — gardien, ailiers, arrières, demi-centre, pivot.",
-    dotClassName: "bg-accent shadow-glow-accent",
-  },
-  {
-    title: "Aligne-toi chaque journée",
-    description:
-      "7 titulaires sur le terrain, 7 remplaçants sur le banc. Deadline avant chaque coup d'envoi, comme en vrai.",
-    dotClassName: "bg-accent-secondary shadow-glow-amber",
-  },
-  {
-    title: "Marque sur le réel",
-    description:
-      "Buts, arrêts, passes décisives : chaque statistique du match compte dans ton score de la journée.",
-    dotClassName: "bg-points-pos",
-  },
-  {
-    title: "Défie tes amis",
-    description:
-      "Crée ta ligue privée, suis le classement en direct, échange des joueurs entre les journées.",
-    dotClassName: "bg-points-neg shadow-glow-red",
-  },
-];
+const FEATURE_KEYS = ["squad", "lineup", "score", "challenge"] as const;
+const FEATURE_STYLE: Record<(typeof FEATURE_KEYS)[number], string> = {
+  squad: "bg-accent shadow-glow-accent",
+  lineup: "bg-accent-secondary shadow-glow-amber",
+  score: "bg-points-pos",
+  challenge: "bg-points-neg shadow-glow-red",
+};
 
 const riseIn = {
   hidden: { opacity: 0, y: 14 },
@@ -35,6 +17,7 @@ const riseIn = {
 };
 
 export function ComingSoon() {
+  const t = useTranslations("dashboard");
   return (
     <div className="relative flex min-h-screen flex-col items-center overflow-hidden bg-bg">
       {/* Arcs de terrain de handball en fond, très discrets */}
@@ -60,7 +43,7 @@ export function ComingSoon() {
             transition={{ duration: 0.5 }}
             className="pixel-corners-sm border border-accent-secondary/35 bg-accent-secondary/10 px-4 py-1 font-arcade text-lg tracking-[0.18em] text-accent-secondary"
           >
-            SAISON 2026 / 2027
+            {t("comingSoon.seasonBadge")}
           </motion.span>
 
           <motion.h1
@@ -94,9 +77,9 @@ export function ComingSoon() {
             transition={{ duration: 0.6, delay: 0.22 }}
             className="mt-6 max-w-xl text-balance text-lg text-text-muted sm:text-xl"
           >
-            Le jeu de <strong className="font-semibold text-text">fantasy handball</strong> basé sur les vrais
-            joueurs de la Daikin StarLigue. Compose ton équipe et marque des points sur leurs vraies performances,
-            journée après journée.
+            {t.rich("comingSoon.tagline", {
+              strong: (chunks) => <strong className="font-semibold text-text">{chunks}</strong>,
+            })}
           </motion.p>
 
           <motion.div
@@ -106,27 +89,27 @@ export function ComingSoon() {
             transition={{ duration: 0.6, delay: 0.34 }}
             className="pixel-corners-sm shadow-glow-accent mt-9 border border-border bg-surface px-5 py-2 font-arcade text-xl text-accent"
           >
-            <span>BIENTÔT</span>
+            <span>{t("comingSoon.badge")}</span>
             <span className="ml-1 inline-block h-[1.1em] w-[0.55em] translate-y-[0.12em] animate-pulse bg-accent align-middle" />
           </motion.div>
         </section>
 
         <section
-          aria-label="Aperçu du jeu"
+          aria-label={t("comingSoon.previewAriaLabel")}
           className="mt-16 grid w-full max-w-5xl grid-cols-1 gap-4 sm:mt-24 sm:grid-cols-2 lg:grid-cols-4"
         >
-          {FEATURES.map((feature, index) => (
+          {FEATURE_KEYS.map((key, index) => (
             <motion.article
-              key={feature.title}
+              key={key}
               initial="hidden"
               animate="visible"
               variants={riseIn}
               transition={{ duration: 0.5, delay: 0.46 + index * 0.08 }}
               className="pixel-corners relative flex flex-col gap-2 border border-border bg-surface p-6 text-left"
             >
-              <span className={`absolute right-5 top-5 h-2.5 w-2.5 rounded-full ${feature.dotClassName}`} />
-              <h2 className="text-xl">{feature.title}</h2>
-              <p className="text-sm leading-relaxed text-text-muted">{feature.description}</p>
+              <span className={`absolute right-5 top-5 h-2.5 w-2.5 rounded-full ${FEATURE_STYLE[key]}`} />
+              <h2 className="text-xl">{t(`comingSoon.features.${key}.title`)}</h2>
+              <p className="text-sm leading-relaxed text-text-muted">{t(`comingSoon.features.${key}.description`)}</p>
             </motion.article>
           ))}
         </section>
@@ -134,10 +117,7 @@ export function ComingSoon() {
 
       <footer className="relative z-10 flex w-full flex-col items-center gap-1 border-t border-border px-6 py-8 text-center text-xs text-text-muted">
         <span className="font-arcade text-base tracking-wide text-text-muted">starliguefantasy.fr</span>
-        <span>
-          Projet perso, sans rapport officiel avec la LNH ou la Daikin StarLigue — ouverture avant le coup
-          d&apos;envoi de la saison.
-        </span>
+        <span>{t("comingSoon.footerDisclaimer")}</span>
       </footer>
     </div>
   );

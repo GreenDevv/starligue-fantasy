@@ -1,0 +1,41 @@
+{
+  "backLink": "← Zurück zur Startseite",
+  "title": "Datenschutz & Cookies",
+  "intro": "Starligue Fantasy ist ein <strong>privates Hobbyprojekt</strong> ohne offizielle Verbindung zur LNH oder der Daikin StarLigue, das nicht kommerziell entwickelt und betrieben wird. Diese Seite erklärt einfach, welche Daten erhoben werden, warum, und welche Cookies verwendet werden.",
+  "sections": {
+    "data": {
+      "title": "Erhobene Daten",
+      "intro": "Bei der Erstellung eines Kontos werden folgende Daten gespeichert:",
+      "items": {
+        "email": "deine E-Mail-Adresse (Anmeldekennung, wird niemals weitergegeben)",
+        "password": "dein Passwort, niemals im Klartext gespeichert (mit bcrypt gehasht)",
+        "name": "dein in der App angezeigter Vorname bzw. Benutzername",
+        "favoritePlayer": "dein Lieblingsspieler, sofern du dich entscheidest, einen anzugeben (optional)"
+      },
+      "gameDataNote": "Beim Spielen erzeugst du außerdem Spieldaten: Kader, Aufstellungen, Ligen, Punkte, Verlauf — diese sind für den Betrieb des Spiels selbst notwendig und werden nie zu anderen Zwecken verwendet."
+    },
+    "notDone": {
+      "title": "Was NICHT gemacht wird",
+      "items": {
+        "analytics": "kein Reichweiten-Analysetool (Google Analytics oder Ähnliches)",
+        "ads": "keine Werbecookies oder -pixel",
+        "resale": "kein Weiterverkauf und keine Weitergabe von Daten an Dritte",
+        "profiling": "kein Profiling"
+      }
+    },
+    "cookies": {
+      "title": "Verwendete Cookies",
+      "intro": "Diese Website verwendet ausschließlich <strong>technisch/funktional notwendige</strong> Cookies, die für ihren Betrieb zwingend erforderlich sind — für diese Art von Cookies ist keine Einwilligung erforderlich (Empfehlung der CNIL), und es werden keine weiteren Cookies gesetzt.",
+      "table": {
+        "headers": { "cookie": "Cookie", "role": "Zweck", "duration": "Dauer" },
+        "session": { "role": "Hält dich angemeldet", "duration": "30 Tage oder bis zur Abmeldung" },
+        "seasonMode": { "role": "Speichert den gewählten Saisonmodus (laufende Saison/Simulation)", "duration": "Dauerhaft" },
+        "activeLeague": { "role": "Speichert deine aktive Liga, falls du mehreren angehörst", "duration": "Dauerhaft" }
+      }
+    },
+    "rights": {
+      "title": "Deine Rechte",
+      "text": "Du kannst jederzeit Zugang zu, Berichtigung oder Löschung deiner Daten verlangen. Da es sich um ein persönliches Projekt ohne dedizierten Support handelt, ist der einfachste Weg, direkt die Person zu kontaktieren, die dir die App gezeigt hat."
+    }
+  }
+}

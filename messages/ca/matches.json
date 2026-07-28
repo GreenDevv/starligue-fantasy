@@ -1,0 +1,41 @@
+{
+  "vs": "vs",
+  "list": {
+    "title": "Calendari",
+    "noActiveSeason": "No hi ha temporada activa.",
+    "gameweekShort": "J{number}",
+    "gameweek": "Jornada {number}",
+    "notFound": "Jornada no trobada.",
+    "empty": "No hi ha partits per a aquesta jornada.",
+    "live": "En directe",
+    "deadline": "Límit: {date}"
+  },
+  "detail": {
+    "summary": "Jornada {number} · {date} · {season}",
+    "statsTitle": "Estadístiques del partit",
+    "noStats": "No hi ha estadístiques disponibles per a aquest equip.",
+    "goalkeeper": "Porter",
+    "player": "Jugador",
+    "saves": "Aturades",
+    "savePercentage": "% Aturades",
+    "rating": "Nota"
+  },
+  "panel": {
+    "recentResults": "Últims resultats",
+    "noResults": "No hi ha resultats per a aquest filtre.",
+    "upcoming": "Propers partits",
+    "noUpcoming": "No hi ha propers partits per a aquest filtre."
+  },
+  "charts": {
+    "goalsFor": "Gols marcats",
+    "goalsAgainst": "Gols encaixats",
+    "emptyDefault": "Encara no hi ha estadístiques disponibles.",
+    "selectAtLeastOne": "Selecciona almenys una estadística per mostrar.",
+    "thisPlayer": "Aquest jugador",
+    "gameweekTooltip": "Jornada {number}",
+    "gameweekAxis": "J{number}",
+    "noValuation": "Encara no hi ha valoració.",
+    "initialValue": "Valor inicial: {value}M — encara no hi ha historial de variació.",
+    "preseason": "Pretemporada"
+  }
+}

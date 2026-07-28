@@ -1,0 +1,167 @@
+{
+  "widgetShell": {
+    "reorder": "Dieses Widget neu anordnen",
+    "remove": "Dieses Widget vom Dashboard entfernen",
+    "sizeLabel": "Größe {size}",
+    "size": {
+      "mini": "Mini",
+      "square": "Quadrat",
+      "wide": "Breit"
+    }
+  },
+  "comingSoon": {
+    "seasonBadge": "SAISON 2026 / 2027",
+    "tagline": "Das Spiel für <strong>Fantasy-Handball</strong> mit den echten Spielern der Daikin StarLigue. Stelle dein Team zusammen und sammle Punkte für ihre echten Leistungen, Spieltag für Spieltag.",
+    "badge": "BALD",
+    "previewAriaLabel": "Spielvorschau",
+    "footerDisclaimer": "Privates Projekt, ohne offizielle Verbindung zur LNH oder der Daikin StarLigue — Start vor dem Anpfiff der Saison.",
+    "features": {
+      "squad": {
+        "title": "Stelle deinen Kader zusammen",
+        "description": "14 Spieler aus den 16 Vereinen der Starligue, ein knappes Budget, eine Position nach der anderen — Torwart, Flügel, Rückraum, Rückraum Mitte, Kreisläufer."
+      },
+      "lineup": {
+        "title": "Stelle dich jeden Spieltag auf",
+        "description": "7 Startspieler auf dem Feld, 7 Ersatzspieler auf der Bank. Deadline vor jedem Anpfiff, genau wie im echten Spiel."
+      },
+      "score": {
+        "title": "Punkte mit der Realität",
+        "description": "Tore, Paraden, Assists: jede Statistik des Spiels zählt für deinen Punktestand am Spieltag."
+      },
+      "challenge": {
+        "title": "Fordere deine Freunde heraus",
+        "description": "Erstelle deine private Liga, verfolge die Rangliste live und tausche Spieler zwischen den Spieltagen."
+      }
+    }
+  },
+  "home": {
+    "metadataTitle": "Bald verfügbar",
+    "metadataDescription": "Starligue Fantasy kommt: das Fantasy-Handball-Spiel mit der Daikin Starligue. Stelle dein Team mit echten Handball-D1-Spielern zusammen, bevor die Saison beginnt.",
+    "noActiveSeason": "Aktuell keine laufende Saison.",
+    "seasonLabel": "Daikin Starligue · {label}",
+    "title": "Starligue",
+    "welcomeBack": "Willkommen zurück, <b>{name}</b>!",
+    "welcomeGuest": "Willkommen — Ergebnisse, Tabelle und News der Daikin StarLigue live.",
+    "ctaLoggedIn": "Zu Fantasy Starligue →",
+    "ctaGuest": "Mein Fantasy-Team erstellen →",
+    "footerDisclaimer": "Privates Projekt, ohne offizielle Verbindung zur LNH oder der Daikin StarLigue.",
+    "footerPrivacyLink": "Datenschutz & Cookies"
+  },
+  "page": {
+    "title": "Dashboard",
+    "noActiveSeason": "Aktuell keine aktive Saison."
+  },
+  "matchesStrip": {
+    "results": "Ergebnisse",
+    "upcoming": "Nächste Spiele",
+    "gameweek": "Spieltag {number}",
+    "noResults": "Bisher keine Ergebnisse.",
+    "noUpcoming": "Kein Spiel geplant."
+  },
+  "simulationControls": {
+    "prevGameweek": "← Vorheriger Spieltag",
+    "nextGameweek": "Nächster Spieltag →",
+    "counter": "Sim ST{current}/{total}"
+  },
+  "statLeaderCard": {
+    "removeAriaLabel": "{label} vom Dashboard entfernen",
+    "ownedByTeams": "In {teams}",
+    "noData": "Bisher keine Daten."
+  },
+  "statLeadersPanel": {
+    "title": "Spitzenreiter",
+    "addStatLabel": "Statistik hinzufügen",
+    "allLinesVisible": "Alle Zeilen werden bereits angezeigt.",
+    "addStatCta": "+ Statistik hinzufügen"
+  },
+  "bestXIWidget": {
+    "subtitle": "Team der Saison · beste Spieler pro Position",
+    "noData": "Bisher kein bewerteter Spieltag."
+  },
+  "clubStandingsWidget": {
+    "title": "Starligue-Tabelle",
+    "beforeGameweek1": "Vor ST1",
+    "afterGameweek": "Nach ST{number}",
+    "notAvailable": "Tabelle noch nicht verfügbar.",
+    "seasonNotStarted": "Die Saison hat noch nicht begonnen — die Tabelle steht überall bei null, das ist normal.",
+    "col": {
+      "club": "Verein",
+      "played": "Sp",
+      "wins": "S",
+      "draws": "U",
+      "losses": "N",
+      "goalsFor": "TF",
+      "goalsAgainst": "TG",
+      "diff": "Diff",
+      "points": "Pkt"
+    }
+  },
+  "leaguesWidget": {
+    "title": "Meine Ligen",
+    "seeAll": "Alle ansehen →",
+    "noLeagues": "Du bist noch keiner Liga beigetreten.",
+    "joinLeague": "Einer Liga beitreten →",
+    "memberCount": "{count, plural, one {# Mitglied} other {# Mitglieder}}"
+  },
+  "globalLeaderboardWidget": {
+    "title": "Gesamtrangliste",
+    "seeAll": "Alle ansehen →",
+    "noTeams": "Bisher kein eingestuftes Team."
+  },
+  "newsFeed": {
+    "title": "Starligue-News",
+    "filterAll": "Alle",
+    "filterTransfers": "Transfers",
+    "filterInjuries": "Verletzungen",
+    "filterTeamOfWeek": "Team der Woche",
+    "filterPerformances": "Leistungen",
+    "filterGeneral": "News",
+    "noNews": "Bisher keine News.",
+    "seeMore": "Mehr anzeigen"
+  },
+  "standingsSection": {
+    "title": "Tabelle",
+    "gameweek": "Spieltag {number}",
+    "notAvailable": "Tabelle noch nicht verfügbar.",
+    "col": {
+      "club": "Verein",
+      "played": "Sp",
+      "diff": "+/-",
+      "points": "Pkt"
+    }
+  },
+  "bestXICard": {
+    "subtitle": "Team der Saison · Spieltag {number}"
+  },
+  "performancesCard": {
+    "subtitle": "Beste Leistungen · Spieltag {number}"
+  },
+  "statLeadersSection": {
+    "subtitle": "Spitzenreiter · Spieltag {number}"
+  },
+  "errors": {
+    "SEASON_COMPLETE": "Alle Spieltage der simulierten Saison wurden bereits gespielt",
+    "CONFLICT": "Die Saison wurde zwischenzeitlich geändert — versuche es erneut",
+    "ALREADY_AT_START": "Die simulierte Saison ist bereits an ihrem Ausgangspunkt"
+  },
+  "dashboardView": {
+    "newsLink": "Starligue-News →",
+    "allWidgetsRemoved": "Alle Widgets wurden entfernt — füge welche über das Panel unten hinzu.",
+    "addWidgetTitle": "Widget hinzufügen",
+    "hideStats": "Statistiken ausblenden",
+    "addStat": "+ Statistik hinzufügen",
+    "allFixedWidgetsVisible": "Alle festen Widgets werden bereits angezeigt — du kannst noch Statistiken hinzufügen.",
+    "close": "Schließen",
+    "addWidgetCta": "+ Widget hinzufügen",
+    "status": {
+      "greeting": "Hallo {name}",
+      "greetingGuest": "Willkommen",
+      "noLeague": "Tritt einer Liga bei oder erstelle eine, um loszulegen.",
+      "joinLeagueCta": "Einer Liga beitreten",
+      "squadNotValidated": "Dein Kader ist noch nicht bestätigt.",
+      "buildSquadCta": "Meinen Kader zusammenstellen",
+      "readyWithGameweek": "Kader bereit — bis Spieltag {number}.",
+      "readyForSeason": "Kader bereit für die Saison."
+    }
+  }
+}

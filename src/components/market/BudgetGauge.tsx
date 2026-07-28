@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, useSpring } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 interface BudgetGaugeProps {
   budget: number;
@@ -24,6 +25,7 @@ function useAnimatedValue(target: number) {
 }
 
 export function BudgetGauge({ budget, spent }: BudgetGaugeProps) {
+  const t = useTranslations("market");
   const remaining = budget - spent;
   const pct = Math.min(100, (spent / budget) * 100);
   const over = remaining < 0;
@@ -34,13 +36,13 @@ export function BudgetGauge({ budget, spent }: BudgetGaugeProps) {
   return (
     <div className="pixel-corners border border-border bg-surface p-3">
       <div className="mb-1.5 flex items-center justify-between text-xs uppercase tracking-wide text-text-muted">
-        <span>Budget</span>
+        <span>{t("budget.label")}</span>
         <span
           className={`font-arcade text-base tabular-nums tracking-wide ${over ? "text-points-neg drop-shadow-[0_0_6px_currentColor]" : "text-text"}`}
         >
           {over
-            ? `${animatedRemaining.toFixed(1)}M de dépassement`
-            : `${animatedRemaining.toFixed(1)}M restants`}
+            ? t("budget.over", { value: animatedRemaining.toFixed(1) })
+            : t("budget.remaining", { value: animatedRemaining.toFixed(1) })}
         </span>
       </div>
       {/* Barre segmentée façon jauge de vie rétro */}
@@ -62,7 +64,7 @@ export function BudgetGauge({ budget, spent }: BudgetGaugeProps) {
         ))}
       </div>
       <div className="mt-1 flex justify-between text-[10px] text-text-muted">
-        <span>Dépensé : {spent.toFixed(1)}M</span>
+        <span>{t("budget.spent", { value: spent.toFixed(1) })}</span>
         <span>/ {budget.toFixed(1)}M</span>
       </div>
     </div>

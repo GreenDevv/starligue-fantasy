@@ -1,0 +1,9 @@
+{
+  "common": {
+    "UNAUTHORIZED": "Inicio de sesión requerido",
+    "FORBIDDEN": "Acción no permitida",
+    "NOT_FOUND": "No encontrado",
+    "INVALID_INPUT": "Campos inválidos",
+    "generic": "Se ha producido un error"
+  }
+}

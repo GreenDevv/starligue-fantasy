@@ -1,0 +1,95 @@
+{
+  "position": {
+    "GK": "Målmand",
+    "LW": "Venstre fløj",
+    "LB": "Venstre back",
+    "CB": "Playmaker",
+    "RB": "Højre back",
+    "RW": "Højre fløj",
+    "PV": "Streger"
+  },
+  "positionShort": {
+    "GK": "MÅL",
+    "LW": "VF",
+    "LB": "VB",
+    "CB": "PM",
+    "RB": "HB",
+    "RW": "HF",
+    "PV": "ST"
+  },
+  "bonus": {
+    "TRIPLE_CAPTAIN": "Tredobbelt anfører",
+    "BENCH_BOOST": "Bench Boost",
+    "INSURANCE": "Forsikring",
+    "STATISTICIAN": "Statistiker"
+  },
+  "newsCategory": {
+    "TRANSFER": "Transfer",
+    "INJURY": "Skade",
+    "TEAM_OF_WEEK": "Ideelt hold",
+    "PERFORMANCE": "Præstation",
+    "GENERAL": "Nyhed"
+  },
+  "predictionOutcome": {
+    "HOME": "Hjemme",
+    "DRAW": "Uafgjort",
+    "AWAY": "Ude"
+  },
+  "venueFilter": {
+    "all": "Alle",
+    "home": "Hjemme",
+    "away": "Ude"
+  },
+  "kitZone": {
+    "jersey": "Trøje",
+    "shorts": "Shorts",
+    "socks": "Strømper"
+  },
+  "jerseyCollar": {
+    "crew": "Rund",
+    "v-neck": "V",
+    "polo": "Polo"
+  },
+  "statScope": {
+    "gameweek": "Runde",
+    "season": "Sæson",
+    "average": "Pr. kamp"
+  },
+  "tradeStatus": {
+    "PENDING": "Afventer",
+    "ACCEPTED": "Accepteret",
+    "REJECTED": "Afvist",
+    "CANCELLED": "Annulleret",
+    "EXPIRED": "Udløbet"
+  },
+  "seasonMode": {
+    "live": "sæson 2026/27",
+    "simulation": "Simulation 2025/26"
+  },
+  "statLine": {
+    "goalsPlay": "Mål (spil)",
+    "goalsPenalty": "Mål (straffekast)",
+    "goalsTotal": "Mål i alt",
+    "shotPercentage": "% skud",
+    "assists": "Sidste aflevering",
+    "ballsRecovered": "Erobrede bolde",
+    "opponentShotsBlocked": "Blokerede modstanderskud",
+    "penaltiesDrawn": "Fremtvungne straffekast",
+    "twoMinDrawn": "Fremtvungne udvisninger",
+    "neutralizations": "Neutraliseringer",
+    "saves": "Redninger",
+    "savePercentage": "% redninger",
+    "turnovers": "Boldtab",
+    "twoMinTaken": "Udvisninger",
+    "disqualified": "Diskvalifikationer",
+    "fantasyPoints": "Fantasy-point (som starter)"
+  },
+  "widgetType": {
+    "leaderboard-global": "Samlet stilling",
+    "leaderboard-leagues": "Mine ligaer",
+    "last-results": "Seneste resultater",
+    "upcoming-matches": "Kommende kampe",
+    "club-standings": "Starligue-stilling",
+    "best-xi": "Sæsonens ideelle hold"
+  }
+}

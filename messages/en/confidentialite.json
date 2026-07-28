@@ -1,0 +1,41 @@
+{
+  "backLink": "← Back to home",
+  "title": "Privacy & cookies",
+  "intro": "Starligue Fantasy is a <strong>personal project</strong>, with no official ties to the LNH or the Daikin StarLigue, built and hosted on a non-commercial basis. This page explains what data is collected, why, and which cookies are used.",
+  "sections": {
+    "data": {
+      "title": "Data we collect",
+      "intro": "When you create an account, we store:",
+      "items": {
+        "email": "your email address (your login, never shared)",
+        "password": "your password, never stored in plain text (hashed with bcrypt)",
+        "name": "the first name/nickname shown in the app",
+        "favoritePlayer": "your favorite player, if you choose to set one (optional)"
+      },
+      "gameDataNote": "Playing the game also generates game data: squads, lineups, leagues, points, history — needed for the game itself to work, and never used for anything else."
+    },
+    "notDone": {
+      "title": "What we DON'T do",
+      "items": {
+        "analytics": "no audience analytics tool (Google Analytics or similar)",
+        "ads": "no advertising cookies or pixels",
+        "resale": "no reselling or sharing of data with third parties",
+        "profiling": "no profiling"
+      }
+    },
+    "cookies": {
+      "title": "Cookies used",
+      "intro": "This site only uses <strong>technical/functional</strong> cookies, strictly necessary for it to work — no consent is required for this type of cookie (CNIL recommendation), and no other cookie is set.",
+      "table": {
+        "headers": { "cookie": "Cookie", "role": "Purpose", "duration": "Duration" },
+        "session": { "role": "Keeps you logged in", "duration": "30 days or logout" },
+        "seasonMode": { "role": "Remembers your chosen season mode (live/simulation)", "duration": "Persistent" },
+        "activeLeague": { "role": "Remembers your active league if you're in several", "duration": "Persistent" }
+      }
+    },
+    "rights": {
+      "title": "Your rights",
+      "text": "You can request access to, correction of, or deletion of your data at any time. Since this is a personal project with no dedicated support, the simplest way is to reach out directly to whoever introduced you to it."
+    }
+  }
+}

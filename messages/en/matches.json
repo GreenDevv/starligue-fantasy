@@ -1,0 +1,41 @@
+{
+  "vs": "vs",
+  "list": {
+    "title": "Fixtures",
+    "noActiveSeason": "No active season.",
+    "gameweekShort": "MD{number}",
+    "gameweek": "Matchday {number}",
+    "notFound": "Matchday not found.",
+    "empty": "No matches for this matchday.",
+    "live": "Live",
+    "deadline": "Deadline: {date}"
+  },
+  "detail": {
+    "summary": "Matchday {number} · {date} · {season}",
+    "statsTitle": "Match stats",
+    "noStats": "No stats available for this team.",
+    "goalkeeper": "Goalkeeper",
+    "player": "Player",
+    "saves": "Saves",
+    "savePercentage": "Save %",
+    "rating": "Rating"
+  },
+  "panel": {
+    "recentResults": "Recent results",
+    "noResults": "No results for this filter.",
+    "upcoming": "Upcoming matches",
+    "noUpcoming": "No upcoming matches for this filter."
+  },
+  "charts": {
+    "goalsFor": "Goals scored",
+    "goalsAgainst": "Goals conceded",
+    "emptyDefault": "No stats available yet.",
+    "selectAtLeastOne": "Select at least one stat to display.",
+    "thisPlayer": "This player",
+    "gameweekTooltip": "Matchday {number}",
+    "gameweekAxis": "MD{number}",
+    "noValuation": "No valuation yet.",
+    "initialValue": "Starting value: {value}M — no variation history yet.",
+    "preseason": "Preseason"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "list": {
+    "title": "Meine Ligen",
+    "count": "{count, plural, one {# Liga} other {# Ligen}}",
+    "seasonBadge": {
+      "live": "26/27",
+      "simulation": "Sim 25/26"
+    },
+    "joinButton": "Beitreten",
+    "createButton": "+ Erstellen",
+    "createdTitle": "Liga erstellt!",
+    "createFormTitle": "Liga erstellen",
+    "createNamePlaceholder": "Name der Liga…",
+    "creating": "Wird erstellt…",
+    "createSubmit": "Erstellen →",
+    "joinFormTitle": "Mit Code beitreten",
+    "joinCodePlaceholder": "ABCD1234",
+    "joining": "Suche…",
+    "joinSubmit": "Beitreten →",
+    "emptyState": "Dein Team ist mit einer Liga verknüpft — erstelle deine eigene oder tritt der eines Freundes bei, um loszulegen.",
+    "memberCount": "{count, plural, one {# Mitglied} other {# Mitglieder}}",
+    "ownerBadge": "Admin",
+    "points": "{points} Pkt"
+  },
+  "detail": {
+    "memberRatio": "{count}/{max} Mitglieder",
+    "buildSquadTitle": "Stelle deinen Kader zusammen",
+    "buildSquadDescription": "Du hast deinen Kader aus 14 Spielern für diese Liga noch nicht zusammengestellt.",
+    "buildSquadCta": "Meinen Kader erstellen →",
+    "leagueLeaderboardTitle": "Liga-Rangliste",
+    "globalLeaderboardTitle": "Gesamtrangliste",
+    "globalLeaderboardSubtitle": "Alle Ligen zusammen"
+  },
+  "inviteCodeLabel": "Einladungscode",
+  "actions": {
+    "copied": "Kopiert ✓",
+    "copyInvite": "{code} — kopieren",
+    "leaveLeague": "Liga verlassen",
+    "deleteConfirm": "Endgültig löschen",
+    "deleteLeague": "Liga löschen"
+  },
+  "chat": {
+    "title": "Liga-Chat",
+    "badge": "Nur Trash Talk",
+    "emptyState": "Noch niemand hat die Feindseligkeiten eröffnet. Die Ehre gebührt dir.",
+    "you": "Du",
+    "inputPlaceholder": "Schick deinen Gegnern eine Spitze…",
+    "send": "Senden"
+  },
+  "errors": {
+    "NO_ACTIVE_SEASON": "Momentan keine aktive Saison",
+    "WRONG_SEASON_MODE": "Diese Liga gehört zu einer anderen Saison — wechsle den Saison-Umschalter, um ihr beizutreten.",
+    "LEAGUE_FULL": "Die Liga ist voll",
+    "ALREADY_MEMBER": "Du bist bereits Mitglied dieser Liga",
+    "OWNER_CANNOT_LEAVE": "Der Ersteller kann seine Liga nicht verlassen. Lösche sie oder übertrage sie."
+  }
+}

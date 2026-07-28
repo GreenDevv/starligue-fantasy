@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 // Graphique SVG à la main (pas de dépendance ajoutée — même convention que
 // HandballPitch/Jersey). Skill dataviz consultée : couleur ambre déjà utilisée
@@ -43,6 +44,7 @@ export function ValueHistoryChart({
   compareEntries?: ValueHistoryPoint[];
   compareLabel?: string;
 }) {
+  const t = useTranslations("matches");
   const svgRef = useRef<SVGSVGElement>(null);
   const [hoverKey, setHoverKey] = useState<number | null>(null);
   const isComparing = Boolean(compareEntries);
@@ -55,12 +57,12 @@ export function ValueHistoryChart({
   ).sort((a, b) => a - b);
 
   if (allKeys.length === 0) {
-    return <p className="py-6 text-center text-xs text-text-muted">Pas encore de valorisation.</p>;
+    return <p className="py-6 text-center text-xs text-text-muted">{t("charts.noValuation")}</p>;
   }
   if (allKeys.length === 1 && !isComparing) {
     return (
       <p className="py-6 text-center text-xs text-text-muted">
-        Valeur initiale : {entries[0]!.value.toFixed(1)}M — pas encore d'historique de variation.
+        {t("charts.initialValue", { value: entries[0]!.value.toFixed(1) })}
       </p>
     );
   }
@@ -114,7 +116,7 @@ export function ValueHistoryChart({
         <div className="flex items-center gap-3 text-[11px] text-text-muted">
           <span className="flex items-center gap-1.5">
             <span className="h-0.5 w-4 shrink-0" style={{ backgroundColor: AMBER }} />
-            {primaryLabel ?? "Ce joueur"}
+            {primaryLabel ?? t("charts.thisPlayer")}
           </span>
           <span className="flex items-center gap-1.5">
             <span
@@ -270,7 +272,7 @@ export function ValueHistoryChart({
                 {compareLabel} : {hoveredCompare.value.toFixed(1)}M
               </p>
             )}
-            <p className="text-text-muted">{hoverKey === -1 ? "Pré-saison" : `Journée ${hoverKey}`}</p>
+            <p className="text-text-muted">{hoverKey === -1 ? t("charts.preseason") : t("charts.gameweekTooltip", { number: hoverKey })}</p>
           </div>
         )}
       </div>

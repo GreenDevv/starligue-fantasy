@@ -1,0 +1,19 @@
+{
+  "title": "Market",
+  "playerCount": "{count, plural, one {# player} other {# players}} · {seasonMode}",
+  "searchPlaceholder": "Search for a player or club…",
+  "allPositions": "All",
+  "sortByValue": "↓ Value",
+  "sortByName": "↓ Name",
+  "noPlayersFound": "No players found",
+  "trend": {
+    "up": "Rising",
+    "down": "Falling"
+  },
+  "budget": {
+    "label": "Budget",
+    "remaining": "{value}M left",
+    "over": "{value}M over budget",
+    "spent": "Spent: {value}M"
+  }
+}

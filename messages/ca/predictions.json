@@ -1,0 +1,21 @@
+{
+  "title": "Pronòstics",
+  "subtitle": "Gratis i il·limitat. Un bon pronòstic incrementa el multiplicador dels teus punts de la jornada (×0.5 a ×2.0) — mai hi ha penalització per un encert dolent ni per no arriscar un pronòstic.",
+  "gwLabel": "Jornada {number}",
+  "gwShort": "J{number}",
+  "opensAfterDeadline": "S'obre després de la deadline de la jornada {number}",
+  "nextGwLocked": "La jornada {next} s'obrirà quan passi la deadline de la jornada {current}.",
+  "loading": "Carregant…",
+  "noMatches": "Cap partit per a aquesta jornada.",
+  "lockedWithPick": "Pronòstic bloquejat: {outcome}",
+  "lockedNoPick": "Bloquejat — cap pronòstic fet",
+  "oddsUnavailable": "Quotes encara no disponibles",
+  "networkError": "Error de xarxa",
+  "errors": {
+    "NOT_AVAILABLE_IN_SIMULATION": "Els pronòstics només estan disponibles en joc en directe per ara",
+    "NO_ACTIVE_LEAGUE": "Cap lliga activa",
+    "GW_NOT_OPEN": "Aquesta jornada encara no està oberta a pronòstics",
+    "MARKET_NOT_READY": "Quotes encara no disponibles per a aquest partit",
+    "MATCH_LOCKED": "Pronòstic bloquejat — el partit comença aviat"
+  }
+}

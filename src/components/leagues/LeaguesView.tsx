@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter, Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { JerseyBadge } from "@/components/jersey/JerseyBadge";
 import { Button } from "@/components/ui/Button";
+import { resolveApiError } from "@/lib/api/error-messages";
 import type { SeasonMode } from "@/lib/team/active-team-context";
 
 interface League {
@@ -24,10 +25,15 @@ interface LeaguesViewProps {
   mode: SeasonMode;
 }
 
-const SEASON_BADGE: Record<SeasonMode, string> = { live: "26/27", simulation: "Simu 25/26" };
-
 export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
   const router = useRouter();
+  const t = useTranslations("leagues");
+  const tCommon = useTranslations("common");
+  const tRoot = useTranslations();
+  const seasonBadge: Record<SeasonMode, string> = {
+    live: t("list.seasonBadge.live"),
+    simulation: t("list.seasonBadge.simulation"),
+  };
   const [leagues] = useState<League[]>(initialLeagues);
   const [panel, setPanel] = useState<"none" | "create" | "join">("none");
   const [createName, setCreateName] = useState("");
@@ -57,7 +63,7 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: createName }),
     });
-    const data = await res.json() as { data?: { id: string; name: string; inviteCode: string }; error?: { message: string } };
+    const data = await res.json() as { data?: { id: string; name: string; inviteCode: string }; error?: { code?: string; message: string } };
     if (data.data) {
       if (isFirstLeague) {
         router.push(firstLeagueOnboardingHref(data.data.id));
@@ -67,7 +73,7 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
       setCreateName("");
       router.refresh();
     } else {
-      setError(data.error?.message ?? "Erreur");
+      setError(resolveApiError(tRoot, "leagues", data.error?.code));
     }
     setLoading(false);
   }
@@ -81,7 +87,7 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ inviteCode: joinCode.toUpperCase() }),
     });
-    const data = await res.json() as { data?: { leagueId: string }; error?: { message: string } };
+    const data = await res.json() as { data?: { leagueId: string }; error?: { code?: string; message: string } };
     if (data.data) {
       setJoinCode("");
       setPanel("none");
@@ -91,7 +97,7 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
       }
       router.push(`/leagues/${data.data.leagueId}`);
     } else {
-      setError(data.error?.message ?? "Code invalide");
+      setError(resolveApiError(tRoot, "leagues", data.error?.code));
     }
     setLoading(false);
   }
@@ -101,9 +107,9 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl text-text">Mes ligues</h1>
+          <h1 className="text-2xl text-text">{t("list.title")}</h1>
           {leagues.length > 0 && (
-            <p className="mt-1 text-sm text-text-muted">{leagues.length} ligue{leagues.length > 1 ? "s" : ""}</p>
+            <p className="mt-1 text-sm text-text-muted">{t("list.count", { count: leagues.length })}</p>
           )}
         </div>
         <div className="flex gap-2">
@@ -116,10 +122,10 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
                 : "border-border text-text-muted hover:text-text",
             ].join(" ")}
           >
-            Rejoindre
+            {t("list.joinButton")}
           </button>
           <Button onClick={() => togglePanel("create")} size="sm" variant={panel === "create" ? "secondary" : "primary"}>
-            + Créer
+            {t("list.createButton")}
           </Button>
         </div>
       </div>
@@ -129,10 +135,10 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
         <div className="pixel-corners border border-border bg-surface p-4">
           {created ? (
             <div className="flex flex-col gap-3 text-center">
-              <p className="text-sm font-medium text-points-pos">Ligue créée !</p>
+              <p className="text-sm font-medium text-points-pos">{t("list.createdTitle")}</p>
               <p className="text-sm text-text">{created.name}</p>
               <div className="pixel-corners-sm bg-bg p-3">
-                <p className="mb-1 text-xs text-text-muted">Code d'invitation</p>
+                <p className="mb-1 text-xs text-text-muted">{t("inviteCodeLabel")}</p>
                 <p className="font-arcade text-2xl tracking-widest text-accent drop-shadow-[0_0_6px_currentColor]">
                   {created.inviteCode}
                 </p>
@@ -141,15 +147,15 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
                 onClick={() => { setPanel("none"); setCreated(null); }}
                 className="text-sm text-text-muted transition-colors hover:text-text"
               >
-                Fermer
+                {tCommon("close")}
               </button>
             </div>
           ) : (
             <form onSubmit={handleCreate} className="flex flex-col gap-3">
-              <p className="text-sm font-medium text-text">Créer une ligue</p>
+              <p className="text-sm font-medium text-text">{t("list.createFormTitle")}</p>
               <input
                 type="text"
-                placeholder="Nom de la ligue…"
+                placeholder={t("list.createNamePlaceholder")}
                 value={createName}
                 onChange={(e) => setCreateName(e.target.value)}
                 className="pixel-corners-sm w-full border border-border bg-bg px-3 py-2 text-sm text-text placeholder:text-text-muted transition-shadow focus:border-accent focus:shadow-glow-accent focus:outline-none"
@@ -159,7 +165,7 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
               />
               {error && <p className="text-xs text-points-neg">{error}</p>}
               <Button type="submit" disabled={loading} className="w-full">
-                {loading ? "Création…" : "Créer →"}
+                {loading ? t("list.creating") : t("list.createSubmit")}
               </Button>
             </form>
           )}
@@ -170,10 +176,10 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
       {panel === "join" && (
         <div className="pixel-corners border border-border bg-surface p-4">
           <form onSubmit={handleJoin} className="flex flex-col gap-3">
-            <p className="text-sm font-medium text-text">Rejoindre avec un code</p>
+            <p className="text-sm font-medium text-text">{t("list.joinFormTitle")}</p>
             <input
               type="text"
-              placeholder="ABCD1234"
+              placeholder={t("list.joinCodePlaceholder")}
               value={joinCode}
               onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
               className="pixel-corners-sm w-full border border-border bg-bg px-3 py-2 text-center font-arcade text-xl uppercase tracking-widest text-accent placeholder:font-sans placeholder:text-base placeholder:normal-case placeholder:tracking-normal placeholder:text-text-muted transition-shadow focus:border-accent focus:shadow-glow-accent focus:outline-none"
@@ -182,7 +188,7 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
             />
             {error && <p className="text-center text-xs text-points-neg">{error}</p>}
             <Button type="submit" disabled={loading || joinCode.length < 6} className="w-full">
-              {loading ? "Recherche…" : "Rejoindre →"}
+              {loading ? t("list.joining") : t("list.joinSubmit")}
             </Button>
           </form>
         </div>
@@ -192,7 +198,7 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
       {leagues.length === 0 ? (
         <div className="pixel-corners border border-border bg-surface px-4 py-10 text-center">
           <p className="text-text-muted">
-            Ton équipe est liée à une ligue — crée la tienne ou rejoins celle d'un ami pour commencer.
+            {t("list.emptyState")}
           </p>
         </div>
       ) : (
@@ -212,14 +218,14 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
                 className="pixel-corners flex items-center gap-4 border border-border bg-surface px-4 py-3.5 transition-colors hover:border-accent/40"
               >
                 <span className="pixel-corners-sm shrink-0 border border-accent/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
-                  {SEASON_BADGE[mode]}
+                  {seasonBadge[mode]}
                 </span>
                 {Boolean(league.jerseyConfig) && <JerseyBadge jerseyConfig={league.jerseyConfig} size="sm" />}
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium text-text">{league.name}</p>
                   <p className="mt-0.5 text-xs text-text-muted">
-                    {league.memberCount} membre{league.memberCount > 1 ? "s" : ""}
-                    {league.isOwner && " · admin"}
+                    {t("list.memberCount", { count: league.memberCount })}
+                    {league.isOwner && <> · {t("list.ownerBadge")}</>}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
@@ -227,7 +233,7 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
                     #{league.myRank}
                   </p>
                   <p className="mt-0.5 text-xs tabular-nums text-text-muted">
-                    {league.myPoints} pts
+                    {t("list.points", { points: league.myPoints })}
                   </p>
                 </div>
               </Link>

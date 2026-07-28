@@ -1,0 +1,41 @@
+{
+  "vs": "vs",
+  "list": {
+    "title": "Kampprogram",
+    "noActiveSeason": "Ingen aktiv sæson.",
+    "gameweekShort": "R{number}",
+    "gameweek": "Runde {number}",
+    "notFound": "Runden blev ikke fundet.",
+    "empty": "Ingen kampe i denne runde.",
+    "live": "Live",
+    "deadline": "Deadline: {date}"
+  },
+  "detail": {
+    "summary": "Runde {number} · {date} · {season}",
+    "statsTitle": "Kampstatistik",
+    "noStats": "Ingen statistik tilgængelig for dette hold.",
+    "goalkeeper": "Målmand",
+    "player": "Spiller",
+    "saves": "Redninger",
+    "savePercentage": "% Redninger",
+    "rating": "Karakter"
+  },
+  "panel": {
+    "recentResults": "Seneste resultater",
+    "noResults": "Ingen resultater for dette filter.",
+    "upcoming": "Kommende kampe",
+    "noUpcoming": "Ingen kommende kampe for dette filter."
+  },
+  "charts": {
+    "goalsFor": "Scorede mål",
+    "goalsAgainst": "Indkasserede mål",
+    "emptyDefault": "Ingen statistik tilgængelig endnu.",
+    "selectAtLeastOne": "Vælg mindst én statistik at vise.",
+    "thisPlayer": "Denne spiller",
+    "gameweekTooltip": "Runde {number}",
+    "gameweekAxis": "R{number}",
+    "noValuation": "Ingen værdisætning endnu.",
+    "initialValue": "Startværdi: {value}M — ingen ændringshistorik endnu.",
+    "preseason": "Før sæsonstart"
+  }
+}

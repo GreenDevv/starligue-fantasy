@@ -1,0 +1,21 @@
+{
+  "title": "Tipps",
+  "subtitle": "Kostenlos und unbegrenzt. Ein guter Tipp erhöht den Punktemultiplikator deines Spieltags (×0.5 bis ×2.0) — nie eine Strafe für einen danebenliegenden oder nicht abgegebenen Tipp.",
+  "gwLabel": "Spieltag {number}",
+  "gwShort": "ST{number}",
+  "opensAfterDeadline": "Öffnet nach der Deadline von Spieltag {number}",
+  "nextGwLocked": "Spieltag {next} öffnet, sobald die Deadline von Spieltag {current} abgelaufen ist.",
+  "loading": "Wird geladen…",
+  "noMatches": "Kein Spiel an diesem Spieltag.",
+  "lockedWithPick": "Tipp gesperrt: {outcome}",
+  "lockedNoPick": "Gesperrt — kein Tipp abgegeben",
+  "oddsUnavailable": "Quoten noch nicht verfügbar",
+  "networkError": "Netzwerkfehler",
+  "errors": {
+    "NOT_AVAILABLE_IN_SIMULATION": "Tipps aktuell nur im laufenden Live-Spiel verfügbar",
+    "NO_ACTIVE_LEAGUE": "Keine aktive Liga",
+    "GW_NOT_OPEN": "Dieser Spieltag ist noch nicht für Tipps geöffnet",
+    "MARKET_NOT_READY": "Quoten für dieses Spiel noch nicht verfügbar",
+    "MATCH_LOCKED": "Tipp gesperrt — das Spiel beginnt bald"
+  }
+}

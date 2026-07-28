@@ -1,10 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { Position } from "@/lib/squad/validation";
 import { POSITIONS } from "@/lib/squad/validation";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
-import { POSITION_SHORT } from "@/components/ui/positionTheme";
 
 export interface SlotPlayer {
   id: string;
@@ -25,6 +25,7 @@ interface SquadSlotsProps {
 // délibérément sans terrain ni notion titulaire/remplaçant : ce choix se fait
 // ensuite sur /team/start (ou /simulation/start).
 export function SquadSlots({ squad, onSlotClick, activePosition }: SquadSlotsProps) {
+  const t = useTranslations("labels");
   return (
     <div className="flex flex-col gap-1.5">
       {POSITIONS.map((pos) => (
@@ -35,7 +36,7 @@ export function SquadSlots({ squad, onSlotClick, activePosition }: SquadSlotsPro
           }`}
         >
           <span className="w-7 shrink-0 text-center text-[10px] font-bold uppercase tracking-wide text-text-muted">
-            {POSITION_SHORT[pos]}
+            {t(`positionShort.${pos}`)}
           </span>
           <div className="grid flex-1 grid-cols-2 gap-1.5">
             {squad[pos].map((player, idx) => (

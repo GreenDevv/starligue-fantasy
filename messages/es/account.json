@@ -1,0 +1,14 @@
+{
+  "title": "Mi cuenta",
+  "emailLabel": "Correo electrónico",
+  "nameLabel": "Nombre de usuario",
+  "favoritePlayerLabel": "Jugador favorito",
+  "optional": "(opcional)",
+  "favoritePlayerLocked": "Definitivo, no se puede modificar una vez declarado.",
+  "savedMessage": "¡Guardado! El nombre de usuario que se muestra arriba se actualizará la próxima vez que inicies sesión.",
+  "saving": "Guardando…",
+  "errors": {
+    "FAVORITE_PLAYER_LOCKED": "El jugador favorito es definitivo una vez declarado",
+    "INVALID_PLAYER": "Jugador favorito no encontrado"
+  }
+}

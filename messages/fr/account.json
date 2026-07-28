@@ -1,0 +1,14 @@
+{
+  "title": "Mon compte",
+  "emailLabel": "Email",
+  "nameLabel": "Pseudo",
+  "favoritePlayerLabel": "Joueur préféré",
+  "optional": "(facultatif)",
+  "favoritePlayerLocked": "Définitif, non modifiable une fois déclaré.",
+  "savedMessage": "Enregistré ! Le pseudo affiché en haut se met à jour à la prochaine connexion.",
+  "saving": "Enregistrement…",
+  "errors": {
+    "FAVORITE_PLAYER_LOCKED": "Le joueur préféré est définitif une fois déclaré",
+    "INVALID_PLAYER": "Joueur préféré introuvable"
+  }
+}

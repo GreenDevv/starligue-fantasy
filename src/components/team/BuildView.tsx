@@ -1,18 +1,20 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import type { Position } from "@/lib/squad/validation";
 import { POSITIONS } from "@/lib/squad/validation";
 import { BudgetGauge } from "@/components/market/BudgetGauge";
-import { POSITION_SHORT, POSITION_LABELS } from "@/components/ui/positionTheme";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { SquadSlots, type SlotPlayer } from "@/components/squad/SquadSlots";
 import { PlayerSeasonRecapTrigger } from "@/components/players/PlayerSeasonRecapTrigger";
 import { cn } from "@/lib/utils";
 import type { SeasonMode } from "@/lib/team/active-team-context";
+import { resolveApiError } from "@/lib/api/error-messages";
 
 interface Player {
   id: string;
@@ -32,6 +34,9 @@ function emptySquad(): SquadState {
 }
 
 export function BuildView({ mode }: { mode: SeasonMode }) {
+  const tLabels = useTranslations("labels");
+  const t = useTranslations("team");
+  const tRoot = useTranslations();
   const router = useRouter();
   const leagueId = useSearchParams().get("league");
   const leagueSuffix = leagueId ? `?league=${leagueId}` : "";
@@ -214,14 +219,14 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
       } else {
         const clubIssue = data.error?.details?.find((d) => d.code === "TOO_MANY_PLAYERS_FROM_CLUB");
         if (clubIssue) {
-          const clubName = allPlayers.find((p) => p.club.id === clubIssue.clubId)?.club.shortName ?? "un club";
-          setError(`Trop de joueurs de ${clubName} (${clubIssue.count}/${clubIssue.max} max)`);
+          const clubName = allPlayers.find((p) => p.club.id === clubIssue.clubId)?.club.shortName ?? t("build.unknownClub");
+          setError(t("build.tooManyFromClub", { club: clubName, count: clubIssue.count ?? 0, max: clubIssue.max ?? 0 }));
         } else {
-          setError(data.error?.message ?? "Erreur lors de la validation");
+          setError(resolveApiError(tRoot, "team", data.error?.code));
         }
       }
     } catch {
-      setError("Erreur réseau");
+      setError(resolveApiError(tRoot, "team", "NETWORK"));
     }
     setSubmitting(false);
   }
@@ -229,7 +234,7 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <p className="text-text-muted">Chargement des joueurs…</p>
+        <p className="text-text-muted">{t("build.loadingPlayers")}</p>
       </div>
     );
   }
@@ -237,23 +242,22 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
   if (locked) {
     return (
       <div className="flex flex-col items-center gap-4 py-20 text-center">
-        <p className="text-lg text-text">Effectif verrouillé pour la saison</p>
+        <p className="text-lg text-text">{t("build.lockedTitle")}</p>
         <p className="max-w-sm text-sm text-text-muted">
-          La saison a commencé : l&apos;effectif ne peut plus être remplacé en bloc. Utilise Transferts ou Trades
-          pour le faire évoluer.
+          {t("build.lockedBody")}
         </p>
         <div className="flex gap-2">
           <button
             onClick={() => router.push(`/team/transfers${leagueSuffix}`)}
             className="pixel-corners-sm bg-accent px-4 py-2 text-sm font-semibold uppercase tracking-wide text-bg transition-colors hover:bg-accent/90"
           >
-            Transferts
+            {t("common.transfers")}
           </button>
           <button
             onClick={() => router.push(`/team/trades${leagueSuffix}`)}
             className="pixel-corners-sm border border-border px-4 py-2 text-sm uppercase tracking-wide text-text-muted transition-colors hover:text-text"
           >
-            Trades
+            {t("common.trades")}
           </button>
         </div>
       </div>
@@ -270,11 +274,11 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
       <div className="mb-4">
         {mode === "simulation" && (
           <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-accent-secondary">
-            Mode Simulation · 2025/26
+            {t("common.simulationModeSeason")}
           </p>
         )}
         <h1 className="text-2xl text-text">
-          {alreadyValidated ? "Modifier mon effectif" : "Créer mon effectif"}
+          {alreadyValidated ? t("build.titleEdit") : t("build.titleCreate")}
         </h1>
       </div>
 
@@ -285,7 +289,7 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
             {/* Budget — sticky en haut (mobile) / colonne gauche sticky (desktop) */}
             <div className="order-1 sticky top-12 lg:top-20 z-[5] -mx-4 border-b border-border bg-bg/95 px-4 pb-3 pt-2 backdrop-blur-sm lg:mx-0 lg:border-none lg:bg-transparent lg:px-0 lg:pb-0 lg:pt-0 lg:backdrop-blur-none">
               <p className="mb-1.5 text-xs text-text-muted">
-                {posCompleted}/7 postes complets · {totalPicked}/14 joueurs
+                {t("build.progress", { completed: posCompleted, picked: totalPicked })}
               </p>
               <BudgetGauge budget={initialBudget} spent={spent} />
             </div>
@@ -294,7 +298,7 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
                 colonne droite sticky (desktop). Pas de terrain ici. */}
             <div className="order-2 lg:order-3 lg:sticky lg:top-20">
               <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">
-                Ton effectif · tap un emplacement vide pour choisir, tap un joueur pour le retirer
+                {t("build.squadHint")}
               </p>
               <SquadSlots squad={squad} onSlotClick={handleSlotClick} activePosition={activePos} />
             </div>
@@ -324,7 +328,7 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
                             : "border border-border text-text-muted hover:border-accent/50 hover:text-text"
                       )}
                     >
-                      {POSITION_SHORT[pos]}
+                      {tLabels(`positionShort.${pos}`)}
                       <span
                         className={
                           filled === 2
@@ -344,7 +348,7 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
               {/* Player search */}
               <input
                 type="text"
-                placeholder={`Chercher un ${POSITION_LABELS[activePos].toLowerCase()}…`}
+                placeholder={t("build.searchPlaceholder", { position: tLabels(`position.${activePos}`).toLowerCase() })}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pixel-corners-sm w-full border border-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text-muted transition-shadow focus:border-accent focus:shadow-glow-accent focus:outline-none"
@@ -355,8 +359,8 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
                 {filteredPlayers.length === 0 ? (
                   <p className="py-6 text-center text-sm text-text-muted">
                     {squad[activePos][0] !== null && squad[activePos][1] !== null
-                      ? "Les 2 slots sont remplis"
-                      : "Aucun joueur disponible"}
+                      ? t("build.slotsFull")
+                      : t("build.noPlayersAvailable")}
                   </p>
                 ) : (
                   <motion.div
@@ -439,8 +443,8 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
           {!canValidate && (
             <p className="mb-2 text-center text-xs text-text-muted">
               {!squadFull
-                ? `Il manque ${14 - totalPicked} joueur${14 - totalPicked > 1 ? "s" : ""}`
-                : `Budget dépassé de ${(spent - initialBudget).toFixed(1)}M`}
+                ? t("build.missingPlayers", { count: 14 - totalPicked })
+                : t("build.budgetExceeded", { amount: (spent - initialBudget).toFixed(1) })}
             </p>
           )}
           <button
@@ -452,10 +456,10 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
             )}
           >
             {submitting
-              ? "Validation…"
+              ? t("common.validating")
               : alreadyValidated
-                ? "Mettre à jour l'effectif"
-                : "Valider mon effectif →"}
+                ? t("build.updateCta")
+                : t("build.validateCta")}
           </button>
         </div>
       </div>

@@ -1,0 +1,13 @@
+{
+  "dashboard": "Panel",
+  "market": "Rynek",
+  "predictions": "Typy",
+  "leagues": "Ligi",
+  "leaderboard": "Klasyfikacja",
+  "matches": "Terminarz",
+  "connexion": "Zaloguj się",
+  "deconnexion": "Wyloguj się",
+  "deconnexionAriaLabel": "Wyloguj się",
+  "deconnexionTitle": "Wylogowanie ({name})",
+  "languageSelector": "Zmień język"
+}

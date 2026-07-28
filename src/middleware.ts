@@ -1,11 +1,21 @@
-// Next-Auth v5 : exporter auth directement comme middleware.
-// La logique de protection des routes est dans auth.ts → callbacks.authorized.
-export { auth as middleware } from "@/lib/auth";
+import createMiddleware from "next-intl/middleware";
+import { routing } from "@/i18n/routing";
+import { auth } from "@/lib/auth";
 
-// Exclut aussi tout chemin avec une extension de fichier (ex: /clubs/hbcn.png) —
-// sans ça, un asset statique placé sous un préfixe protégé (public/clubs/*.png
-// vs PROTECTED_PREFIXES "/clubs" dans auth.ts) se fait rediriger vers /login au
-// lieu d'être servi, pour tout visiteur non connecté.
+// La logique de protection des routes est dans auth.ts → callbacks.authorized,
+// qui s'exécute AVANT ce middleware next-intl (auth() n'appelle le callback
+// wrappé que si authorized() renvoie true — voir auth.ts pour le détail du
+// strip de préfixe de locale et des redirections locale-aware).
+const handleI18nRouting = createMiddleware(routing);
+
+export default auth((req) => handleI18nRouting(req));
+
+// Exclut TOUT /api (pas seulement /api/auth) : sinon next-intl tenterait de
+// préfixer/rediriger les appels fetch("/api/...") du client. Exclut aussi tout
+// chemin avec une extension de fichier (ex: /clubs/hbcn.png) — sans ça, un
+// asset statique placé sous un préfixe protégé (public/clubs/*.png vs
+// PROTECTED_PREFIXES "/clubs" dans auth.ts) se fait rediriger au lieu d'être
+// servi, pour tout visiteur non connecté.
 export const config = {
-  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };

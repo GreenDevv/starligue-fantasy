@@ -1,27 +1,30 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { getTranslations } from "next-intl/server";
 import { NewsCard } from "./NewsCard";
 import type { NewsFeedResult } from "@/lib/news/get-feed";
 import type { NewsCategory } from "@prisma/client";
 
-const CATEGORIES: { value: NewsCategory | null; label: string }[] = [
-  { value: null, label: "Tout" },
-  { value: "TRANSFER", label: "Transferts" },
-  { value: "INJURY", label: "Blessures" },
-  { value: "TEAM_OF_WEEK", label: "Équipe type" },
-  { value: "PERFORMANCE", label: "Performances" },
-  { value: "GENERAL", label: "Actus" },
-];
-
-export function NewsFeed({
+export async function NewsFeed({
   feed,
   activeCategory,
 }: {
   feed: NewsFeedResult;
   activeCategory: NewsCategory | null;
 }) {
+  const t = await getTranslations("dashboard");
+
+  const CATEGORIES: { value: NewsCategory | null; label: string }[] = [
+    { value: null, label: t("newsFeed.filterAll") },
+    { value: "TRANSFER", label: t("newsFeed.filterTransfers") },
+    { value: "INJURY", label: t("newsFeed.filterInjuries") },
+    { value: "TEAM_OF_WEEK", label: t("newsFeed.filterTeamOfWeek") },
+    { value: "PERFORMANCE", label: t("newsFeed.filterPerformances") },
+    { value: "GENERAL", label: t("newsFeed.filterGeneral") },
+  ];
+
   return (
     <div className="pixel-corners border border-border bg-surface p-3">
-      <p className="mb-2 text-[10px] uppercase tracking-widest text-text-muted">Actus Starligue</p>
+      <p className="mb-2 text-[10px] uppercase tracking-widest text-text-muted">{t("newsFeed.title")}</p>
 
       <div className="mb-2 flex flex-wrap gap-1.5">
         {CATEGORIES.map((c) => {
@@ -44,7 +47,7 @@ export function NewsFeed({
       </div>
 
       {feed.items.length === 0 ? (
-        <p className="py-6 text-center text-xs text-text-muted">Aucune actu pour l&apos;instant.</p>
+        <p className="py-6 text-center text-xs text-text-muted">{t("newsFeed.noNews")}</p>
       ) : (
         <div className="flex flex-col">
           {feed.items.map((item) => (
@@ -59,7 +62,7 @@ export function NewsFeed({
             href={`/?${activeCategory ? `category=${activeCategory}&` : ""}page=${feed.page + 1}`}
             className="text-xs uppercase tracking-widest text-accent hover:underline"
           >
-            Voir plus
+            {t("newsFeed.seeMore")}
           </Link>
         </div>
       )}

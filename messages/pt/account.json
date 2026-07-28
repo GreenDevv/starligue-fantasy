@@ -1,0 +1,14 @@
+{
+  "title": "A minha conta",
+  "emailLabel": "Email",
+  "nameLabel": "Alcunha",
+  "favoritePlayerLabel": "Jogador preferido",
+  "optional": "(facultativo)",
+  "favoritePlayerLocked": "Definitivo, não pode ser alterado depois de escolhido.",
+  "savedMessage": "Guardado! A alcunha exibida no topo atualiza-se no próximo login.",
+  "saving": "A guardar…",
+  "errors": {
+    "FAVORITE_PLAYER_LOCKED": "O jogador preferido é definitivo depois de escolhido",
+    "INVALID_PLAYER": "Jogador preferido não encontrado"
+  }
+}

@@ -1,4 +1,7 @@
-import Link from "next/link";
+"use client";
+
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import type { ClubStandingRow } from "@/lib/standings/get";
 import type { WidgetSize } from "@/lib/dashboard/layout";
@@ -17,6 +20,7 @@ export function ClubStandingsWidget({
   gameweekNumber: number | null;
   size?: WidgetSize;
 }) {
+  const t = useTranslations("dashboard");
   const showDetailedColumns = size === "wide";
   // Carré : Pts avant Diff (l'inverse du Long) — la stat qui compte le plus en
   // dernier lu, donc en premier ici où il n'y a que ces deux-là à comparer.
@@ -25,24 +29,26 @@ export function ClubStandingsWidget({
   return (
     <div className="pixel-corners border border-border bg-surface p-3">
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-[10px] uppercase tracking-widest text-text-muted">Classement Starligue</p>
+        <p className="text-[10px] uppercase tracking-widest text-text-muted">{t("clubStandingsWidget.title")}</p>
         {gameweekNumber !== null &&
           (gameweekNumber === 0 ? (
             <span className="pixel-corners-sm bg-accent-secondary/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-accent-secondary">
-              Avant J1
+              {t("clubStandingsWidget.beforeGameweek1")}
             </span>
           ) : (
-            <p className="text-[10px] uppercase tracking-widest text-text-muted">Après J{gameweekNumber}</p>
+            <p className="text-[10px] uppercase tracking-widest text-text-muted">
+              {t("clubStandingsWidget.afterGameweek", { number: gameweekNumber })}
+            </p>
           ))}
       </div>
 
       {standings.length === 0 ? (
-        <p className="py-4 text-center text-xs text-text-muted">Classement pas encore disponible.</p>
+        <p className="py-4 text-center text-xs text-text-muted">{t("clubStandingsWidget.notAvailable")}</p>
       ) : (
         <>
           {gameweekNumber === 0 && (
             <p className="mb-2 text-[11px] text-text-muted">
-              La saison n'a pas encore commencé — classement à zéro partout, normal.
+              {t("clubStandingsWidget.seasonNotStarted")}
             </p>
           )}
           {size === "mini" ? (
@@ -64,26 +70,26 @@ export function ClubStandingsWidget({
                 <thead>
                   <tr className="text-[10px] uppercase tracking-wide text-text-muted">
                     <th className="w-6 py-1 text-left font-normal">#</th>
-                    <th className="py-1 text-left font-normal">Club</th>
+                    <th className="py-1 text-left font-normal">{t("clubStandingsWidget.col.club")}</th>
                     {showDetailedColumns && (
                       <>
-                        <th className="w-8 py-1 text-right font-normal">J</th>
-                        <th className="w-8 py-1 text-right font-normal">V</th>
-                        <th className="w-8 py-1 text-right font-normal">N</th>
-                        <th className="w-8 py-1 text-right font-normal">D</th>
-                        <th className="w-10 py-1 text-right font-normal">BP</th>
-                        <th className="w-10 py-1 text-right font-normal">BC</th>
+                        <th className="w-8 py-1 text-right font-normal">{t("clubStandingsWidget.col.played")}</th>
+                        <th className="w-8 py-1 text-right font-normal">{t("clubStandingsWidget.col.wins")}</th>
+                        <th className="w-8 py-1 text-right font-normal">{t("clubStandingsWidget.col.draws")}</th>
+                        <th className="w-8 py-1 text-right font-normal">{t("clubStandingsWidget.col.losses")}</th>
+                        <th className="w-10 py-1 text-right font-normal">{t("clubStandingsWidget.col.goalsFor")}</th>
+                        <th className="w-10 py-1 text-right font-normal">{t("clubStandingsWidget.col.goalsAgainst")}</th>
                       </>
                     )}
                     {ptsBeforeDiff ? (
                       <>
-                        <th className="w-10 py-1 text-right font-semibold text-text">Pts</th>
-                        <th className="w-10 py-1 text-right font-normal">Diff</th>
+                        <th className="w-10 py-1 text-right font-semibold text-text">{t("clubStandingsWidget.col.points")}</th>
+                        <th className="w-10 py-1 text-right font-normal">{t("clubStandingsWidget.col.diff")}</th>
                       </>
                     ) : (
                       <>
-                        <th className="w-10 py-1 text-right font-normal">Diff</th>
-                        <th className="w-10 py-1 text-right font-semibold text-text">Pts</th>
+                        <th className="w-10 py-1 text-right font-normal">{t("clubStandingsWidget.col.diff")}</th>
+                        <th className="w-10 py-1 text-right font-semibold text-text">{t("clubStandingsWidget.col.points")}</th>
                       </>
                     )}
                   </tr>

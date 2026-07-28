@@ -1,0 +1,13 @@
+{
+  "dashboard": "Dashboard",
+  "market": "Marked",
+  "predictions": "Tips",
+  "leagues": "Ligaer",
+  "leaderboard": "Stilling",
+  "matches": "Kampprogram",
+  "connexion": "Log ind",
+  "deconnexion": "Log ud",
+  "deconnexionAriaLabel": "Log ud",
+  "deconnexionTitle": "Log ud ({name})",
+  "languageSelector": "Skift sprog"
+}

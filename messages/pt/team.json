@@ -1,0 +1,198 @@
+{
+  "common": {
+    "backToTeam": "A minha equipa",
+    "backToHistory": "Histórico",
+    "simulationMode": "Modo Simulação",
+    "simulationModeSeason": "Modo Simulação · 2025/26",
+    "transfers": "Transferências",
+    "trades": "Trocas",
+    "starters": "Titulares",
+    "bench": "Suplentes",
+    "validating": "A validar…",
+    "matchday": "Jornada {number}"
+  },
+  "errors": {
+    "NO_ACTIVE_LEAGUE": "Nenhuma liga ativa",
+    "SQUAD_NOT_VALIDATED": "Plantel não validado",
+    "DEADLINE_PASSED": "O prazo desta jornada já passou",
+    "LINEUP_INVALID": "Alinhamento inválido",
+    "BONUS_ALREADY_USED": "Este bónus já foi utilizado esta época",
+    "BONUS_QUOTA_REACHED": "Quota de bónus atingida para esta época",
+    "TRANSFER_WINDOW_CLOSED": "Nenhuma janela de transferências aberta",
+    "CONVERSION_INVALID": "Conversão inválida",
+    "SEASON_STARTED": "Plantel bloqueado para a época — utiliza Transferências ou Trocas para o alterar",
+    "PLAYERS_NOT_FOUND": "Alguns jogadores não foram encontrados",
+    "SQUAD_INVALID": "Composição inválida",
+    "PLAYER_NOT_FOUND": "Jogador não encontrado",
+    "TRANSFER_INVALID": "Transferência inválida",
+    "PLAYER_NOT_IN_SQUAD": "Este jogador não está no teu plantel",
+    "CAPTAIN_LOCKED": "O capitão só pode ser alterado durante uma janela de transferências",
+    "NOT_APPLICABLE": "Sem personalização de camisola em modo Simulação",
+    "SELF_TRADE": "Impossível propor uma troca à tua própria equipa",
+    "TEAM_NOT_IN_LEAGUE": "Equipa destinatária não encontrada nesta liga",
+    "TRADE_INVALID": "Esta troca não é válida",
+    "TRADE_NOT_PENDING": "Esta proposta já não está pendente",
+    "NETWORK": "Erro de rede"
+  },
+  "history": {
+    "title": "Histórico",
+    "teamSummary": "{name} · {points} pts",
+    "teamSummarySeason": "{name} · {points} pts época",
+    "emptyLive": "Ainda não há nenhuma jornada guardada.",
+    "emptySim": "Ainda não houve nenhuma jornada avançada.",
+    "emptyHintLive": "Os registos são criados automaticamente antes de cada prazo.",
+    "emptyHintSim": "Assim que um admin fizer avançar a simulação, as jornadas aparecem aqui.",
+    "pending": "Pendente",
+    "ptsArrow": "pts →"
+  },
+  "gameweekDetail": {
+    "statusSimScored": "Jornada calculada",
+    "statusSimPending": "Ainda não calculada",
+    "statusLiveScored": "Jornada pontuada",
+    "statusLivePending": "A aguardar as notas",
+    "bonusActive": "Bónus ativo · {bonus}"
+  },
+  "identity": {
+    "title": "A tua equipa",
+    "subtitle": "Escolhe um nome e personaliza a tua camisola — visível em todo o lado onde a tua equipa aparece."
+  },
+  "build": {
+    "titleCreate": "Criar o meu plantel",
+    "titleEdit": "Editar o meu plantel",
+    "loadingPlayers": "A carregar os jogadores…",
+    "lockedTitle": "Plantel bloqueado para a época",
+    "lockedBody": "A época já começou: o plantel já não pode ser substituído em bloco. Utiliza Transferências ou Trocas para o fazer evoluir.",
+    "progress": "{completed}/7 posições completas · {picked}/14 jogadores",
+    "squadHint": "O teu plantel · toca numa posição vazia para escolher, toca num jogador para o remover",
+    "searchPlaceholder": "Procurar um {position}…",
+    "slotsFull": "As 2 vagas estão preenchidas",
+    "noPlayersAvailable": "Nenhum jogador disponível",
+    "tooManyFromClub": "Demasiados jogadores de {club} ({count}/{max} máx.)",
+    "unknownClub": "um clube",
+    "missingPlayers": "{count, plural, one {Falta # jogador} other {Faltam # jogadores}}",
+    "budgetExceeded": "Orçamento excedido em {amount}M",
+    "validateCta": "Validar o meu plantel →",
+    "updateCta": "Atualizar o plantel"
+  },
+  "start": {
+    "chooseCaptainFirst": "Escolhe um capitão antes de validar",
+    "title": "Compõe a tua equipa titular",
+    "subtitle": "Escolhe os teus 7 titulares e o teu capitão (×2 pontos). O capitão só poderá ser alterado durante o período de transferências.",
+    "startersHint": "Titulares · toca num jogador para trocar com o seu suplente",
+    "captainHint": "Capitão · ×2 pontos se for titular na jornada",
+    "submitCta": "Vamos a isto →"
+  },
+  "trades": {
+    "title": "Trocas",
+    "infoBanner": "As trocas são permitidas durante toda a época, mesmo fora das janelas de transferências — uma troca aceite executa-se de imediato.",
+    "proposeTitle": "Propor uma troca",
+    "chooseOpponent": "Escolher um adversário…",
+    "offerLabelYou": "Tu ofereces",
+    "offerLabelThem": "Ele oferece-te",
+    "requestSectionTitle": "Tu pedes",
+    "requestLabelYou": "tu pedes",
+    "requestLabelThem": "ele pede-te",
+    "budgetAdjustmentLabel": "Ajuste de orçamento (tu dás se for positivo)",
+    "proposalSent": "Proposta enviada.",
+    "submitCta": "Propor a troca",
+    "sending": "A enviar…",
+    "myProposals": "As minhas propostas",
+    "noProposals": "Ainda não há nenhuma proposta.",
+    "toTeam": "Para {name}",
+    "fromTeam": "De {name}",
+    "accept": "Aceitar",
+    "reject": "Recusar",
+    "cancel": "Cancelar"
+  },
+  "transfers": {
+    "title": "Transferências",
+    "windowOpen": "Janela de transferências aberta — vende e compra livremente.",
+    "windowClosed": "Nenhuma janela de transferências aberta neste momento.",
+    "jokerAvailable": "{count, plural, one {Joker médico disponível (# restante) para um jogador lesionado.} other {Joker médico disponível (# restantes) para um jogador lesionado.}}",
+    "noJokersLeft": "Nenhum joker médico restante.",
+    "remainingBudgetLabel": "Orçamento restante:",
+    "squadHint": "O teu plantel · seleciona um jogador para vender",
+    "injuredBadge": "LESIONADO",
+    "replacementFor": "Substituto de {name}",
+    "transferUnavailable": "Transferência indisponível de momento",
+    "searchPlaceholder": "Procurar um jogador ou clube…",
+    "noPlayersFound": "Nenhum jogador encontrado",
+    "transferSuccess": "{name} junta-se ao teu plantel."
+  },
+  "view": {
+    "editSquad": "Editar plantel",
+    "customizeJersey": "Personalizar a camisola",
+    "ptsSeasonLabel": "pts época",
+    "captainLabel": "Capitão · ×2 pts",
+    "noCaptain": "Nenhum",
+    "changeCaptain": "Mudar",
+    "locked": "Bloqueado",
+    "lockedTitle": "Só pode ser alterado durante o período de transferências",
+    "seasonBonusTitle": "Bónus de época",
+    "bonusUsedCount": "{used}/{quota} utilizados",
+    "convertTitle": "Converter pontos em orçamento",
+    "budgetLabel": "Orçamento:",
+    "convertRate": "1 pt = {rate}M · saldo convertível: {points, plural, one {# pt} other {# pts}}",
+    "convertPlaceholder": "Pontos a converter",
+    "convertAll": "Tudo",
+    "convertCta": "Converter",
+    "convertPreview": "→ +{amount}M de orçamento",
+    "convertClosedHint": "Converter pontos em orçamento é possível durante uma janela de transferências.",
+    "budgetGained": "+{amount}M de orçamento",
+    "lastGameweekLabel": "Última jornada",
+    "viewDetail": "pts · ver detalhe →",
+    "viewFullHistory": "Ver o histórico completo",
+    "lineupSaved": "Alinhamento guardado ✓",
+    "saving": "A guardar…",
+    "lineupSavedButton": "Alinhamento guardado",
+    "saveLineupCta": "Guardar o alinhamento"
+  },
+  "jersey": {
+    "loading3d": "A carregar a pré-visualização 3D…",
+    "teamNameLabel": "Nome da equipa",
+    "teamNamePlaceholder": "Os Especialistas do Tish",
+    "dragToRotate": "Arrasta para rodar",
+    "patternLabel": "Padrão",
+    "collarSleeveColor": "Cor do colarinho / mangas",
+    "collarLabel": "Colarinho",
+    "contrastSleeves": "Mangas contrastantes",
+    "numberLabel": "Número",
+    "nameFlockLabel": "Nome aplicado",
+    "nameFlockPlaceholder": "TISH",
+    "chooseNameError": "Escolhe um nome de equipa",
+    "saving": "A guardar…",
+    "submitCta": "Validar →",
+    "customColor": "Cor personalizada",
+    "colorSlotFallback": "Cor {n}",
+    "slotLabels": {
+      "0": "Cor principal",
+      "1": "Cor secundária",
+      "2": "Debrum",
+      "3": "Detalhe"
+    }
+  },
+  "pitch": {
+    "svgAriaLabel": "Meio campo de andebol (20m × 20m), enquadrado na zona de jogo",
+    "benchLabel": "Suplentes · toca para trocar"
+  },
+  "bonus": {
+    "TRIPLE_CAPTAIN": {
+      "description": "×3 no capitão nesta jornada"
+    },
+    "BENCH_BOOST": {
+      "description": "Os suplentes contam a ×1 nesta jornada"
+    },
+    "INSURANCE": {
+      "description": "Nenhum jogador termina em negativo nesta jornada"
+    },
+    "STATISTICIAN": {
+      "description": "×2 no bónus/malus líder de jornada"
+    },
+    "status": {
+      "active": "Ativo nesta jornada",
+      "used": "Já utilizado",
+      "quotaReached": "Quota atingida",
+      "available": "Disponível"
+    }
+  }
+}
