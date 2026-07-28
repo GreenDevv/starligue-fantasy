@@ -6,7 +6,6 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { routing } from "@/i18n/routing";
 
 function LoginForm() {
   // router.push brut (pas @/i18n/navigation) : callbackUrl vient soit du
@@ -17,7 +16,7 @@ function LoginForm() {
   const params = useSearchParams();
   const locale = useLocale();
   const t = useTranslations("auth");
-  const defaultCallback = locale === routing.defaultLocale ? "/leagues" : `/${locale}/leagues`;
+  const defaultCallback = `/${locale}/leagues`;
   const callbackUrl = params.get("callbackUrl") ?? defaultCallback;
 
   const [email, setEmail] = useState("");

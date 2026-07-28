@@ -3,7 +3,6 @@
 import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { routing } from "@/i18n/routing";
 import { LogoutIcon } from "@/components/ui/icons";
 
 // Bouton connexion/déconnexion rapide dans la navbar — évite de devoir passer par
@@ -14,7 +13,7 @@ export function AuthButton({ userName }: { userName?: string | null }) {
   const locale = useLocale();
   // next-auth's signOut({ callbackUrl }) n'a pas de notion de locale : le
   // préfixe courant doit être injecté manuellement.
-  const loginPath = locale === routing.defaultLocale ? "/login" : `/${locale}/login`;
+  const loginPath = `/${locale}/login`;
 
   if (!userName) {
     return (

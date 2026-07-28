@@ -18,12 +18,8 @@ const DISALLOW_BASE = [
 ];
 
 export default function robots(): MetadataRoute.Robots {
-  // localePrefix "as-needed" : le FR (défaut) n'a pas de préfixe, en/es/ca en ont un.
-  const disallow = routing.locales.flatMap((locale) =>
-    locale === routing.defaultLocale
-      ? DISALLOW_BASE
-      : DISALLOW_BASE.map((p) => `/${locale}${p}`)
-  );
+  // localePrefix "always" : toutes les langues (y compris le FR par défaut) sont préfixées.
+  const disallow = routing.locales.flatMap((locale) => DISALLOW_BASE.map((p) => `/${locale}${p}`));
 
   return {
     rules: {

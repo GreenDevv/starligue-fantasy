@@ -14,10 +14,10 @@ const loginSchema = z.object({
 const PROTECTED_PREFIXES = ["/team", "/market", "/leagues", "/leaderboard", "/matches", "/players", "/clubs", "/dashboard", "/account"];
 const ADMIN_PREFIXES = ["/admin"];
 
-// localePrefix "as-needed" : le FR (défaut) n'a pas de préfixe (/team), les
-// autres langues en ont un (/en/team). PROTECTED_PREFIXES/ADMIN_PREFIXES sont
-// écrits sans préfixe — il faut le retirer avant de comparer, sinon /en/team
-// ne matche plus jamais "/team".startsWith et la route se retrouve déprotégée.
+// localePrefix "always" : toutes les langues sont préfixées, y compris le FR
+// par défaut (/fr/team). PROTECTED_PREFIXES/ADMIN_PREFIXES sont écrits sans
+// préfixe — il faut le retirer avant de comparer, sinon /en/team ne matche
+// plus jamais "/team".startsWith et la route se retrouve déprotégée.
 function splitLocale(pathname: string): { locale: string; rest: string } {
   const [, maybeLocale, ...restSegs] = pathname.split("/");
   if (maybeLocale && (routing.locales as readonly string[]).includes(maybeLocale)) {
@@ -27,7 +27,7 @@ function splitLocale(pathname: string): { locale: string; rest: string } {
 }
 
 function withLocale(locale: string, path: string): string {
-  return locale === routing.defaultLocale ? path : `/${locale}${path}`;
+  return `/${locale}${path}`;
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
