@@ -14,6 +14,10 @@ const SIZES: Record<NonNullable<ClubLogoProps["size"]>, number> = {
   lg: 48,
 };
 
+// Logos peu lisibles sur fond sombre (dominante foncée/transparente) — plaque
+// blanche derrière pour rester visibles sur les fonds sombres du site.
+export const WHITE_BG_CLUBS = new Set(["CRMHB", "USAM"]);
+
 export function ClubLogo({ club, size = "sm", className = "" }: ClubLogoProps) {
   const px = SIZES[size];
 
@@ -32,14 +36,20 @@ export function ClubLogo({ club, size = "sm", className = "" }: ClubLogoProps) {
     );
   }
 
+  const needsWhiteBg = WHITE_BG_CLUBS.has(club.shortName);
+
   return (
-    <Image
-      src={club.logoUrl}
-      alt={club.name ?? club.shortName}
-      width={px}
-      height={px}
-      className={cn("shrink-0 object-contain", className)}
+    <span
+      className={cn("inline-flex shrink-0", needsWhiteBg && "rounded-full bg-white p-[2px]", className)}
       style={{ width: px, height: px }}
-    />
+    >
+      <Image
+        src={club.logoUrl}
+        alt={club.name ?? club.shortName}
+        width={px}
+        height={px}
+        className="h-full w-full object-contain"
+      />
+    </span>
   );
 }

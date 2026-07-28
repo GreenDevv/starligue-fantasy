@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Position } from "@/lib/squad/validation";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
-import { ClubLogo } from "@/components/ui/ClubLogo";
+import { ClubLogo, WHITE_BG_CLUBS } from "@/components/ui/ClubLogo";
 import { initials } from "@/components/ui/positionTheme";
 
 interface PitchPlayer {
@@ -84,85 +84,99 @@ const RING_HEX: Record<Position, string> = {
 
 const POSITIONS: Position[] = ["GK", "LW", "LB", "CB", "RB", "RW", "PV"];
 
+// Position en % (gauche/haut du conteneur) d'un point exprimé dans le repère du
+// SVG (viewBox), décalé de dx/dy unités — sert à toute la couche HTML posée
+// par-dessus le SVG (photos + badges), pour rester alignée sur les mêmes
+// coordonnées que les anneaux/le terrain dessinés en SVG.
+function pctPosition(coords: { x: number; y: number }, dx = 0, dy = 0) {
+  return {
+    left: `${((coords.x + dx) / COURT) * 100}%`,
+    top: `${((coords.y + dy - VIEW_TOP) / VIEW_HEIGHT) * 100}%`,
+  };
+}
+
 // Écusson de club en incrustation, coin bas-droit de l'avatar — même idée qu'un
-// maillot de jeu de sport plutôt qu'une ligne de texte "club" séparée : plus
-// compact (le nom garde toute la place) et immédiatement reconnaissable. Le
-// logo est posé tel quel (pas de disque ni de cercle de découpe derrière) —
-// les écussons de club ont déjà leur propre silhouette (PNG détouré).
+// maillot de jeu de sport plutôt qu'une ligne de texte "club" séparée. Posé en
+// HTML (comme la photo) et rendu APRÈS elle dans le DOM pour rester au-dessus —
+// sinon la photo (couche HTML) recouvre les badges restés en SVG. Fond blanc
+// pour les clubs dont le logo se voit mal sur fond sombre (WHITE_BG_CLUBS).
 function PitchClubBadge({
-  x,
-  y,
+  coords,
   club,
 }: {
-  x: number;
-  y: number;
+  coords: { x: number; y: number };
   club: { shortName: string; logoUrl?: string | null };
 }) {
   const [errored, setErrored] = useState(false);
-  const cx = x + 9.5;
-  const cy = y + 9.5;
   const showLogo = Boolean(club.logoUrl) && !errored;
-
-  if (showLogo) {
-    return (
-      <image
-        href={club.logoUrl!}
-        x={cx - 4.75} y={cy - 4.75} width="9.5" height="9.5"
-        preserveAspectRatio="xMidYMid meet"
-        onError={() => setErrored(true)}
-      />
-    );
-  }
+  const needsWhiteBg = WHITE_BG_CLUBS.has(club.shortName);
+  const sizePct = ((9.5 * 2) / COURT) * 100;
 
   return (
-    <text
-      x={cx} y={cy + 1.6}
-      textAnchor="middle" fill="#94A3B8" fontSize="4.2" fontWeight="700"
-      style={{ fontFamily: "var(--font-sans), Inter, sans-serif" }}
+    <div
+      className={cnAbsoluteBadge(needsWhiteBg)}
+      style={{ ...pctPosition(coords, 9.5, 9.5), width: `${sizePct}%`, aspectRatio: "1 / 1" }}
     >
-      {club.shortName.slice(0, 3)}
-    </text>
+      {showLogo ? (
+        // eslint-disable-next-line @next/next/no-img-element -- logos hébergés localement mais chemin dynamique par club
+        <img
+          src={club.logoUrl!}
+          alt={club.shortName}
+          className="h-full w-full object-contain"
+          style={needsWhiteBg ? { padding: "8%" } : undefined}
+          onError={() => setErrored(true)}
+        />
+      ) : (
+        <span className="flex h-full w-full items-center justify-center text-[6px] font-bold text-text-muted">
+          {club.shortName.slice(0, 3)}
+        </span>
+      )}
+    </div>
   );
 }
 
-// Pastille de points — coin haut-gauche, miroir de l'écusson de club (petite,
-// pleine, pas de gros pavé rectangulaire) : reste elle aussi dans le halo du
-// joueur, jamais en zone morte au-dessus qui empiéterait sur le jeton du dessus.
-function PointsBadge({ x, y, points }: { x: number; y: number; points: number }) {
+function cnAbsoluteBadge(withWhiteBg: boolean) {
+  return `pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full${withWhiteBg ? " bg-white" : ""}`;
+}
+
+// Pastille de points — coin haut-gauche, miroir de l'écusson de club.
+function PointsBadge({ coords, points }: { coords: { x: number; y: number }; points: number }) {
   const positive = points >= 0;
   const color = positive ? "#34D399" : "#F87171";
-  const cx = x - 9.5;
-  const cy = y - 9.5;
+  const sizePct = ((7 * 2) / COURT) * 100;
   return (
-    <g>
-      <circle cx={cx} cy={cy} r="7" fill="#0E1116" stroke={color} strokeOpacity="0.85" strokeWidth="1" />
-      <text
-        x={cx} y={cy + 2}
-        textAnchor="middle" fill={color} fontSize="7" fontWeight="700"
-        style={{ fontFamily: "var(--font-arcade), monospace" }}
-      >
+    <div
+      className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border"
+      style={{
+        ...pctPosition(coords, -9.5, -9.5),
+        width: `${sizePct}%`,
+        aspectRatio: "1 / 1",
+        backgroundColor: "#0E1116",
+        borderColor: color,
+      }}
+    >
+      <span className="font-arcade text-[7px] font-bold leading-none" style={{ color }}>
         {points}
-      </text>
-    </g>
+      </span>
+    </div>
   );
 }
 
-// Brassard de capitaine — coin haut-droit, seul coin encore libre (club en bas-
-// droit, points éventuels en haut-gauche) pour ne jamais se superposer.
-function PitchCaptainBadge({ x, y }: { x: number; y: number }) {
-  const cx = x + 9.5;
-  const cy = y - 9.5;
+// Brassard de capitaine — coin haut-droit, seul coin encore libre.
+function PitchCaptainBadge({ coords }: { coords: { x: number; y: number } }) {
+  const sizePct = ((7 * 2) / COURT) * 100;
   return (
-    <g>
-      <circle cx={cx} cy={cy} r="7" fill="#F59E0B" stroke="#0E1116" strokeWidth="1" />
-      <text
-        x={cx} y={cy + 2.6}
-        textAnchor="middle" fill="#0E1116" fontSize="8" fontWeight="700"
-        style={{ fontFamily: "var(--font-display), sans-serif" }}
-      >
-        C
-      </text>
-    </g>
+    <div
+      className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-bg"
+      style={{
+        ...pctPosition(coords, 9.5, -9.5),
+        width: `${sizePct}%`,
+        aspectRatio: "1 / 1",
+        backgroundColor: "#F59E0B",
+      }}
+    >
+      <span className="font-display text-[8px] font-bold leading-none text-bg">C</span>
+    </div>
   );
 }
 
@@ -314,7 +328,6 @@ export function HandballPitch({
                         {initials(player.firstName, player.lastName)}
                       </text>
                     )}
-                    <PitchClubBadge x={coords.x} y={coords.y} club={player.club} />
                     <text
                       x={coords.x} y={coords.y + R + 8}
                       textAnchor="middle" fill="#F1F5F9" fontSize={nameFontSize(lastName ?? "")} fontWeight="600"
@@ -322,12 +335,6 @@ export function HandballPitch({
                     >
                       {lastName}
                     </text>
-                    {player.points !== undefined && (
-                      <PointsBadge x={coords.x} y={coords.y} points={player.points} />
-                    )}
-                    {captainId && player.playerId === captainId && (
-                      <PitchCaptainBadge x={coords.x} y={coords.y} />
-                    )}
                   </>
                 ) : (
                   <>
@@ -358,28 +365,17 @@ export function HandballPitch({
         </svg>
 
         {/* Photos des titulaires — superposition HTML alignée sur les mêmes
-            coordonnées que le SVG (converties en %), au-dessus des anneaux mais
-            en-dessous des badges/texte (déjà peints avant dans le SVG, donc sous
-            cette couche : les badges débordent très peu sur le cercle photo, cf.
-            leurs coordonnées ±9.5 pour un rayon photo de 11). */}
+            coordonnées que le SVG (converties en %), au-dessus des anneaux SVG. */}
         {POSITIONS.map((pos) => {
           const player = starterByPos.get(pos);
           if (!player?.photoUrl) return null;
           const coords = SLOT_COORDS[pos];
-          const leftPct = (coords.x / COURT) * 100;
-          const topPct = ((coords.y - VIEW_TOP) / VIEW_HEIGHT) * 100;
           const sizePct = (((R - 1) * 2) / COURT) * 100;
           return (
             <div
               key={pos}
-              className="pointer-events-none absolute overflow-hidden rounded-full"
-              style={{
-                left: `${leftPct}%`,
-                top: `${topPct}%`,
-                width: `${sizePct}%`,
-                aspectRatio: "1 / 1",
-                transform: "translate(-50%, -50%)",
-              }}
+              className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full"
+              style={{ ...pctPosition(coords), width: `${sizePct}%`, aspectRatio: "1 / 1" }}
             >
               <PitchStarterPhoto
                 photoUrl={player.photoUrl}
@@ -389,6 +385,22 @@ export function HandballPitch({
                 alt={`${player.firstName} ${player.lastName}`}
               />
             </div>
+          );
+        })}
+
+        {/* Badges (club/points/capitaine) — rendus APRÈS la couche photo ci-dessus
+            pour toujours passer au-dessus d'elle (sinon les logos de club, par
+            exemple, se retrouvent recouverts par la photo du joueur). */}
+        {POSITIONS.map((pos) => {
+          const player = starterByPos.get(pos);
+          if (!player) return null;
+          const coords = SLOT_COORDS[pos];
+          return (
+            <Fragment key={pos}>
+              <PitchClubBadge coords={coords} club={player.club} />
+              {player.points !== undefined && <PointsBadge coords={coords} points={player.points} />}
+              {captainId && player.playerId === captainId && <PitchCaptainBadge coords={coords} />}
+            </Fragment>
           );
         })}
       </div>
