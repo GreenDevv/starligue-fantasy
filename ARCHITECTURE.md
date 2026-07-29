@@ -1207,3 +1207,36 @@ qu'un seul de 16 slides.)
   GitHub (Settings → Secrets and variables → Actions), même valeur que côté Railway.
   Le workflow expose aussi un déclenchement manuel (`workflow_dispatch`, avec option
   `dryRun`) pour tester sans attendre l'horaire planifié.
+
+### 17.2 Gabarit "hero" comme format standard pour tout post classement
+
+Le design "hero" (n°1 en grand format + mini-liste rangs 2-5, cf. §17.1) n'est pas
+spécifique au pipeline `post-stat-leaders` : c'est **le format de référence pour tout
+post Instagram de type classement**, y compris les posts ponctuels publiés à la main
+hors cron. Premier réemploi : post 10 "Les plus sélectionnés" (2026-07-29, top 5 des
+joueurs les plus présents dans les `FantasyTeam` sur les 24 premières heures du jeu,
+Mathieu GREBILLE en tête avec 10/24 équipes) — mêmes tokens visuels que
+`src/app/api/og/stat-leaders/route.tsx` recopiés à l'identique dans un fichier HTML/CSS
+autonome (pipeline `public/social/*.png` des posts 2-9, pas la route `next/og`), pour
+rester indiscernable des posts automatiques.
+
+Tokens à reprendre tels quels pour tout futur post de ce type (y compris les stats
+après chaque journée notée) :
+- **Format** : 1080×1350, bloc hero 1080×620.
+- **Polices** : `display` = `src/lib/social/fonts/BarlowCondensed-Bold.ttf` (titres,
+  nom du n°1, valeurs chiffrées) ; `sans` = `src/lib/social/fonts/Inter-Regular.ttf`
+  (texte courant). Versions statiques obligatoires (une police variable fait planter
+  `@vercel/og`, cf. §17.1) ; en HTML/CSS autonome, chargées via `@font-face` en
+  `file://` vers ces mêmes fichiers `.ttf`.
+- **Couleurs** : fond `#0E1116` + dégradés radiaux `rgba(45,212,191,0.16)` (teal, haut)
+  et `rgba(245,158,11,0.12)` (ambre, bas-droite) ; badge/valeurs en ambre `#F59E0B` ;
+  sous-titre en teal `#2DD4BF` ; texte principal `#F1F5F9`, texte secondaire `#94A3B8`/
+  `#CBD5E1`.
+- **Hero** : photo pleine largeur (repli initiales géantes sur dégradé teal si absente)
+  + masque dégradé sombre plaqué sur le bas (`linear-gradient` vers `#0E1116`) pour la
+  lisibilité du nom/club/valeur en overlay ; nom 48px, valeur 84px.
+- **Mini-liste** : lignes `rgba(255,255,255,0.04)` + bordure `rgba(255,255,255,0.08)`,
+  cercle de rang, logo club (`public/clubs/*.png`), valeur 32px ambre.
+- **Footer** : "STARLIGUE FANTASY / starliguefantasy.fr".
+- **Légende** : même ton que les autres posts (emojis + hashtags `#StarligueFantasy
+  #Handball #FantasyHandball #DaikinStarLigue #LNH`).
