@@ -9,7 +9,8 @@
     "starters": "Titulares",
     "bench": "Suplentes",
     "validating": "Validando…",
-    "matchday": "Jornada {number}"
+    "matchday": "Jornada {number}",
+    "continue": "Continuar"
   },
   "errors": {
     "NO_ACTIVE_LEAGUE": "No hay ninguna liga activa",
@@ -194,5 +195,23 @@
       "quotaReached": "Cupo alcanzado",
       "available": "Disponible"
     }
+  },
+  "auction": {
+    "loadingAuction": "Cargando la subasta…",
+    "title": "Subasta",
+    "subtitle": "Puja por los puestos que aún necesitas cubrir. El presupuesto solo se descuenta si ganas al jugador.",
+    "roundLabel": "Ronda {number}/{total}",
+    "budgetLabel": "Presupuesto restante",
+    "totalCommitted": "Comprometido esta ronda: {amount}",
+    "squadProgress": "{count}/14 jugadores en tu plantilla",
+    "myBidsTitle": "Mis pujas esta ronda",
+    "noBidsYet": "Aún no has hecho ninguna puja",
+    "bidAmountPlaceholder": "Importe",
+    "waitingForOthers": "Esperando a los demás equipos ({submitted}/{total} enviados)",
+    "saveCta": "Guardar",
+    "submitCta": "Enviar mi ronda →",
+    "genericError": "Algo salió mal, inténtalo de nuevo.",
+    "finishedTitle": "Subasta terminada",
+    "finishedBody": "Las {count} rondas han terminado — {squadSize}/14 jugadores en tu plantilla. Las posiciones vacías se completarán a través del mercado de fichajes."
   }
 }

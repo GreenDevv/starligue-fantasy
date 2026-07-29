@@ -95,6 +95,7 @@ model User {
   passwordHash     String?
   name             String
   role             UserRole         @default(USER)
+  canUseAuctionMode Boolean         @default(false) // garde-fou bêta v1 du mode Enchères (§18) — 4 comptes de test en prod, voir scripts/grant-auction-access.ts
   favoritePlayerId String? // choisi (facultatif) à l'inscription — src/app/(public)/register/page.tsx
   favoritePlayer   Player?          @relation("FavoritePlayer", fields: [favoritePlayerId], references: [id])
   createdAt        DateTime         @default(now())
@@ -220,6 +221,7 @@ model Player {
   simulationTradeOffers  SimulationTradeProposalPlayer[]
   newsItems              NewsItem[]
   favoritedBy            User[]                          @relation("FavoritePlayer")
+  auctionBids            AuctionBid[]
 
   @@unique([seasonId, clubId, firstName, lastName])
   @@index([seasonId, position])
@@ -610,6 +612,8 @@ model FantasyTeam {
   tradeProposalsSent     TradeProposal[]          @relation("TradeProposer")
   tradeProposalsReceived TradeProposal[]          @relation("TradeReceiver")
   predictions            Prediction[]
+  auctionBids            AuctionBid[]
+  auctionSubmissions     AuctionRoundSubmission[]
 
   @@unique([userId, leagueId])
   @@index([leagueId, totalPoints(sort: Desc)]) // classement de ligue
@@ -749,6 +753,13 @@ model Prediction {
 // champ séparé à maintenir. seasonId nullable en transition de migration
 // uniquement, NOT NULL dans les faits dès la fin de l'étape 1 (voir
 // scripts/migrate-simulation-teams-to-leagues.ts et memory-bank/plan de fusion).
+// CLASSIC = wizard à prix fixe (§8.3) ; AUCTION = enchères multi-tours (§18),
+// choisi une fois à la création de la ligue, jamais reconverti ensuite.
+enum LeagueMode {
+  CLASSIC
+  AUCTION
+}
+
 model League {
   id                       String                    @id @default(cuid())
   name                     String
@@ -757,6 +768,7 @@ model League {
   owner                    User                      @relation("LeagueOwner", fields: [ownerId], references: [id])
   seasonId                 String
   season                   Season                    @relation(fields: [seasonId], references: [id])
+  mode                     LeagueMode                @default(CLASSIC)
   maxMembers               Int                       @default(50)
   createdAt                DateTime                  @default(now())
   members                  LeagueMember[]
@@ -765,6 +777,7 @@ model League {
   tradeProposals           TradeProposal[]
   simulationTradeProposals SimulationTradeProposal[]
   chatMessages             LeagueChatMessage[]
+  auctionRounds            AuctionRound[]
 
   @@index([seasonId])
 }
@@ -794,6 +807,60 @@ model LeagueMember {
   joinedAt DateTime @default(now())
 
   @@unique([leagueId, userId])
+}
+
+// Mode Enchères (§18 ARCHITECTURE.md) — un tour scope à toute la ligue,
+// résolu dès que toutes les FantasyTeam de la ligue ont soumis leurs
+// enchères (voir AuctionRoundSubmission). AUCTION_ROUND_COUNT (GameConfig,
+// défaut 3) tours par ligue.
+enum AuctionRoundStatus {
+  OPEN
+  RESOLVED
+}
+
+model AuctionRound {
+  id          String                    @id @default(cuid())
+  leagueId    String
+  league      League                    @relation(fields: [leagueId], references: [id])
+  roundNumber Int
+  status      AuctionRoundStatus        @default(OPEN)
+  resolvedAt  DateTime?
+  createdAt   DateTime                  @default(now())
+  bids        AuctionBid[]
+  submissions AuctionRoundSubmission[]
+
+  @@unique([leagueId, roundNumber])
+}
+
+// Soumission explicite d'un tour par une équipe (même avec 0 enchère si son
+// effectif est déjà complet) — condition de la résolution automatique
+// (déclenchée par la dernière soumission attendue, voir §18.2).
+model AuctionRoundSubmission {
+  id             String       @id @default(cuid())
+  auctionRoundId String
+  auctionRound   AuctionRound @relation(fields: [auctionRoundId], references: [id])
+  fantasyTeamId  String
+  fantasyTeam    FantasyTeam  @relation(fields: [fantasyTeamId], references: [id])
+  submittedAt    DateTime     @default(now())
+
+  @@unique([auctionRoundId, fantasyTeamId])
+}
+
+// won renseigné à la résolution du tour, jamais relu par la logique de jeu —
+// sert de trace d'audit/affichage, même esprit que PlayerValueHistory (§13.3).
+model AuctionBid {
+  id             String       @id @default(cuid())
+  auctionRoundId String
+  auctionRound   AuctionRound @relation(fields: [auctionRoundId], references: [id])
+  fantasyTeamId  String
+  fantasyTeam    FantasyTeam  @relation(fields: [fantasyTeamId], references: [id])
+  playerId       String
+  player         Player       @relation(fields: [playerId], references: [id])
+  amount         Decimal      @db.Decimal(6, 1)
+  won            Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  @@unique([auctionRoundId, fantasyTeamId, playerId])
 }
 
 model GameConfig {

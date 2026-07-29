@@ -9,7 +9,8 @@
     "starters": "Starters",
     "bench": "Bench",
     "validating": "Validating…",
-    "matchday": "Matchday {number}"
+    "matchday": "Matchday {number}",
+    "continue": "Continue"
   },
   "errors": {
     "NO_ACTIVE_LEAGUE": "No active league",
@@ -194,5 +195,23 @@
       "quotaReached": "Quota reached",
       "available": "Available"
     }
+  },
+  "auction": {
+    "loadingAuction": "Loading the auction…",
+    "title": "Auction",
+    "subtitle": "Place your bids on the positions you still need to fill. Budget is only spent if you win the player.",
+    "roundLabel": "Round {number}/{total}",
+    "budgetLabel": "Remaining budget",
+    "totalCommitted": "Committed this round: {amount}",
+    "squadProgress": "{count}/14 players in your squad",
+    "myBidsTitle": "My bids this round",
+    "noBidsYet": "No bid placed yet",
+    "bidAmountPlaceholder": "Amount",
+    "waitingForOthers": "Waiting for other teams ({submitted}/{total} submitted)",
+    "saveCta": "Save",
+    "submitCta": "Submit my round →",
+    "genericError": "Something went wrong, try again.",
+    "finishedTitle": "Auction finished",
+    "finishedBody": "All {count} rounds are done — {squadSize}/14 players in your squad. Any unfilled positions will be completed via the transfer market."
   }
 }

@@ -9,7 +9,8 @@
     "starters": "Titulars",
     "bench": "Suplents",
     "validating": "Validant…",
-    "matchday": "Jornada {number}"
+    "matchday": "Jornada {number}",
+    "continue": "Continuar"
   },
   "errors": {
     "NO_ACTIVE_LEAGUE": "No hi ha cap lliga activa",
@@ -194,5 +195,23 @@
       "quotaReached": "Quota assolida",
       "available": "Disponible"
     }
+  },
+  "auction": {
+    "loadingAuction": "Carregant la subhasta…",
+    "title": "Subhasta",
+    "subtitle": "Fes pujes en les posicions que encara et falten. El pressupost només es gasta si guanyes el jugador.",
+    "roundLabel": "Ronda {number}/{total}",
+    "budgetLabel": "Pressupost restant",
+    "totalCommitted": "Compromès aquesta ronda: {amount}",
+    "squadProgress": "{count}/14 jugadors a la plantilla",
+    "myBidsTitle": "Les meves pujes aquesta ronda",
+    "noBidsYet": "Encara no has fet cap puja",
+    "bidAmountPlaceholder": "Import",
+    "waitingForOthers": "Esperant els altres equips ({submitted}/{total} enviades)",
+    "saveCta": "Desar",
+    "submitCta": "Enviar la meva ronda →",
+    "genericError": "Alguna cosa ha fallat, torna-ho a provar.",
+    "finishedTitle": "Subhasta acabada",
+    "finishedBody": "Les {count} rondes han acabat — {squadSize}/14 jugadors a la plantilla. Les posicions buides es completaran mitjançant el mercat de fitxatges."
   }
 }

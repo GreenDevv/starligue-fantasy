@@ -1240,3 +1240,174 @@ après chaque journée notée) :
 - **Footer** : "STARLIGUE FANTASY / starliguefantasy.fr".
 - **Légende** : même ton que les autres posts (emojis + hashtags `#StarligueFantasy
   #Handball #FantasyHandball #DaikinStarLigue #LNH`).
+
+---
+
+## 18. Mode Enchères (draft alternatif par ligue)
+
+### 18.1 Principe
+
+Nouveau mode de constitution d'effectif, alternatif au wizard classique à prix
+fixe (§8.3), choisi **à la création de la ligue** et figé ensuite —
+`League.mode` (`LeagueMode` : `CLASSIC` par défaut | `AUCTION`), pas de bascule
+en v1.
+
+Objectif : constituer l'effectif de tous les membres d'une ligue par enchères
+successives plutôt que par achat direct à la `marketValue`, avec une contrainte
+propre à ce mode — **aucun joueur ne peut appartenir à deux équipes de la même
+ligue**. Budget de départ plus élevé qu'en classique (`AUCTION_INITIAL_BUDGET`,
+`GameConfig` distinct d'`INITIAL_BUDGET`), qui reflète le fait qu'une enchère
+perdue ne coûte jamais rien (§18.3).
+
+### 18.2 Déroulement en tours
+
+- Remplace l'écran 2 de l'onboarding (§8.3, "Build de l'effectif") pour les
+  ligues `AUCTION` ; les écrans 1 (identité) et 3 (titulaires) restent
+  inchangés et arrivent une fois les enchères terminées.
+- Un tour (`AuctionRound`, `roundNumber` 1..N, `AUCTION_ROUND_COUNT` défaut
+  **3**) est scoped à la ligue entière : tous les membres doivent avoir soumis
+  pour qu'il se résolve.
+- À chaque tour, un membre place au plus **une enchère par slot de poste qu'il
+  lui reste à pourvoir** — pas systématiquement 14 enchères dès le 1er tour si
+  l'effectif se remplit déjà via des tours précédents. Validation à la
+  soumission : somme des enchères du tour ≤ budget restant, une enchère max
+  par joueur, aucune enchère sur un poste déjà complet (2/2) ni sur un club
+  déjà à `MAX_PLAYERS_PER_CLUB` en tenant compte des enchères en cours.
+- Soumettre le tour est une action explicite, même avec 0 enchère si
+  l'effectif du membre est déjà complet (`AuctionRoundSubmission`) — condition
+  de la résolution automatique.
+- Résolution automatique dès que tous les membres actifs ont soumis ;
+  fallback admin (§18.6) pour débloquer un tour si un membre ne se manifeste
+  jamais — même logique "aucune limite/contrôle imposé, l'admin tranche" que
+  les fenêtres de transfert (§13.1).
+
+### 18.3 Résolution d'un tour (règles d'arbitrage)
+
+Fonction pure `resolveAuctionRound` (`src/lib/auction/resolve.ts`),
+déterministe et testée, appelée depuis la route de résolution — même esprit
+que `validateSquad`/`applyGameweekValueAdjustments`.
+
+- Pour chaque joueur ayant reçu au moins une enchère dans le tour : le membre
+  avec l'enchère la plus haute le remporte.
+- **Égalité sur la plus haute enchère → personne ne le remporte ce tour**
+  (règle produit explicite) : le joueur reste disponible aux tours suivants,
+  tous les enchérisseurs peuvent re-enchérir dessus.
+- Le joueur gagné est assigné **automatiquement** au bon slot de poste dans
+  `FantasySquadPlayer` (`purchasePrice` = montant de l'enchère gagnante) —
+  jamais une étape manuelle côté utilisateur.
+- Budget : seule l'enchère **gagnante** est déduite (`FantasyTeam.budget -=
+  amount`) ; une enchère perdue ou nulle (égalité) ne coûte rien, le budget
+  correspondant reste disponible au tour suivant.
+- Exclusivité au sein de la ligue : un joueur remporté devient indisponible
+  pour toutes les autres équipes de la même ligue dès la résolution du tour
+  (retiré du pool proposé aux tours suivants) — contrôlé **en application**
+  (`validateAuctionBid`), pas par contrainte DB globale : le mode `CLASSIC`
+  autorise explicitement le partage d'un joueur entre équipes d'une même
+  ligue, donc pas de `@@unique` bloquant au niveau du schéma.
+
+### 18.4 Fin des enchères, cas non résolus
+
+`AUCTION_ROUND_COUNT` tours (défaut 3) suffisent dans l'immense majorité des
+cas. À l'issue du dernier tour, si un membre a encore un ou plusieurs slots
+vides (égalités répétées, budget épuisé) : **pas de tour de rattrapage
+dédié** — le slot reste vide et se comble via le marché des transferts
+classique une fois une fenêtre ouverte (§13.1), comme n'importe quel effectif
+incomplet ailleurs dans le jeu. `FantasyTeam.isValidated` reste `false` tant
+que les 14 slots ne sont pas remplis, comme en mode classique. Une fois le
+dernier tour résolu : passage aux écrans 1/3 de l'onboarding (identité
+possible en parallèle des enchères, titulaires seulement une fois l'effectif
+connu).
+
+### 18.5 Modèle de données (ajouts Prisma)
+
+```prisma
+enum LeagueMode {
+  CLASSIC   // comportement actuel, inchangé
+  AUCTION
+}
+
+model League {
+  // ...
+  mode LeagueMode @default(CLASSIC)   // figé à la création, pas de bascule en v1
+}
+
+enum AuctionRoundStatus {
+  OPEN
+  RESOLVED
+}
+
+model AuctionRound {
+  id          String                    @id @default(cuid())
+  leagueId    String
+  league      League                    @relation(fields: [leagueId], references: [id])
+  roundNumber Int
+  status      AuctionRoundStatus        @default(OPEN)
+  resolvedAt  DateTime?
+  bids        AuctionBid[]
+  submissions AuctionRoundSubmission[]
+
+  @@unique([leagueId, roundNumber])
+}
+
+// Soumission explicite d'un tour par une équipe (même avec 0 enchère si son
+// effectif est déjà complet) — condition de la résolution automatique du tour.
+model AuctionRoundSubmission {
+  id             String       @id @default(cuid())
+  auctionRoundId String
+  auctionRound   AuctionRound @relation(fields: [auctionRoundId], references: [id])
+  fantasyTeamId  String
+  fantasyTeam    FantasyTeam  @relation(fields: [fantasyTeamId], references: [id])
+  submittedAt    DateTime     @default(now())
+
+  @@unique([auctionRoundId, fantasyTeamId])
+}
+
+// won renseigné à la résolution, jamais relu pour la logique de jeu — sert de
+// trace d'audit/affichage, même esprit que PlayerValueHistory (§13.3).
+model AuctionBid {
+  id             String       @id @default(cuid())
+  auctionRoundId String
+  auctionRound   AuctionRound @relation(fields: [auctionRoundId], references: [id])
+  fantasyTeamId  String
+  fantasyTeam    FantasyTeam  @relation(fields: [fantasyTeamId], references: [id])
+  playerId       String
+  player         Player       @relation(fields: [playerId], references: [id])
+  amount         Decimal      @db.Decimal(6, 1)
+  won            Boolean      @default(false)
+
+  @@unique([auctionRoundId, fantasyTeamId, playerId])
+}
+```
+
+### 18.6 Endpoints
+
+```
+GET    /api/leagues/:id/auction                      → état du tour courant (round, mes enchères, ai-je
+                                                         soumis, joueurs déjà remportés dans la ligue = indispo)
+POST   /api/leagues/:id/auction/bids                  { bids: [{ playerId, amount }] } → remplace mes
+                                                         enchères du tour courant (validation : slots
+                                                         restants, budget, MAX_PLAYERS_PER_CLUB, joueur
+                                                         pas déjà remporté)
+POST   /api/leagues/:id/auction/submit                → soumet mon tour (même vide) → déclenche la
+                                                         résolution si je suis le dernier membre attendu
+POST   /api/admin/leagues/:id/auction/force-resolve   → résout le tour courant même si tous les membres
+                                                         n'ont pas soumis (fallback abandon/inactivité)
+```
+
+### 18.7 Hors scope v1
+
+- Pas de bascule `CLASSIC` ↔ `AUCTION` après création de la ligue.
+- Pas d'enchères en temps réel (pas de websocket, pas de contre-enchère
+  visible pendant le tour) — sealed-bid uniquement, cohérent avec "une fois
+  que tous ont placé leur enchère, le tour est fini".
+- Pas de notification (email/push) quand un tour se résout.
+
+### 18.8 Garde-fou bêta (test en prod, 4 comptes)
+
+Avant ouverture à tous : `User.canUseAuctionMode` (`Boolean @default(false)`,
+migration `20260729120000_add_user_auction_access_flag`) restreint qui peut
+créer/rejoindre une ligue `mode: AUCTION` — vérifié côté `POST /api/leagues`
+quand ce mode sera implémenté. Activé sur 4 comptes de test via
+`scripts/grant-auction-access.ts` (même pattern que les autres scripts
+ad hoc contre la prod, cf. `PROD_DATABASE_URL`). Flag temporaire, à retirer
+(ou son contrôle à assouplir) une fois le mode validé en conditions réelles.

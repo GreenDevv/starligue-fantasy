@@ -9,7 +9,8 @@
     "starters": "Podstawowa siódemka",
     "bench": "Rezerwowi",
     "validating": "Zatwierdzanie…",
-    "matchday": "Kolejka {number}"
+    "matchday": "Kolejka {number}",
+    "continue": "Kontynuuj"
   },
   "errors": {
     "NO_ACTIVE_LEAGUE": "Brak aktywnej ligi",
@@ -194,5 +195,23 @@
       "quotaReached": "Limit osiągnięty",
       "available": "Dostępny"
     }
+  },
+  "auction": {
+    "loadingAuction": "Ładowanie aukcji…",
+    "title": "Aukcja",
+    "subtitle": "Licytuj na pozycjach, których jeszcze potrzebujesz. Budżet jest pobierany tylko wtedy, gdy wygrasz zawodnika.",
+    "roundLabel": "Runda {number}/{total}",
+    "budgetLabel": "Pozostały budżet",
+    "totalCommitted": "Zaangażowane w tej rundzie: {amount}",
+    "squadProgress": "{count}/14 zawodników w składzie",
+    "myBidsTitle": "Moje oferty w tej rundzie",
+    "noBidsYet": "Nie złożono jeszcze żadnej oferty",
+    "bidAmountPlaceholder": "Kwota",
+    "waitingForOthers": "Oczekiwanie na inne drużyny ({submitted}/{total} zgłoszonych)",
+    "saveCta": "Zapisz",
+    "submitCta": "Wyślij moją rundę →",
+    "genericError": "Coś poszło nie tak, spróbuj ponownie.",
+    "finishedTitle": "Aukcja zakończona",
+    "finishedBody": "Wszystkie {count} rundy zakończone — {squadSize}/14 zawodników w składzie. Nieobsadzone pozycje zostaną uzupełnione przez rynek transferowy."
   }
 }

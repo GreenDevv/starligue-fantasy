@@ -9,7 +9,8 @@
     "starters": "Titulaires",
     "bench": "Remplaçants",
     "validating": "Validation…",
-    "matchday": "Journée {number}"
+    "matchday": "Journée {number}",
+    "continue": "Continuer"
   },
   "errors": {
     "NO_ACTIVE_LEAGUE": "Aucune ligue active",
@@ -194,5 +195,23 @@
       "quotaReached": "Quota atteint",
       "available": "Disponible"
     }
+  },
+  "auction": {
+    "loadingAuction": "Chargement des enchères…",
+    "title": "Enchères",
+    "subtitle": "Place tes enchères sur les postes qu'il te reste à pourvoir. Le budget n'est débité que si tu remportes le joueur.",
+    "roundLabel": "Tour {number}/{total}",
+    "budgetLabel": "Budget restant",
+    "totalCommitted": "Engagé ce tour : {amount}",
+    "squadProgress": "{count}/14 joueurs dans l'effectif",
+    "myBidsTitle": "Mes enchères ce tour",
+    "noBidsYet": "Aucune enchère placée pour l'instant",
+    "bidAmountPlaceholder": "Montant",
+    "waitingForOthers": "En attente des autres équipes ({submitted}/{total} ont soumis)",
+    "saveCta": "Enregistrer",
+    "submitCta": "Soumettre mon tour →",
+    "genericError": "Une erreur est survenue, réessaie.",
+    "finishedTitle": "Enchères terminées",
+    "finishedBody": "Les {count} tours sont terminés — {squadSize}/14 joueurs dans ton effectif. Les postes non pourvus se compléteront via le marché des transferts."
   }
 }

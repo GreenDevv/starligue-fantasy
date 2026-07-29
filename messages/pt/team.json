@@ -9,7 +9,8 @@
     "starters": "Titulares",
     "bench": "Suplentes",
     "validating": "A validar…",
-    "matchday": "Jornada {number}"
+    "matchday": "Jornada {number}",
+    "continue": "Continuar"
   },
   "errors": {
     "NO_ACTIVE_LEAGUE": "Nenhuma liga ativa",
@@ -194,5 +195,23 @@
       "quotaReached": "Quota atingida",
       "available": "Disponível"
     }
+  },
+  "auction": {
+    "loadingAuction": "A carregar o leilão…",
+    "title": "Leilão",
+    "subtitle": "Faz lances nas posições que ainda precisas de preencher. O orçamento só é gasto se ganhares o jogador.",
+    "roundLabel": "Ronda {number}/{total}",
+    "budgetLabel": "Orçamento restante",
+    "totalCommitted": "Comprometido nesta ronda: {amount}",
+    "squadProgress": "{count}/14 jogadores no plantel",
+    "myBidsTitle": "Os meus lances nesta ronda",
+    "noBidsYet": "Ainda não fizeste nenhum lance",
+    "bidAmountPlaceholder": "Valor",
+    "waitingForOthers": "A aguardar as outras equipas ({submitted}/{total} submetidas)",
+    "saveCta": "Guardar",
+    "submitCta": "Submeter a minha ronda →",
+    "genericError": "Algo correu mal, tenta novamente.",
+    "finishedTitle": "Leilão terminado",
+    "finishedBody": "As {count} rondas terminaram — {squadSize}/14 jogadores no plantel. As posições por preencher serão completadas através do mercado de transferências."
   }
 }

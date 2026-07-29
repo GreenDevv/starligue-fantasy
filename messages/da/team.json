@@ -9,7 +9,8 @@
     "starters": "Startspillere",
     "bench": "Reserver",
     "validating": "Bekræfter…",
-    "matchday": "Runde {number}"
+    "matchday": "Runde {number}",
+    "continue": "Fortsæt"
   },
   "errors": {
     "NO_ACTIVE_LEAGUE": "Ingen aktiv liga",
@@ -194,5 +195,23 @@
       "quotaReached": "Kvote nået",
       "available": "Tilgængelig"
     }
+  },
+  "auction": {
+    "loadingAuction": "Indlæser auktionen…",
+    "title": "Auktion",
+    "subtitle": "Byd på de positioner, du stadig mangler. Budgettet trækkes kun, hvis du vinder spilleren.",
+    "roundLabel": "Runde {number}/{total}",
+    "budgetLabel": "Resterende budget",
+    "totalCommitted": "Bundet denne runde: {amount}",
+    "squadProgress": "{count}/14 spillere i truppen",
+    "myBidsTitle": "Mine bud denne runde",
+    "noBidsYet": "Ingen bud afgivet endnu",
+    "bidAmountPlaceholder": "Beløb",
+    "waitingForOthers": "Venter på de andre hold ({submitted}/{total} har afgivet)",
+    "saveCta": "Gem",
+    "submitCta": "Indsend min runde →",
+    "genericError": "Noget gik galt, prøv igen.",
+    "finishedTitle": "Auktion afsluttet",
+    "finishedBody": "Alle {count} runder er slut — {squadSize}/14 spillere i truppen. Ledige positioner fyldes op via transfermarkedet."
   }
 }

@@ -12,6 +12,7 @@ import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { SquadSlots, type SlotPlayer } from "@/components/squad/SquadSlots";
 import { PlayerSeasonRecapTrigger } from "@/components/players/PlayerSeasonRecapTrigger";
+import { AuctionBuildView } from "@/components/team/AuctionBuildView";
 import { cn } from "@/lib/utils";
 import type { SeasonMode } from "@/lib/team/active-team-context";
 import { resolveApiError } from "@/lib/api/error-messages";
@@ -54,6 +55,7 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
   const [error, setError] = useState<string | null>(null);
   const [alreadyValidated, setAlreadyValidated] = useState(false);
   const [locked, setLocked] = useState(false);
+  const [auctionLeague, setAuctionLeague] = useState<{ leagueId: string } | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -67,6 +69,8 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
         { data?: { players: Player[] } },
         {
           data?: {
+            leagueId: string;
+            leagueMode?: "CLASSIC" | "AUCTION";
             initialBudget: number;
             maxPlayersPerClub: number;
             isValidated: boolean;
@@ -81,6 +85,13 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
         // apparaît systématiquement "en dépassement" dès la réouverture de l'écran.
         if (teamRes.data?.initialBudget) setInitialBudget(teamRes.data.initialBudget);
         if (teamRes.data?.maxPlayersPerClub) setMaxPlayersPerClub(teamRes.data.maxPlayersPerClub);
+        // Ligue en mode Enchères (§18 ARCHITECTURE.md) : le wizard à prix fixe ne
+        // s'applique pas, l'effectif se construit tour par tour sur un écran dédié.
+        if (teamRes.data?.leagueMode === "AUCTION" && teamRes.data.leagueId) {
+          setAuctionLeague({ leagueId: teamRes.data.leagueId });
+          setLoading(false);
+          return;
+        }
         if (teamRes.data?.isValidated && (teamRes.data.squad?.length ?? 0) === 14) {
           setAlreadyValidated(true);
           // Rebuild complet interdit une fois la saison commencée (voir
@@ -237,6 +248,10 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
         <p className="text-text-muted">{t("build.loadingPlayers")}</p>
       </div>
     );
+  }
+
+  if (auctionLeague) {
+    return <AuctionBuildView leagueId={auctionLeague.leagueId} leagueSuffix={leagueSuffix} />;
   }
 
   if (locked) {

@@ -49,7 +49,7 @@ export async function GET(request: Request) {
       prisma.gameConfig.findUnique({ where: { key: "SEASON_BONUS_QUOTA_PER_SEASON" } }),
       prisma.gameConfig.findUnique({ where: { key: "INITIAL_BUDGET" } }),
       prisma.gameConfig.findUnique({ where: { key: "MAX_PLAYERS_PER_CLUB" } }),
-      prisma.league.findUnique({ where: { id: ctx.leagueId }, select: { name: true } }),
+      prisma.league.findUnique({ where: { id: ctx.leagueId }, select: { name: true, mode: true } }),
     ]);
 
   if (!team) {
@@ -84,6 +84,7 @@ export async function GET(request: Request) {
       id: team.id,
       leagueId: ctx.leagueId,
       leagueName: league?.name ?? null,
+      leagueMode: league?.mode ?? "CLASSIC",
       name: team.name,
       jerseyConfig: "jerseyConfig" in team ? team.jerseyConfig : null,
       // team.budget = solde restant (budget initial - dépenses), utilisé par le flux

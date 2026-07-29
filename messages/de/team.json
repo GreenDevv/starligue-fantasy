@@ -9,7 +9,8 @@
     "starters": "Startspieler",
     "bench": "Ersatzbank",
     "validating": "Bestätigung…",
-    "matchday": "Spieltag {number}"
+    "matchday": "Spieltag {number}",
+    "continue": "Weiter"
   },
   "errors": {
     "NO_ACTIVE_LEAGUE": "Keine aktive Liga",
@@ -194,5 +195,23 @@
       "quotaReached": "Kontingent erreicht",
       "available": "Verfügbar"
     }
+  },
+  "auction": {
+    "loadingAuction": "Auktion wird geladen…",
+    "title": "Auktion",
+    "subtitle": "Biete auf die Positionen, die dir noch fehlen. Das Budget wird nur belastet, wenn du den Spieler bekommst.",
+    "roundLabel": "Runde {number}/{total}",
+    "budgetLabel": "Verbleibendes Budget",
+    "totalCommitted": "Diese Runde eingesetzt: {amount}",
+    "squadProgress": "{count}/14 Spieler im Kader",
+    "myBidsTitle": "Meine Gebote diese Runde",
+    "noBidsYet": "Noch kein Gebot abgegeben",
+    "bidAmountPlaceholder": "Betrag",
+    "waitingForOthers": "Warten auf andere Teams ({submitted}/{total} abgegeben)",
+    "saveCta": "Speichern",
+    "submitCta": "Runde abschicken →",
+    "genericError": "Etwas ist schiefgelaufen, versuch es erneut.",
+    "finishedTitle": "Auktion beendet",
+    "finishedBody": "Alle {count} Runden sind vorbei — {squadSize}/14 Spieler im Kader. Offene Positionen werden über den Transfermarkt aufgefüllt."
   }
 }
