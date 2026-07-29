@@ -105,6 +105,20 @@ model User {
   accounts         Account[]
   simulationTeams  SimulationTeam[]
   leagueChatMessages LeagueChatMessage[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+// Mot de passe oublié — ARCHITECTURE.md §6.1. tokenHash (sha256 du token brut
+// envoyé par email) et non le token lui-même : une fuite de la table ne permet
+// pas de réinitialiser un compte. Un seul token actif par utilisateur (voir
+// forgot-password/route.ts qui purge les précédents avant d'en créer un).
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // Requis par @auth/prisma-adapter (OAuth Google + credentials)

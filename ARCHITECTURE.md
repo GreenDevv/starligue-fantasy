@@ -476,6 +476,15 @@ POST   /api/auth/register            { email, password, name, favoritePlayerId? 
                                         équipe : voir §6.4, chaque équipe est liée à une ligue créée/
                                         rejointe ensuite) — favoritePlayerId facultatif, jamais bloquant,
                                         vérifié référencer un Player existant si fourni
+POST   /api/auth/forgot-password     { email, locale } → réponse toujours { data: { sent: true } }
+                                        (anti-enumeration, ne révèle jamais si l'email existe) ; si un
+                                        User correspond, émet un PasswordResetToken (TTL 1h, un seul
+                                        actif par utilisateur) et envoie l'email via Resend
+                                        (src/lib/email) — lien /reset-password?token=...
+POST   /api/auth/reset-password      { token, password } → vérifie PasswordResetToken (tokenHash =
+                                        sha256(token)), 400 INVALID_TOKEN/TOKEN_EXPIRED sinon met à
+                                        jour passwordHash + purge tous les tokens de l'utilisateur
+                                        (transaction Prisma)
 [Auth.js gère /api/auth/* : signin, signout, session, callback Google]
 ```
 

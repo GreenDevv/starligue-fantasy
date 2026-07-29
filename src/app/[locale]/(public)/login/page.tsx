@@ -80,6 +80,10 @@ function LoginForm() {
       >
         {loading ? t("login.submitting") : t("login.submit")}
       </button>
+
+      <Link href="/forgot-password" className="text-center text-sm text-text-muted hover:text-accent hover:underline">
+        {t("login.forgotPasswordLink")}
+      </Link>
     </form>
   );
 }
