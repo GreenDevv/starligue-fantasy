@@ -34,6 +34,11 @@ describe("htmlToParagraphs", () => {
   it("returns an empty array for HTML with no block-level content", () => {
     expect(htmlToParagraphs("<div><img src=\"x.jpg\"></div>")).toEqual([]);
   });
+
+  it("decodes named Latin-1 entities (hbcnantes.com encodes accents this way)", () => {
+    const html = "<p>C&rsquo;&eacute;tait la rentr&eacute;e &agrave; la H Arena.</p>";
+    expect(htmlToParagraphs(html)).toEqual(["C’était la rentrée à la H Arena."]);
+  });
 });
 
 describe("htmlToPlainContent", () => {

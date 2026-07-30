@@ -18,6 +18,31 @@ const NAMED_ENTITIES: Record<string, string> = {
   quot: '"',
   apos: "'",
   hellip: "…",
+  // Entités Latin-1 nommées (HTML4) — nécessaires pour les sites qui encodent les
+  // accents ainsi plutôt qu'en UTF-8 brut (constaté sur hbcnantes.com : "&eacute;",
+  // "&agrave;", etc. dans le corps de chaque article). Le lookup est déjà
+  // insensible à la casse (regex /i + .toLowerCase() ci-dessous), pas besoin
+  // d'entrées majuscules séparées.
+  eacute: "é",
+  egrave: "è",
+  ecirc: "ê",
+  euml: "ë",
+  agrave: "à",
+  acirc: "â",
+  auml: "ä",
+  aelig: "æ",
+  ccedil: "ç",
+  ocirc: "ô",
+  ouml: "ö",
+  oelig: "œ",
+  ucirc: "û",
+  uuml: "ü",
+  ugrave: "ù",
+  icirc: "î",
+  iuml: "ï",
+  euro: "€",
+  laquo: "«",
+  raquo: "»",
 };
 
 function decodeEntities(text: string): string {
