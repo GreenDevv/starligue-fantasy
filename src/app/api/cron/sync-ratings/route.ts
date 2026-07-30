@@ -35,6 +35,22 @@ export async function POST(req: Request) {
     );
   }
 
+  try {
+    // Résolution des calendars_id manquants + Match.status/scores depuis lnh.fr — un
+    // seul fetch pour toute la saison, idempotent. Fait AVANT la détection des
+    // journées à synchroniser ci-dessous : le mode par défaut (sans ?gameweek/
+    // ?matchId) filtre sur `status: "FINISHED"`, qui vient d'être mis à jour par cet
+    // appel — l'inverser retarderait la détection d'un jour (le statut ne serait à
+    // jour qu'au run suivant).
+    await syncCalendarsIdsForSeason(season.id, LNH_SEASONS_ID_2026_2027, SEASON_START_YEAR_2026_2027);
+  } catch (err) {
+    const recoverable = err instanceof IngestionError ? err.recoverable : false;
+    console.warn("[sync-ratings] syncCalendarsIdsForSeason:", String(err));
+    if (!recoverable) {
+      return NextResponse.json({ error: { code: "SCRAPER_ERROR", message: String(err) } }, { status: 502 });
+    }
+  }
+
   // Détermine les journées à synchroniser
   const gameweekIds = new Set<string>();
 
@@ -64,18 +80,6 @@ export async function POST(req: Request) {
   }
 
   const results: { gameweekId: string; status: "ok" | "error"; detail: string }[] = [];
-
-  try {
-    // Résolution des calendars_id manquants — un seul fetch pour toute la saison,
-    // idempotent, sert toutes les journées ci-dessous.
-    await syncCalendarsIdsForSeason(season.id, LNH_SEASONS_ID_2026_2027, SEASON_START_YEAR_2026_2027);
-  } catch (err) {
-    const recoverable = err instanceof IngestionError ? err.recoverable : false;
-    console.warn("[sync-ratings] syncCalendarsIdsForSeason:", String(err));
-    if (!recoverable) {
-      return NextResponse.json({ error: { code: "SCRAPER_ERROR", message: String(err) } }, { status: 502 });
-    }
-  }
 
   for (const gameweekId of gameweekIds) {
     try {

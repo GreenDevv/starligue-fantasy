@@ -6,6 +6,14 @@
 // fetchSeasonCalendar), les matchs de la saison en direct n'ont pas de
 // `externalIds.lnh_calendars_id` (import initial fait par CSV, cf.
 // prisma/fixtures_starligue_2026.csv) — syncCalendarsIdsForSeason() le résout.
+//
+// Cette même fonction met AUSSI à jour Match.status/homeScore/awayScore depuis le
+// calendrier lnh.fr (2026-07-30) : jusque-là rien ne le faisait pour la saison en
+// direct (le score/scoring fantasy ne dépend que de PlayerMatchStat, indépendant de
+// Match — mais les pages de détail match/club, le H2H et le règlement des pronostics
+// §14 en ont besoin). fetchSeasonCalendar() renvoyait déjà ces champs
+// (ScrapedFixture.status/homeScore/awayScore, utilisés depuis le début pour le Mode
+// Simulation), seule l'écriture côté saison en direct manquait.
 import { prisma } from "@/lib/db";
 import {
   createLnhScraperProvider,
@@ -17,12 +25,16 @@ export interface CalendarsIdSyncResult {
   resolved: number;
   alreadyKnown: number;
   unresolved: number;
+  /** Matchs dont le statut et/ou le score ont été mis à jour depuis lnh.fr sur ce run. */
+  resultsUpdated: number;
 }
 
 /**
  * Résout `Match.externalIds.lnh_calendars_id` pour tous les matchs déjà en base
  * d'une saison, en les rapprochant du calendrier lnh.fr (journée + clubs domicile/
- * extérieur). Idempotent — ne touche pas aux matchs qui ont déjà un calendars_id.
+ * extérieur). Met aussi à jour `Match.status`/`homeScore`/`awayScore` depuis ce même
+ * calendrier. Idempotent — ne réécrit rien pour un match dont le calendars_id est
+ * déjà connu ET dont le statut/score correspond déjà à la dernière valeur scrapée.
  */
 export async function syncCalendarsIdsForSeason(
   seasonId: string,
@@ -42,6 +54,7 @@ export async function syncCalendarsIdsForSeason(
   let resolved = 0;
   let alreadyKnown = 0;
   let unresolved = 0;
+  let resultsUpdated = 0;
 
   for (const fixture of fixtures) {
     const homeClubId = clubIdBySlug.get(fixture.homeClubSlug.toLowerCase());
@@ -62,7 +75,7 @@ export async function syncCalendarsIdsForSeason(
 
     const match = await prisma.match.findFirst({
       where: { gameweekId: gameweek.id, homeClubId, awayClubId },
-      select: { id: true, externalIds: true },
+      select: { id: true, externalIds: true, status: true, homeScore: true, awayScore: true },
     });
     if (!match) {
       unresolved++;
@@ -70,19 +83,35 @@ export async function syncCalendarsIdsForSeason(
     }
 
     const externalIds = (match.externalIds as Record<string, string>) ?? {};
-    if (externalIds.lnh_calendars_id) {
+    const needsCalendarsId = !externalIds.lnh_calendars_id;
+    const needsResultUpdate =
+      match.status !== fixture.status ||
+      match.homeScore !== fixture.homeScore ||
+      match.awayScore !== fixture.awayScore;
+
+    if (!needsCalendarsId && !needsResultUpdate) {
       alreadyKnown++;
       continue;
     }
 
     await prisma.match.update({
       where: { id: match.id },
-      data: { externalIds: { ...externalIds, lnh_calendars_id: fixture.calendarsId } },
+      data: {
+        ...(needsCalendarsId ? { externalIds: { ...externalIds, lnh_calendars_id: fixture.calendarsId } } : {}),
+        ...(needsResultUpdate
+          ? {
+              status: fixture.status as "SCHEDULED" | "FINISHED",
+              homeScore: fixture.homeScore,
+              awayScore: fixture.awayScore,
+            }
+          : {}),
+      },
     });
-    resolved++;
+    if (needsCalendarsId) resolved++;
+    if (needsResultUpdate) resultsUpdated++;
   }
 
-  return { resolved, alreadyKnown, unresolved };
+  return { resolved, alreadyKnown, unresolved, resultsUpdated };
 }
 
 export interface GameweekBoxscoreSyncResult {

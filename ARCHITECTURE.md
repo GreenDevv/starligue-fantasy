@@ -563,7 +563,15 @@ POST   /api/cron/sync-fixtures            → provider.fetchFixtures (1×/jour) 
                                              jamais configurée en prod, échoue en 503 sinon)
 POST   /api/cron/sync-results             → résultats des matchs du jour (soirs de journée) — PAS
                                              PLANIFIÉ, même dépendance API_SPORTS_KEY que ci-dessus
-POST   /api/cron/sync-ratings             → scraper notes LNH (matin J+1) — pas planifié, manuel
+POST   /api/cron/sync-ratings             → scraper notes LNH (matin J+1) — PLANIFIÉ,
+                                             cron-daily.yml, 06:00 UTC. Met aussi à jour
+                                             Match.status/homeScore/awayScore depuis lnh.fr
+                                             (syncCalendarsIdsForSeason, src/lib/ingestion/
+                                             boxscore.ts, ajouté le 2026-07-31 — jusque-là rien ne
+                                             le faisait pour la saison en direct ; le scoring
+                                             fantasy n'en dépend pas — PlayerMatchStat seul suffit
+                                             — mais les pages match/club et le règlement des
+                                             pronostics §14 en ont besoin)
 POST   /api/cron/snapshot-lineups         → gèle les alignements (à chaque deadline) — pas planifié
 POST   /api/cron/compute-scores           → calcule points des journées complètes — pas planifié
 POST   /api/cron/compute-prediction-odds  → crée les marchés de pronostic des matchs sans cotes
@@ -590,16 +598,28 @@ déjà = `curl`, donc toute commande custom donne `curl curl ...`, échec sans l
 exploitable) — d'où le choix de GitHub Actions comme remplacement, cohérent avec la
 solution déjà en place pour ce cron-là.
 
-**Seule `sync-news` a un cron actif** (`cron-daily.yml`, 06:00 UTC) — c'est le seul
-besoin exprimé côté crons de synchro (page d'actus). Les 7 autres routes de synchro
-listées ci-dessus (fixtures/résultats/notes/scores/classement/effectifs/pronostics)
-existent et fonctionnent, mais n'ont **aucun déclenchement automatique** pour l'instant
-— utilisables uniquement en manuel (dashboard admin, ou `curl` avec `CRON_SECRET`).
-`sync-fixtures`/`sync-results` ont de toute façon besoin de `API_SPORTS_KEY` (jamais
-configurée en prod) avant de pouvoir tourner, planifiées ou non. Secret `CRON_SECRET`
-dupliqué en secret de repo GitHub (Settings → Secrets and variables → Actions), même
-valeur que côté Railway (`railway variables --service web`). Chaque workflow expose
-aussi `workflow_dispatch` pour un déclenchement manuel sans attendre l'horaire planifié.
+**`sync-news` et `sync-ratings` ont un cron actif** (`cron-daily.yml`, 06:00 UTC, 2 jobs
+indépendants — l'échec de l'un ne bloque pas l'autre). Les 6 autres routes de synchro
+listées ci-dessus (fixtures/résultats API-Sports/snapshot-lineups/scores/classement/
+effectifs/pronostics) existent et fonctionnent, mais n'ont **aucun déclenchement
+automatique** pour l'instant — utilisables uniquement en manuel (dashboard admin, ou
+`curl` avec `CRON_SECRET`). `sync-fixtures`/`sync-results` ont de toute façon besoin de
+`API_SPORTS_KEY` (jamais configurée en prod) avant de pouvoir tourner, planifiées ou
+non — mais ce n'est pas bloquant pour le scoring fantasy (indépendant de `Match`, voir
+`sync-ratings` ci-dessus) ni pour le calendrier de la saison en direct (importé une
+fois par CSV, `prisma/fixtures_starligue_2026.csv`, pas par ces routes). Secret
+`CRON_SECRET` dupliqué en secret de repo GitHub (Settings → Secrets and variables →
+Actions), même valeur que côté Railway (`railway variables --service web`). Chaque
+workflow expose aussi `workflow_dispatch` pour un déclenchement manuel sans attendre
+l'horaire planifié.
+
+**Piège d'ordre corrigé le 2026-07-31** dans `sync-ratings/route.ts` : le mode par
+défaut (sans `?gameweek`/`?matchId`) détecte "les matchs terminés hier" en filtrant sur
+`Match.status = FINISHED` — qui est justement le champ que `syncCalendarsIdsForSeason`
+vient de commencer à mettre à jour. Appeler cette fonction *après* la détection
+(comme c'était fait à l'origine, pour la seule résolution de `calendars_id`) aurait
+retardé la détection d'un jour à chaque fois (statut pas encore à jour au moment du
+filtre). Corrigé en déplaçant l'appel avant la détection des journées à synchroniser.
 
 ### 6.8 Pronostics (auth requise) — voir §14
 ```
