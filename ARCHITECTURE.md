@@ -565,17 +565,28 @@ POST   /api/cron/snapshot-lineups         → gèle les alignements (à chaque d
 POST   /api/cron/compute-scores           → calcule points des journées complètes
 POST   /api/cron/compute-prediction-odds  → crée les marchés de pronostic des matchs sans cotes (§14)
 POST   /api/cron/sync-news                → scrape lnh.fr + sites de clubs, alimente la page /starligue (§16)
+POST   /api/cron/sync-standings           → classement officiel Daikin StarLigue (widget dashboard)
+POST   /api/cron/sync-players-lnh         → effectifs depuis lnh.fr (upsert)
 POST   /api/cron/post-stat-leaders        → publie les 3 carrousels Instagram "Leaders Starligue"
                                              (attaque/gardiens/défense) des journées notées pas encore
                                              postées (matin J+1, après compute-scores) — §17.
-                                             Déclenché par GitHub Actions (.github/workflows/
-                                             post-stat-leaders.yml), pas par un cron Railway comme
-                                             les 8 autres — une image Docker `curlimages/curl` sur
-                                             Railway s'est révélée peu fiable (ENTRYPOINT déjà = curl,
-                                             donne "curl curl ...", et un échec sans log exploitable
-                                             ensuite) ; GitHub Actions évite ce problème et donne des
-                                             logs de run consultables dans l'onglet Actions du repo.
 ```
+
+**Déclenchement : GitHub Actions, pas Railway** (`.github/workflows/cron-daily.yml`,
+`cron-hourly.yml`, `post-stat-leaders.yml`). Railway a été essayé en premier pour tous
+ces crons via deux services `cron-daily`/`cron-hourly` (image Docker `curlimages/curl`)
+— peu fiable pour deux raisons cumulées, découvertes le 2026-07-30 en creusant pourquoi
+aucun des deux ne tournait réellement en prod : 1) l'ENTRYPOINT de cette image est déjà
+`curl`, donc toute commande de démarrage custom donne en pratique `curl curl ...`
+(échec immédiat, sans log exploitable) ; 2) **aucun schedule Railway n'avait en fait
+jamais été configuré** sur ces deux services (`cronSchedule: null` côté API Railway) —
+ils tournaient juste comme des services classiques en boucle de crash
+(`ON_FAILURE`), jamais comme de vrais jobs planifiés. Même diagnostic que celui déjà
+posé pour `post-stat-leaders` (seul cron migré vers GitHub Actions jusque-là) ;
+`cron-daily`/`cron-hourly` ont reçu le même traitement. Secret `CRON_SECRET` dupliqué
+en secret de repo GitHub (Settings → Secrets and variables → Actions), même valeur que
+côté Railway (`railway variables --service web`). Chaque workflow expose aussi
+`workflow_dispatch` pour un déclenchement manuel sans attendre l'horaire planifié.
 
 ### 6.8 Pronostics (auth requise) — voir §14
 ```
@@ -781,12 +792,25 @@ NEXT_PUBLIC_APP_URL=https://...
 Railway :
 - Service web Next.js (standalone output, `PORT` + `0.0.0.0` comme sur tes autres projets — pas besoin de server.js custom ici, pas de Socket.io en v1).
 - Service Postgres managé.
-- Crons Railway (ou service worker minimal) qui `curl -X POST -H "Authorization: Bearer $CRON_SECRET"` les routes `/api/cron/*` :
-  - `sync-fixtures` : `0 6 * * *`
-  - `sync-results` : `0 20-23,0-2 * * 4,5,6,0` (soirs de matchs, jeu→dim)
-  - `sync-ratings` + `compute-scores` : `0 9,13 * * *`
-  - `snapshot-lineups` : `*/15 * * * *` (le job vérifie lui-même si une deadline vient de passer — idempotent)
-  - `sync-news` : `0 7 * * *` (quotidien, avant sync-ratings/compute-scores — §16)
+- ~~Crons Railway (`cron-daily`/`cron-hourly`, image `curlimages/curl`)~~ — abandonnés
+  le 2026-07-30, jamais fonctionnels (voir §6.7 pour le diagnostic complet : ni
+  schedule ni commande de démarrage configurés côté Railway). Remplacés par 3
+  workflows GitHub Actions (`.github/workflows/cron-daily.yml`, `cron-hourly.yml`,
+  `post-stat-leaders.yml`) qui `curl -X POST -H "Authorization: Bearer $CRON_SECRET"`
+  les routes `/api/cron/*` :
+  - `cron-daily.yml` (`0 6 * * *`) : `sync-fixtures`, `sync-ratings`, `compute-scores`,
+    `sync-news`, `sync-standings`, `sync-players-lnh`
+  - `cron-hourly.yml` (`0 * * * *`) : `sync-results`, `snapshot-lineups`,
+    `compute-prediction-odds`
+  - `post-stat-leaders.yml` (`0 7 * * *`) : voir §17.1
+
+  Simplifications assumées par rapport au découpage plus fin envisagé à l'origine
+  (`sync-ratings` 2×/jour à 9h/13h, `sync-results` seulement les soirs de match
+  jeu→dim 20h-2h, `snapshot-lineups` toutes les 15 min) : toutes ces routes sont
+  idempotentes, un appel hors fenêtre utile est un no-op sans effet de bord — juste
+  moins précis (ex. `snapshot-lineups` peut geler un alignement jusqu'à ~59 min après
+  la deadline exacte plutôt qu'au plus près). À resserrer si ça devient gênant en
+  pratique.
 
 ---
 
@@ -1210,12 +1234,12 @@ qu'un seul de 16 slides.)
   ton identique aux posts manuels (emojis + hashtags `#StarligueFantasy #Handball
   #FantasyHandball #DaikinStarLigue #LNH`).
 - Déclenché par un workflow GitHub Actions planifié (`.github/workflows/
-  post-stat-leaders.yml`, `cron: "0 7 * * *"`), pas par Railway comme les 8 autres
-  crons du projet — voir §6.7 pour la raison (échec silencieux d'une image Docker
-  `curlimages/curl` sur Railway). Secret `CRON_SECRET` dupliqué en secret de repo
-  GitHub (Settings → Secrets and variables → Actions), même valeur que côté Railway.
-  Le workflow expose aussi un déclenchement manuel (`workflow_dispatch`, avec option
-  `dryRun`) pour tester sans attendre l'horaire planifié.
+  post-stat-leaders.yml`, `cron: "0 7 * * *"`) — voir §6.7 pour la raison (premier
+  cron migré loin de Railway, avant que `cron-daily`/`cron-hourly` ne le soient aussi
+  le 2026-07-30 pour le même type de problème). Secret `CRON_SECRET` dupliqué en
+  secret de repo GitHub (Settings → Secrets and variables → Actions), même valeur que
+  côté Railway. Le workflow expose aussi un déclenchement manuel (`workflow_dispatch`,
+  avec option `dryRun`) pour tester sans attendre l'horaire planifié.
 
 ### 17.2 Gabarit "hero" comme format standard pour tout post classement
 

@@ -1,0 +1,54 @@
+name: Cron horaire (résultats, alignements, cotes pronostics)
+
+# Remplace le service Railway "cron-hourly" (même bug que cron-daily.yml — voir son
+# commentaire d'en-tête pour le détail du diagnostic : startCommand et cronSchedule
+# vides côté Railway, conteneur curlimages/curl en boucle de crash sans jamais
+# appeler la moindre route).
+#
+# Tourne toutes les heures, 24h/24 — plus large que ce que documente ARCHITECTURE.md
+# §4.1 (sync-results/sync-standings n'y sont utiles que les soirs de journée, 20h–02h ;
+# snapshot-lineups seulement "à chaque deadline"). Simplification assumée : les 3
+# routes sont idempotentes (voir leurs commentaires respectifs), un appel hors fenêtre
+# utile est un no-op sans effet de bord, juste un appel réseau superflu. Contrepartie
+# acceptée : snapshot-lineups n'a qu'une précision à l'heure près sur les deadlines
+# (peut geler un alignement jusqu'à ~59 min après l'heure exacte plutôt qu'au plus
+# près) — à resserrer avec un cron plus fréquent si ça devient gênant en pratique.
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  cron-hourly:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler les routes /api/cron/* horaires
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -u
+          base="https://starliguefantasy.fr/api/cron"
+          routes=(sync-results snapshot-lineups compute-prediction-odds)
+
+          failed=()
+          for route in "${routes[@]}"; do
+            echo "::group::$route"
+            response=$(curl -sS -w "\n%{http_code}" -X POST \
+              -H "Authorization: Bearer ${CRON_SECRET}" \
+              "$base/$route")
+            body=$(echo "$response" | sed '$d')
+            status=$(echo "$response" | tail -n 1)
+
+            echo "$body" | python3 -m json.tool || echo "$body"
+
+            if [ "$status" -ge 300 ]; then
+              echo "::error::$route → HTTP $status"
+              failed+=("$route")
+            fi
+            echo "::endgroup::"
+          done
+
+          if [ "${#failed[@]}" -gt 0 ]; then
+            echo "::error::Routes en échec : ${failed[*]}"
+            exit 1
+          fi
