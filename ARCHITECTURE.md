@@ -558,35 +558,48 @@ GET    /api/admin/ingestion-log           → derniers runs, erreurs de parsing
 
 ### 6.7 Cron (header `Authorization: Bearer ${CRON_SECRET}`)
 ```
-POST   /api/cron/sync-fixtures            → provider.fetchFixtures (1×/jour)
-POST   /api/cron/sync-results             → résultats des matchs du jour (soirs de journée)
-POST   /api/cron/sync-ratings             → scraper notes LNH (matin J+1)
-POST   /api/cron/snapshot-lineups         → gèle les alignements (à chaque deadline)
-POST   /api/cron/compute-scores           → calcule points des journées complètes
-POST   /api/cron/compute-prediction-odds  → crée les marchés de pronostic des matchs sans cotes (§14)
-POST   /api/cron/sync-news                → scrape lnh.fr + sites de clubs, alimente la page /starligue (§16)
-POST   /api/cron/sync-standings           → classement officiel Daikin StarLigue (widget dashboard)
-POST   /api/cron/sync-players-lnh         → effectifs depuis lnh.fr (upsert)
+POST   /api/cron/sync-fixtures            → provider.fetchFixtures (1×/jour) — PAS PLANIFIÉ,
+                                             déclenchement manuel admin seulement (API_SPORTS_KEY
+                                             jamais configurée en prod, échoue en 503 sinon)
+POST   /api/cron/sync-results             → résultats des matchs du jour (soirs de journée) — PAS
+                                             PLANIFIÉ, même dépendance API_SPORTS_KEY que ci-dessus
+POST   /api/cron/sync-ratings             → scraper notes LNH (matin J+1) — pas planifié, manuel
+POST   /api/cron/snapshot-lineups         → gèle les alignements (à chaque deadline) — pas planifié
+POST   /api/cron/compute-scores           → calcule points des journées complètes — pas planifié
+POST   /api/cron/compute-prediction-odds  → crée les marchés de pronostic des matchs sans cotes
+                                             (§14) — pas planifié
+POST   /api/cron/sync-news                → scrape lnh.fr + sites de clubs, alimente la page
+                                             d'accueil (§16) — PLANIFIÉ, cron-daily.yml, 06:00 UTC
+POST   /api/cron/sync-standings           → classement officiel Daikin StarLigue (widget
+                                             dashboard) — pas planifié
+POST   /api/cron/sync-players-lnh         → effectifs depuis lnh.fr (upsert) — pas planifié
 POST   /api/cron/post-stat-leaders        → publie les 3 carrousels Instagram "Leaders Starligue"
                                              (attaque/gardiens/défense) des journées notées pas encore
                                              postées (matin J+1, après compute-scores) — §17.
+                                             PLANIFIÉ, post-stat-leaders.yml, 07:00 UTC
 ```
 
-**Déclenchement : GitHub Actions, pas Railway** (`.github/workflows/cron-daily.yml`,
-`cron-hourly.yml`, `post-stat-leaders.yml`). Railway a été essayé en premier pour tous
-ces crons via deux services `cron-daily`/`cron-hourly` (image Docker `curlimages/curl`)
-— peu fiable pour deux raisons cumulées, découvertes le 2026-07-30 en creusant pourquoi
-aucun des deux ne tournait réellement en prod : 1) l'ENTRYPOINT de cette image est déjà
-`curl`, donc toute commande de démarrage custom donne en pratique `curl curl ...`
-(échec immédiat, sans log exploitable) ; 2) **aucun schedule Railway n'avait en fait
-jamais été configuré** sur ces deux services (`cronSchedule: null` côté API Railway) —
-ils tournaient juste comme des services classiques en boucle de crash
-(`ON_FAILURE`), jamais comme de vrais jobs planifiés. Même diagnostic que celui déjà
-posé pour `post-stat-leaders` (seul cron migré vers GitHub Actions jusque-là) ;
-`cron-daily`/`cron-hourly` ont reçu le même traitement. Secret `CRON_SECRET` dupliqué
-en secret de repo GitHub (Settings → Secrets and variables → Actions), même valeur que
-côté Railway (`railway variables --service web`). Chaque workflow expose aussi
-`workflow_dispatch` pour un déclenchement manuel sans attendre l'horaire planifié.
+**Déclenchement (routes planifiées) : GitHub Actions, pas Railway**
+(`.github/workflows/cron-daily.yml`, `post-stat-leaders.yml`). Railway avait deux
+services vides `cron-daily`/`cron-hourly` (image Docker `curlimages/curl`, supprimés le
+2026-07-30) qui n'ont jamais fonctionné : ni schedule (`cronSchedule: null` côté API
+Railway) ni commande de démarrage configurés — le conteneur tournait juste `curl` sans
+argument en boucle de crash (`ON_FAILURE`), jamais un vrai job planifié. Même famille de
+souci que celui déjà diagnostiqué pour `post-stat-leaders` (ENTRYPOINT de cette image
+déjà = `curl`, donc toute commande custom donne `curl curl ...`, échec sans log
+exploitable) — d'où le choix de GitHub Actions comme remplacement, cohérent avec la
+solution déjà en place pour ce cron-là.
+
+**Seule `sync-news` a un cron actif** (`cron-daily.yml`, 06:00 UTC) — c'est le seul
+besoin exprimé côté crons de synchro (page d'actus). Les 7 autres routes de synchro
+listées ci-dessus (fixtures/résultats/notes/scores/classement/effectifs/pronostics)
+existent et fonctionnent, mais n'ont **aucun déclenchement automatique** pour l'instant
+— utilisables uniquement en manuel (dashboard admin, ou `curl` avec `CRON_SECRET`).
+`sync-fixtures`/`sync-results` ont de toute façon besoin de `API_SPORTS_KEY` (jamais
+configurée en prod) avant de pouvoir tourner, planifiées ou non. Secret `CRON_SECRET`
+dupliqué en secret de repo GitHub (Settings → Secrets and variables → Actions), même
+valeur que côté Railway (`railway variables --service web`). Chaque workflow expose
+aussi `workflow_dispatch` pour un déclenchement manuel sans attendre l'horaire planifié.
 
 ### 6.8 Pronostics (auth requise) — voir §14
 ```
@@ -792,16 +805,14 @@ NEXT_PUBLIC_APP_URL=https://...
 Railway :
 - Service web Next.js (standalone output, `PORT` + `0.0.0.0` comme sur tes autres projets — pas besoin de server.js custom ici, pas de Socket.io en v1).
 - Service Postgres managé.
-- ~~Crons Railway (`cron-daily`/`cron-hourly`, image `curlimages/curl`)~~ — abandonnés
+- ~~Crons Railway (`cron-daily`/`cron-hourly`, image `curlimages/curl`)~~ — supprimés
   le 2026-07-30, jamais fonctionnels (voir §6.7 pour le diagnostic complet : ni
-  schedule ni commande de démarrage configurés côté Railway). Remplacés par 3
-  workflows GitHub Actions (`.github/workflows/cron-daily.yml`, `cron-hourly.yml`,
-  `post-stat-leaders.yml`) qui `curl -X POST -H "Authorization: Bearer $CRON_SECRET"`
+  schedule ni commande de démarrage configurés côté Railway). Remplacés par 2
+  workflows GitHub Actions qui `curl -X POST -H "Authorization: Bearer $CRON_SECRET"`
   les routes `/api/cron/*` :
-  - `cron-daily.yml` (`0 6 * * *`) : `sync-fixtures`, `sync-ratings`, `compute-scores`,
-    `sync-news`, `sync-standings`, `sync-players-lnh`
-  - `cron-hourly.yml` (`0 * * * *`) : `sync-results`, `snapshot-lineups`,
-    `compute-prediction-odds`
+  - `cron-daily.yml` (`0 6 * * *`) : `sync-news` uniquement — seul besoin exprimé côté
+    cron de synchro. Les autres routes de synchro (fixtures/résultats/notes/scores/
+    classement/effectifs/pronostics) restent volontairement non planifiées, voir §6.7.
   - `post-stat-leaders.yml` (`0 7 * * *`) : voir §17.1
 
   Simplifications assumées par rapport au découpage plus fin envisagé à l'origine
@@ -1235,8 +1246,8 @@ qu'un seul de 16 slides.)
   #FantasyHandball #DaikinStarLigue #LNH`).
 - Déclenché par un workflow GitHub Actions planifié (`.github/workflows/
   post-stat-leaders.yml`, `cron: "0 7 * * *"`) — voir §6.7 pour la raison (premier
-  cron migré loin de Railway, avant que `cron-daily`/`cron-hourly` ne le soient aussi
-  le 2026-07-30 pour le même type de problème). Secret `CRON_SECRET` dupliqué en
+  cron migré loin de Railway, avant que `cron-daily` ne le soit aussi le 2026-07-30
+  pour le même type de problème). Secret `CRON_SECRET` dupliqué en
   secret de repo GitHub (Settings → Secrets and variables → Actions), même valeur que
   côté Railway. Le workflow expose aussi un déclenchement manuel (`workflow_dispatch`,
   avec option `dryRun`) pour tester sans attendre l'horaire planifié.

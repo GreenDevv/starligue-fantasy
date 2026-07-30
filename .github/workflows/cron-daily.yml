@@ -1,57 +1,39 @@
-name: Cron quotidien (fixtures, notes, scores, actus, classement)
+name: Cron quotidien (actus lnh.fr + sites de clubs)
 
 # Remplace le service Railway "cron-daily" (image curlimages/curl), qui n'a jamais
 # fonctionné : startCommand et cronSchedule tous deux vides côté Railway (confirmé via
 # `railway status --json`), donc le conteneur se contentait de lancer `curl` sans
 # argument en boucle de crash (ON_FAILURE) sans jamais appeler la moindre route. Même
 # classe de bug que celle documentée en ARCHITECTURE.md §6.7 pour post-stat-leaders.yml
-# (ENTRYPOINT déjà = curl sur cette image → "curl curl ..." si on passe une commande),
-# qui avait déjà motivé le passage à GitHub Actions pour ce cron-là — même traitement
-# ici pour cron-daily.
+# (ENTRYPOINT déjà = curl sur cette image → "curl curl ..." si on passe une commande).
 #
-# 06:00 UTC, pas 07:00 : laisse 1h de marge avant post-stat-leaders.yml (07:00 UTC) qui
-# suppose compute-scores déjà terminé. Simplification assumée par rapport à
-# ARCHITECTURE.md §4.1 (sync-ratings y est documenté 2×/jour, 09h/13h) : ce batch ne
-# tourne qu'une fois — à resserrer plus tard si le besoin d'un second passage se
-# confirme.
+# Portée volontairement limitée à sync-news (scrape lnh.fr + sites de clubs, §16) —
+# c'est le seul besoin exprimé pour ce cron. Les autres routes /api/cron/* du jeu
+# (fixtures, notes, scores, classement, effectifs) restent non planifiées pour
+# l'instant, disponibles en déclenchement manuel admin uniquement — voir
+# ARCHITECTURE.md §6.7.
 on:
   schedule:
     - cron: "0 6 * * *"
   workflow_dispatch: {}
 
 jobs:
-  cron-daily:
+  sync-news:
     runs-on: ubuntu-latest
     steps:
-      - name: Appeler les routes /api/cron/* quotidiennes
+      - name: Appeler /api/cron/sync-news
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          set -u
-          base="https://starliguefantasy.fr/api/cron"
-          # Ordre : fixtures avant tout le reste (upsert calendrier), ratings avant
-          # compute-scores (dépendance directe, §4.1).
-          routes=(sync-fixtures sync-ratings compute-scores sync-news sync-standings sync-players-lnh)
+          response=$(curl -sS -w "\n%{http_code}" -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://starliguefantasy.fr/api/cron/sync-news")
+          body=$(echo "$response" | sed '$d')
+          status=$(echo "$response" | tail -n 1)
 
-          failed=()
-          for route in "${routes[@]}"; do
-            echo "::group::$route"
-            response=$(curl -sS -w "\n%{http_code}" -X POST \
-              -H "Authorization: Bearer ${CRON_SECRET}" \
-              "$base/$route")
-            body=$(echo "$response" | sed '$d')
-            status=$(echo "$response" | tail -n 1)
+          echo "$body" | python3 -m json.tool || echo "$body"
 
-            echo "$body" | python3 -m json.tool || echo "$body"
-
-            if [ "$status" -ge 300 ]; then
-              echo "::error::$route → HTTP $status"
-              failed+=("$route")
-            fi
-            echo "::endgroup::"
-          done
-
-          if [ "${#failed[@]}" -gt 0 ]; then
-            echo "::error::Routes en échec : ${failed[*]}"
+          if [ "$status" -ge 300 ]; then
+            echo "::error::HTTP $status"
             exit 1
           fi
