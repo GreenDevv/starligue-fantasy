@@ -212,6 +212,15 @@
     "submitCta": "Soumettre mon tour →",
     "genericError": "Une erreur est survenue, réessaie.",
     "finishedTitle": "Enchères terminées",
-    "finishedBody": "Les {count} tours sont terminés — {squadSize}/14 joueurs dans ton effectif. Les postes non pourvus se compléteront via le marché des transferts."
+    "finishedBody": "Les {count} tours sont terminés — {squadSize}/14 joueurs dans ton effectif. Les postes non pourvus se compléteront via le marché des transferts.",
+    "errors": {
+      "duplicateBid": "{player} : enchère en double, une seule autorisée par joueur.",
+      "invalidAmount": "{player} : montant invalide.",
+      "unknownPlayer": "Un des joueurs sélectionnés est introuvable, réessaie.",
+      "budgetExceeded": "Budget dépassé de {overage} (engagé {total} pour {budget} disponible).",
+      "positionFull": "{position} : {requested} enchères pour seulement {remaining} place(s) restante(s).",
+      "tooManyFromClub": "Trop de joueurs de {club} : {count} sélectionnés, {max} maximum par club.",
+      "playerAlreadyOwned": "{players} déjà remporté(s) par une autre équipe de la ligue."
+    }
   }
 }

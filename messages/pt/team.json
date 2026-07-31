@@ -212,6 +212,15 @@
     "submitCta": "Submeter a minha ronda →",
     "genericError": "Algo correu mal, tenta novamente.",
     "finishedTitle": "Leilão terminado",
-    "finishedBody": "As {count} rondas terminaram — {squadSize}/14 jogadores no plantel. As posições por preencher serão completadas através do mercado de transferências."
+    "finishedBody": "As {count} rondas terminaram — {squadSize}/14 jogadores no plantel. As posições por preencher serão completadas através do mercado de transferências.",
+    "errors": {
+      "duplicateBid": "{player}: lance duplicado, só é permitido um por jogador.",
+      "invalidAmount": "{player}: valor inválido.",
+      "unknownPlayer": "Um dos jogadores selecionados não foi encontrado, tenta novamente.",
+      "budgetExceeded": "Orçamento excedido em {overage} (comprometido {total} de {budget} disponível).",
+      "positionFull": "{position}: {requested} lances para apenas {remaining} vaga(s) restante(s).",
+      "tooManyFromClub": "Demasiados jogadores de {club}: {count} selecionados, máximo {max} por clube.",
+      "playerAlreadyOwned": "{players} já conquistado(s) por outra equipa da liga."
+    }
   }
 }

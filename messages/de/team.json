@@ -212,6 +212,15 @@
     "submitCta": "Runde abschicken →",
     "genericError": "Etwas ist schiefgelaufen, versuch es erneut.",
     "finishedTitle": "Auktion beendet",
-    "finishedBody": "Alle {count} Runden sind vorbei — {squadSize}/14 Spieler im Kader. Offene Positionen werden über den Transfermarkt aufgefüllt."
+    "finishedBody": "Alle {count} Runden sind vorbei — {squadSize}/14 Spieler im Kader. Offene Positionen werden über den Transfermarkt aufgefüllt.",
+    "errors": {
+      "duplicateBid": "{player}: doppeltes Gebot, nur eins pro Spieler erlaubt.",
+      "invalidAmount": "{player}: ungültiger Betrag.",
+      "unknownPlayer": "Einer der ausgewählten Spieler wurde nicht gefunden, versuch es erneut.",
+      "budgetExceeded": "Budget um {overage} überschritten (eingesetzt {total} von {budget} verfügbar).",
+      "positionFull": "{position}: {requested} Gebote für nur {remaining} verbleibende Plätze.",
+      "tooManyFromClub": "Zu viele Spieler von {club}: {count} ausgewählt, maximal {max} pro Verein.",
+      "playerAlreadyOwned": "{players} bereits von einem anderen Team der Liga gewonnen."
+    }
   }
 }

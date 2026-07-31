@@ -212,6 +212,15 @@
     "submitCta": "Enviar mi ronda →",
     "genericError": "Algo salió mal, inténtalo de nuevo.",
     "finishedTitle": "Subasta terminada",
-    "finishedBody": "Las {count} rondas han terminado — {squadSize}/14 jugadores en tu plantilla. Las posiciones vacías se completarán a través del mercado de fichajes."
+    "finishedBody": "Las {count} rondas han terminado — {squadSize}/14 jugadores en tu plantilla. Las posiciones vacías se completarán a través del mercado de fichajes.",
+    "errors": {
+      "duplicateBid": "{player}: puja duplicada, solo se permite una por jugador.",
+      "invalidAmount": "{player}: importe no válido.",
+      "unknownPlayer": "No se ha encontrado uno de los jugadores seleccionados, inténtalo de nuevo.",
+      "budgetExceeded": "Presupuesto superado en {overage} (comprometido {total} de {budget} disponible).",
+      "positionFull": "{position}: {requested} pujas para solo {remaining} plaza(s) restante(s).",
+      "tooManyFromClub": "Demasiados jugadores de {club}: {count} seleccionados, máximo {max} por club.",
+      "playerAlreadyOwned": "{players} ya ganado(s) por otro equipo de la liga."
+    }
   }
 }

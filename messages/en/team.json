@@ -212,6 +212,15 @@
     "submitCta": "Submit my round →",
     "genericError": "Something went wrong, try again.",
     "finishedTitle": "Auction finished",
-    "finishedBody": "All {count} rounds are done — {squadSize}/14 players in your squad. Any unfilled positions will be completed via the transfer market."
+    "finishedBody": "All {count} rounds are done — {squadSize}/14 players in your squad. Any unfilled positions will be completed via the transfer market.",
+    "errors": {
+      "duplicateBid": "{player}: duplicate bid, only one allowed per player.",
+      "invalidAmount": "{player}: invalid amount.",
+      "unknownPlayer": "One of the selected players could not be found, try again.",
+      "budgetExceeded": "Budget exceeded by {overage} (committed {total} of {budget} available).",
+      "positionFull": "{position}: {requested} bids for only {remaining} remaining slot(s).",
+      "tooManyFromClub": "Too many players from {club}: {count} selected, {max} max per club.",
+      "playerAlreadyOwned": "{players} already won by another team in the league."
+    }
   }
 }

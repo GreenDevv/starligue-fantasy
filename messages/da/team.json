@@ -212,6 +212,15 @@
     "submitCta": "Indsend min runde →",
     "genericError": "Noget gik galt, prøv igen.",
     "finishedTitle": "Auktion afsluttet",
-    "finishedBody": "Alle {count} runder er slut — {squadSize}/14 spillere i truppen. Ledige positioner fyldes op via transfermarkedet."
+    "finishedBody": "Alle {count} runder er slut — {squadSize}/14 spillere i truppen. Ledige positioner fyldes op via transfermarkedet.",
+    "errors": {
+      "duplicateBid": "{player}: dobbelt bud, kun ét pr. spiller tilladt.",
+      "invalidAmount": "{player}: ugyldigt beløb.",
+      "unknownPlayer": "En af de valgte spillere blev ikke fundet, prøv igen.",
+      "budgetExceeded": "Budget overskredet med {overage} (bundet {total} af {budget} tilgængeligt).",
+      "positionFull": "{position}: {requested} bud for kun {remaining} ledige plads(er).",
+      "tooManyFromClub": "For mange spillere fra {club}: {count} valgt, maks {max} pr. klub.",
+      "playerAlreadyOwned": "{players} allerede vundet af et andet hold i ligaen."
+    }
   }
 }

@@ -212,6 +212,15 @@
     "submitCta": "Enviar la meva ronda →",
     "genericError": "Alguna cosa ha fallat, torna-ho a provar.",
     "finishedTitle": "Subhasta acabada",
-    "finishedBody": "Les {count} rondes han acabat — {squadSize}/14 jugadors a la plantilla. Les posicions buides es completaran mitjançant el mercat de fitxatges."
+    "finishedBody": "Les {count} rondes han acabat — {squadSize}/14 jugadors a la plantilla. Les posicions buides es completaran mitjançant el mercat de fitxatges.",
+    "errors": {
+      "duplicateBid": "{player}: puja duplicada, només se'n permet una per jugador.",
+      "invalidAmount": "{player}: import no vàlid.",
+      "unknownPlayer": "No s'ha trobat un dels jugadors seleccionats, torna-ho a provar.",
+      "budgetExceeded": "Pressupost superat en {overage} (compromès {total} de {budget} disponible).",
+      "positionFull": "{position}: {requested} pujes per només {remaining} plaça(es) restant(s).",
+      "tooManyFromClub": "Massa jugadors de {club}: {count} seleccionats, màxim {max} per club.",
+      "playerAlreadyOwned": "{players} ja guanyat(s) per un altre equip de la lliga."
+    }
   }
 }

@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import type { Position } from "@/lib/squad/validation";
 import { POSITIONS } from "@/lib/squad/validation";
+import type { AuctionBidError } from "@/lib/auction/validate";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,8 @@ interface AuctionState {
   initialBudget: number;
   squadSize: number;
   squadPositionCounts: Partial<Record<Position, number>>;
+  squadClubCounts: Record<string, number>;
+  maxPlayersPerClub: number;
   isValidated: boolean;
   myBids: Array<{ playerId: string; amount: number }>;
   submitted: boolean;
@@ -52,7 +55,7 @@ export function AuctionBuildView({ leagueId, leagueSuffix }: { leagueId: string;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<string[]>([]);
   const lastRoundNumber = useRef<number | null>(null);
 
   const fetchState = useCallback(async () => {
@@ -125,6 +128,78 @@ export function AuctionBuildView({ leagueId, leagueSuffix }: { leagueId: string;
     return counts;
   }, [draftBids, allPlayers]);
 
+  const bidsCountByClub = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const [playerId, value] of Object.entries(draftBids)) {
+      if (!(parseFloat(value) > 0)) continue;
+      const player = allPlayers.find((p) => p.id === playerId);
+      if (!player) continue;
+      counts.set(player.club.id, (counts.get(player.club.id) ?? 0) + 1);
+    }
+    return counts;
+  }, [draftBids, allPlayers]);
+
+  const playerById = useMemo(() => new Map(allPlayers.map((p) => [p.id, p])), [allPlayers]);
+  const clubById = useMemo(() => new Map(allPlayers.map((p) => [p.club.id, p.club])), [allPlayers]);
+
+  const playerLabel = useCallback(
+    (playerId: string) => {
+      const p = playerById.get(playerId);
+      return p ? `${p.firstName} ${p.lastName}` : playerId;
+    },
+    [playerById]
+  );
+
+  const describeBidError = useCallback(
+    (err: AuctionBidError): string => {
+      switch (err.code) {
+        case "DUPLICATE_BID":
+          return t("auction.errors.duplicateBid", { player: playerLabel(err.playerId) });
+        case "INVALID_AMOUNT":
+          return t("auction.errors.invalidAmount", { player: playerLabel(err.playerId) });
+        case "UNKNOWN_PLAYER":
+          return t("auction.errors.unknownPlayer");
+        case "BUDGET_EXCEEDED":
+          return t("auction.errors.budgetExceeded", {
+            overage: err.overage.toFixed(1),
+            total: err.total.toFixed(1),
+            budget: err.budget.toFixed(1),
+          });
+        case "POSITION_FULL":
+          return t("auction.errors.positionFull", {
+            position: tLabels(`position.${err.position}`),
+            requested: err.requested,
+            remaining: err.remaining,
+          });
+        case "TOO_MANY_PLAYERS_FROM_CLUB":
+          return t("auction.errors.tooManyFromClub", {
+            club: clubById.get(err.clubId)?.shortName ?? err.clubId,
+            count: err.count,
+            max: err.max,
+          });
+      }
+    },
+    [t, tLabels, playerLabel, clubById]
+  );
+
+  const describeApiError = useCallback(
+    (error?: { code?: string; message?: string; details?: unknown }): string[] => {
+      if (!error) return [t("auction.genericError")];
+      if (error.code === "BIDS_INVALID" && Array.isArray(error.details)) {
+        return (error.details as AuctionBidError[]).map(describeBidError);
+      }
+      if (error.code === "PLAYER_ALREADY_OWNED" && Array.isArray(error.details)) {
+        return [
+          t("auction.errors.playerAlreadyOwned", {
+            players: (error.details as string[]).map(playerLabel).join(", "),
+          }),
+        ];
+      }
+      return [error.message ?? t("auction.genericError")];
+    },
+    [t, describeBidError, playerLabel]
+  );
+
   function setBid(playerId: string, position: Position, value: string) {
     setDraftBids((prev) => {
       const next = { ...prev };
@@ -140,7 +215,7 @@ export function AuctionBuildView({ leagueId, leagueSuffix }: { leagueId: string;
 
   async function saveBids(): Promise<boolean> {
     setSaving(true);
-    setError(null);
+    setErrors([]);
     const bids = Object.entries(draftBids)
       .map(([playerId, value]) => ({ playerId, amount: parseFloat(value) }))
       .filter((b) => b.amount > 0);
@@ -150,16 +225,19 @@ export function AuctionBuildView({ leagueId, leagueSuffix }: { leagueId: string;
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ bids }),
       });
-      const data = (await res.json()) as { data?: { success: boolean }; error?: { message?: string } };
+      const data = (await res.json()) as {
+        data?: { success: boolean };
+        error?: { code?: string; message?: string; details?: unknown };
+      };
       if (!data.data?.success) {
-        setError(data.error?.message ?? t("auction.genericError"));
+        setErrors(describeApiError(data.error));
         setSaving(false);
         return false;
       }
       setSaving(false);
       return true;
     } catch {
-      setError(t("auction.genericError"));
+      setErrors([t("auction.genericError")]);
       setSaving(false);
       return false;
     }
@@ -176,15 +254,15 @@ export function AuctionBuildView({ leagueId, leagueSuffix }: { leagueId: string;
       const res = await fetch(`/api/leagues/${leagueId}/auction/submit`, { method: "POST" });
       const data = (await res.json()) as {
         data?: { resolved: boolean };
-        error?: { message?: string };
+        error?: { code?: string; message?: string; details?: unknown };
       };
       if (!data.data) {
-        setError(data.error?.message ?? t("auction.genericError"));
+        setErrors(describeApiError(data.error));
       } else {
         await fetchState();
       }
     } catch {
-      setError(t("auction.genericError"));
+      setErrors([t("auction.genericError")]);
     }
     setSubmitting(false);
   }
@@ -259,12 +337,25 @@ export function AuctionBuildView({ leagueId, leagueSuffix }: { leagueId: string;
                     {Object.entries(draftBids).map(([playerId, amount]) => {
                       const player = allPlayers.find((p) => p.id === playerId);
                       if (!player) return null;
+                      const clubTotal =
+                        (bidsCountByClub.get(player.club.id) ?? 0) + (state.squadClubCounts[player.club.id] ?? 0);
+                      const overClubQuota = clubTotal > state.maxPlayersPerClub;
                       return (
                         <div key={playerId} className="flex items-center gap-2 px-3 py-2">
                           <PlayerAvatar player={player} size="xs" />
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-xs text-text">
                               {player.firstName} {player.lastName}
+                            </p>
+                            <p
+                              className={cn(
+                                "flex items-center gap-1 text-[10px]",
+                                overClubQuota ? "font-medium text-points-neg" : "text-text-muted"
+                              )}
+                            >
+                              <ClubLogo club={player.club} size="xs" />
+                              <span className="truncate">{player.club.shortName}</span>
+                              {overClubQuota && ` · ${clubTotal}/${state.maxPlayersPerClub}`}
                             </p>
                           </div>
                           <span className="shrink-0 text-xs font-semibold tabular-nums text-accent-secondary">
@@ -368,7 +459,13 @@ export function AuctionBuildView({ leagueId, leagueSuffix }: { leagueId: string;
 
       <div className="fixed inset-x-0 bottom-[calc(52px+env(safe-area-inset-bottom))] border-t border-border bg-bg/95 px-4 py-4 backdrop-blur-sm sm:bottom-0">
         <div className="mx-auto max-w-2xl">
-          {error && <p className="mb-2 text-center text-sm text-points-neg">{error}</p>}
+          {errors.length > 0 && (
+            <ul className="mb-2 space-y-0.5 text-center text-sm text-points-neg">
+              {errors.map((message, i) => (
+                <li key={i}>{message}</li>
+              ))}
+            </ul>
+          )}
           {state.submitted ? (
             <p className="text-center text-sm text-text-muted">
               {t("auction.waitingForOthers", { submitted: state.submittedCount, total: state.memberCount })}

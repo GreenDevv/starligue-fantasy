@@ -212,6 +212,15 @@
     "submitCta": "Wyślij moją rundę →",
     "genericError": "Coś poszło nie tak, spróbuj ponownie.",
     "finishedTitle": "Aukcja zakończona",
-    "finishedBody": "Wszystkie {count} rundy zakończone — {squadSize}/14 zawodników w składzie. Nieobsadzone pozycje zostaną uzupełnione przez rynek transferowy."
+    "finishedBody": "Wszystkie {count} rundy zakończone — {squadSize}/14 zawodników w składzie. Nieobsadzone pozycje zostaną uzupełnione przez rynek transferowy.",
+    "errors": {
+      "duplicateBid": "{player}: podwójna oferta, dozwolona tylko jedna na zawodnika.",
+      "invalidAmount": "{player}: nieprawidłowa kwota.",
+      "unknownPlayer": "Nie znaleziono jednego z wybranych zawodników, spróbuj ponownie.",
+      "budgetExceeded": "Budżet przekroczony o {overage} (zaangażowane {total} z {budget} dostępnych).",
+      "positionFull": "{position}: {requested} ofert na tylko {remaining} wolne miejsce(a).",
+      "tooManyFromClub": "Zbyt wielu zawodników z {club}: wybrano {count}, maksymalnie {max} na klub.",
+      "playerAlreadyOwned": "{players} już wygrany(-i) przez inną drużynę w lidze."
+    }
   }
 }
