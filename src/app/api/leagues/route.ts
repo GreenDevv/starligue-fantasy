@@ -68,7 +68,10 @@ export async function GET() {
   return NextResponse.json({ data: leagues });
 }
 
-const createSchema = z.object({ name: z.string().min(3).max(50) });
+const createSchema = z.object({
+  name: z.string().min(3).max(50),
+  leagueMode: z.enum(["CLASSIC", "AUCTION"]).optional().default("CLASSIC"),
+});
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -87,20 +90,43 @@ export async function POST(request: Request) {
   const userId = session.user.id;
   const teamOwnerName = session.user.name ?? "Coach";
   const mode = resolveSeasonMode();
+  const leagueMode = parsed.data.leagueMode;
+
+  if (leagueMode === "AUCTION") {
+    // Garde-fou bêta (§18 ARCHITECTURE.md) : création de ligue Enchères
+    // réservée à l'admin du site, et seulement pour le jeu en direct (pas
+    // encore supporté en Mode Simulation, voir memory auction_mode_feature).
+    // @ts-expect-error — role étendu
+    if (session.user?.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: { code: "AUCTION_MODE_ADMIN_ONLY", message: "Le mode Enchères est réservé à l'administrateur" } },
+        { status: 403 }
+      );
+    }
+    if (mode !== "live") {
+      return NextResponse.json(
+        { error: { code: "AUCTION_LIVE_ONLY", message: "Le mode Enchères n'est disponible que pour le jeu en direct" } },
+        { status: 400 }
+      );
+    }
+  }
+
   const inviteCode = await generateUniqueInviteCode();
 
   const [config, season] = await Promise.all([
-    prisma.gameConfig.findUnique({ where: { key: "INITIAL_BUDGET" } }),
+    prisma.gameConfig.findUnique({ where: { key: leagueMode === "AUCTION" ? "AUCTION_INITIAL_BUDGET" : "INITIAL_BUDGET" } }),
     resolveModeSeason(mode),
   ]);
-  const initialBudget = parseFloat(config?.value ?? process.env.INITIAL_BUDGET ?? "100.0");
+  const initialBudget = parseFloat(
+    config?.value ?? (leagueMode === "AUCTION" ? "500.0" : process.env.INITIAL_BUDGET ?? "100.0")
+  );
   if (!season) {
     return NextResponse.json({ error: { code: "NO_ACTIVE_SEASON" } }, { status: 400 });
   }
 
   const { league, teamId } = await prisma.$transaction(async (tx) => {
     const l = await tx.league.create({
-      data: { name: parsed.data.name, inviteCode, ownerId: userId, seasonId: season.id },
+      data: { name: parsed.data.name, inviteCode, ownerId: userId, seasonId: season.id, mode: leagueMode },
     });
     await tx.leagueMember.create({ data: { leagueId: l.id, userId } });
 

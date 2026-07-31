@@ -11,6 +11,9 @@
     "createdTitle": "League created!",
     "createFormTitle": "Create a league",
     "createNamePlaceholder": "League name…",
+    "createModeLabel": "League type",
+    "createModeClassic": "Classic",
+    "createModeAuction": "Auction (admin)",
     "creating": "Creating…",
     "createSubmit": "Create →",
     "joinFormTitle": "Join with a code",
@@ -52,6 +55,8 @@
     "WRONG_SEASON_MODE": "This league belongs to another season — switch the season toggle to join it.",
     "LEAGUE_FULL": "This league is full",
     "ALREADY_MEMBER": "You're already a member of this league",
-    "OWNER_CANNOT_LEAVE": "The creator can't leave their own league. Delete it or transfer ownership."
+    "OWNER_CANNOT_LEAVE": "The creator can't leave their own league. Delete it or transfer ownership.",
+    "AUCTION_MODE_ADMIN_ONLY": "Auction mode is reserved for the site admin",
+    "AUCTION_LIVE_ONLY": "Auction mode is only available for the live game"
   }
 }

@@ -11,6 +11,9 @@
     "createdTitle": "¡Liga creada!",
     "createFormTitle": "Crear una liga",
     "createNamePlaceholder": "Nombre de la liga…",
+    "createModeLabel": "Tipo de liga",
+    "createModeClassic": "Clásica",
+    "createModeAuction": "Subasta (admin)",
     "creating": "Creando…",
     "createSubmit": "Crear →",
     "joinFormTitle": "Unirse con un código",
@@ -52,6 +55,8 @@
     "WRONG_SEASON_MODE": "Esta liga pertenece a otra temporada — cambia el interruptor de temporada para unirte.",
     "LEAGUE_FULL": "Esta liga está completa",
     "ALREADY_MEMBER": "Ya eres miembro de esta liga",
-    "OWNER_CANNOT_LEAVE": "El creador no puede salir de su propia liga. Elimínala o transfiere la propiedad."
+    "OWNER_CANNOT_LEAVE": "El creador no puede salir de su propia liga. Elimínala o transfiere la propiedad.",
+    "AUCTION_MODE_ADMIN_ONLY": "El modo Subasta está reservado al administrador",
+    "AUCTION_LIVE_ONLY": "El modo Subasta solo está disponible para el juego en directo"
   }
 }

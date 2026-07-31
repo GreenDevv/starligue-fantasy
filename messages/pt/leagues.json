@@ -11,6 +11,9 @@
     "createdTitle": "Liga criada!",
     "createFormTitle": "Criar uma liga",
     "createNamePlaceholder": "Nome da liga…",
+    "createModeLabel": "Tipo de liga",
+    "createModeClassic": "Clássica",
+    "createModeAuction": "Leilão (admin)",
     "creating": "A criar…",
     "createSubmit": "Criar →",
     "joinFormTitle": "Juntar-me com um código",
@@ -52,6 +55,8 @@
     "WRONG_SEASON_MODE": "Esta liga pertence a outra época — muda o interruptor de época para te juntares a ela.",
     "LEAGUE_FULL": "A liga está completa",
     "ALREADY_MEMBER": "Já és membro desta liga",
-    "OWNER_CANNOT_LEAVE": "O criador não pode sair da sua liga. Elimina-a ou transfere-a."
+    "OWNER_CANNOT_LEAVE": "O criador não pode sair da sua liga. Elimina-a ou transfere-a.",
+    "AUCTION_MODE_ADMIN_ONLY": "O modo Leilão é reservado ao administrador",
+    "AUCTION_LIVE_ONLY": "O modo Leilão só está disponível para o jogo em direto"
   }
 }

@@ -78,8 +78,15 @@ export async function POST(request: Request) {
     );
   }
 
-  const config = await prisma.gameConfig.findUnique({ where: { key: "INITIAL_BUDGET" } });
-  const initialBudget = parseFloat(config?.value ?? process.env.INITIAL_BUDGET ?? "100.0");
+  // Budget de départ dépend du mode de la ligue rejointe (500 en Enchères vs
+  // 100 en Classique, §18 ARCHITECTURE.md) — avant ce fix la route ignorait
+  // league.mode et servait toujours INITIAL_BUDGET, même pour une ligue AUCTION.
+  const config = await prisma.gameConfig.findUnique({
+    where: { key: league.mode === "AUCTION" ? "AUCTION_INITIAL_BUDGET" : "INITIAL_BUDGET" },
+  });
+  const initialBudget = parseFloat(
+    config?.value ?? (league.mode === "AUCTION" ? "500.0" : process.env.INITIAL_BUDGET ?? "100.0")
+  );
   const teamOwnerName = session.user.name ?? "Coach";
 
   let teamId: string;

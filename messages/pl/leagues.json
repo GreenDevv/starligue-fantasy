@@ -11,6 +11,9 @@
     "createdTitle": "Liga utworzona!",
     "createFormTitle": "Utwórz ligę",
     "createNamePlaceholder": "Nazwa ligi…",
+    "createModeLabel": "Typ ligi",
+    "createModeClassic": "Klasyczna",
+    "createModeAuction": "Aukcja (admin)",
     "creating": "Tworzenie…",
     "createSubmit": "Utwórz →",
     "joinFormTitle": "Dołącz z kodem",
@@ -52,6 +55,8 @@
     "WRONG_SEASON_MODE": "Ta liga należy do innego sezonu — przełącz tryb sezonu, aby do niej dołączyć.",
     "LEAGUE_FULL": "Liga jest pełna",
     "ALREADY_MEMBER": "Jesteś już członkiem tej ligi",
-    "OWNER_CANNOT_LEAVE": "Założyciel nie może opuścić własnej ligi. Usuń ją lub przekaż innej osobie."
+    "OWNER_CANNOT_LEAVE": "Założyciel nie może opuścić własnej ligi. Usuń ją lub przekaż innej osobie.",
+    "AUCTION_MODE_ADMIN_ONLY": "Tryb Aukcji jest zarezerwowany dla administratora",
+    "AUCTION_LIVE_ONLY": "Tryb Aukcji jest dostępny tylko w grze na żywo"
   }
 }

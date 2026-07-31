@@ -11,6 +11,9 @@
     "createdTitle": "Lliga creada!",
     "createFormTitle": "Crear una lliga",
     "createNamePlaceholder": "Nom de la lliga…",
+    "createModeLabel": "Tipus de lliga",
+    "createModeClassic": "Clàssica",
+    "createModeAuction": "Subhasta (admin)",
     "creating": "Creant…",
     "createSubmit": "Crear →",
     "joinFormTitle": "Unir-se amb un codi",
@@ -52,6 +55,8 @@
     "WRONG_SEASON_MODE": "Aquesta lliga pertany a una altra temporada — canvia l'interruptor de temporada per unir-t'hi.",
     "LEAGUE_FULL": "Aquesta lliga està completa",
     "ALREADY_MEMBER": "Ja ets membre d'aquesta lliga",
-    "OWNER_CANNOT_LEAVE": "El creador no pot sortir de la seva pròpia lliga. Elimina-la o transfereix-ne la propietat."
+    "OWNER_CANNOT_LEAVE": "El creador no pot sortir de la seva pròpia lliga. Elimina-la o transfereix-ne la propietat.",
+    "AUCTION_MODE_ADMIN_ONLY": "El mode Subhasta està reservat a l'administrador",
+    "AUCTION_LIVE_ONLY": "El mode Subhasta només està disponible per al joc en directe"
   }
 }

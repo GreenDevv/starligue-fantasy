@@ -11,6 +11,9 @@
     "createdTitle": "Ligue créée !",
     "createFormTitle": "Créer une ligue",
     "createNamePlaceholder": "Nom de la ligue…",
+    "createModeLabel": "Type de ligue",
+    "createModeClassic": "Classique",
+    "createModeAuction": "Enchères (admin)",
     "creating": "Création…",
     "createSubmit": "Créer →",
     "joinFormTitle": "Rejoindre avec un code",
@@ -52,6 +55,8 @@
     "WRONG_SEASON_MODE": "Cette ligue appartient à une autre saison — bascule le toggle de saison pour la rejoindre.",
     "LEAGUE_FULL": "La ligue est complète",
     "ALREADY_MEMBER": "Tu es déjà membre de cette ligue",
-    "OWNER_CANNOT_LEAVE": "Le créateur ne peut pas quitter sa ligue. Supprime-la ou transfère-la."
+    "OWNER_CANNOT_LEAVE": "Le créateur ne peut pas quitter sa ligue. Supprime-la ou transfère-la.",
+    "AUCTION_MODE_ADMIN_ONLY": "Le mode Enchères est réservé à l'administrateur",
+    "AUCTION_LIVE_ONLY": "Le mode Enchères n'est disponible que pour le jeu en direct"
   }
 }

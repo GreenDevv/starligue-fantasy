@@ -11,6 +11,9 @@
     "createdTitle": "Liga erstellt!",
     "createFormTitle": "Liga erstellen",
     "createNamePlaceholder": "Name der Liga…",
+    "createModeLabel": "Liga-Typ",
+    "createModeClassic": "Klassisch",
+    "createModeAuction": "Auktion (Admin)",
     "creating": "Wird erstellt…",
     "createSubmit": "Erstellen →",
     "joinFormTitle": "Mit Code beitreten",
@@ -52,6 +55,8 @@
     "WRONG_SEASON_MODE": "Diese Liga gehört zu einer anderen Saison — wechsle den Saison-Umschalter, um ihr beizutreten.",
     "LEAGUE_FULL": "Die Liga ist voll",
     "ALREADY_MEMBER": "Du bist bereits Mitglied dieser Liga",
-    "OWNER_CANNOT_LEAVE": "Der Ersteller kann seine Liga nicht verlassen. Lösche sie oder übertrage sie."
+    "OWNER_CANNOT_LEAVE": "Der Ersteller kann seine Liga nicht verlassen. Lösche sie oder übertrage sie.",
+    "AUCTION_MODE_ADMIN_ONLY": "Der Auktionsmodus ist dem Administrator vorbehalten",
+    "AUCTION_LIVE_ONLY": "Der Auktionsmodus ist nur für das Live-Spiel verfügbar"
   }
 }

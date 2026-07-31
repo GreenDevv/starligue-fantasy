@@ -23,9 +23,10 @@ interface League {
 interface LeaguesViewProps {
   initialLeagues: League[];
   mode: SeasonMode;
+  isAdmin: boolean;
 }
 
-export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
+export function LeaguesView({ initialLeagues, mode, isAdmin }: LeaguesViewProps) {
   const router = useRouter();
   const t = useTranslations("leagues");
   const tCommon = useTranslations("common");
@@ -37,10 +38,16 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
   const [leagues] = useState<League[]>(initialLeagues);
   const [panel, setPanel] = useState<"none" | "create" | "join">("none");
   const [createName, setCreateName] = useState("");
+  const [createLeagueMode, setCreateLeagueMode] = useState<"CLASSIC" | "AUCTION">("CLASSIC");
   const [joinCode, setJoinCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [created, setCreated] = useState<{ name: string; inviteCode: string } | null>(null);
+  // Garde-fou bêta (§18 ARCHITECTURE.md) : le mode Enchères n'est pas encore
+  // supporté en Mode Simulation (SimulationTeam) — cf. memory
+  // auction_mode_feature. Le back-end revérifie de toute façon les deux
+  // conditions, ce booléen ne fait que masquer le sélecteur côté client.
+  const canOfferAuctionMode = isAdmin && mode === "live";
 
   function togglePanel(p: "create" | "join") {
     setPanel((prev) => (prev === p ? "none" : p));
@@ -61,7 +68,7 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
     const res = await fetch("/api/leagues", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: createName }),
+      body: JSON.stringify({ name: createName, leagueMode: canOfferAuctionMode ? createLeagueMode : "CLASSIC" }),
     });
     const data = await res.json() as { data?: { id: string; name: string; inviteCode: string }; error?: { code?: string; message: string } };
     if (data.data) {
@@ -71,6 +78,7 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
       }
       setCreated(data.data);
       setCreateName("");
+      setCreateLeagueMode("CLASSIC");
       router.refresh();
     } else {
       setError(resolveApiError(tRoot, "leagues", data.error?.code));
@@ -163,6 +171,30 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
                 maxLength={50}
                 required
               />
+              {canOfferAuctionMode && (
+                <div>
+                  <p className="mb-1.5 text-xs uppercase tracking-widest text-text-muted">
+                    {t("list.createModeLabel")}
+                  </p>
+                  <div className="flex gap-1.5">
+                    {(["CLASSIC", "AUCTION"] as const).map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setCreateLeagueMode(m)}
+                        className={[
+                          "pixel-corners-sm flex-1 border px-3 py-1.5 text-xs font-medium transition-colors",
+                          createLeagueMode === m
+                            ? "border-accent text-accent shadow-glow-accent"
+                            : "border-border text-text-muted hover:text-text",
+                        ].join(" ")}
+                      >
+                        {m === "CLASSIC" ? t("list.createModeClassic") : t("list.createModeAuction")}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               {error && <p className="text-xs text-points-neg">{error}</p>}
               <Button type="submit" disabled={loading} className="w-full">
                 {loading ? t("list.creating") : t("list.createSubmit")}

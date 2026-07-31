@@ -11,6 +11,9 @@
     "createdTitle": "Liga oprettet!",
     "createFormTitle": "Opret en liga",
     "createNamePlaceholder": "Ligaens navn…",
+    "createModeLabel": "Ligatype",
+    "createModeClassic": "Klassisk",
+    "createModeAuction": "Auktion (admin)",
     "creating": "Opretter…",
     "createSubmit": "Opret →",
     "joinFormTitle": "Deltag med en kode",
@@ -52,6 +55,8 @@
     "WRONG_SEASON_MODE": "Denne liga tilhører en anden sæson — skift sæsontilstand for at deltage.",
     "LEAGUE_FULL": "Ligaen er fuld",
     "ALREADY_MEMBER": "Du er allerede medlem af denne liga",
-    "OWNER_CANNOT_LEAVE": "Ejeren kan ikke forlade sin egen liga. Slet den, eller overdrag den."
+    "OWNER_CANNOT_LEAVE": "Ejeren kan ikke forlade sin egen liga. Slet den, eller overdrag den.",
+    "AUCTION_MODE_ADMIN_ONLY": "Auktionstilstand er forbeholdt administratoren",
+    "AUCTION_LIVE_ONLY": "Auktionstilstand er kun tilgængelig for det direkte spil"
   }
 }

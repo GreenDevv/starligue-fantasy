@@ -15,8 +15,11 @@ export default async function LeaguesPage({ params }: { params: { locale: string
   const mode = resolveSeasonMode();
   const season = await resolveModeSeason(mode);
 
+  // @ts-expect-error — role étendu
+  const isAdmin = session.user?.role === "ADMIN";
+
   if (!season) {
-    return <LeaguesView initialLeagues={[]} mode={mode} />;
+    return <LeaguesView initialLeagues={[]} mode={mode} isAdmin={isAdmin} />;
   }
 
   const memberships = await prisma.leagueMember.findMany({
@@ -55,5 +58,5 @@ export default async function LeaguesPage({ params }: { params: { locale: string
     })
   );
 
-  return <LeaguesView initialLeagues={leagues} mode={mode} />;
+  return <LeaguesView initialLeagues={leagues} mode={mode} isAdmin={isAdmin} />;
 }
