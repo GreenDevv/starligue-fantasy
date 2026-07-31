@@ -7,6 +7,7 @@ import { getDashboardMatchStrips } from "@/lib/matches/dashboard-strips";
 import { getNewsFeed } from "@/lib/news/get-feed";
 import { getTeamOfWeekCard, getPerformancesCard } from "@/lib/news/get-weekly-cards";
 import { getWeeklyStatLeaders } from "@/lib/stats/get-weekly-leaders";
+import { getWarmupMatches } from "@/lib/matches/get-warmup-matches";
 import { MatchesStrip } from "@/components/dashboard/MatchesStrip";
 import { StandingsSection } from "@/components/starligue/StandingsSection";
 import { NewsFeed } from "@/components/starligue/NewsFeed";
@@ -71,13 +72,14 @@ export default async function HomePage({
     );
   }
 
-  const [standings, matchStrips, newsFeed, teamOfWeek, performances, leaders] = await Promise.all([
+  const [standings, matchStrips, newsFeed, teamOfWeek, performances, leaders, warmupMatches] = await Promise.all([
     getClubStandings(season.id),
     getDashboardMatchStrips(season.id),
     getNewsFeed(season.id, { category: category ?? undefined, page }),
     getTeamOfWeekCard(season.id),
     getPerformancesCard(season.id),
     getWeeklyStatLeaders(season.id),
+    getWarmupMatches(season.id),
   ]);
 
   return (
@@ -123,7 +125,7 @@ export default async function HomePage({
         </div>
 
         <div className="flex flex-col gap-4 lg:col-start-3 lg:row-start-1">
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
+          <div className="flex flex-col gap-3">
             <MatchesStrip
               variant="results"
               gameweekNumber={matchStrips.lastResults.gameweekNumber}
@@ -137,6 +139,17 @@ export default async function HomePage({
               fixedColumns={2}
             />
           </div>
+          {warmupMatches.length > 0 && (
+            <MatchesStrip
+              variant="upcoming"
+              gameweekNumber={null}
+              matches={warmupMatches}
+              fixedColumns={2}
+              title={t("warmup.title")}
+              disableLink
+              showDate
+            />
+          )}
           {teamOfWeek && <StarligueBestXICard gameweekNumber={teamOfWeek.gameweekNumber} entries={teamOfWeek.entries} />}
           {performances && (
             <StarliguePerformancesCard gameweekNumber={performances.gameweekNumber} entries={performances.entries} />

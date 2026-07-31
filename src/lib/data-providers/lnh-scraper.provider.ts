@@ -31,6 +31,14 @@ export interface ScrapedPlayer {
 const LNH_BASE = "https://www.lnh.fr";
 const STATS_URL = `${LNH_BASE}/daikin-starligue/stats/joueurs`;
 const CALENDAR_URL = `${LNH_BASE}/daikin-starligue/calendrier`;
+// Calendrier "global" (toutes compétitions confondues, pas juste Daikin StarLigue) —
+// univers="matchs-6892" au lieu de "d1-26623". C'est là, et nulle part ailleurs sur
+// lnh.fr, qu'apparaît la compétition "Warm Up -" (matchs de préparation officiellement
+// labellisés ainsi par la LNH elle-même, cf. fetchWarmupMatches ci-dessous) —
+// découvert le 2026-07-31, à côté de "Trophée des Champions - TDC/WUP" et "Coupe de
+// France -". Même structure HTML par item (calendars-listing-item) que CALENDAR_URL.
+const WARMUP_CALENDAR_URL = `${LNH_BASE}/matchs/calendrier`;
+const WARMUP_UNIVERS = "matchs-6892";
 const STANDINGS_URL = `${LNH_BASE}/daikin-starligue/classement`;
 const AJAX_URL = `${LNH_BASE}/ajaxpost1`;
 const CLUBS_URL = `${LNH_BASE}/daikin-starligue/clubs`;
@@ -88,6 +96,36 @@ export interface ScrapedFixture {
   calendarsId: string; // = l'id de l'item calendrier, EST le calendars_id du boxscore (pas besoin d'un fetch séparé)
   homeClubSlug: string;
   awayClubSlug: string;
+  kickoffAt: Date;
+  status: "SCHEDULED" | "FINISHED";
+  homeScore: number | null;
+  awayScore: number | null;
+}
+
+// Match de préparation ("Warm Up -" ou "Trophée des Champions - WUP", voir
+// WARMUP_CALENDAR_URL) — contrairement à ScrapedFixture, pas de gameweekNumber (ces
+// matchs sont hors championnat) et les deux clubs ne sont pas forcément des clubs
+// Daikin StarLigue connus de notre DB (ex: club de D2, ou club étranger comme
+// Rhein-Neckar Löwen) — d'où homeClubName/awayClubName toujours renseignés en plus
+// des slugs, pour affichage même quand la résolution club échoue côté ingestion.
+// homeClubLogoUrl/awayClubLogoUrl : URL lnh.fr complète du logo (permet de le
+// télécharger localement pour un club hors DB — voir scripts/backfill-warmup-logos.ts).
+// homeClubDivision/awayClubDivision : déduit du 1er segment de l'URL équipe lnh.fr
+// ("proligue/equipes/…" → "proligue", "daikin-starligue/equipes/…" → "daikin-starligue",
+// une URL sans segment, ex: "equipes/rhein-neckar-lowen" → null, club étranger) —
+// utile seulement pour un club NON résolu dans notre DB (pour un club Starligue connu,
+// notre propre table Club fait autorité, pas ce label lnh.fr).
+export interface ScrapedWarmupMatch {
+  calendarsId: string;
+  competitionLabel: string; // "Warm Up" | "Trophée des Champions - WUP"
+  homeClubSlug: string;
+  homeClubName: string;
+  homeClubLogoUrl: string;
+  homeClubDivision: string | null;
+  awayClubSlug: string;
+  awayClubName: string;
+  awayClubLogoUrl: string;
+  awayClubDivision: string | null;
   kickoffAt: Date;
   status: "SCHEDULED" | "FINISHED";
   homeScore: number | null;
@@ -519,6 +557,116 @@ export function parseCalendarFromHtml(html: string, seasonStartYear: number): Sc
       calendarsId: idMatch[1]!,
       homeClubSlug,
       awayClubSlug,
+      kickoffAt,
+      status: scoreMatch ? "FINISHED" : "SCHEDULED",
+      homeScore: scoreMatch ? parseInt(scoreMatch[1]!, 10) : null,
+      awayScore: scoreMatch ? parseInt(scoreMatch[2]!, 10) : null,
+    });
+  }
+
+  return results;
+}
+
+// Parse le calendrier "Warm Up" (WARMUP_CALENDAR_URL) — même structure de bloc que
+// parseCalendarFromHtml (calendars-listing-item), mais sans gameweekNumber (hors
+// championnat) et avec les noms de club en clair (team-name) en plus des slugs, les
+// deux clubs n'étant pas garantis d'être des clubs Daikin StarLigue connus de notre
+// DB (club de D2/Proligue, ou club étranger). Filtre sur le libellé de compétition :
+// "Warm Up" ou "Trophée des Champions - WUP" — exclut "Trophée des Champions - TDC"
+// (le match d'ouverture officiel, pas un amical) et "Coupe de France" (compétition à
+// part, hors périmètre demandé).
+// Les noms de club affichés en clair (team-name) peuvent contenir des entités HTML
+// (ex: "Elite Val d&apos;Oise") — jamais rencontré ailleurs dans ce fichier (les
+// autres champs club viennent de attributs alt="logo X", pas de ce bloc-là), donc pas
+// de décodeur existant à réutiliser. Table minimale, mêmes conventions que les
+// providers d'actus (src/lib/data-providers/news/*).
+const WARMUP_NAMED_ENTITIES: Record<string, string> = {
+  apos: "'",
+  amp: "&",
+  eacute: "é",
+  egrave: "è",
+  agrave: "à",
+  ccedil: "ç",
+};
+
+function decodeWarmupEntities(text: string): string {
+  return text
+    .replace(/&#(\d+);/g, (_, code: string) => String.fromCharCode(Number(code)))
+    .replace(/&([a-z]+);/gi, (full: string, name: string) => WARMUP_NAMED_ENTITIES[name.toLowerCase()] ?? full);
+}
+
+interface WarmupTeamInfo {
+  slug: string;
+  name: string;
+  logoUrl: string;
+  division: string | null;
+}
+
+// Un bloc "team-logo" complet (href + img + team-name) — extraits ensemble pour
+// garantir le bon appariement (plutôt que 2 matchAll globaux séparés sur tout
+// l'item, qui pourraient désaligner slug/nom si l'un des deux motifs manquait pour
+// une équipe seulement).
+function extractWarmupTeamInfo(block: string): WarmupTeamInfo | null {
+  const logoMatch = block.match(/(https:\/\/www\.lnh\.fr\/medias\/sports_teams\/([^_"]+)__logo__[^"]*\.png)/);
+  const nameMatch = block.match(/<div class="team-name">\s*([^<]+?)\s*<\/div>/);
+  if (!logoMatch || !nameMatch) return null;
+
+  // "https://www.lnh.fr/proligue/equipes/…" → "proligue" ; "…/daikin-starligue/equipes/…"
+  // → "daikin-starligue" ; "https://www.lnh.fr/equipes/…" (pas de segment, club
+  // étranger) → null. Fiable seulement pour un club absent de notre DB — voir
+  // ScrapedWarmupMatch.
+  const hrefMatch = block.match(/<a href="https:\/\/www\.lnh\.fr\/([a-z0-9-]+\/)?equipes\//);
+  const division = hrefMatch?.[1] ? hrefMatch[1].replace(/\/$/, "") : null;
+
+  return {
+    slug: logoMatch[2]!,
+    name: decodeWarmupEntities(nameMatch[1]!),
+    logoUrl: logoMatch[1]!,
+    division,
+  };
+}
+
+export function parseWarmupFromHtml(html: string, seasonStartYear: number): ScrapedWarmupMatch[] {
+  const results: ScrapedWarmupMatch[] = [];
+
+  const items = html.split('<div class="calendars-listing-item').slice(1);
+  for (const raw of items) {
+    const idMatch = raw.match(/^[^>]*\bid="(\d+)"/s);
+    const competitionMatch = raw.match(/<span class="competition">\s*([^<]+?)\s*<\/span>/);
+    const dateMatch = raw.match(/(\d{1,2})\s+([a-zéû.]+)\.?\s+(\d{1,2})h(\d{2})/i);
+    if (!idMatch || !competitionMatch || !dateMatch) continue;
+
+    const competitionLabel = competitionMatch[1]!.replace(/\s*-\s*$/, "").trim();
+    if (competitionLabel !== "Warm Up" && competitionLabel !== "Trophée des Champions - WUP") continue;
+
+    const monthKey = dateMatch[2]!.toLowerCase().replace(/\.$/, "");
+    const month = MONTH_MAP[monthKey];
+    if (!month) continue;
+    const day = parseInt(dateMatch[1]!, 10);
+    const hour = parseInt(dateMatch[3]!, 10);
+    const minute = parseInt(dateMatch[4]!, 10);
+    const year = inferYear(month, seasonStartYear);
+    const kickoffAt = franceLocalToUtc(year, month, day, hour, minute);
+
+    const teamBlocks = raw.split('<div class="team-logo">').slice(1, 3);
+    if (teamBlocks.length < 2) continue;
+    const home = extractWarmupTeamInfo(teamBlocks[0]!);
+    const away = extractWarmupTeamInfo(teamBlocks[1]!);
+    if (!home || !away) continue;
+
+    const scoreMatch = raw.match(/class="scores is-finish">\s*(\d+)\s*-\s*(\d+)\s*</);
+
+    results.push({
+      calendarsId: idMatch[1]!,
+      competitionLabel,
+      homeClubSlug: home.slug,
+      homeClubName: home.name,
+      homeClubLogoUrl: home.logoUrl,
+      homeClubDivision: home.division,
+      awayClubSlug: away.slug,
+      awayClubName: away.name,
+      awayClubLogoUrl: away.logoUrl,
+      awayClubDivision: away.division,
       kickoffAt,
       status: scoreMatch ? "FINISHED" : "SCHEDULED",
       homeScore: scoreMatch ? parseInt(scoreMatch[1]!, 10) : null,
@@ -975,6 +1123,56 @@ export class LnhScraperProvider implements StarligueDataProvider {
 
     const html = await ajaxRes.text();
     return parseCalendarFromHtml(html, seasonStartYear);
+  }
+
+  // Matchs de préparation ("Warm Up -", voir WARMUP_CALENDAR_URL/parseWarmupFromHtml)
+  // — même recette que fetchSeasonCalendar (clé CSRF propre à cette page, pas
+  // réutilisable depuis CALENDAR_URL), univers différent ("matchs-6892" au lieu de
+  // "d1-26623"). current_month="all" renvoie toute la saison en une requête (vérifié
+  // le 2026-07-31 : 579 items dont 67 "Warm Up -", tous en août).
+  async fetchWarmupMatches(seasonsId: string, seasonStartYear: number): Promise<ScrapedWarmupMatch[]> {
+    const res = await this.fetchWithTimeout(WARMUP_CALENDAR_URL, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; StarligueFantasyBot/1.0)" },
+    });
+    if (!res) {
+      throw new IngestionError(`LNH Scraper : impossible de récupérer ${WARMUP_CALENDAR_URL}`, this.name, true);
+    }
+    const pageHtml = await res.text();
+    const keyMatch = pageHtml.match(/name="key"\s+value="(\d+)"/);
+    const cookie = res.headers.get("set-cookie") ?? "";
+    if (!keyMatch) {
+      throw new IngestionError("LNH Scraper : clé de formulaire calendrier Warm Up introuvable", this.name, true);
+    }
+
+    const body = new URLSearchParams({
+      contents_controller: "sportsCalendars",
+      contents_action: "index_ajax",
+      type: "all",
+      type_id: "all",
+      univers: WARMUP_UNIVERS,
+      seasons_id: seasonsId,
+      days_id: "all",
+      teams_id: "all",
+      current_month: "all",
+      key: keyMatch[1]!,
+    });
+
+    const ajaxRes = await this.fetchWithTimeout(AJAX_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-Requested-With": "XMLHttpRequest",
+        "User-Agent": "Mozilla/5.0 (compatible; StarligueFantasyBot/1.0)",
+        ...(cookie ? { Cookie: cookie } : {}),
+      },
+      body: body.toString(),
+    });
+    if (!ajaxRes) {
+      throw new IngestionError("LNH Scraper : impossible de récupérer le calendrier Warm Up (ajaxpost1)", this.name, true);
+    }
+
+    const html = await ajaxRes.text();
+    return parseWarmupFromHtml(html, seasonStartYear);
   }
 
   // Récupère le classement officiel d'une saison (daikin-starligue/classement,

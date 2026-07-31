@@ -5,6 +5,10 @@ interface ClubLogoProps {
   club: { shortName: string; name?: string; logoUrl?: string | null };
   size?: "xs" | "sm" | "md" | "lg";
   className?: string;
+  // Info-bulle au survol (ex: "Ivry (Proligue)") — utile pour un club hors DB dont
+  // le nom seul ne suffit pas à situer le niveau (Warm Up, ARCHITECTURE.md §19).
+  // Absent par défaut : n'affecte aucun usage existant.
+  title?: string;
 }
 
 const SIZES: Record<NonNullable<ClubLogoProps["size"]>, number> = {
@@ -18,7 +22,7 @@ const SIZES: Record<NonNullable<ClubLogoProps["size"]>, number> = {
 // blanche derrière pour rester visibles sur les fonds sombres du site.
 export const WHITE_BG_CLUBS = new Set(["CRMHB", "USAM"]);
 
-export function ClubLogo({ club, size = "sm", className = "" }: ClubLogoProps) {
+export function ClubLogo({ club, size = "sm", className = "", title }: ClubLogoProps) {
   const px = SIZES[size];
 
   if (!club.logoUrl) {
@@ -30,6 +34,7 @@ export function ClubLogo({ club, size = "sm", className = "" }: ClubLogoProps) {
         )}
         style={{ width: px, height: px }}
         aria-label={club.name ?? club.shortName}
+        title={title}
       >
         {club.shortName.slice(0, 3)}
       </span>
@@ -42,6 +47,7 @@ export function ClubLogo({ club, size = "sm", className = "" }: ClubLogoProps) {
     <span
       className={cn("inline-flex shrink-0", needsWhiteBg && "rounded-full bg-white p-[2px]", className)}
       style={{ width: px, height: px }}
+      title={title}
     >
       <Image
         src={club.logoUrl}

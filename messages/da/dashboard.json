@@ -58,6 +58,9 @@
     "noResults": "Ingen resultater endnu.",
     "noUpcoming": "Ingen planlagte kampe."
   },
+  "warmup": {
+    "title": "Warm-up"
+  },
   "simulationControls": {
     "prevGameweek": "← Forrige runde",
     "nextGameweek": "Næste runde →",

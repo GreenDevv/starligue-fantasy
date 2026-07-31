@@ -581,6 +581,8 @@ POST   /api/cron/sync-news                → scrape lnh.fr + sites de clubs, al
 POST   /api/cron/sync-standings           → classement officiel Daikin StarLigue (widget
                                              dashboard) — pas planifié
 POST   /api/cron/sync-players-lnh         → effectifs depuis lnh.fr (upsert) — pas planifié
+POST   /api/cron/sync-warmup              → matchs de préparation "Warm Up" (§19) — PLANIFIÉ,
+                                             cron-daily.yml, 06:00 UTC
 POST   /api/cron/post-stat-leaders        → publie les 3 carrousels Instagram "Leaders Starligue"
                                              (attaque/gardiens/défense) des journées notées pas encore
                                              postées (matin J+1, après compute-scores) — §17.
@@ -598,8 +600,9 @@ déjà = `curl`, donc toute commande custom donne `curl curl ...`, échec sans l
 exploitable) — d'où le choix de GitHub Actions comme remplacement, cohérent avec la
 solution déjà en place pour ce cron-là.
 
-**`sync-news` et `sync-ratings` ont un cron actif** (`cron-daily.yml`, 06:00 UTC, 2 jobs
-indépendants — l'échec de l'un ne bloque pas l'autre). Les 6 autres routes de synchro
+**`sync-news`, `sync-ratings` et `sync-warmup` ont un cron actif** (`cron-daily.yml`,
+06:00 UTC, 3 jobs indépendants — l'échec de l'un ne bloque pas les autres). Les 6
+autres routes de synchro
 listées ci-dessus (fixtures/résultats API-Sports/snapshot-lineups/scores/classement/
 effectifs/pronostics) existent et fonctionnent, mais n'ont **aucun déclenchement
 automatique** pour l'instant — utilisables uniquement en manuel (dashboard admin, ou
@@ -1475,3 +1478,136 @@ quand ce mode sera implémenté. Activé sur 4 comptes de test via
 `scripts/grant-auction-access.ts` (même pattern que les autres scripts
 ad hoc contre la prod, cf. `PROD_DATABASE_URL`). Flag temporaire, à retirer
 (ou son contrôle à assouplir) une fois le mode validé en conditions réelles.
+
+---
+
+## 19. Matchs de préparation (mode "Warm Up")
+
+Découvert le 2026-07-31 : lnh.fr expose un **calendrier global**
+(`https://www.lnh.fr/matchs/calendrier`, `univers=matchs-6892`, distinct du
+calendrier Daikin StarLigue déjà scrapé qui utilise `univers=d1-26623`) qui
+couvre toutes les compétitions confondues — championnat, Coupe de France,
+Trophée des Champions, **et une compétition officiellement labellisée "Warm
+Up -"** par la LNH elle-même : les matchs de préparation d'avant-saison de
+tous les clubs (Starligue et divisions inférieures), y compris face à des
+clubs étrangers (ex: PSG vs Rhein-Neckar Löwen). Même structure HTML par item
+(`calendars-listing-item`) que le calendrier officiel, donc même fiabilité de
+scraping — contrairement à une simple annonce en texte libre dans les actus
+club (ce qui aurait été le seul recours si cette compétition n'avait pas
+existé côté LNH).
+
+**Modèle** : `FriendlyMatch` (migration `20260731090000_add_friendly_match`)
+— volontairement séparé de `Match` : pas de `Gameweek`/`deadlineAt`, pas de
+classement (`ClubStanding`), pas d'impact sur le scoring fantasy. `homeClubId`/
+`awayClubId` nullables (l'adversaire n'est pas toujours un club Daikin
+StarLigue connu de notre DB — club de D2 ou club étranger), accompagnés de
+`homeClubName`/`awayClubName` toujours renseignés (scrapés) pour l'affichage
+même quand la résolution club échoue. `competitionLabel` garde "Warm Up" ou
+"Trophée des Champions - WUP" (les deux gardés — "Trophée des Champions - TDC",
+le vrai match d'ouverture officiel, et "Coupe de France" sont exclus, hors
+périmètre demandé).
+
+**Filtre "au moins une équipe Starligue"** : un match est gardé si `homeClubId`
+OU `awayClubId` résout vers un club **jouant réellement la saison active**
+(`getActiveClubIdBySlug`, `src/lib/clubs/get-active-club-slugs.ts` : club ayant
+au moins un `Player` sur `seasonId`) — les deux slugs sont vérifiés
+indépendamment, sans présumer lequel des deux est "le nôtre". Exemple vérifié :
+Chartres (Starligue) vs Saran (marqué "proligue" côté href lnh.fr, mais bien
+remonté Starligue en DB pour 2026/27) — les deux étant actifs, le match est
+gardé quel que soit le libellé de division utilisé par lnh.fr lui-même (pas
+fiable pour la classification, l'appartenance Starligue vient de notre propre
+donnée d'effectif, pas du HTML scrapé).
+
+**Piège trouvé et corrigé** : `Club` est une table **globale**, partagée avec le
+Mode Simulation (`src/lib/simulation/setup.ts`) — elle contient donc aussi
+d'anciens clubs relégués (Dijon/GDH, Istres/IPH, présents pour la saison 2025/26
+simulée mais pas 2026/27, confirmé : 0 `Player` sur la saison active pour ces
+deux clubs, et c'est aussi pourquoi ils n'ont pas de logo). Un premier filtre
+basé sur "le club existe dans `Club`" les aurait comptés à tort comme
+Starligue. `getActiveClubIdBySlug` règle ça une fois pour toutes (réutilisé par
+`syncWarmupMatches` et `scripts/backfill-warmup-logos.ts`). Effet de bord :
+lnh.fr tague encore Istres/Dijon sous `daikin-starligue/equipes/…` dans son
+propre HTML (relégation pas répercutée côté LNH) — ce segment est ignoré
+explicitement pour un club non actif (`resolveDivision`), pour ne pas afficher
+une info-bulle "Daikin Starligue" trompeuse sur un adversaire qu'on vient de
+traiter comme hors Starligue.
+
+**Provider** : `LnhScraperProvider.fetchWarmupMatches(seasonsId, seasonStartYear)`
+(`src/lib/data-providers/lnh-scraper.provider.ts`) — `parseWarmupFromHtml`
+pour le parsing (testé, `lnh-scraper.warmup.test.ts`). `current_month=all` côté
+lnh.fr renvoie toute la saison en une seule requête (vérifié : 579 items dont
+67 "Warm Up -" pour 2026/27, tous en août) — pas besoin de boucler par mois.
+
+**Ingestion** : `syncWarmupMatches` (`src/lib/ingestion/warmup.ts`), upsert
+idempotent par `dedupeKey` (`"lnh:" + calendars_id`, même convention que
+`NewsItem`) — calendrier ET résultats en une seule passe (le statut/score vient
+de la même réponse que le calendrier, pas de fetch séparé).
+
+**Cron** : `POST /api/cron/sync-warmup`, planifié dans `cron-daily.yml`
+(06:00 UTC, job indépendant des deux autres).
+
+**Logos et division des clubs hors DB** (migration
+`20260731093000_add_warmup_logo_division`) : `FriendlyMatch.homeClubLogoUrl`/
+`awayClubLogoUrl`/`homeClubDivision`/`awayClubDivision`, renseignés seulement
+quand le club correspondant n'est pas actif en DB (sinon `Club.logoUrl` fait
+autorité). `division` vient du 1er segment de l'URL équipe lnh.fr
+(`proligue/equipes/…` → `"Proligue"`), ou d'une table connue à la main pour un
+club étranger sans ce segment (`src/lib/clubs/warmup-foreign-divisions.ts` —
+"1ère division allemande/hongroise/suisse/polonaise/japonaise" selon le club,
+connaissance générale du handball, pas une donnée scrapée ; un club absent de
+cette table reste simplement sans info plutôt que d'en deviner une). `logoUrl`
+est un chemin statique **local** (`/clubs/warmup/{slug}.png`, jamais un hotlink
+lnh.fr — même convention que les logos des clubs Starligue) :
+`scripts/backfill-warmup-logos.ts` télécharge ces fichiers une fois (19 logos
+backfillés le 2026-07-31), `syncWarmupMatches` ne fait que LIRE ces fichiers
+déjà commités via `fs.existsSync` — jamais d'écriture dans `public/` à
+l'exécution du cron (filesystem éphémère en prod, un build standalone Next.js
+ne re-sert pas des fichiers ajoutés après coup dans `public/`). Un adversaire
+pas encore backfillé retombe sur les initiales (`ClubLogo`) jusqu'au prochain
+passage manuel du script.
+
+**Affichage** : réutilise directement `MatchesStrip` (`src/components/
+dashboard/MatchesStrip.tsx`, déjà utilisé pour le championnat) plutôt qu'un
+composant séparé — demande explicite de l'utilisateur ("exactement le même
+affichage"). Une seule liste chronologique (pas de séparation résultats/à
+venir comme le championnat : hors saison, la notion de "dernière journée" n'a
+pas de sens ici), sans limite d'affichage. Extensions ajoutées à `MatchesStrip`
+pour ce cas d'usage, sans régression sur l'existant : `title` (remplace
+"Résultats"/"Prochains matchs" par un libellé libre, ex: "Warm Up"),
+`disableLink` (rend un encart sans lien — un club hors DB n'a pas de page
+`/clubs/[id]` ; prop booléenne et non une fonction, `MatchesStrip` est un
+Client Component et une fonction passée depuis une page serveur ne serait pas
+sérialisable à travers la frontière RSC), `showDate` (affiche la date+heure du
+match au-dessus des logos, sans changer leur taille — utile ici car les matchs
+d'une même liste n'ont pas tous la même date, contrairement au championnat où
+le range de dates de la journée est déjà dans l'en-tête), score affiché **par
+match** selon qu'il est renseigné ou non (`homeScore !== null`) plutôt que
+selon `variant` (rétrocompatible : côté championnat, "résultats" a toujours un
+score et "prochains matchs" jamais). `ClubLogo` accepte aussi un `title`
+optionnel (info-bulle au survol, ex: "Ivry (Proligue)", "Tatabanya (1ère
+division hongroise)") — sans effet sur les autres usages du composant (absent
+partout ailleurs). Bloc masqué entièrement si aucun match Warm Up — pas de
+section vide à afficher le reste de l'année, cette compétition n'existe qu'en
+pré-saison (~1 mois/an).
+
+**Pas de stats joueurs pour les Warm Up (vérifié, pas juste supposé)** :
+`sync-warmup` tourne chaque matin (`cron-daily.yml`, 06:00 UTC) et récupère
+bien les scores dès qu'un match est joué (re-scrape complet + upsert à chaque
+passage). En revanche, LNH ne publie **aucune statistique joueur** pour cette
+compétition — testé en direct sur un match Warm Up déjà joué la saison passée
+(Rhein-Neckar Löwen 26-28 Paris) : la page boxscore de lnh.fr
+(`contents_action=view_tab_stats`) renvoie littéralement "Aucun joueur" /
+"Aucune statistique". Contrairement au championnat, où cette même page est
+alimentée normalement. Rien à développer ici — la donnée n'existe pas côté
+LNH, pas une limite de notre pipeline.
+
+**Piège layout mobile corrigé au passage** (remonté par l'utilisateur via
+capture d'écran) : le conteneur `Résultats`/`Prochains matchs`
+(`src/app/[locale]/page.tsx`) utilisait `grid grid-cols-2 gap-3 lg:grid-cols-1`
+— comportement inversé de ce qu'on veut : côte à côte (2 colonnes, chacune à
+moitié de la largeur) sur petit écran, empilé (1 colonne, pleine largeur)
+seulement à partir de `lg`. Sur mobile, ça écrasait les logos des encarts
+`MatchesStrip` dans une largeur deux fois trop étroite. Remplacé par
+`flex flex-col gap-3` (toujours empilé, quelle que soit la taille d'écran) —
+le bloc Warm Up, déjà positionné après ce conteneur, en profite aussi
+(pleine largeur sur mobile comme sur desktop).

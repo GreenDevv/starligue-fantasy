@@ -90,21 +90,21 @@ enum PredictionOutcome {
 }
 
 model User {
-  id               String           @id @default(cuid())
-  email            String           @unique
-  passwordHash     String?
-  name             String
-  role             UserRole         @default(USER)
-  canUseAuctionMode Boolean         @default(false) // garde-fou bêta v1 du mode Enchères (§18) — 4 comptes de test en prod, voir scripts/grant-auction-access.ts
-  favoritePlayerId String? // choisi (facultatif) à l'inscription — src/app/(public)/register/page.tsx
-  favoritePlayer   Player?          @relation("FavoritePlayer", fields: [favoritePlayerId], references: [id])
-  createdAt        DateTime         @default(now())
-  fantasyTeams     FantasyTeam[]
-  leagueMembers    LeagueMember[]
-  ownedLeagues     League[]         @relation("LeagueOwner")
-  accounts         Account[]
-  simulationTeams  SimulationTeam[]
-  leagueChatMessages LeagueChatMessage[]
+  id                  String               @id @default(cuid())
+  email               String               @unique
+  passwordHash        String?
+  name                String
+  role                UserRole             @default(USER)
+  canUseAuctionMode   Boolean              @default(false) // garde-fou bêta v1 du mode Enchères (§18) — 4 comptes de test en prod, voir scripts/grant-auction-access.ts
+  favoritePlayerId    String? // choisi (facultatif) à l'inscription — src/app/(public)/register/page.tsx
+  favoritePlayer      Player?              @relation("FavoritePlayer", fields: [favoritePlayerId], references: [id])
+  createdAt           DateTime             @default(now())
+  fantasyTeams        FantasyTeam[]
+  leagueMembers       LeagueMember[]
+  ownedLeagues        League[]             @relation("LeagueOwner")
+  accounts            Account[]
+  simulationTeams     SimulationTeam[]
+  leagueChatMessages  LeagueChatMessage[]
   passwordResetTokens PasswordResetToken[]
 }
 
@@ -162,21 +162,66 @@ model Season {
   simulationTradeProposals        SimulationTradeProposal[]
   clubStandings                   ClubStanding[]
   newsItems                       NewsItem[]
+  friendlyMatches                 FriendlyMatch[]
 }
 
 model Club {
-  id             String                @id @default(cuid())
-  name           String // "Montpellier Handball"
-  shortName      String // "MHB"
-  logoUrl        String?
-  externalIds    Json                  @default("{}") // { "api_sports": "123", "lnh": "mhb" }
-  players        Player[]
-  homeMatches    Match[]               @relation("HomeClub")
-  awayMatches    Match[]               @relation("AwayClub")
-  standings      ClubStanding[]
-  h2hHomeMatches ClubHeadToHeadMatch[] @relation("H2HHomeClub")
-  h2hAwayMatches ClubHeadToHeadMatch[] @relation("H2HAwayClub")
-  newsItems      NewsItem[]
+  id                String                @id @default(cuid())
+  name              String // "Montpellier Handball"
+  shortName         String // "MHB"
+  logoUrl           String?
+  externalIds       Json                  @default("{}") // { "api_sports": "123", "lnh": "mhb" }
+  players           Player[]
+  homeMatches       Match[]               @relation("HomeClub")
+  awayMatches       Match[]               @relation("AwayClub")
+  standings         ClubStanding[]
+  h2hHomeMatches    ClubHeadToHeadMatch[] @relation("H2HHomeClub")
+  h2hAwayMatches    ClubHeadToHeadMatch[] @relation("H2HAwayClub")
+  newsItems         NewsItem[]
+  warmupHomeMatches FriendlyMatch[]       @relation("WarmupHomeClub")
+  warmupAwayMatches FriendlyMatch[]       @relation("WarmupAwayClub")
+}
+
+// Matchs de préparation (mode "Warm Up") — lnh.fr labellise officiellement cette
+// compétition ainsi (calendrier global univers=matchs-6892, distinct du calendrier
+// Daikin StarLigue univers=d1-26623 qu'on scrape déjà), au même titre que la Coupe
+// de France ou le Trophée des Champions. Contrairement au reste du pipeline
+// (Match), aucune notion de classement/journée/deadline ici — juste une liste de
+// rencontres amicales avant le début du championnat. Un seul des deux clubs suffit
+// à être en Daikin StarLigue pour qu'on garde le match (ex: Chartres vs Saran D2,
+// ou PSG vs un club étranger comme Rhein-Neckar Löwen) — d'où home/awayClubId
+// nullables (le club adverse n'est pas toujours dans notre DB) accompagnés du nom
+// scrapé en clair (toujours renseigné, que le club soit connu ou non).
+model FriendlyMatch {
+  id               String      @id @default(cuid())
+  seasonId         String
+  season           Season      @relation(fields: [seasonId], references: [id])
+  competitionLabel String // "Warm Up" | "Trophée des Champions - WUP" (affichage, pas de logique dessus)
+  kickoffAt        DateTime
+  status           MatchStatus @default(SCHEDULED)
+  homeClubId       String?
+  homeClub         Club?       @relation("WarmupHomeClub", fields: [homeClubId], references: [id])
+  homeClubName     String // toujours renseigné (scrapé), même si homeClubId est null
+  // Utilisés seulement quand homeClubId est null (club hors DB) — pour un club
+  // Starligue connu, Club.logoUrl fait autorité, pas ces champs. logoUrl = chemin
+  // statique local si déjà backfillé (scripts/backfill-warmup-logos.ts), sinon null
+  // (repli sur les initiales côté affichage, ClubLogo). division = segment d'URL
+  // lnh.fr ("proligue", etc.), voir ScrapedWarmupMatch.
+  homeClubLogoUrl  String?
+  homeClubDivision String?
+  awayClubId       String?
+  awayClub         Club?       @relation("WarmupAwayClub", fields: [awayClubId], references: [id])
+  awayClubName     String
+  awayClubLogoUrl  String?
+  awayClubDivision String?
+  homeScore        Int?
+  awayScore        Int?
+  source           DataSource  @default(LNH_SCRAPER)
+  dedupeKey        String      @unique // "lnh:" + calendars_id lnh.fr — idempotence
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@index([seasonId, kickoffAt])
 }
 
 // Historique des confrontations directes entre deux clubs, au-delà de ce que Match
@@ -455,21 +500,21 @@ model SocialPost {
 }
 
 model Match {
-  id          String            @id @default(cuid())
-  seasonId    String
-  season      Season            @relation(fields: [seasonId], references: [id])
-  gameweekId  String
-  gameweek    Gameweek          @relation(fields: [gameweekId], references: [id])
-  homeClubId  String
-  homeClub    Club              @relation("HomeClub", fields: [homeClubId], references: [id])
-  awayClubId  String
-  awayClub    Club              @relation("AwayClub", fields: [awayClubId], references: [id])
-  kickoffAt   DateTime
-  status      MatchStatus       @default(SCHEDULED)
-  homeScore   Int?
-  awayScore   Int?
-  externalIds Json              @default("{}")
-  playerStats PlayerMatchStat[]
+  id               String            @id @default(cuid())
+  seasonId         String
+  season           Season            @relation(fields: [seasonId], references: [id])
+  gameweekId       String
+  gameweek         Gameweek          @relation(fields: [gameweekId], references: [id])
+  homeClubId       String
+  homeClub         Club              @relation("HomeClub", fields: [homeClubId], references: [id])
+  awayClubId       String
+  awayClub         Club              @relation("AwayClub", fields: [awayClubId], references: [id])
+  kickoffAt        DateTime
+  status           MatchStatus       @default(SCHEDULED)
+  homeScore        Int?
+  awayScore        Int?
+  externalIds      Json              @default("{}")
+  playerStats      PlayerMatchStat[]
   predictionMarket PredictionMarket?
 
   @@index([gameweekId])
@@ -833,13 +878,13 @@ enum AuctionRoundStatus {
 }
 
 model AuctionRound {
-  id          String                    @id @default(cuid())
+  id          String                   @id @default(cuid())
   leagueId    String
-  league      League                    @relation(fields: [leagueId], references: [id])
+  league      League                   @relation(fields: [leagueId], references: [id])
   roundNumber Int
-  status      AuctionRoundStatus        @default(OPEN)
+  status      AuctionRoundStatus       @default(OPEN)
   resolvedAt  DateTime?
-  createdAt   DateTime                  @default(now())
+  createdAt   DateTime                 @default(now())
   bids        AuctionBid[]
   submissions AuctionRoundSubmission[]
 

@@ -6,10 +6,16 @@ import { ClubLogo } from "@/components/ui/ClubLogo";
 import type { WidgetSize } from "@/lib/dashboard/layout";
 
 interface StripClub {
-  id: string;
+  // Absent pour un club hors DB (pas de page /clubs/[id] à lier) — voir linkHref.
+  id?: string;
   shortName: string;
   name?: string;
   logoUrl?: string | null;
+  // Renseigné seulement pour un club hors DB (ex: adversaire Warm Up de D2/étranger,
+  // ARCHITECTURE.md §19) — affiché en info-bulle au survol du logo. Jamais pour un
+  // club Daikin StarLigue connu (n'affecte aucun usage existant : absent partout
+  // ailleurs).
+  division?: string | null;
 }
 
 interface StripMatch {
@@ -34,6 +40,23 @@ interface MatchesStripProps {
   // ~300px, d'où le débordement/clipping des logos). Un nombre de colonnes fixe
   // (non lié au viewport) contourne ça pour ces usages en conteneur étroit connu.
   fixedColumns?: 2 | 3;
+  // Titre affiché à la place de "Résultats"/"Prochains matchs" (ex: "Warm Up" pour
+  // une liste qui mélange les deux, ARCHITECTURE.md §19). Sans effet sur l'usage
+  // championnat existant si omis.
+  title?: string;
+  // true : rend un simple encart sans lien au lieu du lien par défaut (/matches/[id]
+  // ou /clubs/[id]/vs/[id]) — ex: matchs Warm Up (ARCHITECTURE.md §19), dont les
+  // clubs hors DB n'ont pas de page /clubs/[id]. Prop booléenne (pas une fonction) :
+  // ce composant est un Client Component, une fonction passée depuis une page
+  // serveur ne serait pas sérialisable à travers la frontière RSC. Sans effet sur
+  // l'usage championnat existant si omis.
+  disableLink?: boolean;
+  // Affiche la date+heure du match dans l'encart (au-dessus des logos, sans changer
+  // leur taille) plutôt qu'en info-bulle seulement — utile quand les matchs d'une
+  // même liste n'ont pas tous la même date (ex: Warm Up, ARCHITECTURE.md §19,
+  // contrairement au championnat où le range de dates de la journée est déjà dans
+  // l'en-tête). Sans effet sur l'usage championnat existant si omis.
+  showDate?: boolean;
 }
 
 // Même design que "wide", réduit à l'échelle pour "square"/"mini" (widget dashboard
@@ -74,10 +97,24 @@ function formatGameweekRange(format: DateFormatter, dates: (string | Date)[]): s
 // uniquement (pas de nom complet), grille qui s'enroule pour montrer toute la
 // journée sans scroll. Réutilisé par TeamView (saison 2026/27) et SimulationView
 // (2025/26) — ARCHITECTURE.md §8.1.
-export function MatchesStrip({ variant, gameweekNumber, matches, size = "wide", fixedColumns }: MatchesStripProps) {
+function clubTooltip(club: StripClub): string | undefined {
+  if (!club.division) return undefined;
+  return `${club.name ?? club.shortName} (${club.division})`;
+}
+
+export function MatchesStrip({
+  variant,
+  gameweekNumber,
+  matches,
+  size = "wide",
+  fixedColumns,
+  title: titleOverride,
+  disableLink,
+  showDate,
+}: MatchesStripProps) {
   const t = useTranslations("dashboard");
   const format = useFormatter();
-  const title = variant === "results" ? t("matchesStrip.results") : t("matchesStrip.upcoming");
+  const title = titleOverride ?? (variant === "results" ? t("matchesStrip.results") : t("matchesStrip.upcoming"));
   const dateRange = formatGameweekRange(format, matches.map((m) => m.kickoffAt));
   const { logo, gridCols: responsiveGridCols, boxPad, outerGap } = SIZE_CONFIG[size];
   const gridCols = fixedColumns ? (fixedColumns === 2 ? "grid-cols-2" : "grid-cols-3") : responsiveGridCols;
@@ -100,21 +137,47 @@ export function MatchesStrip({ variant, gameweekNumber, matches, size = "wide", 
         </p>
       ) : (
         <div className={`grid ${gridCols} ${outerGap}`}>
-          {matches.map((m) => (
-            <Link
-              key={m.id}
-              href={variant === "results" ? `/matches/${m.id}` : `/clubs/${m.homeClub.id}/vs/${m.awayClub.id}`}
-              className={`flex items-center justify-center gap-0.5 rounded-md border border-border/60 bg-bg transition-colors hover:border-accent/50 ${boxPad}`}
-            >
-              <ClubLogo club={m.homeClub} size={logo} />
-              {variant === "results" && (
-                <span className="font-arcade text-sm tracking-wide text-text">
-                  {m.homeScore ?? "–"}-{m.awayScore ?? "–"}
+          {matches.map((m) => {
+            const href = disableLink
+              ? null
+              : variant === "results"
+                ? `/matches/${m.id}`
+                : `/clubs/${m.homeClub.id}/vs/${m.awayClub.id}`;
+            const hasScore = m.homeScore !== null && m.awayScore !== null;
+            const logosRow = (
+              <div className="flex items-center justify-center gap-0.5">
+                <ClubLogo club={m.homeClub} size={logo} title={clubTooltip(m.homeClub)} />
+                {hasScore && (
+                  <span className="font-arcade text-sm tracking-wide text-text">
+                    {m.homeScore}-{m.awayScore}
+                  </span>
+                )}
+                <ClubLogo club={m.awayClub} size={logo} title={clubTooltip(m.awayClub)} />
+              </div>
+            );
+            const content = showDate ? (
+              <div className="flex flex-col items-center gap-0.5">
+                <span className="text-[9px] uppercase leading-none tracking-wide text-text-muted">
+                  {formatDayMonth(format, new Date(m.kickoffAt))}{" "}
+                  {format.dateTime(new Date(m.kickoffAt), { hour: "2-digit", minute: "2-digit" })}
                 </span>
-              )}
-              <ClubLogo club={m.awayClub} size={logo} />
-            </Link>
-          ))}
+                {logosRow}
+              </div>
+            ) : (
+              logosRow
+            );
+            const boxClassName = `flex items-center justify-center gap-0.5 rounded-md border border-border/60 bg-bg transition-colors hover:border-accent/50 ${boxPad}`;
+
+            return href ? (
+              <Link key={m.id} href={href} className={boxClassName}>
+                {content}
+              </Link>
+            ) : (
+              <div key={m.id} className={boxClassName}>
+                {content}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

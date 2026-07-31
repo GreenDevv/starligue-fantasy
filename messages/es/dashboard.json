@@ -58,6 +58,9 @@
     "noResults": "Todavía no hay resultados.",
     "noUpcoming": "No hay partidos programados."
   },
+  "warmup": {
+    "title": "Warm-up"
+  },
   "simulationControls": {
     "prevGameweek": "← Jornada anterior",
     "nextGameweek": "Jornada siguiente →",
