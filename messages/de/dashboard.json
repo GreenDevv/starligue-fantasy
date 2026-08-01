@@ -61,6 +61,9 @@
   "warmup": {
     "title": "Warm-up"
   },
+  "coupeDeFrance": {
+    "title": "Coupe de France"
+  },
   "simulationControls": {
     "prevGameweek": "← Vorheriger Spieltag",
     "nextGameweek": "Nächster Spieltag →",

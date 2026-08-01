@@ -24,7 +24,14 @@
     "recentResults": "Últims resultats",
     "noResults": "No hi ha resultats per a aquest filtre.",
     "upcoming": "Propers partits",
-    "noUpcoming": "No hi ha propers partits per a aquest filtre."
+    "noUpcoming": "No hi ha propers partits per a aquest filtre.",
+    "competitionStarligue": "Starligue",
+    "competitionWarmup": "Warm Up",
+    "competitionCoupeDeFrance": "Coupe de France",
+    "calendarPrevMonth": "Mes anterior",
+    "calendarNextMonth": "Mes següent",
+    "calendarNoMatches": "No hi ha partits aquest mes per a aquest filtre.",
+    "tooltipRank": "Classificació actual: {rank}"
   },
   "charts": {
     "goalsFor": "Gols marcats",

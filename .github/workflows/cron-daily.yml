@@ -1,4 +1,4 @@
-name: Cron quotidien (actus + notes/résultats + matchs Warm Up lnh.fr)
+name: Cron quotidien (actus + notes/résultats + matchs Warm Up/Coupe de France lnh.fr)
 
 # Remplace le service Railway "cron-daily" (image curlimages/curl), qui n'a jamais
 # fonctionné : startCommand et cronSchedule tous deux vides côté Railway (confirmé via
@@ -7,7 +7,9 @@ name: Cron quotidien (actus + notes/résultats + matchs Warm Up lnh.fr)
 # classe de bug que celle documentée en ARCHITECTURE.md §6.7 pour post-stat-leaders.yml
 # (ENTRYPOINT déjà = curl sur cette image → "curl curl ..." si on passe une commande).
 #
-# Trois routes, trois jobs indépendants (l'échec de l'un ne bloque pas les autres) :
+# Cinq jobs, quatre indépendants + un qui dépend des deux syncs "hors championnat"
+# (l'échec de l'un ne bloque pas les autres, sauf backfill-warmup-logos qui a besoin
+# que sync-warmup ET sync-coupe-de-france soient passés) :
 #   - sync-news       : scrape lnh.fr + sites de clubs (§16)
 #   - sync-ratings    : notes LNH (boxscore) des matchs terminés hier — met aussi à
 #                       jour Match.status/homeScore/awayScore depuis lnh.fr
@@ -18,6 +20,15 @@ name: Cron quotidien (actus + notes/résultats + matchs Warm Up lnh.fr)
 #                       warmup.ts) — calendrier ET résultats en une seule passe,
 #                       calendrier global lnh.fr distinct du calendrier Daikin
 #                       StarLigue (découvert le 2026-07-31).
+#   - sync-coupe-de-france : même calendrier global lnh.fr, compétition "Coupe de
+#                       France -" (découverte le 2026-08-01, ajoutée sur le même
+#                       principe que Warm Up — src/lib/ingestion/warmup.ts::
+#                       syncCoupeDeFranceMatches, même table FriendlyMatch).
+#   - backfill-warmup-logos : télécharge les logos des nouveaux adversaires Warm Up
+#                       ET Coupe de France hors DB (D2/étrangers) et les commit sur
+#                       main pour qu'un redeploy Railway les embarque
+#                       (scripts/backfill-warmup-logos.ts, filesystem prod éphémère
+#                       — voir commentaire du job).
 # ARCHITECTURE.md §4.1 documente sync-ratings 2×/jour (09h/13h) — ici 1×/jour
 # seulement (06:00 UTC), même simplification assumée que pour le reste des crons
 # non planifiés. Les autres routes /api/cron/* (fixtures/résultats API-Sports,
@@ -27,6 +38,9 @@ on:
   schedule:
     - cron: "0 6 * * *"
   workflow_dispatch: {}
+
+permissions:
+  contents: write
 
 jobs:
   sync-news:
@@ -88,3 +102,68 @@ jobs:
             echo "::error::HTTP $status"
             exit 1
           fi
+
+  sync-coupe-de-france:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler /api/cron/sync-coupe-de-france
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          response=$(curl -sS -w "\n%{http_code}" -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://starliguefantasy.fr/api/cron/sync-coupe-de-france")
+          body=$(echo "$response" | sed '$d')
+          status=$(echo "$response" | tail -n 1)
+
+          echo "$body" | python3 -m json.tool || echo "$body"
+
+          if [ "$status" -ge 300 ]; then
+            echo "::error::HTTP $status"
+            exit 1
+          fi
+
+  # Contrairement aux jobs ci-dessus (simples appels HTTP), celui-ci fait tourner
+  # scripts/backfill-warmup-logos.ts directement sur le runner CI : le build Next.js
+  # standalone en prod (Railway) a un filesystem éphémère, public/ n'y est pas
+  # réinscriptible à l'exécution (voir src/lib/ingestion/warmup.ts et le script
+  # lui-même). Seul un commit des logos dans le repo, suivi d'un redeploy Railway,
+  # les rend disponibles. Dépend de sync-warmup ET sync-coupe-de-france (doivent
+  # tourner avant, pas en parallèle) pour backfiller les logos des adversaires
+  # découverts par CES runs, quelle que soit la compétition.
+  backfill-warmup-logos:
+    needs: [sync-warmup, sync-coupe-de-france]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Installer pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Installer Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Installer les dépendances
+        run: pnpm install --frozen-lockfile
+
+      - name: Backfill logos Warm Up (lecture DB prod, écriture locale)
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+        run: pnpm tsx scripts/backfill-warmup-logos.ts
+
+      - name: Committer les nouveaux logos si besoin
+        run: |
+          git config user.name "starligue-fantasy-bot"
+          git config user.email "actions@github.com"
+          git add public/clubs/warmup/
+          if git diff --cached --quiet; then
+            echo "Aucun nouveau logo à committer"
+          else
+            git commit -m "chore: backfill logos clubs Warm Up (auto)"
+            git push
+          fi
+

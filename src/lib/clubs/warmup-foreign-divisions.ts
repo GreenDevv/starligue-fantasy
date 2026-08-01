@@ -10,7 +10,9 @@
 export const WARMUP_FOREIGN_CLUB_DIVISIONS: Record<string, string> = {
   "rhein-neckar": "1ère division allemande",
   wetzlar: "1ère division allemande",
+  gummersbach: "1ère division allemande",
   plock: "1ère division polonaise",
+  kielce: "1ère division polonaise",
   "suhr-aarau": "1ère division suisse",
   "rtv-1879-basel": "1ère division suisse",
   szeged: "1ère division hongroise",

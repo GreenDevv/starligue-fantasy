@@ -1,14 +1,18 @@
-// Ingestion des matchs de préparation (mode "Warm Up", ARCHITECTURE.md) — voir
-// src/lib/data-providers/lnh-scraper.provider.ts::fetchWarmupMatches pour la source
-// (compétition "Warm Up -" officiellement labellisée par la LNH, calendrier global
-// univers=matchs-6892, distinct du calendrier Daikin StarLigue déjà scrapé).
-// Contrairement à Match (championnat), pas de notion de journée/deadline/classement
-// ici — juste une liste de rencontres amicales, upsert idempotent par dedupeKey
-// (même convention que NewsItem, cf. src/lib/news/sync.ts).
+// Ingestion des matchs hors championnat (mode "Warm Up" et Coupe de France,
+// ARCHITECTURE.md) — voir src/lib/data-providers/lnh-scraper.provider.ts::
+// fetchWarmupMatches/fetchCoupeDeFranceMatches pour la source (compétitions
+// officiellement labellisées ainsi par la LNH, calendrier global univers=matchs-6892,
+// distinct du calendrier Daikin StarLigue déjà scrapé). Contrairement à Match
+// (championnat), pas de notion de journée/deadline/classement ici — juste une liste
+// de rencontres, upsert idempotent par dedupeKey (même convention que NewsItem, cf.
+// src/lib/news/sync.ts). Les deux compétitions partagent la même table FriendlyMatch
+// (competitionLabel les distingue à l'affichage) et donc la même mécanique
+// d'ingestion (syncFriendlyMatches) — seule la source scrapée diffère. Le nom de ce
+// fichier ("warmup") est resté historique (première compétition couverte).
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { prisma } from "@/lib/db";
-import { createLnhScraperProvider } from "@/lib/data-providers/lnh-scraper.provider";
+import { createLnhScraperProvider, type ScrapedWarmupMatch } from "@/lib/data-providers/lnh-scraper.provider";
 import { getActiveClubIdBySlug } from "@/lib/clubs/get-active-club-slugs";
 import { WARMUP_FOREIGN_CLUB_DIVISIONS } from "@/lib/clubs/warmup-foreign-divisions";
 
@@ -23,7 +27,9 @@ export interface WarmupSyncResult {
 // chaud sur un build standalone Next.js) — seulement une LECTURE d'assets déjà
 // commités au repo par scripts/backfill-warmup-logos.ts. Un club pas encore
 // backfillé retombe simplement sur les initiales (ClubLogo) jusqu'au prochain
-// passage du script.
+// passage du script. Même dossier public/clubs/warmup/ pour Warm Up ET Coupe de
+// France (adversaires hors DB des deux compétitions confondus, pas de raison de
+// séparer : un club hors DB a le même logo quelle que soit la compétition).
 function resolveLocalWarmupLogoUrl(slug: string): string | null {
   const path = join(process.cwd(), "public", "clubs", "warmup", `${slug}.png`);
   return existsSync(path) ? `/clubs/warmup/${slug}.png` : null;
@@ -51,14 +57,10 @@ function resolveDivision(slug: string, hrefDivision: string | null): string | nu
  * pour la saison active (getActiveClubIdBySlug — pas juste "existe dans la table
  * Club", qui contient aussi d'anciens clubs relégués comme Dijon/Istres, présents
  * pour le Mode Simulation 2025/26 mais pas la saison Daikin StarLigue 2026/27).
+ * Cœur partagé par syncWarmupMatches et syncCoupeDeFranceMatches — seule la liste de
+ * matchs déjà scrapée/filtrée par compétition en amont diffère.
  */
-export async function syncWarmupMatches(
-  seasonId: string,
-  lnhSeasonsId: string,
-  seasonStartYear: number
-): Promise<WarmupSyncResult> {
-  const provider = createLnhScraperProvider();
-  const matches = await provider.fetchWarmupMatches(lnhSeasonsId, seasonStartYear);
+async function syncFriendlyMatches(seasonId: string, matches: ScrapedWarmupMatch[]): Promise<WarmupSyncResult> {
   const clubIdBySlug = await getActiveClubIdBySlug(seasonId);
 
   let upserted = 0;
@@ -119,4 +121,24 @@ export async function syncWarmupMatches(
   }
 
   return { fetched: matches.length, upserted, skippedNoStarligueClub };
+}
+
+export async function syncWarmupMatches(
+  seasonId: string,
+  lnhSeasonsId: string,
+  seasonStartYear: number
+): Promise<WarmupSyncResult> {
+  const provider = createLnhScraperProvider();
+  const matches = await provider.fetchWarmupMatches(lnhSeasonsId, seasonStartYear);
+  return syncFriendlyMatches(seasonId, matches);
+}
+
+export async function syncCoupeDeFranceMatches(
+  seasonId: string,
+  lnhSeasonsId: string,
+  seasonStartYear: number
+): Promise<WarmupSyncResult> {
+  const provider = createLnhScraperProvider();
+  const matches = await provider.fetchCoupeDeFranceMatches(lnhSeasonsId, seasonStartYear);
+  return syncFriendlyMatches(seasonId, matches);
 }

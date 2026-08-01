@@ -1,13 +1,14 @@
 // Télécharge en local les logos des clubs adverses hors DB (D2/Proligue, clubs
-// étrangers) apparaissant dans des matchs Warm Up (ARCHITECTURE.md §19) impliquant
-// au moins un club Daikin StarLigue. Script ponctuel, à relancer manuellement quand
-// de nouveaux adversaires apparaissent (ex: en cours de pré-saison) — pas exécuté
-// automatiquement par le cron sync-warmup, qui ne fait que LIRE ces fichiers déjà
-// commités (filesystem éphémère en prod, public/ non réinscriptible à l'exécution
+// étrangers) apparaissant dans des matchs Warm Up ET Coupe de France (ARCHITECTURE.md
+// §19) impliquant au moins un club Daikin StarLigue. Script relancé automatiquement
+// par le job backfill-warmup-logos de .github/workflows/cron-daily.yml (le cron
+// applicatif sync-warmup/sync-coupe-de-france, eux, ne font que LIRE ces fichiers
+// déjà commités — filesystem prod éphémère, public/ non réinscriptible à l'exécution
 // sur un build standalone Next.js — voir src/lib/ingestion/warmup.ts).
 //
 // Les clubs Starligue connus (déjà dans notre DB) sont ignorés — leur logo vient de
-// Club.logoUrl, pas de ce script.
+// Club.logoUrl, pas de ce script. Même dossier public/clubs/warmup/ pour les deux
+// compétitions (un club hors DB a le même logo quelle que soit la compétition).
 import { PrismaClient } from "@prisma/client";
 import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -43,14 +44,17 @@ async function main() {
   if (!season) throw new Error("NO_ACTIVE_SEASON");
 
   const provider = createLnhScraperProvider();
-  const matches = await provider.fetchWarmupMatches(LNH_SEASONS_ID_2026_2027, SEASON_START_YEAR_2026_2027);
+  const [warmupMatches, coupeDeFranceMatches] = await Promise.all([
+    provider.fetchWarmupMatches(LNH_SEASONS_ID_2026_2027, SEASON_START_YEAR_2026_2027),
+    provider.fetchCoupeDeFranceMatches(LNH_SEASONS_ID_2026_2027, SEASON_START_YEAR_2026_2027),
+  ]);
   const knownSlugs = new Set((await getActiveClubIdBySlug(season.id)).keys());
 
   const toDownload = new Map<string, string>(); // slug -> logoUrl
-  for (const m of matches) {
+  for (const m of [...warmupMatches, ...coupeDeFranceMatches]) {
     const homeKnown = knownSlugs.has(m.homeClubSlug.toLowerCase());
     const awayKnown = knownSlugs.has(m.awayClubSlug.toLowerCase());
-    if (!homeKnown && !awayKnown) continue; // même filtre que syncWarmupMatches — hors périmètre
+    if (!homeKnown && !awayKnown) continue; // même filtre que syncFriendlyMatches — hors périmètre
 
     if (!homeKnown) toDownload.set(m.homeClubSlug, m.homeClubLogoUrl);
     if (!awayKnown) toDownload.set(m.awayClubSlug, m.awayClubLogoUrl);

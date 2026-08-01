@@ -102,12 +102,14 @@ export interface ScrapedFixture {
   awayScore: number | null;
 }
 
-// Match de préparation ("Warm Up -" ou "Trophée des Champions - WUP", voir
-// WARMUP_CALENDAR_URL) — contrairement à ScrapedFixture, pas de gameweekNumber (ces
-// matchs sont hors championnat) et les deux clubs ne sont pas forcément des clubs
-// Daikin StarLigue connus de notre DB (ex: club de D2, ou club étranger comme
-// Rhein-Neckar Löwen) — d'où homeClubName/awayClubName toujours renseignés en plus
-// des slugs, pour affichage même quand la résolution club échoue côté ingestion.
+// Match hors championnat ("Warm Up -"/"Trophée des Champions - WUP", ou
+// "Coupe de France -", voir WARMUP_CALENDAR_URL) — contrairement à ScrapedFixture,
+// pas de gameweekNumber (ces matchs sont hors championnat) et les deux clubs ne sont
+// pas forcément des clubs Daikin StarLigue connus de notre DB (ex: club de D2, ou
+// club étranger comme Rhein-Neckar Löwen) — d'où homeClubName/awayClubName toujours
+// renseignés en plus des slugs, pour affichage même quand la résolution club échoue
+// côté ingestion. Le nom "Warmup" est resté historique (première compétition
+// couverte) mais le type sert aussi à la Coupe de France depuis son ajout.
 // homeClubLogoUrl/awayClubLogoUrl : URL lnh.fr complète du logo (permet de le
 // télécharger localement pour un club hors DB — voir scripts/backfill-warmup-logos.ts).
 // homeClubDivision/awayClubDivision : déduit du 1er segment de l'URL équipe lnh.fr
@@ -117,7 +119,7 @@ export interface ScrapedFixture {
 // notre propre table Club fait autorité, pas ce label lnh.fr).
 export interface ScrapedWarmupMatch {
   calendarsId: string;
-  competitionLabel: string; // "Warm Up" | "Trophée des Champions - WUP"
+  competitionLabel: string; // "Warm Up" | "Trophée des Champions - WUP" | "Coupe de France"
   homeClubSlug: string;
   homeClubName: string;
   homeClubLogoUrl: string;
@@ -567,14 +569,14 @@ export function parseCalendarFromHtml(html: string, seasonStartYear: number): Sc
   return results;
 }
 
-// Parse le calendrier "Warm Up" (WARMUP_CALENDAR_URL) — même structure de bloc que
-// parseCalendarFromHtml (calendars-listing-item), mais sans gameweekNumber (hors
+// Parse le calendrier global lnh.fr (WARMUP_CALENDAR_URL) — même structure de bloc
+// que parseCalendarFromHtml (calendars-listing-item), mais sans gameweekNumber (hors
 // championnat) et avec les noms de club en clair (team-name) en plus des slugs, les
 // deux clubs n'étant pas garantis d'être des clubs Daikin StarLigue connus de notre
-// DB (club de D2/Proligue, ou club étranger). Filtre sur le libellé de compétition :
-// "Warm Up" ou "Trophée des Champions - WUP" — exclut "Trophée des Champions - TDC"
-// (le match d'ouverture officiel, pas un amical) et "Coupe de France" (compétition à
-// part, hors périmètre demandé).
+// DB (club de D2/Proligue, ou club étranger). Générique sur un ensemble de libellés
+// de compétition autorisés — partagé par parseWarmupFromHtml (exclut notamment
+// "Trophée des Champions - TDC", le match d'ouverture officiel, pas un amical) et
+// parseCoupeDeFranceFromHtml, seule la logique de filtre diffère.
 // Les noms de club affichés en clair (team-name) peuvent contenir des entités HTML
 // (ex: "Elite Val d&apos;Oise") — jamais rencontré ailleurs dans ce fichier (les
 // autres champs club viennent de attributs alt="logo X", pas de ce bloc-là), donc pas
@@ -626,7 +628,11 @@ function extractWarmupTeamInfo(block: string): WarmupTeamInfo | null {
   };
 }
 
-export function parseWarmupFromHtml(html: string, seasonStartYear: number): ScrapedWarmupMatch[] {
+function parseFriendlyMatchesFromHtml(
+  html: string,
+  seasonStartYear: number,
+  allowedLabels: ReadonlySet<string>
+): ScrapedWarmupMatch[] {
   const results: ScrapedWarmupMatch[] = [];
 
   const items = html.split('<div class="calendars-listing-item').slice(1);
@@ -637,7 +643,7 @@ export function parseWarmupFromHtml(html: string, seasonStartYear: number): Scra
     if (!idMatch || !competitionMatch || !dateMatch) continue;
 
     const competitionLabel = competitionMatch[1]!.replace(/\s*-\s*$/, "").trim();
-    if (competitionLabel !== "Warm Up" && competitionLabel !== "Trophée des Champions - WUP") continue;
+    if (!allowedLabels.has(competitionLabel)) continue;
 
     const monthKey = dateMatch[2]!.toLowerCase().replace(/\.$/, "");
     const month = MONTH_MAP[monthKey];
@@ -675,6 +681,17 @@ export function parseWarmupFromHtml(html: string, seasonStartYear: number): Scra
   }
 
   return results;
+}
+
+const WARMUP_LABELS = new Set(["Warm Up", "Trophée des Champions - WUP"]);
+const COUPE_DE_FRANCE_LABELS = new Set(["Coupe de France"]);
+
+export function parseWarmupFromHtml(html: string, seasonStartYear: number): ScrapedWarmupMatch[] {
+  return parseFriendlyMatchesFromHtml(html, seasonStartYear, WARMUP_LABELS);
+}
+
+export function parseCoupeDeFranceFromHtml(html: string, seasonStartYear: number): ScrapedWarmupMatch[] {
+  return parseFriendlyMatchesFromHtml(html, seasonStartYear, COUPE_DE_FRANCE_LABELS);
 }
 
 // Une ligne du classement officiel (daikin-starligue/classement, contents_controller=
@@ -1125,12 +1142,13 @@ export class LnhScraperProvider implements StarligueDataProvider {
     return parseCalendarFromHtml(html, seasonStartYear);
   }
 
-  // Matchs de préparation ("Warm Up -", voir WARMUP_CALENDAR_URL/parseWarmupFromHtml)
-  // — même recette que fetchSeasonCalendar (clé CSRF propre à cette page, pas
-  // réutilisable depuis CALENDAR_URL), univers différent ("matchs-6892" au lieu de
-  // "d1-26623"). current_month="all" renvoie toute la saison en une requête (vérifié
-  // le 2026-07-31 : 579 items dont 67 "Warm Up -", tous en août).
-  async fetchWarmupMatches(seasonsId: string, seasonStartYear: number): Promise<ScrapedWarmupMatch[]> {
+  // Calendrier global lnh.fr (WARMUP_CALENDAR_URL, univers="matchs-6892") — même
+  // recette que fetchSeasonCalendar (clé CSRF propre à cette page, pas réutilisable
+  // depuis CALENDAR_URL). current_month="all" renvoie toute la saison en une requête
+  // (vérifié le 2026-07-31 : 579 items dont 67 "Warm Up -", tous en août). Mécanique
+  // HTTP partagée par fetchWarmupMatches et fetchCoupeDeFranceMatches — seul le
+  // filtre de libellé appliqué ensuite par le parseur diffère.
+  private async fetchFriendlyCalendarHtml(seasonsId: string): Promise<string> {
     const res = await this.fetchWithTimeout(WARMUP_CALENDAR_URL, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; StarligueFantasyBot/1.0)" },
     });
@@ -1171,8 +1189,23 @@ export class LnhScraperProvider implements StarligueDataProvider {
       throw new IngestionError("LNH Scraper : impossible de récupérer le calendrier Warm Up (ajaxpost1)", this.name, true);
     }
 
-    const html = await ajaxRes.text();
+    return ajaxRes.text();
+  }
+
+  async fetchWarmupMatches(seasonsId: string, seasonStartYear: number): Promise<ScrapedWarmupMatch[]> {
+    const html = await this.fetchFriendlyCalendarHtml(seasonsId);
     return parseWarmupFromHtml(html, seasonStartYear);
+  }
+
+  // Coupe de France (labellisée "Coupe de France -" par la LNH sur ce même calendrier
+  // global) — mêmes filtres "au moins un club Starligue actif" et mêmes conventions
+  // logos/division que Warm Up côté ingestion (src/lib/ingestion/warmup.ts), stockée
+  // dans la même table FriendlyMatch (competitionLabel distingue les deux à
+  // l'affichage). Vérifié le 2026-08-01 : 12 matchs, tous le 30 août, mélange de
+  // clubs Starligue et de clubs inférieurs français (Besançon, Massy...).
+  async fetchCoupeDeFranceMatches(seasonsId: string, seasonStartYear: number): Promise<ScrapedWarmupMatch[]> {
+    const html = await this.fetchFriendlyCalendarHtml(seasonsId);
+    return parseCoupeDeFranceFromHtml(html, seasonStartYear);
   }
 
   // Récupère le classement officiel d'une saison (daikin-starligue/classement,

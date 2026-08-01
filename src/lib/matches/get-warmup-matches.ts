@@ -1,12 +1,25 @@
-// Résout les matchs de préparation ("Warm Up", ARCHITECTURE.md §19) à afficher sur
-// la page d'accueil, dans le même MatchesStrip que le championnat
-// (src/components/dashboard/MatchesStrip.tsx) — une seule liste chronologique
-// (mélange résultats déjà connus et matchs à venir, le score s'affiche par match
-// selon qu'il est renseigné ou non), pas de séparation résultats/à venir comme pour
-// le championnat : contrairement à une journée de championnat, il n'y a pas de
-// notion de "dernière journée"/"prochaine journée" ici, juste un calendrier continu
-// sur ~1 mois de pré-saison.
+// Résout les matchs hors championnat (Warm Up ET Coupe de France, ARCHITECTURE.md
+// §19) à afficher sur la page d'accueil, dans le même MatchesStrip que le
+// championnat (src/components/dashboard/MatchesStrip.tsx) — une seule liste
+// chronologique par compétition (mélange résultats déjà connus et matchs à venir, le
+// score s'affiche par match selon qu'il est renseigné ou non), pas de séparation
+// résultats/à venir comme pour le championnat : contrairement à une journée de
+// championnat, il n'y a pas de notion de "dernière journée"/"prochaine journée" ici.
+// Les deux compétitions partagent la table FriendlyMatch (competitionLabel les
+// distingue) — chaque fonction filtre donc explicitement sur son propre ensemble de
+// libellés pour ne pas mélanger les deux à l'affichage (ex: le strip "Warm Up" de la
+// home ne doit jamais afficher un match de Coupe de France, et réciproquement).
+//
+// getClubWarmupMatches/getClubCoupeDeFranceMatches (perspective isHome/opponent,
+// même forme que ClubPageMatch de src/lib/clubs/club-page-data.ts) servent à
+// fusionner ces compétitions et le championnat dans un seul flux sur la page club
+// (ClubMatchesPanel) — seuls les clubs Daikin StarLigue ont une page, pas besoin de
+// filtrer les adversaires hors DB (D2/étrangers), ils n'apparaissent que comme
+// adversaire dans la liste d'un club Starligue.
 import { prisma } from "@/lib/db";
+
+const WARMUP_LABELS = ["Warm Up", "Trophée des Champions - WUP"];
+const COUPE_DE_FRANCE_LABELS = ["Coupe de France"];
 
 export interface WarmupMatchClub {
   shortName: string; // pour ClubLogo (tronqué à 3 lettres si pas de logo) — nom scrapé si club inconnu
@@ -38,9 +51,9 @@ function toDisplayClub(
   return { shortName: fallbackName, name: fallbackName, logoUrl, division };
 }
 
-export async function getWarmupMatches(seasonId: string): Promise<WarmupMatchRow[]> {
+async function getFriendlyMatches(seasonId: string, competitionLabels: string[]): Promise<WarmupMatchRow[]> {
   const matches = await prisma.friendlyMatch.findMany({
-    where: { seasonId },
+    where: { seasonId, competitionLabel: { in: competitionLabels } },
     include: {
       homeClub: { select: { shortName: true, name: true, logoUrl: true } },
       awayClub: { select: { shortName: true, name: true, logoUrl: true } },
@@ -56,4 +69,58 @@ export async function getWarmupMatches(seasonId: string): Promise<WarmupMatchRow
     awayScore: m.awayScore,
     kickoffAt: m.kickoffAt,
   }));
+}
+
+export function getWarmupMatches(seasonId: string): Promise<WarmupMatchRow[]> {
+  return getFriendlyMatches(seasonId, WARMUP_LABELS);
+}
+
+export function getCoupeDeFranceMatches(seasonId: string): Promise<WarmupMatchRow[]> {
+  return getFriendlyMatches(seasonId, COUPE_DE_FRANCE_LABELS);
+}
+
+export interface ClubWarmupMatch {
+  id: string;
+  isHome: boolean;
+  opponent: WarmupMatchClub;
+  ownScore: number | null;
+  opponentScore: number | null;
+  kickoffAt: Date;
+}
+
+async function getClubFriendlyMatches(
+  clubId: string,
+  seasonId: string,
+  competitionLabels: string[]
+): Promise<ClubWarmupMatch[]> {
+  const matches = await prisma.friendlyMatch.findMany({
+    where: { seasonId, competitionLabel: { in: competitionLabels }, OR: [{ homeClubId: clubId }, { awayClubId: clubId }] },
+    include: {
+      homeClub: { select: { shortName: true, name: true, logoUrl: true } },
+      awayClub: { select: { shortName: true, name: true, logoUrl: true } },
+    },
+    orderBy: { kickoffAt: "asc" },
+  });
+
+  return matches.map((m) => {
+    const isHome = m.homeClubId === clubId;
+    return {
+      id: m.id,
+      isHome,
+      opponent: isHome
+        ? toDisplayClub(m.awayClub, m.awayClubName, m.awayClubLogoUrl, m.awayClubDivision)
+        : toDisplayClub(m.homeClub, m.homeClubName, m.homeClubLogoUrl, m.homeClubDivision),
+      ownScore: isHome ? m.homeScore : m.awayScore,
+      opponentScore: isHome ? m.awayScore : m.homeScore,
+      kickoffAt: m.kickoffAt,
+    };
+  });
+}
+
+export function getClubWarmupMatches(clubId: string, seasonId: string): Promise<ClubWarmupMatch[]> {
+  return getClubFriendlyMatches(clubId, seasonId, WARMUP_LABELS);
+}
+
+export function getClubCoupeDeFranceMatches(clubId: string, seasonId: string): Promise<ClubWarmupMatch[]> {
+  return getClubFriendlyMatches(clubId, seasonId, COUPE_DE_FRANCE_LABELS);
 }

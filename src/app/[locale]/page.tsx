@@ -7,7 +7,7 @@ import { getDashboardMatchStrips } from "@/lib/matches/dashboard-strips";
 import { getNewsFeed } from "@/lib/news/get-feed";
 import { getTeamOfWeekCard, getPerformancesCard } from "@/lib/news/get-weekly-cards";
 import { getWeeklyStatLeaders } from "@/lib/stats/get-weekly-leaders";
-import { getWarmupMatches } from "@/lib/matches/get-warmup-matches";
+import { getWarmupMatches, getCoupeDeFranceMatches } from "@/lib/matches/get-warmup-matches";
 import { MatchesStrip } from "@/components/dashboard/MatchesStrip";
 import { StandingsSection } from "@/components/starligue/StandingsSection";
 import { NewsFeed } from "@/components/starligue/NewsFeed";
@@ -72,15 +72,17 @@ export default async function HomePage({
     );
   }
 
-  const [standings, matchStrips, newsFeed, teamOfWeek, performances, leaders, warmupMatches] = await Promise.all([
-    getClubStandings(season.id),
-    getDashboardMatchStrips(season.id),
-    getNewsFeed(season.id, { category: category ?? undefined, page }),
-    getTeamOfWeekCard(season.id),
-    getPerformancesCard(season.id),
-    getWeeklyStatLeaders(season.id),
-    getWarmupMatches(season.id),
-  ]);
+  const [standings, matchStrips, newsFeed, teamOfWeek, performances, leaders, warmupMatches, coupeDeFranceMatches] =
+    await Promise.all([
+      getClubStandings(season.id),
+      getDashboardMatchStrips(season.id),
+      getNewsFeed(season.id, { category: category ?? undefined, page }),
+      getTeamOfWeekCard(season.id),
+      getPerformancesCard(season.id),
+      getWeeklyStatLeaders(season.id),
+      getWarmupMatches(season.id),
+      getCoupeDeFranceMatches(season.id),
+    ]);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-4 px-4 pb-16 pt-6 sm:px-6">
@@ -146,6 +148,17 @@ export default async function HomePage({
               matches={warmupMatches}
               fixedColumns={2}
               title={t("warmup.title")}
+              disableLink
+              showDate
+            />
+          )}
+          {coupeDeFranceMatches.length > 0 && (
+            <MatchesStrip
+              variant="upcoming"
+              gameweekNumber={null}
+              matches={coupeDeFranceMatches}
+              fixedColumns={2}
+              title={t("coupeDeFrance.title")}
               disableLink
               showDate
             />

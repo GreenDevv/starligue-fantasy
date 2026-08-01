@@ -5,6 +5,8 @@ import { prisma } from "@/lib/db";
 import { resolveSeasonMode, resolveModeSeason } from "@/lib/team/active-team-context";
 import { SIMULATION_SEASON_LABEL } from "@/lib/simulation/constants";
 import { getClubPageData } from "@/lib/clubs/club-page-data";
+import { getClubWarmupMatches, getClubCoupeDeFranceMatches } from "@/lib/matches/get-warmup-matches";
+import { getClubStandings } from "@/lib/standings/get";
 import { POSITIONS } from "@/lib/squad/validation";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
@@ -24,14 +26,25 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
   });
   if (!club) notFound();
 
-  const [roster, { results, upcoming, goalsChartEntries }] = await Promise.all([
-    prisma.player.findMany({
-      where: { clubId: club.id, seasonId: season.id },
-      orderBy: [{ lastName: "asc" }],
-      select: { id: true, firstName: true, lastName: true, position: true, photoUrl: true, marketValue: true },
-    }),
-    getClubPageData(club.id, season.id, mode),
-  ]);
+  const [roster, { results, upcoming, goalsChartEntries }, warmupMatches, coupeDeFranceMatches, standings] =
+    await Promise.all([
+      prisma.player.findMany({
+        where: { clubId: club.id, seasonId: season.id },
+        orderBy: [{ lastName: "asc" }],
+        select: { id: true, firstName: true, lastName: true, position: true, photoUrl: true, marketValue: true },
+      }),
+      getClubPageData(club.id, season.id, mode),
+      getClubWarmupMatches(club.id, season.id),
+      getClubCoupeDeFranceMatches(club.id, season.id),
+      getClubStandings(season.id),
+    ]);
+
+  // Rang actuel de chaque adversaire pour l'info-bulle des matchs Starligue
+  // (ClubMatchesPanel) — demande explicite de l'utilisateur ("son classement
+  // actuel"), donc le dernier snapshot connu, pas le rang au moment du match.
+  // Record plutôt que Map : ClubMatchesPanel est un Client Component, garder un
+  // type trivialement sérialisable à travers la frontière RSC.
+  const rankByClubId: Record<string, number> = Object.fromEntries(standings.rows.map((r) => [r.clubId, r.rank]));
 
   const rosterByPosition = POSITIONS.map((pos) => ({
     position: pos,
@@ -48,7 +61,7 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
 
       {/* Club header */}
       <div className="flex items-center gap-4 pixel-corners border border-border bg-surface p-4">
-        <ClubLogo club={club} size="lg" />
+        <ClubLogo club={club} size="xl" largeOnDesktop />
         <div>
           <h1 className="text-2xl text-text">{club.name}</h1>
           <p className="text-sm text-text-muted">
@@ -56,6 +69,18 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
           </p>
         </div>
       </div>
+
+      {/* Résultats / prochains matchs — championnat + Warm Up + Coupe de France
+          fusionnés, filtrables par compétition et domicile-extérieur
+          (ARCHITECTURE.md §19) */}
+      <ClubMatchesPanel
+        club={club}
+        results={results}
+        upcoming={upcoming}
+        warmupMatches={warmupMatches}
+        coupeDeFranceMatches={coupeDeFranceMatches}
+        rankByClubId={rankByClubId}
+      />
 
       {/* Buts marqués/encaissés par journée */}
       <div>
@@ -66,9 +91,6 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
           <ClubGoalsChart entries={goalsChartEntries} />
         </div>
       </div>
-
-      {/* Résultats / prochains matchs, filtrables domicile-extérieur */}
-      <ClubMatchesPanel clubId={club.id} results={results} upcoming={upcoming} />
 
       {/* Effectif */}
       <div>

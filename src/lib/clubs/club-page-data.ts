@@ -28,7 +28,11 @@ export interface ClubPageMatch {
 export interface ClubPageData {
   results: ClubPageMatch[]; // les plus récents d'abord
   upcoming: ClubPageMatch[]; // les plus proches d'abord
-  goalsChartEntries: { gameweekNumber: number; values: { goalsFor: number; goalsAgainst: number } }[];
+  goalsChartEntries: {
+    gameweekNumber: number;
+    values: { goalsFor: number; goalsAgainst: number };
+    opponent: { shortName: string; name: string; logoUrl: string | null };
+  }[];
 }
 
 const CLUB_SELECT = { select: { id: true, shortName: true, name: true, logoUrl: true } } as const;
@@ -79,6 +83,7 @@ export async function getClubPageData(clubId: string, seasonId: string, mode: Se
       goalsChartEntries.push({
         gameweekNumber: row.gameweekNumber,
         values: { goalsFor: ownScore, goalsAgainst: opponentScore },
+        opponent,
       });
     } else {
       upcoming.push(row);

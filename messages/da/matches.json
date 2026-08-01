@@ -24,7 +24,14 @@
     "recentResults": "Seneste resultater",
     "noResults": "Ingen resultater for dette filter.",
     "upcoming": "Kommende kampe",
-    "noUpcoming": "Ingen kommende kampe for dette filter."
+    "noUpcoming": "Ingen kommende kampe for dette filter.",
+    "competitionStarligue": "Starligue",
+    "competitionWarmup": "Warm Up",
+    "competitionCoupeDeFrance": "Coupe de France",
+    "calendarPrevMonth": "Forrige måned",
+    "calendarNextMonth": "Næste måned",
+    "calendarNoMatches": "Ingen kampe denne måned for dette filter.",
+    "tooltipRank": "Nuværende placering: {rank}"
   },
   "charts": {
     "goalsFor": "Scorede mål",

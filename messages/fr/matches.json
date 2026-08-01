@@ -24,7 +24,14 @@
     "recentResults": "Derniers résultats",
     "noResults": "Aucun résultat pour ce filtre.",
     "upcoming": "Prochains matchs",
-    "noUpcoming": "Aucun match à venir pour ce filtre."
+    "noUpcoming": "Aucun match à venir pour ce filtre.",
+    "competitionStarligue": "Starligue",
+    "competitionWarmup": "Warm Up",
+    "competitionCoupeDeFrance": "Coupe de France",
+    "calendarPrevMonth": "Mois précédent",
+    "calendarNextMonth": "Mois suivant",
+    "calendarNoMatches": "Aucun match ce mois-ci pour ce filtre.",
+    "tooltipRank": "Classement actuel : {rank}"
   },
   "charts": {
     "goalsFor": "Buts marqués",
