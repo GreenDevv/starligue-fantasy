@@ -40,16 +40,6 @@
     "home": "Local",
     "away": "Visitant"
   },
-  "kitZone": {
-    "jersey": "Samarreta",
-    "shorts": "Pantalons",
-    "socks": "Mitjons"
-  },
-  "jerseyCollar": {
-    "crew": "Rodó",
-    "v-neck": "Pic",
-    "polo": "Polo"
-  },
   "statScope": {
     "gameweek": "Jornada",
     "season": "Temporada",

@@ -28,7 +28,6 @@
     "TRANSFER_INVALID": "Ugyldig transfer",
     "PLAYER_NOT_IN_SQUAD": "Denne spiller er ikke i din trup",
     "CAPTAIN_LOCKED": "Anføreren kan kun ændres i et transfervindue",
-    "NOT_APPLICABLE": "Ingen trøjetilpasning i simulationstilstand",
     "SELF_TRADE": "Kan ikke foreslå en trade til sit eget hold",
     "TEAM_NOT_IN_LEAGUE": "Modtagerholdet blev ikke fundet i denne liga",
     "TRADE_INVALID": "Denne trade er ikke gyldig",
@@ -55,7 +54,7 @@
   },
   "identity": {
     "title": "Dit hold",
-    "subtitle": "Vælg et navn og tilpas din trøje — synlig overalt hvor dit hold vises."
+    "subtitle": "Vælg et navn til dit hold — synligt overalt hvor det vises."
   },
   "build": {
     "titleCreate": "Opret min trup",
@@ -122,7 +121,7 @@
   },
   "view": {
     "editSquad": "Rediger trup",
-    "customizeJersey": "Tilpas trøje",
+    "renameTeam": "Omdøb hold",
     "ptsSeasonLabel": "sæsonpoint",
     "captainLabel": "Anfører · ×2 point",
     "noCaptain": "Ingen",
@@ -149,28 +148,11 @@
     "saveLineupCta": "Gem opstilling"
   },
   "jersey": {
-    "loading3d": "Indlæser 3D-visning…",
     "teamNameLabel": "Holdets navn",
     "teamNamePlaceholder": "Tishs Eksperter",
-    "dragToRotate": "Træk for at rotere",
-    "patternLabel": "Mønster",
-    "collarSleeveColor": "Farve på krave/ærmer",
-    "collarLabel": "Krave",
-    "contrastSleeves": "Kontrastærmer",
-    "numberLabel": "Nummer",
-    "nameFlockLabel": "Navn på ryggen",
-    "nameFlockPlaceholder": "TISH",
     "chooseNameError": "Vælg et holdnavn",
     "saving": "Gemmer…",
-    "submitCta": "Bekræft →",
-    "customColor": "Brugerdefineret farve",
-    "colorSlotFallback": "Farve {n}",
-    "slotLabels": {
-      "0": "Primærfarve",
-      "1": "Sekundærfarve",
-      "2": "Kant",
-      "3": "Detalje"
-    }
+    "submitCta": "Bekræft →"
   },
   "pitch": {
     "svgAriaLabel": "Håndboldbane (halvdel, 20m × 20m), afgrænset til spillezonen",

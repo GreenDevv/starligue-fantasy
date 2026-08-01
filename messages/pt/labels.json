@@ -40,16 +40,6 @@
     "home": "Casa",
     "away": "Fora"
   },
-  "kitZone": {
-    "jersey": "Camisola",
-    "shorts": "Calções",
-    "socks": "Meias"
-  },
-  "jerseyCollar": {
-    "crew": "Redondo",
-    "v-neck": "Bico",
-    "polo": "Polo"
-  },
   "statScope": {
     "gameweek": "Jornada",
     "season": "Época",

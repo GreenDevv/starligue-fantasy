@@ -40,16 +40,6 @@
     "home": "Hjemme",
     "away": "Ude"
   },
-  "kitZone": {
-    "jersey": "Trøje",
-    "shorts": "Shorts",
-    "socks": "Strømper"
-  },
-  "jerseyCollar": {
-    "crew": "Rund",
-    "v-neck": "V",
-    "polo": "Polo"
-  },
   "statScope": {
     "gameweek": "Runde",
     "season": "Sæson",

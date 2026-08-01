@@ -28,7 +28,6 @@
     "TRANSFER_INVALID": "Invalid transfer",
     "PLAYER_NOT_IN_SQUAD": "This player isn't in your squad",
     "CAPTAIN_LOCKED": "The captain can only be changed during a transfer window",
-    "NOT_APPLICABLE": "Jersey customization isn't available in Simulation mode",
     "SELF_TRADE": "You can't propose a trade to your own team",
     "TEAM_NOT_IN_LEAGUE": "Receiving team not found in this league",
     "TRADE_INVALID": "This trade isn't valid",
@@ -55,7 +54,7 @@
   },
   "identity": {
     "title": "Your team",
-    "subtitle": "Pick a name and customize your jersey — visible everywhere your team appears."
+    "subtitle": "Pick a name for your team — visible everywhere it appears."
   },
   "build": {
     "titleCreate": "Create my squad",
@@ -122,7 +121,7 @@
   },
   "view": {
     "editSquad": "Edit squad",
-    "customizeJersey": "Customize jersey",
+    "renameTeam": "Rename team",
     "ptsSeasonLabel": "season pts",
     "captainLabel": "Captain · ×2 pts",
     "noCaptain": "None",
@@ -149,28 +148,11 @@
     "saveLineupCta": "Save lineup"
   },
   "jersey": {
-    "loading3d": "Loading 3D preview…",
     "teamNameLabel": "Team name",
     "teamNamePlaceholder": "Tish's All-Stars",
-    "dragToRotate": "Drag to rotate",
-    "patternLabel": "Pattern",
-    "collarSleeveColor": "Collar / sleeve color",
-    "collarLabel": "Collar",
-    "contrastSleeves": "Contrast sleeves",
-    "numberLabel": "Number",
-    "nameFlockLabel": "Name print",
-    "nameFlockPlaceholder": "TISH",
     "chooseNameError": "Pick a team name",
     "saving": "Saving…",
-    "submitCta": "Confirm →",
-    "customColor": "Custom color",
-    "colorSlotFallback": "Color {n}",
-    "slotLabels": {
-      "0": "Main color",
-      "1": "Secondary color",
-      "2": "Trim",
-      "3": "Detail"
-    }
+    "submitCta": "Confirm →"
   },
   "pitch": {
     "svgAriaLabel": "Handball half-court (20m × 20m), framed on the playing area",

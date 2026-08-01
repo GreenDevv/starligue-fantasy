@@ -1,11 +1,14 @@
-// Rendu SVG du maillot personnalisable — mêmes conventions que
+// Rendu SVG du maillot — mêmes conventions que
 // src/components/pitch/HandballPitch.tsx : viewBox fixe mis à l'échelle via CSS
 // (jamais width/height), couleurs en hex bruts (le SVG ne lit pas les classes
 // Tailwind), <defs> pour la silhouette réutilisée en clipPath. Les régions de
-// motif viennent du registre partagé src/lib/team/kitPatterns.ts, seule
-// source de vérité aussi utilisée par la texture Canvas du viewer 3D.
+// motif viennent du registre partagé src/lib/team/kitPatterns.ts. Le
+// jerseyConfig affiché ici n'est plus personnalisable par l'utilisateur
+// (éditeur supprimé, voir ARCHITECTURE.md §5.x) — figé à DEFAULT_JERSEY_CONFIG
+// depuis la création de l'équipe (ou à sa valeur legacy pour les équipes
+// personnalisées avant la suppression de l'éditeur).
 import { safeJerseyConfig, zoneColor, zonePattern, type JerseyConfig } from "@/lib/team/jersey";
-import { JERSEY_SLEEVE_RIGHT, KIT_SILHOUETTES, silhouetteToSvgPath } from "@/lib/team/kitSilhouettes";
+import { JERSEY_SILHOUETTE, JERSEY_SLEEVE_RIGHT, silhouetteToSvgPath } from "@/lib/team/kitSilhouettes";
 
 interface JerseyProps {
   config: unknown;
@@ -13,10 +16,10 @@ interface JerseyProps {
   className?: string;
 }
 
-// Silhouette torse + manches courtes + encolure — partagée avec KitViewer3D
-// via src/lib/team/kitSilhouettes.ts, réutilisée ici pour le remplissage de
-// base et comme clip pour les calques de motif/manches.
-const BODY_PATH = silhouetteToSvgPath(KIT_SILHOUETTES.jersey);
+// Silhouette torse + manches courtes + encolure (src/lib/team/kitSilhouettes.ts),
+// réutilisée ici pour le remplissage de base et comme clip pour les calques
+// de motif/manches.
+const BODY_PATH = silhouetteToSvgPath(JERSEY_SILHOUETTE);
 
 function PatternLayer({ config, clipId }: { config: JerseyConfig; clipId: string }) {
   const zone = config.jersey;

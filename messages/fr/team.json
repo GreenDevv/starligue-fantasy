@@ -28,7 +28,6 @@
     "TRANSFER_INVALID": "Transfert invalide",
     "PLAYER_NOT_IN_SQUAD": "Ce joueur n'est pas dans ton effectif",
     "CAPTAIN_LOCKED": "Le capitaine ne peut être changé que pendant une fenêtre de transfert",
-    "NOT_APPLICABLE": "Pas de personnalisation de maillot en mode Simulation",
     "SELF_TRADE": "Impossible de proposer un trade à sa propre équipe",
     "TEAM_NOT_IN_LEAGUE": "Équipe destinataire introuvable dans cette ligue",
     "TRADE_INVALID": "Ce trade n'est pas valide",
@@ -55,7 +54,7 @@
   },
   "identity": {
     "title": "Ton équipe",
-    "subtitle": "Choisis un nom et personnalise ton maillot — visible partout où ton équipe apparaît."
+    "subtitle": "Choisis un nom pour ton équipe — visible partout où elle apparaît."
   },
   "build": {
     "titleCreate": "Créer mon effectif",
@@ -122,7 +121,7 @@
   },
   "view": {
     "editSquad": "Modifier effectif",
-    "customizeJersey": "Personnaliser le maillot",
+    "renameTeam": "Renommer l'équipe",
     "ptsSeasonLabel": "pts saison",
     "captainLabel": "Capitaine · ×2 pts",
     "noCaptain": "Aucun",
@@ -149,28 +148,11 @@
     "saveLineupCta": "Sauvegarder l'alignement"
   },
   "jersey": {
-    "loading3d": "Chargement de l'aperçu 3D…",
     "teamNameLabel": "Nom de l'équipe",
     "teamNamePlaceholder": "Les Experts de Tish",
-    "dragToRotate": "Glisser pour faire tourner",
-    "patternLabel": "Motif",
-    "collarSleeveColor": "Couleur du col / manches",
-    "collarLabel": "Col",
-    "contrastSleeves": "Manches contrastées",
-    "numberLabel": "Numéro",
-    "nameFlockLabel": "Nom floqué",
-    "nameFlockPlaceholder": "TISH",
     "chooseNameError": "Choisis un nom d'équipe",
     "saving": "Sauvegarde…",
-    "submitCta": "Valider →",
-    "customColor": "Couleur personnalisée",
-    "colorSlotFallback": "Couleur {n}",
-    "slotLabels": {
-      "0": "Couleur principale",
-      "1": "Couleur secondaire",
-      "2": "Liseré",
-      "3": "Détail"
-    }
+    "submitCta": "Valider →"
   },
   "pitch": {
     "svgAriaLabel": "Demi-terrain de handball (20m × 20m), cadré sur la zone de jeu",

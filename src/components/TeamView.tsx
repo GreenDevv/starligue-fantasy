@@ -282,7 +282,7 @@ export function TeamView({
               href={`/team/identity?league=${leagueId}&from=team`}
               className="text-[10px] text-text-muted transition-colors hover:text-text"
             >
-              {t("view.customizeJersey")}
+              {t("view.renameTeam")}
             </Link>
           )}
         </div>

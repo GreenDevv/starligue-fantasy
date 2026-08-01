@@ -28,7 +28,6 @@
     "TRANSFER_INVALID": "Traspaso no válido",
     "PLAYER_NOT_IN_SQUAD": "Este jugador no está en tu plantilla",
     "CAPTAIN_LOCKED": "El capitán solo se puede cambiar durante una ventana de traspasos",
-    "NOT_APPLICABLE": "La personalización de camiseta no está disponible en modo Simulación",
     "SELF_TRADE": "No puedes proponer un trade a tu propio equipo",
     "TEAM_NOT_IN_LEAGUE": "No se encontró el equipo destinatario en esta liga",
     "TRADE_INVALID": "Este trade no es válido",
@@ -55,7 +54,7 @@
   },
   "identity": {
     "title": "Tu equipo",
-    "subtitle": "Elige un nombre y personaliza tu camiseta — visible en todas partes donde aparezca tu equipo."
+    "subtitle": "Elige un nombre para tu equipo — visible en todas partes donde aparezca."
   },
   "build": {
     "titleCreate": "Crear mi plantilla",
@@ -122,7 +121,7 @@
   },
   "view": {
     "editSquad": "Modificar plantilla",
-    "customizeJersey": "Personalizar camiseta",
+    "renameTeam": "Renombrar equipo",
     "ptsSeasonLabel": "pts de temporada",
     "captainLabel": "Capitán · ×2 pts",
     "noCaptain": "Ninguno",
@@ -149,28 +148,11 @@
     "saveLineupCta": "Guardar alineación"
   },
   "jersey": {
-    "loading3d": "Cargando la vista previa 3D…",
     "teamNameLabel": "Nombre del equipo",
     "teamNamePlaceholder": "Los Cracks de Tish",
-    "dragToRotate": "Arrastra para girar",
-    "patternLabel": "Patrón",
-    "collarSleeveColor": "Color de cuello / mangas",
-    "collarLabel": "Cuello",
-    "contrastSleeves": "Mangas en contraste",
-    "numberLabel": "Número",
-    "nameFlockLabel": "Nombre estampado",
-    "nameFlockPlaceholder": "TISH",
     "chooseNameError": "Elige un nombre de equipo",
     "saving": "Guardando…",
-    "submitCta": "Confirmar →",
-    "customColor": "Color personalizado",
-    "colorSlotFallback": "Color {n}",
-    "slotLabels": {
-      "0": "Color principal",
-      "1": "Color secundario",
-      "2": "Ribete",
-      "3": "Detalle"
-    }
+    "submitCta": "Confirmar →"
   },
   "pitch": {
     "svgAriaLabel": "Media cancha de balonmano (20m × 20m), encuadrada sobre la zona de juego",

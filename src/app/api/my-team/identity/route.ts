@@ -1,19 +1,18 @@
 export const dynamic = "force-dynamic";
 
-// PUT /api/my-team/identity — nom + maillot de l'équipe (remplace le PUT
-// /api/my-team/name jamais construit — ARCHITECTURE.md §6.3)
+// PUT /api/my-team/identity — renommage d'équipe (remplace le PUT
+// /api/my-team/name jamais construit — ARCHITECTURE.md §6.3). Gérait aussi
+// jerseyConfig avant la suppression de l'éditeur de maillot ; le nom du
+// endpoint reste "identity" pour ne pas casser l'appelant existant.
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { resolveActiveLeagueId } from "@/lib/team/active-league";
-import { jerseyConfigSchema } from "@/lib/team/jersey";
-import { resolveSeasonMode } from "@/lib/team/active-team-context";
 
 const bodySchema = z.object({
   leagueId: z.string().cuid().optional(),
   name: z.string().min(1).max(50),
-  jerseyConfig: jerseyConfigSchema,
 });
 
 export async function PUT(request: Request) {
@@ -26,16 +25,6 @@ export async function PUT(request: Request) {
   if (!parsed.success) {
     return NextResponse.json(
       { error: { code: "INVALID_INPUT", message: parsed.error.message } },
-      { status: 400 }
-    );
-  }
-
-  // Personnalisation de maillot = concept live uniquement (SimulationTeam n'a pas
-  // de jerseyConfig, divergence délibérée du schéma) — jamais linké en simulation,
-  // mais garde défensive au cas où la route serait appelée hors mode live.
-  if (resolveSeasonMode() === "simulation") {
-    return NextResponse.json(
-      { error: { code: "NOT_APPLICABLE", message: "Pas de personnalisation de maillot en mode Simulation" } },
       { status: 400 }
     );
   }
@@ -59,8 +48,8 @@ export async function PUT(request: Request) {
 
   const updated = await prisma.fantasyTeam.update({
     where: { id: team.id },
-    data: { name: parsed.data.name, jerseyConfig: parsed.data.jerseyConfig },
-    select: { id: true, name: true, jerseyConfig: true },
+    data: { name: parsed.data.name },
+    select: { id: true, name: true },
   });
 
   return NextResponse.json({ data: updated });

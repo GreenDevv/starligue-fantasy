@@ -1,9 +1,8 @@
-// Registre partagé des motifs de kit — seule source de vérité pour le rendu
-// SVG (Jersey.tsx, vignettes de galerie de l'éditeur) ET la texture Canvas du
-// viewer 3D (KitViewer3D.tsx). Chaque motif est une liste de régions
-// polygonales en coordonnées 0-100 (même repère que Jersey.tsx) ; les régions
-// peuvent dépasser cette zone sans risque car le rendu final est toujours
-// rogné par le clip de la silhouette du vêtement (clipPath SVG ou clip Canvas).
+// Registre des motifs de kit — source de vérité pour le rendu SVG du maillot
+// (Jersey.tsx). Chaque motif est une liste de régions polygonales en
+// coordonnées 0-100 (même repère que Jersey.tsx) ; les régions peuvent
+// dépasser cette zone sans risque car le rendu final est toujours rogné par
+// le clip SVG de la silhouette du maillot.
 
 export interface PatternRegion {
   points: [number, number][];

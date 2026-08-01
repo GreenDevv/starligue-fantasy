@@ -1,7 +1,9 @@
-// Silhouettes des 3 zones du kit, en coordonnées 0-100 (même repère que
-// kitPatterns.ts). Source de vérité unique partagée par :
-// - Jersey.tsx (chemin SVG, via silhouetteToSvgPath)
-// - JerseyEditor.tsx (clipPath des vignettes de motif)
+// Silhouette du maillot, en coordonnées 0-100 (même repère que
+// kitPatterns.ts). Source de vérité unique pour Jersey.tsx (chemin SVG, via
+// silhouetteToSvgPath) — seul consommateur restant depuis la suppression de
+// l'éditeur de personnalisation (JerseyEditor/KitFigure) ; les silhouettes
+// short/chaussettes qu'utilisait sa galerie de motifs ont été retirées avec
+// lui.
 //
 // Le contour du maillot (JERSEY_RIGHT_HALF / JERSEY_SLEEVE_RIGHT) n'est pas
 // dessiné à la main : ses points sont ré-échelonnés depuis le path de
@@ -13,7 +15,6 @@
 // courtes galbées, ourlet arrondi) donne un résultat nettement plus
 // crédible. Toujours uniquement des segments droits (polygone dense) pour
 // rester simple à cliper en SVG.
-import type { KitZoneName } from "./jersey";
 
 export type Silhouette = [number, number][][];
 
@@ -49,20 +50,7 @@ export const JERSEY_SLEEVE_RIGHT: Point[] = JERSEY_RIGHT_HALF.slice(12, 41);
 
 const JERSEY_OUTLINE: Point[] = [...JERSEY_RIGHT_HALF, ...mirrorX(JERSEY_RIGHT_HALF).slice(1)];
 
-export const KIT_SILHOUETTES: Record<KitZoneName, Silhouette> = {
-  jersey: [JERSEY_OUTLINE],
-  // Ceinture + deux jambes (3 sous-chemins disjoints).
-  shorts: [
-    [[15, 5], [85, 5], [85, 35], [15, 35]],
-    [[18, 35], [48, 35], [46, 95], [20, 95]],
-    [[52, 35], [82, 35], [80, 95], [54, 95]],
-  ],
-  // Paire de chaussettes (2 sous-chemins disjoints).
-  socks: [
-    [[20, 5], [45, 5], [42, 90], [23, 90]],
-    [[55, 5], [80, 5], [77, 90], [58, 90]],
-  ],
-};
+export const JERSEY_SILHOUETTE: Silhouette = [JERSEY_OUTLINE];
 
 export function silhouetteToSvgPath(silhouette: Silhouette): string {
   return silhouette

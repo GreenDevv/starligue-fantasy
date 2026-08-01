@@ -28,7 +28,6 @@
     "TRANSFER_INVALID": "Ungültiger Transfer",
     "PLAYER_NOT_IN_SQUAD": "Dieser Spieler ist nicht in deinem Kader",
     "CAPTAIN_LOCKED": "Der Kapitän kann nur während eines Transferfensters geändert werden",
-    "NOT_APPLICABLE": "Keine Trikot-Anpassung im Simulationsmodus",
     "SELF_TRADE": "Ein Trade mit dem eigenen Team ist nicht möglich",
     "TEAM_NOT_IN_LEAGUE": "Empfängerteam in dieser Liga nicht gefunden",
     "TRADE_INVALID": "Dieser Trade ist nicht gültig",
@@ -55,7 +54,7 @@
   },
   "identity": {
     "title": "Dein Team",
-    "subtitle": "Wähle einen Namen und gestalte dein Trikot — sichtbar überall, wo dein Team erscheint."
+    "subtitle": "Wähle einen Namen für dein Team — sichtbar überall, wo es erscheint."
   },
   "build": {
     "titleCreate": "Meinen Kader erstellen",
@@ -122,7 +121,7 @@
   },
   "view": {
     "editSquad": "Kader bearbeiten",
-    "customizeJersey": "Trikot anpassen",
+    "renameTeam": "Team umbenennen",
     "ptsSeasonLabel": "Pkt Saison",
     "captainLabel": "Kapitän · ×2 Pkt",
     "noCaptain": "Keiner",
@@ -149,28 +148,11 @@
     "saveLineupCta": "Aufstellung speichern"
   },
   "jersey": {
-    "loading3d": "3D-Vorschau wird geladen…",
     "teamNameLabel": "Teamname",
     "teamNamePlaceholder": "Die Experten von Tish",
-    "dragToRotate": "Ziehen zum Drehen",
-    "patternLabel": "Muster",
-    "collarSleeveColor": "Farbe von Kragen / Ärmeln",
-    "collarLabel": "Kragen",
-    "contrastSleeves": "Kontrastärmel",
-    "numberLabel": "Nummer",
-    "nameFlockLabel": "Namensaufdruck",
-    "nameFlockPlaceholder": "TISH",
     "chooseNameError": "Wähle einen Teamnamen",
     "saving": "Wird gespeichert…",
-    "submitCta": "Bestätigen →",
-    "customColor": "Eigene Farbe",
-    "colorSlotFallback": "Farbe {n}",
-    "slotLabels": {
-      "0": "Hauptfarbe",
-      "1": "Nebenfarbe",
-      "2": "Paspel",
-      "3": "Detail"
-    }
+    "submitCta": "Bestätigen →"
   },
   "pitch": {
     "svgAriaLabel": "Handball-Spielfeldhälfte (20 m × 20 m), auf die Spielzone zugeschnitten",

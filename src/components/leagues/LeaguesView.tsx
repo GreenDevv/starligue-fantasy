@@ -57,8 +57,8 @@ export function LeaguesView({ initialLeagues, mode, isAdmin }: LeaguesViewProps)
 
   const isFirstLeague = leagues.length === 0;
   // Va directement à la construction d'effectif après création/adhésion à une
-  // première ligue — /team/identity (personnalisation de maillot) reste
-  // accessible depuis /team mais n'est plus imposé à l'onboarding.
+  // première ligue — /team/identity (renommage d'équipe) reste accessible
+  // depuis /team mais n'est plus imposé à l'onboarding.
   const firstLeagueOnboardingHref = (leagueId: string) => `/team/build?league=${leagueId}`;
 
   async function handleCreate(e: FormEvent) {

@@ -28,7 +28,6 @@
     "TRANSFER_INVALID": "Traspàs no vàlid",
     "PLAYER_NOT_IN_SQUAD": "Aquest jugador no és a la teva plantilla",
     "CAPTAIN_LOCKED": "El capità només es pot canviar durant una finestra de traspassos",
-    "NOT_APPLICABLE": "La personalització de la samarreta no està disponible en mode Simulació",
     "SELF_TRADE": "No pots proposar un trade al teu propi equip",
     "TEAM_NOT_IN_LEAGUE": "No s'ha trobat l'equip destinatari en aquesta lliga",
     "TRADE_INVALID": "Aquest trade no és vàlid",
@@ -55,7 +54,7 @@
   },
   "identity": {
     "title": "El teu equip",
-    "subtitle": "Tria un nom i personalitza la teva samarreta — visible a tot arreu on aparegui el teu equip."
+    "subtitle": "Tria un nom per al teu equip — visible a tot arreu on aparegui."
   },
   "build": {
     "titleCreate": "Crear la meva plantilla",
@@ -122,7 +121,7 @@
   },
   "view": {
     "editSquad": "Modificar plantilla",
-    "customizeJersey": "Personalitzar samarreta",
+    "renameTeam": "Canviar el nom de l'equip",
     "ptsSeasonLabel": "pts de temporada",
     "captainLabel": "Capità · ×2 pts",
     "noCaptain": "Cap",
@@ -149,28 +148,11 @@
     "saveLineupCta": "Desar alineació"
   },
   "jersey": {
-    "loading3d": "Carregant la vista prèvia 3D…",
     "teamNameLabel": "Nom de l'equip",
     "teamNamePlaceholder": "Els Cracks d'en Tish",
-    "dragToRotate": "Arrossega per girar",
-    "patternLabel": "Patró",
-    "collarSleeveColor": "Color de coll / mànigues",
-    "collarLabel": "Coll",
-    "contrastSleeves": "Mànigues de contrast",
-    "numberLabel": "Número",
-    "nameFlockLabel": "Nom estampat",
-    "nameFlockPlaceholder": "TISH",
     "chooseNameError": "Tria un nom d'equip",
     "saving": "Desant…",
-    "submitCta": "Confirmar →",
-    "customColor": "Color personalitzat",
-    "colorSlotFallback": "Color {n}",
-    "slotLabels": {
-      "0": "Color principal",
-      "1": "Color secundari",
-      "2": "Vora",
-      "3": "Detall"
-    }
+    "submitCta": "Confirmar →"
   },
   "pitch": {
     "svgAriaLabel": "Mitja pista d'handbol (20m × 20m), enquadrada sobre la zona de joc",

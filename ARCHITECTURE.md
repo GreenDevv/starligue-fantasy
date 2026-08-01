@@ -28,7 +28,6 @@ Starligue Fantasy reprend le modèle Premier League Fantasy appliqué au handbal
 | Ingestion données | Couche d'adapters (API-Sports + scraper LNH + import CSV) | Aucune API ne fournit tout, voir §3 |
 | Cache / jobs | Cron Railway + routes `/api/cron/*` protégées par secret | Pas besoin de Redis en v1 |
 | Validation | Zod partout (API input + parsing données externes) | Les données externes sont non fiables par nature |
-| Rendu 3D (éditeur de kit) | three.js + @react-three/fiber v8 (React 18) + drei, chargés en `next/dynamic({ ssr:false })` sur `/team/identity` uniquement | Vrai aperçu 3D avec rotation demandé (voir §5.x) — seule dépendance lourde du projet, isolée par code-splitting pour ne pas peser sur les autres pages |
 
 ---
 
@@ -394,14 +393,11 @@ Notes de design :
 - `FantasyTeam` unique sur `(userId, leagueId)`, pas sur `userId` seul : chaque ligue créée/rejointe a sa propre équipe (effectif, budget, points, maillot indépendants). Créer/rejoindre une ligue crée l'équipe correspondante dans la même transaction (`POST /api/leagues`, `POST /api/leagues/join`) — l'inscription (`POST /api/auth/register`) ne crée plus que le `User`.
 - Le rôle STARTER/BENCH « courant » vit dans `FantasySquadPlayer.role` ; le job de snapshot le copie dans le lineup à la deadline.
 
-### 5.x Le système de maillot (kit : maillot + short + chaussettes)
+### 5.x Le système de maillot (affichage seul — éditeur supprimé)
 
 `FantasyTeam.jerseyConfig` (Json, jamais de `@default` DB — toujours fourni à la
 création, même convention que `FantasyLineup.entries`) stocke un `JerseyConfig`
-(`src/lib/team/jersey.ts`, validé par Zod). Le nom de champ `jerseyConfig` est
-conservé tel quel (DB, API, tous ses consommateurs) même si le modèle couvre
-désormais tout le kit — seule sa forme interne a changé, pour éviter de
-renommer dans les ~15 fichiers qui l'importent :
+(`src/lib/team/jersey.ts`, validé par Zod) :
 
 ```ts
 interface KitZone {
@@ -421,48 +417,40 @@ interface JerseyConfig {
 }
 ```
 
+⚠️ **Il n'existe plus d'éditeur.** `DEFAULT_JERSEY_CONFIG` (teal/noir/ambre,
+palette §8.1) est appliqué à la création d'une équipe et n'est ensuite plus
+modifiable par l'utilisateur — le champ reste en base et continue d'être
+rendu partout où l'identité d'une équipe apparaît, juste figé. Historique :
+plusieurs itérations d'un éditeur visuel se sont succédé (3D sculpté en
+`THREE.LatheGeometry`, puis silhouette 2D plein corps illustrée en SVG) sans
+jamais convaincre côté produit ; l'éditeur (`JerseyEditor`/`KitFigure`/
+`KitViewer3D`, la dépendance `three`/`@react-three/*`, et la personnalisation
+short/chaussettes de `kitSilhouettes.ts`) a été retiré plutôt que ré-itéré une
+fois de plus. `/team/identity` sert désormais uniquement au **renommage
+d'équipe** (seule UI existante pour ça, cf. §6.3) — même URL conservée, mais
+contenu remplacé par un simple champ nom.
+
 **Registre de motifs (`src/lib/team/kitPatterns.ts`)** : ~25 `PatternDefinition`
 partagées par les 3 zones, chacune une liste de régions polygonales en
 coordonnées `0-100` (mêmes conventions que le SVG) référençant un index de
 `colors`. Quelques générateurs paramétrés (`stripes`, `hoops`, `sash`,
 `halves`/`diagonalSplit`, `chevron`, `yoke`, `cross`…) peuplent la galerie sans
-dessiner chaque motif à la main. C'est la **seule source de vérité** du rendu,
-utilisée à la fois par le SVG (`Jersey.tsx`) et par la texture Canvas du viewer
-3D (`KitViewer3D.tsx`) — jamais de logique de motif dupliquée entre les deux.
+dessiner chaque motif à la main. Reste la source de vérité du rendu (même si
+seul le maillot, pas short/chaussettes, est affiché — voir plus bas).
 
-**Silhouettes (`src/lib/team/kitSilhouettes.ts`)** : les contours 2D de chaque
-zone (maillot/short/chaussettes), en polygones `0-100`, également partagés
-entre le clip SVG et l'extrusion 3D.
+**Silhouette (`src/lib/team/kitSilhouettes.ts`)** : le contour 2D du maillot
+seul, en polygone dense `0-100`, utilisé comme clip SVG par `Jersey.tsx`.
 
-`DEFAULT_JERSEY_CONFIG` (teal/noir/ambre, reprend la palette §8.1) est appliqué
-à la création d'une équipe. `CURATED_JERSEY_SWATCHES` fournit une palette de
-pastilles pour l'éditeur (`JerseyEditor`), en plus d'un sélecteur hex libre.
 `safeJerseyConfig` migre défensivement l'ancien format plat (avant
 l'introduction des zones et du registre élargi) — un `jerseyConfig` legacy en
 base continue de se charger sans erreur.
 
-Le rendu 2D (`Jersey.tsx`) reste un SVG à viewBox fixe, même convention que
+Le rendu (`Jersey.tsx`) est un SVG à viewBox fixe, même convention que
 `HandballPitch.tsx` (couleurs en hex bruts, `<defs>`/`<clipPath>` pour les
-motifs) — il n'affiche que le maillot (pas le short/chaussettes), utilisé par
-`JerseyBadge.tsx` partout où l'identité d'une équipe apparaît en petit format
-(en-tête `/team`, listes de ligues, classements) : un corps complet n'y
-apporterait rien et coûterait en perf sur les listes.
-
-**Aperçu 3D (`KitViewer3D.tsx`, éditeur uniquement)** : ⚠️ rupture avec la
-décision initiale « pas de dépendance npm ajoutée » — `three`,
-`@react-three/fiber` (v8, compatible React 18) et `@react-three/drei` ont été
-ajoutés pour un vrai rendu 3D avec rotation, à la demande explicite du produit
-(inspiration fmkitcreator.com). Chaque zone est une « carte rigide » extrudée
-depuis sa silhouette 2D (`THREE.ExtrudeGeometry`, pas de mannequin sculpté —
-choix délibéré pour rester faisable sans asset 3D dédié), texturée par un
-`<canvas>` offscreen qui rejoue les mêmes régions du registre de motifs.
-`KitViewer3D` est chargé exclusivement via `next/dynamic({ ssr: false })` depuis
-`JerseyEditor` : les pages qui n'affichent que des `JerseyBadge` (classements,
-listes de ligues…) ne doivent jamais charger three.js.
-
-`/team/identity` n'est pas (encore) dans le pilote "borne d'arcade" (§8.1 bis) —
-l'éditeur réutilise les classes `pixel-corners`/`pixel-corners-sm` déjà en
-place avant ce pilote, mais n'adopte pas scanlines/glow, réservés au terrain.
+motifs) — il n'affiche que le maillot (pas le short/chaussettes, jamais montré
+nulle part maintenant que l'éditeur plein-corps a disparu), utilisé par
+`JerseyBadge.tsx` partout où l'identité d'une équipe apparaît (en-tête
+`/team`, listes de ligues, classements).
 
 ---
 
@@ -515,9 +503,9 @@ POST   /api/my-team/squad                 { playerIds: string[14] }
          → v1 : re-soumission complète autorisée tant que isValidated=false ou avant J1
 PUT    /api/my-team/lineup                { starters: string[7] }
          → validation : 1/poste, joueurs ∈ effectif, deadline non passée
-PUT    /api/my-team/identity              { name, jerseyConfig: JerseyConfig }
-         → nom + maillot (voir §5.x) — étape "nom + maillot" de l'onboarding, et
-           réutilisable pour personnaliser après coup (lien depuis /team)
+PUT    /api/my-team/identity              { name } → renommage d'équipe (voir §5.x ;
+         gérait aussi jerseyConfig avant la suppression de l'éditeur de maillot,
+         nom du endpoint conservé tel quel) — lien "Renommer l'équipe" depuis /team
 GET    /api/my-team/history               → points par journée (lineups passés)
 GET    /api/my-team/lineup/:gameweekId    → détail d'une journée (points par joueur)
 ```
@@ -731,8 +719,8 @@ cette page.
 /leagues/[id]           Classement de ligue, évolution des rangs
 /team                   ★ Vue terrain : alignement, points live de la journée
                         (sélecteur de ligue si l'utilisateur en a plusieurs)
-/team/identity          Nom d'équipe + maillot (JerseyEditor) — 1ère étape de
-                        l'onboarding par ligue, réutilisable pour personnaliser après coup
+/team/identity          Renommage d'équipe (voir §5.x) — accessible depuis /team,
+                        plus imposé à l'onboarding
 /team/build             Constitution initiale de l'effectif (wizard 7 postes,
                         budget restant affiché en permanence, validation finale)
 /market                 Marché : table filtrable (poste, club, prix, forme),

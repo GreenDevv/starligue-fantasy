@@ -40,16 +40,6 @@
     "home": "Home",
     "away": "Away"
   },
-  "kitZone": {
-    "jersey": "Jersey",
-    "shorts": "Shorts",
-    "socks": "Socks"
-  },
-  "jerseyCollar": {
-    "crew": "Crew",
-    "v-neck": "V-neck",
-    "polo": "Polo"
-  },
   "statScope": {
     "gameweek": "Matchday",
     "season": "Season",

@@ -28,7 +28,6 @@
     "TRANSFER_INVALID": "Nieprawidłowy transfer",
     "PLAYER_NOT_IN_SQUAD": "Tego zawodnika nie ma w Twoim składzie",
     "CAPTAIN_LOCKED": "Kapitana można zmienić tylko podczas okna transferowego",
-    "NOT_APPLICABLE": "Brak personalizacji koszulki w trybie symulacji",
     "SELF_TRADE": "Nie można zaproponować wymiany własnej drużynie",
     "TEAM_NOT_IN_LEAGUE": "Nie znaleziono drużyny docelowej w tej lidze",
     "TRADE_INVALID": "Ta wymiana jest nieprawidłowa",
@@ -55,7 +54,7 @@
   },
   "identity": {
     "title": "Twoja drużyna",
-    "subtitle": "Wybierz nazwę i spersonalizuj koszulkę — widoczne wszędzie tam, gdzie pojawia się Twoja drużyna."
+    "subtitle": "Wybierz nazwę dla swojej drużyny — widoczną wszędzie tam, gdzie się pojawia."
   },
   "build": {
     "titleCreate": "Ułóż mój skład",
@@ -122,7 +121,7 @@
   },
   "view": {
     "editSquad": "Edytuj skład",
-    "customizeJersey": "Personalizuj koszulkę",
+    "renameTeam": "Zmień nazwę drużyny",
     "ptsSeasonLabel": "pkt w sezonie",
     "captainLabel": "Kapitan · ×2 pkt",
     "noCaptain": "Brak",
@@ -149,28 +148,11 @@
     "saveLineupCta": "Zapisz ustawienie"
   },
   "jersey": {
-    "loading3d": "Ładowanie podglądu 3D…",
     "teamNameLabel": "Nazwa drużyny",
     "teamNamePlaceholder": "Eksperci Tisha",
-    "dragToRotate": "Przeciągnij, aby obrócić",
-    "patternLabel": "Wzór",
-    "collarSleeveColor": "Kolor kołnierza / rękawów",
-    "collarLabel": "Kołnierz",
-    "contrastSleeves": "Kontrastowe rękawy",
-    "numberLabel": "Numer",
-    "nameFlockLabel": "Nazwisko na koszulce",
-    "nameFlockPlaceholder": "TISH",
     "chooseNameError": "Wybierz nazwę drużyny",
     "saving": "Zapisywanie…",
-    "submitCta": "Zatwierdź →",
-    "customColor": "Kolor niestandardowy",
-    "colorSlotFallback": "Kolor {n}",
-    "slotLabels": {
-      "0": "Kolor główny",
-      "1": "Kolor drugorzędny",
-      "2": "Lamówka",
-      "3": "Detal"
-    }
+    "submitCta": "Zatwierdź →"
   },
   "pitch": {
     "svgAriaLabel": "Połowa boiska do piłki ręcznej (20m × 20m), w kadrze strefy gry",

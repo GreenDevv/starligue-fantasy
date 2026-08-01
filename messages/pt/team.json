@@ -28,7 +28,6 @@
     "TRANSFER_INVALID": "Transferência inválida",
     "PLAYER_NOT_IN_SQUAD": "Este jogador não está no teu plantel",
     "CAPTAIN_LOCKED": "O capitão só pode ser alterado durante uma janela de transferências",
-    "NOT_APPLICABLE": "Sem personalização de camisola em modo Simulação",
     "SELF_TRADE": "Impossível propor uma troca à tua própria equipa",
     "TEAM_NOT_IN_LEAGUE": "Equipa destinatária não encontrada nesta liga",
     "TRADE_INVALID": "Esta troca não é válida",
@@ -55,7 +54,7 @@
   },
   "identity": {
     "title": "A tua equipa",
-    "subtitle": "Escolhe um nome e personaliza a tua camisola — visível em todo o lado onde a tua equipa aparece."
+    "subtitle": "Escolhe um nome para a tua equipa — visível em todo o lado onde aparece."
   },
   "build": {
     "titleCreate": "Criar o meu plantel",
@@ -122,7 +121,7 @@
   },
   "view": {
     "editSquad": "Editar plantel",
-    "customizeJersey": "Personalizar a camisola",
+    "renameTeam": "Mudar o nome da equipa",
     "ptsSeasonLabel": "pts época",
     "captainLabel": "Capitão · ×2 pts",
     "noCaptain": "Nenhum",
@@ -149,28 +148,11 @@
     "saveLineupCta": "Guardar o alinhamento"
   },
   "jersey": {
-    "loading3d": "A carregar a pré-visualização 3D…",
     "teamNameLabel": "Nome da equipa",
     "teamNamePlaceholder": "Os Especialistas do Tish",
-    "dragToRotate": "Arrasta para rodar",
-    "patternLabel": "Padrão",
-    "collarSleeveColor": "Cor do colarinho / mangas",
-    "collarLabel": "Colarinho",
-    "contrastSleeves": "Mangas contrastantes",
-    "numberLabel": "Número",
-    "nameFlockLabel": "Nome aplicado",
-    "nameFlockPlaceholder": "TISH",
     "chooseNameError": "Escolhe um nome de equipa",
     "saving": "A guardar…",
-    "submitCta": "Validar →",
-    "customColor": "Cor personalizada",
-    "colorSlotFallback": "Cor {n}",
-    "slotLabels": {
-      "0": "Cor principal",
-      "1": "Cor secundária",
-      "2": "Debrum",
-      "3": "Detalhe"
-    }
+    "submitCta": "Validar →"
   },
   "pitch": {
     "svgAriaLabel": "Meio campo de andebol (20m × 20m), enquadrado na zona de jogo",

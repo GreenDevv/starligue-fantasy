@@ -40,16 +40,6 @@
     "home": "Domowe",
     "away": "Wyjazdowe"
   },
-  "kitZone": {
-    "jersey": "Koszulka",
-    "shorts": "Spodenki",
-    "socks": "Getry"
-  },
-  "jerseyCollar": {
-    "crew": "Okrągły",
-    "v-neck": "V",
-    "polo": "Polo"
-  },
   "statScope": {
     "gameweek": "Kolejka",
     "season": "Sezon",
