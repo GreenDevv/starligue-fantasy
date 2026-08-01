@@ -8,7 +8,9 @@ import { getNewsFeed } from "@/lib/news/get-feed";
 import { getTeamOfWeekCard, getPerformancesCard } from "@/lib/news/get-weekly-cards";
 import { getWeeklyStatLeaders } from "@/lib/stats/get-weekly-leaders";
 import { getWarmupMatches, getCoupeDeFranceMatches } from "@/lib/matches/get-warmup-matches";
+import { getActiveClubs } from "@/lib/clubs/get-active-clubs";
 import { MatchesStrip } from "@/components/dashboard/MatchesStrip";
+import { ClubLogo } from "@/components/ui/ClubLogo";
 import { StandingsSection } from "@/components/starligue/StandingsSection";
 import { NewsFeed } from "@/components/starligue/NewsFeed";
 import { StarligueBestXICard } from "@/components/starligue/StarligueBestXICard";
@@ -72,7 +74,7 @@ export default async function HomePage({
     );
   }
 
-  const [standings, matchStrips, newsFeed, teamOfWeek, performances, leaders, warmupMatches, coupeDeFranceMatches] =
+  const [standings, matchStrips, newsFeed, teamOfWeek, performances, leaders, warmupMatches, coupeDeFranceMatches, clubs] =
     await Promise.all([
       getClubStandings(season.id),
       getDashboardMatchStrips(season.id),
@@ -82,6 +84,7 @@ export default async function HomePage({
       getWeeklyStatLeaders(season.id),
       getWarmupMatches(season.id),
       getCoupeDeFranceMatches(season.id),
+      getActiveClubs(season.id),
     ]);
 
   return (
@@ -116,6 +119,16 @@ export default async function HomePage({
         >
           {session?.user ? t("home.ctaLoggedIn") : t("home.ctaGuest")}
         </Link>
+      </div>
+
+      {/* Les 16 clubs Starligue de la saison, une seule ligne sur toute la largeur
+          (scrollable horizontalement sur mobile si jamais ça ne tient pas). */}
+      <div className="pixel-corners flex items-center justify-between gap-3 overflow-x-auto border border-border bg-surface px-4 py-3">
+        {clubs.map((club) => (
+          <Link key={club.id} href={`/clubs/${club.id}`} className="shrink-0 transition-opacity hover:opacity-80">
+            <ClubLogo club={club} size="md" title={club.name} />
+          </Link>
+        ))}
       </div>
 
       {/* Actus au centre (colonne dominante) ; classement d'un côté, matchs/équipe
