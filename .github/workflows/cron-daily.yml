@@ -140,6 +140,14 @@ jobs:
 
       - name: Installer pnpm
         uses: pnpm/action-setup@v6
+        with:
+          # Version fixée ici plutôt que via packageManager dans package.json :
+          # Railway (Nixpacks) lit aussi ce champ et active la même version via
+          # corepack pour le build — un plantage connu de corepack + pnpm@11.10.0
+          # sur Node 24 (celui utilisé par l'image de build Railway) a cassé le
+          # déploiement prod le 2026-08-01 alors que GitHub Actions n'avait besoin
+          # de ce pin que pour lui-même.
+          version: 11.10.0
 
       - name: Installer Node
         uses: actions/setup-node@v7
