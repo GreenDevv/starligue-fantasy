@@ -123,10 +123,10 @@ export default async function HomePage({
 
       {/* Les 16 clubs Starligue de la saison, une seule ligne sur toute la largeur
           (scrollable horizontalement sur mobile si jamais ça ne tient pas). */}
-      <div className="pixel-corners flex items-center justify-between gap-3 overflow-x-auto border border-border bg-surface px-4 py-3">
+      <div className="pixel-corners flex items-center justify-between gap-1 overflow-x-auto border border-border bg-surface px-3 py-3">
         {clubs.map((club) => (
           <Link key={club.id} href={`/clubs/${club.id}`} className="shrink-0 transition-opacity hover:opacity-80">
-            <ClubLogo club={club} size="md" title={club.name} />
+            <ClubLogo club={club} size="lg" title={club.name} />
           </Link>
         ))}
       </div>
