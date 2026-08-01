@@ -131,29 +131,23 @@ export default async function HomePage({
         ))}
       </div>
 
-      {/* Actus au centre (colonne dominante) ; classement d'un côté, matchs/équipe
-          type/leaders de l'autre. Sur mobile : actus en premier (contenu principal
-          demandé), puis le bloc matchs/perfs, puis le classement. */}
+      {/* Actus au centre (colonne dominante) ; résultats + classement à gauche,
+          matchs à venir/équipe type/leaders à droite. Sur mobile : actus en
+          premier (contenu principal demandé), puis le bloc matchs/perfs, puis
+          résultats+classement. */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_minmax(0,1fr)_300px] lg:items-start">
         <div className="lg:col-start-2 lg:row-start-1">
           <NewsFeed feed={newsFeed} activeCategory={category} />
         </div>
 
         <div className="flex flex-col gap-4 lg:col-start-3 lg:row-start-1">
-          <div className="flex flex-col gap-3">
-            <MatchesStrip
-              variant="results"
-              gameweekNumber={matchStrips.lastResults.gameweekNumber}
-              matches={matchStrips.lastResults.matches}
-              fixedColumns={2}
-            />
-            <MatchesStrip
-              variant="upcoming"
-              gameweekNumber={matchStrips.upcoming.gameweekNumber}
-              matches={matchStrips.upcoming.matches}
-              fixedColumns={2}
-            />
-          </div>
+          <MatchesStrip
+            variant="upcoming"
+            gameweekNumber={matchStrips.upcoming.gameweekNumber}
+            matches={matchStrips.upcoming.matches}
+            fixedColumns={2}
+            tone="highlight"
+          />
           {warmupMatches.length > 0 && (
             <MatchesStrip
               variant="upcoming"
@@ -183,7 +177,13 @@ export default async function HomePage({
           <StatLeadersSection gameweekNumber={leaders.gameweekNumber} categories={leaders.categories} />
         </div>
 
-        <div className="lg:col-start-1 lg:row-start-1">
+        <div className="flex flex-col gap-4 lg:col-start-1 lg:row-start-1">
+          <MatchesStrip
+            variant="results"
+            gameweekNumber={matchStrips.lastResults.gameweekNumber}
+            matches={matchStrips.lastResults.matches}
+            fixedColumns={2}
+          />
           <StandingsSection gameweekNumber={standings.gameweekNumber} rows={standings.rows} />
         </div>
       </div>

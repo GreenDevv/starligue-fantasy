@@ -1,4 +1,4 @@
-name: Cron quotidien (actus + notes/résultats + matchs Warm Up/Coupe de France lnh.fr)
+name: Cron quotidien (actus + matchs Warm Up/Coupe de France lnh.fr)
 
 # Remplace le service Railway "cron-daily" (image curlimages/curl), qui n'a jamais
 # fonctionné : startCommand et cronSchedule tous deux vides côté Railway (confirmé via
@@ -7,15 +7,14 @@ name: Cron quotidien (actus + notes/résultats + matchs Warm Up/Coupe de France 
 # classe de bug que celle documentée en ARCHITECTURE.md §6.7 pour post-stat-leaders.yml
 # (ENTRYPOINT déjà = curl sur cette image → "curl curl ..." si on passe une commande).
 #
-# Cinq jobs, quatre indépendants + un qui dépend des deux syncs "hors championnat"
+# sync-ratings (notes LNH + Match.status/scores) a été extrait dans cron-results.yml
+# le 2026-08-01 : horaire différent voulu (le soir, après les matchs, plutôt que le
+# matin avec le reste) — cf. ce fichier pour le détail.
+#
+# Quatre jobs, trois indépendants + un qui dépend des deux syncs "hors championnat"
 # (l'échec de l'un ne bloque pas les autres, sauf backfill-warmup-logos qui a besoin
 # que sync-warmup ET sync-coupe-de-france soient passés) :
 #   - sync-news       : scrape lnh.fr + sites de clubs (§16)
-#   - sync-ratings    : notes LNH (boxscore) des matchs terminés hier — met aussi à
-#                       jour Match.status/homeScore/awayScore depuis lnh.fr
-#                       (syncCalendarsIdsForSeason, src/lib/ingestion/boxscore.ts),
-#                       utile aux pages de match/club et au règlement des pronostics
-#                       (§14), pas seulement au scoring fantasy (qui n'en dépend pas).
 #   - sync-warmup     : matchs de préparation ("Warm Up", src/lib/ingestion/
 #                       warmup.ts) — calendrier ET résultats en une seule passe,
 #                       calendrier global lnh.fr distinct du calendrier Daikin
@@ -29,11 +28,9 @@ name: Cron quotidien (actus + notes/résultats + matchs Warm Up/Coupe de France 
 #                       main pour qu'un redeploy Railway les embarque
 #                       (scripts/backfill-warmup-logos.ts, filesystem prod éphémère
 #                       — voir commentaire du job).
-# ARCHITECTURE.md §4.1 documente sync-ratings 2×/jour (09h/13h) — ici 1×/jour
-# seulement (06:00 UTC), même simplification assumée que pour le reste des crons
-# non planifiés. Les autres routes /api/cron/* (fixtures/résultats API-Sports,
-# snapshot-lineups, compute-scores, classement, effectifs, pronostics) restent non
-# planifiées — voir ARCHITECTURE.md §6.7.
+# Les autres routes /api/cron/* (fixtures/résultats API-Sports, snapshot-lineups,
+# compute-scores, classement, effectifs, pronostics) restent non planifiées — voir
+# ARCHITECTURE.md §6.7.
 on:
   schedule:
     - cron: "0 6 * * *"
@@ -53,26 +50,6 @@ jobs:
           response=$(curl -sS -w "\n%{http_code}" -X POST \
             -H "Authorization: Bearer ${CRON_SECRET}" \
             "https://starliguefantasy.fr/api/cron/sync-news")
-          body=$(echo "$response" | sed '$d')
-          status=$(echo "$response" | tail -n 1)
-
-          echo "$body" | python3 -m json.tool || echo "$body"
-
-          if [ "$status" -ge 300 ]; then
-            echo "::error::HTTP $status"
-            exit 1
-          fi
-
-  sync-ratings:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Appeler /api/cron/sync-ratings
-        env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
-        run: |
-          response=$(curl -sS -w "\n%{http_code}" -X POST \
-            -H "Authorization: Bearer ${CRON_SECRET}" \
-            "https://starliguefantasy.fr/api/cron/sync-ratings")
           body=$(echo "$response" | sed '$d')
           status=$(echo "$response" | tail -n 1)
 

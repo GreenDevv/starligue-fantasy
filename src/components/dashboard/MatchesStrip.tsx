@@ -57,6 +57,11 @@ interface MatchesStripProps {
   // contrairement au championnat où le range de dates de la journée est déjà dans
   // l'en-tête). Sans effet sur l'usage championnat existant si omis.
   showDate?: boolean;
+  // "highlight" : encart teinté accent (au lieu du gris bg-surface par défaut) pour
+  // le faire ressortir visuellement dans une pile d'encarts similaires (ex:
+  // "prochains matchs" sur la home, pour le distinguer des résultats). Purement
+  // visuel, aucun effet sur le comportement.
+  tone?: "default" | "highlight";
 }
 
 // Même design que "wide", réduit à l'échelle pour "square"/"mini" (widget dashboard
@@ -111,6 +116,7 @@ export function MatchesStrip({
   title: titleOverride,
   disableLink,
   showDate,
+  tone = "default",
 }: MatchesStripProps) {
   const t = useTranslations("dashboard");
   const format = useFormatter();
@@ -118,9 +124,10 @@ export function MatchesStrip({
   const dateRange = formatGameweekRange(format, matches.map((m) => m.kickoffAt));
   const { logo, gridCols: responsiveGridCols, boxPad, outerGap } = SIZE_CONFIG[size];
   const gridCols = fixedColumns ? (fixedColumns === 2 ? "grid-cols-2" : "grid-cols-3") : responsiveGridCols;
+  const containerTone = tone === "highlight" ? "border-accent/40 bg-accent/10" : "border-border bg-surface";
 
   return (
-    <div className="pixel-corners border border-border bg-surface px-3 py-2.5">
+    <div className={`pixel-corners border px-3 py-2.5 ${containerTone}`}>
       <div className="mb-2 flex items-center justify-between">
         <p className="text-[10px] uppercase tracking-widest text-text-muted">{title}</p>
         {gameweekNumber !== null && (

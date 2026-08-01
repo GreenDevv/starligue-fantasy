@@ -1,0 +1,41 @@
+name: Cron résultats du soir (notes LNH + scores matchs)
+
+# Extrait de cron-daily.yml le 2026-08-01 : sync-ratings doit tourner le soir, après
+# les matchs (pas le matin avec les actus/Warm Up), donc horaire de déclenchement
+# séparé. Route derrière : /api/cron/sync-ratings — scrape les notes LNH (boxscore)
+# des matchs récemment terminés et met à jour Match.status/homeScore/awayScore
+# (syncCalendarsIdsForSeason, src/lib/ingestion/boxscore.ts), utile aux pages de
+# match/club et au règlement des pronostics (§14), en plus du scoring fantasy. Voir
+# la mémoire lnh_live_season_results_sync.md : la fenêtre est glissante (dernières
+# 24h), donc l'horaire exact n'a pas besoin d'être précis à la minute.
+#
+# 22:30 UTC = 23:30 à Paris en heure d'hiver (CET, UTC+1) — la majeure partie de la
+# saison (LNH : sept.-juin, la portion hivernale domine). En heure d'été (CEST,
+# UTC+2, début sept. et avril-juin), ça correspond à 00:30 le lendemain plutôt que
+# 23:30 — dérive d'1h assumée plutôt que deux déclencheurs cron à gérer, sans
+# conséquence vu la fenêtre glissante ci-dessus.
+on:
+  schedule:
+    - cron: "30 22 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  sync-ratings:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler /api/cron/sync-ratings
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          response=$(curl -sS -w "\n%{http_code}" -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://starliguefantasy.fr/api/cron/sync-ratings")
+          body=$(echo "$response" | sed '$d')
+          status=$(echo "$response" | tail -n 1)
+
+          echo "$body" | python3 -m json.tool || echo "$body"
+
+          if [ "$status" -ge 300 ]; then
+            echo "::error::HTTP $status"
+            exit 1
+          fi
