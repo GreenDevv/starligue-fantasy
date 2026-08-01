@@ -165,8 +165,15 @@ jobs:
           git add public/clubs/warmup/
           if git diff --cached --quiet; then
             echo "Aucun nouveau logo à committer"
-          else
-            git commit -m "chore: backfill logos clubs Warm Up (auto)"
-            git push
+            exit 0
           fi
+          git commit -m "chore: backfill logos clubs Warm Up (auto)"
+          # main a pu avancer depuis le checkout du job (autre push pendant que le
+          # scraping tournait) — rebase avant de pousser plutôt qu'un push qui
+          # échouerait en non-fast-forward (vécu le 2026-08-01 : le fix pnpm-
+          # workspace.yaml poussé pendant que ce job tournait a fait échouer le
+          # push, alors que le commit local (logos) était pourtant bon).
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
 
