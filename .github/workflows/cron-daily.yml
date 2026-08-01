@@ -144,7 +144,10 @@ jobs:
       - name: Installer Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # pnpm@11.10.0 (packageManager de package.json) exige Node >=22.13 —
+          # "Error [ERR_UNKNOWN_BUILTIN_MODULE]: No such built-in module: node:sqlite"
+          # sur Node 20 sinon (module ajouté en Node 22).
+          node-version: 22
           cache: pnpm
 
       - name: Installer les dépendances
