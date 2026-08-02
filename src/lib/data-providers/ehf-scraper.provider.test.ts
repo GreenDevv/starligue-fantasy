@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mapEhfMatch, EHF_CHAMPIONS_LEAGUE_LABEL, type EhfMatch } from "./ehf-scraper.provider";
+import { mapEhfMatch, parseClubLogosFromHtml, EHF_CHAMPIONS_LEAGUE_LABEL, type EhfMatch } from "./ehf-scraper.provider";
 
 // Échantillon représentatif des 18 clubs Starligue (slug lnh.fr + nom complet) —
 // mêmes valeurs que celles renvoyées par getActiveClubSlugsAndNames en prod.
@@ -115,5 +115,51 @@ describe("mapEhfMatch", () => {
   it("étiquette la compétition passée en paramètre (générique, pas figée)", () => {
     const m = mapEhfMatch(match({ homeName: "HBC Nantes", awayName: "X" }), "EHF European League", KNOWN_CLUBS);
     expect(m.competitionLabel).toBe("EHF European League");
+  });
+});
+
+// Fragment fidèle à la structure réelle capturée le 2026-08-02 sur
+// ehfcl.eurohandball.com/men/2026-27/clubs/ (bloc `class="tg-item"`, logo en
+// data-src car chargement différé côté site, nom encodé en entités HTML).
+function clubItem(opts: { name: string; nation: string; logoUrl: string }): string {
+  return `
+<a href="http://history.eurohandball.com/redirect/club/x" class="tg-item" title="${opts.name} (${opts.nation})">
+    <img class="tg-flag"
+         data-loading="lazy"
+         src="/frontend.kw/dist/assets/img/blank.png"
+         data-src="${opts.logoUrl}"
+         alt="${opts.name} (${opts.nation})">
+  <span class="tg-name">${opts.name}</span>
+  <span class="tg-abbreviation">${opts.nation}</span>
+</a>
+`;
+}
+
+describe("parseClubLogosFromHtml", () => {
+  it("associe chaque nom de club à son URL de logo", () => {
+    const html = [
+      clubItem({ name: "Aalborg H&#xE5;ndbold", nation: "DEN", logoUrl: "https://res.ehf.eu/aalborg" }),
+      clubItem({ name: "Barça", nation: "ESP", logoUrl: "https://res.ehf.eu/barca" }),
+    ].join("");
+    const logos = parseClubLogosFromHtml(html);
+    expect(logos.get("Aalborg Håndbold")).toBe("https://res.ehf.eu/aalborg");
+    expect(logos.get("Barça")).toBe("https://res.ehf.eu/barca");
+    expect(logos.size).toBe(2);
+  });
+
+  it("décode les entités HTML hexadécimales et nommées dans le nom", () => {
+    const html = clubItem({ name: "Rhein-Neckar L&#xF6;wen", nation: "GER", logoUrl: "https://res.ehf.eu/x" });
+    const logos = parseClubLogosFromHtml(html);
+    expect(logos.has("Rhein-Neckar Löwen")).toBe(true);
+  });
+
+  it("ignore un bloc incomplet (pas de data-src ou pas de tg-name)", () => {
+    const html = `<a class="tg-item"><span class="tg-abbreviation">DEN</span></a>`;
+    const logos = parseClubLogosFromHtml(html);
+    expect(logos.size).toBe(0);
+  });
+
+  it("retourne une map vide sur du HTML sans bloc tg-item", () => {
+    expect(parseClubLogosFromHtml("<html><body>rien ici</body></html>").size).toBe(0);
   });
 });

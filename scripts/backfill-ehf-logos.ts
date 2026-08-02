@@ -13,11 +13,26 @@
 // de logo ne sont plus conservées dans FriendlyMatch une fois le chemin local
 // résolu) plutôt que de les lire depuis la DB — même principe que
 // backfill-warmup-logos.ts qui re-scrape lnh.fr au lieu de lire FriendlyMatch.
+//
+// Deux sources de logo côté EHF, dans cet ordre de priorité (vérifié le
+// 2026-08-02) : la page "clubs" de la saison (fetchChampionsLeagueClubLogos/
+// fetchEuropeanLeagueClubLogos) d'abord — l'API matchs (logoBig/logoSmall,
+// consommée par fetchChampionsLeagueMatches/fetchEuropeanLeagueMatches) s'est
+// révélée incomplète : 5 des 9 adversaires EHF CL 2026/27 de nos clubs (Aalborg
+// Håndbold, Barça, HC Vardar 1961, Orlen Wisla Plock, RK Celje Pivovarna Laško)
+// n'ont AUCUN logo sur AUCUN de leurs matchs, alors que la page "clubs" les liste
+// tous. Le fallback sur l'URL de l'API matchs reste utile si un club apparaît en
+// match mais pas (encore) sur la page clubs.
 import { PrismaClient } from "@prisma/client";
 import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { fetchChampionsLeagueMatches, fetchEuropeanLeagueMatches } from "../src/lib/data-providers/ehf-scraper.provider";
+import {
+  fetchChampionsLeagueMatches,
+  fetchEuropeanLeagueMatches,
+  fetchChampionsLeagueClubLogos,
+  fetchEuropeanLeagueClubLogos,
+} from "../src/lib/data-providers/ehf-scraper.provider";
 import { getActiveClubIdBySlug, getActiveClubSlugsAndNames } from "../src/lib/clubs/get-active-club-slugs";
 
 const OUT_DIR = path.join(process.cwd(), "public", "clubs", "warmup");
@@ -52,10 +67,13 @@ async function main() {
   // European League 2026/27 peut ne pas encore être publiée côté EHF (404) — pas
   // une vraie erreur pour ce script, juste rien à backfiller de ce côté-là tant que
   // ce n'est pas le cas (même comportement que sync-european-league).
-  const [clMatches, elMatches] = await Promise.all([
+  const [clMatches, elMatches, clLogos, elLogos] = await Promise.all([
     fetchChampionsLeagueMatches(knownClubs).catch(() => []),
     fetchEuropeanLeagueMatches(knownClubs).catch(() => []),
+    fetchChampionsLeagueClubLogos().catch(() => new Map<string, string>()),
+    fetchEuropeanLeagueClubLogos().catch(() => new Map<string, string>()),
   ]);
+  const clubLogosByName = new Map([...clLogos, ...elLogos]);
 
   const toDownload = new Map<string, string>(); // slug -> logoUrl
   for (const m of [...clMatches, ...elMatches]) {
@@ -63,8 +81,8 @@ async function main() {
     const awayKnown = knownSlugs.has(m.awayClubSlug.toLowerCase());
     if (!homeKnown && !awayKnown) continue; // même filtre que syncFriendlyMatches — hors périmètre
 
-    if (!homeKnown) toDownload.set(m.homeClubSlug, m.homeClubLogoUrl);
-    if (!awayKnown) toDownload.set(m.awayClubSlug, m.awayClubLogoUrl);
+    if (!homeKnown) toDownload.set(m.homeClubSlug, clubLogosByName.get(m.homeClubName) ?? m.homeClubLogoUrl);
+    if (!awayKnown) toDownload.set(m.awayClubSlug, clubLogosByName.get(m.awayClubName) ?? m.awayClubLogoUrl);
   }
 
   const results = { downloaded: 0, alreadyPresent: 0, noLogo: 0, failed: [] as string[] };

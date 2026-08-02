@@ -44,6 +44,12 @@ export const EHF_EUROPEAN_LEAGUE_LABEL = "EHF European League";
 
 const EHF_CHAMPIONS_LEAGUE_URL = "https://ehfcl.eurohandball.com/men/2026-27/matches/";
 const EHF_EUROPEAN_LEAGUE_URL = "https://ehfel.eurohandball.com/men/2026-27/matches/";
+// Page "clubs" de la saison — source de logos plus complète que l'API matchs (voir
+// fetchClubLogos plus bas) : contrairement à data-currentcontentid/competition-id,
+// cette URL ne varie pas d'une compétition à l'autre, seul le domaine change (même
+// chemin /men/2026-27/clubs/ sur les deux sites).
+const EHF_CHAMPIONS_LEAGUE_CLUBS_URL = "https://ehfcl.eurohandball.com/men/2026-27/clubs/";
+const EHF_EUROPEAN_LEAGUE_CLUBS_URL = "https://ehfel.eurohandball.com/men/2026-27/clubs/";
 
 // ---- Résolution du club (nom EHF → slug lnh.fr connu, ou slug dérivé si inconnu) ----
 
@@ -275,4 +281,55 @@ export function fetchChampionsLeagueMatches(knownClubs: { slug: string; name: st
 
 export function fetchEuropeanLeagueMatches(knownClubs: { slug: string; name: string }[]): Promise<ScrapedWarmupMatch[]> {
   return fetchEhfCompetitionMatches(EHF_EUROPEAN_LEAGUE_URL, EHF_EUROPEAN_LEAGUE_LABEL, knownClubs);
+}
+
+// ---- Logos des clubs (page "clubs" de la saison, pas l'API matchs) ----
+
+// L'API matchs (homeTeam.team.logoBig/logoSmall) est incomplète : plusieurs clubs
+// n'ont AUCUN logo sur AUCUN de leurs matchs (vérifié le 2026-08-02 sur 5 clubs EHF
+// CL 2026/27 : Aalborg Håndbold, Barça, HC Vardar 1961, Orlen Wisla Plock, RK Celje
+// Pivovarna Laško — logoBig ET logoSmall null sur la totalité de leurs matchs
+// respectifs). La page "clubs" de la saison (`/men/{saison}/clubs/`, distincte de
+// la page "matchs") liste elle TOUS les clubs avec logo, servie en HTML brut sans
+// JS (comme la page matchs pour contentId/competitionId) — structure par bloc
+// `class="tg-item"` (nom en clair dans `<span class="tg-name">`, logo dans
+// `data-src`, chargement différé côté site mais l'attribut est déjà présent dans le
+// HTML initial). Utilisée uniquement par le backfill de logos
+// (scripts/backfill-ehf-logos.ts) — la synchro des matchs elle-même ne consomme
+// plus aucune URL de logo hotlinkée (résolution 100% locale, voir
+// src/lib/ingestion/warmup.ts).
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&#x([0-9a-f]+);/gi, (_m, hex: string) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_m, dec: string) => String.fromCharCode(Number(dec)))
+    .replace(/&amp;/g, "&")
+    .replace(/&apos;/g, "'")
+    .replace(/&quot;/g, '"');
+}
+
+// Fonction pure (testée) — nom de club (tel qu'affiché sur le site, même forme que
+// team.name côté API matchs) → URL de logo.
+export function parseClubLogosFromHtml(html: string): Map<string, string> {
+  const logos = new Map<string, string>();
+  const items = html.split('class="tg-item"').slice(1);
+  for (const raw of items) {
+    const srcMatch = raw.match(/data-src="([^"]+)"/);
+    const nameMatch = raw.match(/<span class="tg-name">([^<]+)<\/span>/);
+    if (!srcMatch || !nameMatch) continue;
+    logos.set(decodeHtmlEntities(nameMatch[1]!.trim()), srcMatch[1]!);
+  }
+  return logos;
+}
+
+async function fetchClubLogos(clubsPageUrl: string): Promise<Map<string, string>> {
+  const html = await fetchText(clubsPageUrl);
+  return parseClubLogosFromHtml(html);
+}
+
+export function fetchChampionsLeagueClubLogos(): Promise<Map<string, string>> {
+  return fetchClubLogos(EHF_CHAMPIONS_LEAGUE_CLUBS_URL);
+}
+
+export function fetchEuropeanLeagueClubLogos(): Promise<Map<string, string>> {
+  return fetchClubLogos(EHF_EUROPEAN_LEAGUE_CLUBS_URL);
 }

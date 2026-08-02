@@ -1709,10 +1709,28 @@ projet, y compris les clubs Starligue eux-mêmes). `scripts/backfill-ehf-logos.t
 l'API EHF lui-même plutôt que de lire `FriendlyMatch`, dont les URLs de logo
 ne sont plus conservées une fois résolues en chemin local) télécharge vers le
 même dossier partagé `public/clubs/warmup/` — un club hors DB a le même logo
-quelle que soit la compétition. Certains clubs EHF n'ont tout simplement
-aucun logo publié côté API (vérifié le 2026-08-02, ex: Aalborg Håndbold,
-Orlen Wisla Plock) : retombent sur les initiales (`ClubLogo`) comme un
-adversaire Warm Up jamais backfillé, comportement attendu, pas une erreur.
+quelle que soit la compétition.
+
+**Piège trouvé et corrigé : l'API matchs (`logoBig`/`logoSmall`) est
+incomplète, la page "clubs" de la saison ne l'est pas** — signalé par
+l'utilisateur ("je n'ai pas les logos des clubs de EHF CL"), vérifié : 5 des 9
+adversaires EHF CL 2026/27 de nos clubs (Aalborg Håndbold, Barça, HC Vardar
+1961, Orlen Wisla Plock, RK Celje Pivovarna Laško) n'ont AUCUN logo sur AUCUN
+de leurs matchs côté API `competitionmatchesapi`, alors qu'EHF les affiche
+bien sur `/men/{saison}/clubs/` (page distincte de `/men/{saison}/matches/`,
+listant tous les clubs de la compétition avec logo). Cette page est elle
+aussi servie en HTML brut sans JS (même famille de découverte que
+`data-currentcontentid`) — `parseClubLogosFromHtml`
+(`src/lib/data-providers/ehf-scraper.provider.ts`, testée) extrait chaque
+`<a class="tg-item">` (nom dans `<span class="tg-name">`, logo dans
+`data-src`, entités HTML hex/décimales/nommées à décoder). `scripts/
+backfill-ehf-logos.ts` l'utilise en source primaire (par nom d'équipe,
+`fetchChampionsLeagueClubLogos`/`fetchEuropeanLeagueClubLogos`), l'URL de
+l'API matchs ne servant plus que de repli si un club apparaît en match mais
+pas sur la page clubs. Les 9 adversaires ont désormais un logo (0 restant en
+initiales) — un club sans AUCUNE des deux sources retomberait quand même sur
+les initiales (`ClubLogo`), comme un adversaire Warm Up jamais backfillé,
+comportement attendu si jamais rencontré, pas une erreur.
 **Piège rencontré et abandonné en cours de route** : le hotlink direct avait
 d'abord fait planter `ClubLogo` (`next/image` exige une liste blanche
 statique de domaines dans `next.config.mjs`, `<img>` classique utilisé en
