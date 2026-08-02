@@ -302,13 +302,23 @@ export function ClubMatchesPanel({
   const filteredUpcoming = allUpcoming.filter(matchesFilter);
   const filteredAll = useMemo(() => [...filteredResults, ...filteredUpcoming], [filteredResults, filteredUpcoming]);
 
-  const competitionCheckboxes: { kind: CompetitionKind; label: string }[] = [
+  // Un club ne joue jamais Champions League ET European League la même saison
+  // (compétitions européennes mutuellement exclusives) — inutile d'afficher une
+  // case à cocher pour une compétition où ce club n'a de toute façon aucun match
+  // (demande explicite de l'utilisateur). Générique : ne montre QUE les
+  // compétitions ayant au moins un match (résultat ou à venir) pour ce club,
+  // Starligue mise à part (toujours pertinente, chaque club joue le championnat).
+  const kindsWithMatches = new Set<CompetitionKind>([...allResults, ...allUpcoming].map((m) => m.kind));
+  const allCompetitionCheckboxes: { kind: CompetitionKind; label: string }[] = [
     { kind: "starligue", label: t("panel.competitionStarligue") },
     { kind: "warmup", label: t("panel.competitionWarmup") },
     { kind: "coupe", label: t("panel.competitionCoupeDeFrance") },
     { kind: "championsLeague", label: t("panel.competitionChampionsLeague") },
     { kind: "europeanLeague", label: t("panel.competitionEuropeanLeague") },
   ];
+  const competitionCheckboxes = allCompetitionCheckboxes.filter(
+    ({ kind }) => kind === "starligue" || kindsWithMatches.has(kind)
+  );
 
   return (
     <div className="flex flex-col gap-4">
