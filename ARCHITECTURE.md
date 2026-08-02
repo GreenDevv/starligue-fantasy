@@ -1739,6 +1739,26 @@ pour les photos joueurs) — non pertinent une fois le hotlink abandonné, mais
 le contournement `<img>` reste en place dans `ClubLogo` par prudence (défense
 en profondeur si jamais un logo hotlinké venait à réapparaître).
 
+**Piège trouvé et corrigé : même la page "clubs" EHF sert des logos à fond
+blanc opaque pour plusieurs clubs** — signalé par l'utilisateur ("il y a du
+blanc autour, ce n'est pas consistant"), vérifié visuellement sur les 9
+logos : 6 avaient un fond blanc plein (Dinamo Bucuresti, HC Zagreb, MT
+Melsungen, HC Vardar 1961, Orlen Wisla Plock, RK Celje Pivovarna Laško —
+certains même servis en JPEG, format sans transparence possible), contre 3
+correctement transparents (SAH-Aarhus, Aalborg Håndbold, Barça). Aucune
+source EHF (ni API matchs, ni page clubs) n'a de version transparente pour
+ces 6 clubs — remplacés à la main par de meilleures sources : Wikipedia/
+Wikimedia Commons pour 5 (recherche par nom de club, vérification de la
+transparence réelle des coins avant retenue — plusieurs résultats Wikipedia
+avaient eux aussi un fond blanc opaque malgré un format PNG, ex: le premier
+essai pour HC Zagreb), SVG du site officiel `rk-zagreb.hr` rastérisé en PNG
+transparent pour HC Zagreb (aucune version transparente trouvée sur
+Wikipedia). `scripts/backfill-ehf-logos.ts` ne re-télécharge jamais un
+fichier déjà présent (`existsSync`) : ces 6 remplacements manuels sont donc
+protégés indéfiniment contre un futur run automatique du script — voir le
+commentaire du script pour la marche à suivre si l'un de ces clubs
+disparaissait puis réapparaissait un jour (calendrier).
+
 **Ingestion** : `syncChampionsLeagueMatches`/`syncEuropeanLeagueMatches`
 (`src/lib/ingestion/warmup.ts`) — `syncFriendlyMatches` accepte désormais un
 paramètre `source: "lnh" | "ehf"` qui ne bascule plus que la résolution de

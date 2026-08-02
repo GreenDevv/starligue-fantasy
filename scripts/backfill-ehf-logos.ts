@@ -23,6 +23,20 @@
 // n'ont AUCUN logo sur AUCUN de leurs matchs, alors que la page "clubs" les liste
 // tous. Le fallback sur l'URL de l'API matchs reste utile si un club apparaît en
 // match mais pas (encore) sur la page clubs.
+//
+// **Piège découvert le 2026-08-02, à connaître avant de "corriger" ce script** :
+// même la page "clubs" EHF sert des logos avec un FOND BLANC opaque pour plusieurs
+// clubs (Dinamo Bucuresti, HC Zagreb, HC Vardar 1961, Orlen Wisla Plock, RK Celje
+// Pivovarna Laško, MT Melsungen — repéré par l'utilisateur, incohérent avec le
+// reste des logos du site, tous en fond transparent). `downloadLogo` ne re-télécharge
+// JAMAIS un fichier déjà présent (`existsSync`) — ces 6 fichiers ont donc été
+// remplacés À LA MAIN par de meilleures versions à fond transparent (Wikipedia/
+// Wikimedia Commons pour 5, SVG officiel rk-zagreb.hr rastérisé pour HC Zagreb,
+// aucune source EHF n'en avait de correcte) et resteront protégés indéfiniment
+// contre un futur run de ce script, qui ne les verra jamais comme "manquants".
+// Si un de ces 6 clubs disparaît puis réapparaît un jour (fichier supprimé entre
+// temps), vérifier à la main la transparence du logo re-téléchargé avant de le
+// commiter — ne pas supposer que la source EHF s'est améliorée entre-temps.
 import { PrismaClient } from "@prisma/client";
 import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
