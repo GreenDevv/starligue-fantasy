@@ -5,7 +5,8 @@
     "season": "Temporada",
     "goalsByGameweek": "Gols per jornada",
     "rosterCount": "Plantilla — {count, plural, one {# jugador} other {# jugadors}}",
-    "noPlayers": "Cap jugador registrat de moment."
+    "noPlayers": "Cap jugador registrat de moment.",
+    "switchClub": "Canviar de club"
   },
   "compare": {
     "vs": "VS",

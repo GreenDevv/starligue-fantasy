@@ -149,8 +149,13 @@ function MatchesGrid({ club, matches, showScore }: { club: ClubHeaderInfo; match
 // Légende des codes couleur (résultat) et de la nomenclature (compétition) —
 // demande explicite de l'utilisateur, affichée une seule fois au-dessus des
 // résultats/prochains matchs/calendrier puisque les trois vues partagent le même
-// code visuel.
-function MatchesLegend() {
+// code visuel. `visibleKinds` : n'affiche que les badges des compétitions où CE
+// club a effectivement un match (Starligue toujours affiché) — un club ne joue
+// jamais Champions League ET European League la même saison (compétitions
+// mutuellement exclusives), inutile d'expliquer un code qui n'apparaît jamais sur
+// cette page (demande explicite de l'utilisateur, même logique que les cases à
+// cocher de compétition ci-dessus).
+function MatchesLegend({ visibleKinds }: { visibleKinds: Set<CompetitionKind> }) {
   const t = useTranslations("matches");
 
   const swatches: { tone: string; label: string }[] = [
@@ -159,13 +164,14 @@ function MatchesLegend() {
     { tone: "border-accent-secondary/60 bg-accent-secondary/10", label: t("panel.legendDraw") },
     { tone: "border-accent/50 bg-accent/5", label: t("panel.legendUpcoming") },
   ];
-  const badges: { code: string; label: string }[] = [
-    { code: t("list.gameweekShort", { number: "#" }), label: t("panel.competitionStarligue") },
-    { code: t("panel.competitionShortWarmup"), label: t("panel.competitionWarmup") },
-    { code: t("panel.competitionShortCoupe"), label: t("panel.competitionCoupeDeFrance") },
-    { code: t("panel.competitionShortChampionsLeague"), label: t("panel.competitionChampionsLeague") },
-    { code: t("panel.competitionShortEuropeanLeague"), label: t("panel.competitionEuropeanLeague") },
+  const allBadges: { kind: CompetitionKind; code: string; label: string }[] = [
+    { kind: "starligue", code: t("list.gameweekShort", { number: "#" }), label: t("panel.competitionStarligue") },
+    { kind: "warmup", code: t("panel.competitionShortWarmup"), label: t("panel.competitionWarmup") },
+    { kind: "coupe", code: t("panel.competitionShortCoupe"), label: t("panel.competitionCoupeDeFrance") },
+    { kind: "championsLeague", code: t("panel.competitionShortChampionsLeague"), label: t("panel.competitionChampionsLeague") },
+    { kind: "europeanLeague", code: t("panel.competitionShortEuropeanLeague"), label: t("panel.competitionEuropeanLeague") },
   ];
+  const badges = allBadges.filter(({ kind }) => visibleKinds.has(kind));
 
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 pixel-corners border border-border bg-surface px-3 py-2 text-[10px] text-text-muted">
@@ -304,11 +310,15 @@ export function ClubMatchesPanel({
 
   // Un club ne joue jamais Champions League ET European League la même saison
   // (compétitions européennes mutuellement exclusives) — inutile d'afficher une
-  // case à cocher pour une compétition où ce club n'a de toute façon aucun match
-  // (demande explicite de l'utilisateur). Générique : ne montre QUE les
-  // compétitions ayant au moins un match (résultat ou à venir) pour ce club,
-  // Starligue mise à part (toujours pertinente, chaque club joue le championnat).
+  // case à cocher (ni une entrée de légende, voir MatchesLegend) pour une
+  // compétition où ce club n'a de toute façon aucun match (demande explicite de
+  // l'utilisateur). Générique : ne montre QUE les compétitions ayant au moins un
+  // match (résultat ou à venir) pour ce club, Starligue mise à part (toujours
+  // pertinente, chaque club joue le championnat — ajoutée explicitement au cas où
+  // ce club n'aurait ni résultat ni match à venir programmé, ex. tout début/fin de
+  // saison).
   const kindsWithMatches = new Set<CompetitionKind>([...allResults, ...allUpcoming].map((m) => m.kind));
+  kindsWithMatches.add("starligue");
   const allCompetitionCheckboxes: { kind: CompetitionKind; label: string }[] = [
     { kind: "starligue", label: t("panel.competitionStarligue") },
     { kind: "warmup", label: t("panel.competitionWarmup") },
@@ -316,9 +326,7 @@ export function ClubMatchesPanel({
     { kind: "championsLeague", label: t("panel.competitionChampionsLeague") },
     { kind: "europeanLeague", label: t("panel.competitionEuropeanLeague") },
   ];
-  const competitionCheckboxes = allCompetitionCheckboxes.filter(
-    ({ kind }) => kind === "starligue" || kindsWithMatches.has(kind)
-  );
+  const competitionCheckboxes = allCompetitionCheckboxes.filter(({ kind }) => kindsWithMatches.has(kind));
 
   return (
     <div className="flex flex-col gap-4">
@@ -353,7 +361,7 @@ export function ClubMatchesPanel({
         </div>
       </div>
 
-      <MatchesLegend />
+      <MatchesLegend visibleKinds={kindsWithMatches} />
 
       <div>
         <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">{t("panel.recentResults")}</p>

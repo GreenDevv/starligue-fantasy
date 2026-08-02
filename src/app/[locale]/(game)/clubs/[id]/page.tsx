@@ -12,11 +12,12 @@ import {
   getClubEuropeanLeagueMatches,
 } from "@/lib/matches/get-warmup-matches";
 import { getClubStandings } from "@/lib/standings/get";
+import { getActiveClubs } from "@/lib/clubs/get-active-clubs";
 import { POSITIONS } from "@/lib/squad/validation";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
-import { ClubLogo } from "@/components/ui/ClubLogo";
 import { ClubGoalsChart } from "@/components/charts/ClubGoalsChart";
 import { ClubMatchesPanel } from "@/components/clubs/ClubMatchesPanel";
+import { ClubSwitcher } from "@/components/clubs/ClubSwitcher";
 
 export default async function ClubPage({ params }: { params: { id: string } }) {
   const t = await getTranslations("labels");
@@ -39,6 +40,7 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
     championsLeagueMatches,
     europeanLeagueMatches,
     standings,
+    allClubs,
   ] = await Promise.all([
     prisma.player.findMany({
       where: { clubId: club.id, seasonId: season.id },
@@ -51,6 +53,7 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
     getClubChampionsLeagueMatches(club.id, season.id),
     getClubEuropeanLeagueMatches(club.id, season.id),
     getClubStandings(season.id),
+    getActiveClubs(season.id),
   ]);
 
   // Rang actuel de chaque adversaire pour l'info-bulle des matchs Starligue
@@ -73,9 +76,10 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
         ← {tClubs("detail.backToDashboard")}
       </Link>
 
-      {/* Club header */}
+      {/* Club header — logo cliquable, ouvre un menu déroulant pour naviguer vers
+          un autre club (demande explicite de l'utilisateur) */}
       <div className="flex items-center gap-4 pixel-corners border border-border bg-surface p-4">
-        <ClubLogo club={club} size="xl" largeOnDesktop />
+        <ClubSwitcher currentClub={club} clubs={allClubs} />
         <div>
           <h1 className="text-2xl text-text">{club.name}</h1>
           <p className="text-sm text-text-muted">

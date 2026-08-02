@@ -5,7 +5,8 @@
     "season": "Saison",
     "goalsByGameweek": "Tore pro Spieltag",
     "rosterCount": "Kader — {count, plural, one {# Spieler} other {# Spieler}}",
-    "noPlayers": "Bisher kein Spieler erfasst."
+    "noPlayers": "Bisher kein Spieler erfasst.",
+    "switchClub": "Verein wechseln"
   },
   "compare": {
     "vs": "VS",

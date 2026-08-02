@@ -55,15 +55,18 @@ function resolveDivision(slug: string, hrefDivision: string | null): string | nu
   return WARMUP_FOREIGN_CLUB_DIVISIONS[slug.toLowerCase()] ?? null;
 }
 
-// "lnh" (Warm Up/Coupe de France) : logos hors DB résolus localement depuis
-// public/clubs/warmup/ (backfillés à la main, filesystem prod éphémère — voir
-// resolveLocalWarmupLogoUrl) et division dérivée du HTML lnh.fr. "ehf" (EHF
-// Champions League ET European League, même API) : l'API fournit déjà une URL de
-// logo stable (CDN res.ehf.eu, pas de session/expiration observée) et un code
-// nation à 3 lettres tout prêt — hotlinkée directement, pas besoin de réinventer un
-// pipeline de backfill pour cette source (contrairement à lnh.fr, dont les URLs de
-// logo ne sont pas considérées assez stables pour du hotlink direct, cf.
-// ARCHITECTURE.md §19).
+// Logos : les DEUX sources (lnh ET ehf) résolvent désormais leur logo de club hors
+// DB de la même façon — localement depuis public/clubs/warmup/ (backfillés par
+// scripts/backfill-warmup-logos.ts et scripts/backfill-ehf-logos.ts respectivement,
+// même dossier partagé, filesystem prod éphémère — voir resolveLocalWarmupLogoUrl).
+// Un premier jet EHF hotlinkait directement le CDN res.ehf.eu ; revenu en arrière
+// avant que la volumétrie de clubs augmente (Champions League ET European League) —
+// mêmes garanties de disponibilité que Warm Up plutôt que de dépendre de la
+// disponibilité continue d'un CDN tiers, et cohérent avec "aucun logo hotlinké,
+// jamais" déjà appliqué aux clubs Starligue eux-mêmes. Seule la DIVISION reste
+// résolue différemment par source : l'API EHF fournit déjà un code nation à 3
+// lettres tout prêt (m.homeClubDivision), lnh.fr nécessite de le dériver du HTML
+// (resolveDivision).
 type FriendlySource = "lnh" | "ehf";
 
 /**
@@ -95,16 +98,8 @@ async function syncFriendlyMatches(
     }
 
     const dedupeKey = `${source}:${m.calendarsId}`;
-    const homeClubLogoUrl = homeClubId
-      ? null
-      : source === "ehf"
-        ? (m.homeClubLogoUrl || null)
-        : resolveLocalWarmupLogoUrl(m.homeClubSlug);
-    const awayClubLogoUrl = awayClubId
-      ? null
-      : source === "ehf"
-        ? (m.awayClubLogoUrl || null)
-        : resolveLocalWarmupLogoUrl(m.awayClubSlug);
+    const homeClubLogoUrl = homeClubId ? null : resolveLocalWarmupLogoUrl(m.homeClubSlug);
+    const awayClubLogoUrl = awayClubId ? null : resolveLocalWarmupLogoUrl(m.awayClubSlug);
     const homeClubDivision = homeClubId ? null : source === "ehf" ? m.homeClubDivision : resolveDivision(m.homeClubSlug, m.homeClubDivision);
     const awayClubDivision = awayClubId ? null : source === "ehf" ? m.awayClubDivision : resolveDivision(m.awayClubSlug, m.awayClubDivision);
 

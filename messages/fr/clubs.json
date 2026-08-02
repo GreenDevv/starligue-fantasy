@@ -5,7 +5,8 @@
     "season": "Saison",
     "goalsByGameweek": "Buts par journée",
     "rosterCount": "Effectif — {count, plural, one {# joueur} other {# joueurs}}",
-    "noPlayers": "Aucun joueur enregistré pour l'instant."
+    "noPlayers": "Aucun joueur enregistré pour l'instant.",
+    "switchClub": "Changer de club"
   },
   "compare": {
     "vs": "VS",

@@ -27,9 +27,7 @@ name: Cron quotidien (actus + matchs Warm Up/Coupe de France/coupes d'Europe EHF
 #                       ce jour : Nantes/Montpellier/PSG), source différente — API
 #                       JSON EHF, pas lnh.fr (découverte le 2026-08-02,
 #                       src/lib/data-providers/ehf-scraper.provider.ts) — même
-#                       table FriendlyMatch, ne dépend pas de backfill-warmup-logos
-#                       (logos EHF hotlinkés directement, pas de backfill local
-#                       nécessaire pour cette source).
+#                       table FriendlyMatch.
 #   - sync-european-league : EHF European League Men, même mécanique exacte que
 #                       sync-champions-league (même provider, même table). La page
 #                       saison 2026/27 n'existe pas encore côté EHF au moment
@@ -37,12 +35,20 @@ name: Cron quotidien (actus + matchs Warm Up/Coupe de France/coupes d'Europe EHF
 #                       vérifié — 404) : ce job échouera (erreur récupérable)
 #                       jusqu'à sa publication, puis fonctionnera automatiquement
 #                       sans changement de configuration (contentId/competitionId
-#                       découverts dynamiquement par le provider).
-#   - backfill-warmup-logos : télécharge les logos des nouveaux adversaires Warm Up
-#                       ET Coupe de France hors DB (D2/étrangers) et les commit sur
-#                       main pour qu'un redeploy Railway les embarque
-#                       (scripts/backfill-warmup-logos.ts, filesystem prod éphémère
-#                       — voir commentaire du job).
+#                       découverts dynamiquement par le provider). Cet échec
+#                       attendu ne doit PAS empêcher backfill-warmup-logos de
+#                       tourner (voir son `if:`).
+#   - backfill-warmup-logos : télécharge les logos des nouveaux adversaires hors DB
+#                       (D2/étrangers pour Warm Up/Coupe de France, clubs européens
+#                       pour EHF Champions League/European League — même dossier
+#                       public/clubs/warmup/, un club hors DB a le même logo quelle
+#                       que soit la compétition) et les commit sur main pour qu'un
+#                       redeploy Railway les embarque (scripts/backfill-warmup-
+#                       logos.ts + scripts/backfill-ehf-logos.ts, filesystem prod
+#                       éphémère — voir commentaire du job). `if: !cancelled()` :
+#                       tourne même si sync-european-league a échoué (cas attendu
+#                       tant que la page n'existe pas), seule une vraie annulation
+#                       du workflow doit l'empêcher de tourner.
 # Les autres routes /api/cron/* (fixtures/résultats API-Sports, snapshot-lineups,
 # compute-scores, classement, effectifs, pronostics) restent non planifiées — voir
 # ARCHITECTURE.md §6.7.
@@ -156,15 +162,20 @@ jobs:
           fi
 
   # Contrairement aux jobs ci-dessus (simples appels HTTP), celui-ci fait tourner
-  # scripts/backfill-warmup-logos.ts directement sur le runner CI : le build Next.js
-  # standalone en prod (Railway) a un filesystem éphémère, public/ n'y est pas
-  # réinscriptible à l'exécution (voir src/lib/ingestion/warmup.ts et le script
-  # lui-même). Seul un commit des logos dans le repo, suivi d'un redeploy Railway,
-  # les rend disponibles. Dépend de sync-warmup ET sync-coupe-de-france (doivent
-  # tourner avant, pas en parallèle) pour backfiller les logos des adversaires
-  # découverts par CES runs, quelle que soit la compétition.
+  # scripts/backfill-warmup-logos.ts ET scripts/backfill-ehf-logos.ts directement
+  # sur le runner CI : le build Next.js standalone en prod (Railway) a un
+  # filesystem éphémère, public/ n'y est pas réinscriptible à l'exécution (voir
+  # src/lib/ingestion/warmup.ts et les scripts eux-mêmes). Seul un commit des logos
+  # dans le repo, suivi d'un redeploy Railway, les rend disponibles. Dépend des
+  # quatre syncs "hors championnat" (doivent tourner avant, pas en parallèle) pour
+  # backfiller les logos des adversaires découverts par CES runs, quelle que soit
+  # la compétition. `if: !cancelled()` plutôt que le défaut (qui skip si une
+  # dépendance échoue) : sync-european-league échoue tant qu'EHF n'a pas publié la
+  # page 2026/27 (cas attendu, voir plus haut), ça ne doit pas empêcher le backfill
+  # Warm Up/Coupe de France/Champions League de tourner quand même.
   backfill-warmup-logos:
-    needs: [sync-warmup, sync-coupe-de-france]
+    needs: [sync-warmup, sync-coupe-de-france, sync-champions-league, sync-european-league]
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -193,10 +204,15 @@ jobs:
       - name: Installer les dépendances
         run: pnpm install --frozen-lockfile
 
-      - name: Backfill logos Warm Up (lecture DB prod, écriture locale)
+      - name: Backfill logos Warm Up/Coupe de France (lecture DB prod, écriture locale)
         env:
           DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
         run: pnpm tsx scripts/backfill-warmup-logos.ts
+
+      - name: Backfill logos EHF Champions League/European League (re-scrape EHF, écriture locale)
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+        run: pnpm tsx scripts/backfill-ehf-logos.ts
 
       - name: Committer les nouveaux logos si besoin
         run: |
@@ -207,7 +223,7 @@ jobs:
             echo "Aucun nouveau logo à committer"
             exit 0
           fi
-          git commit -m "chore: backfill logos clubs Warm Up (auto)"
+          git commit -m "chore: backfill logos clubs hors DB (Warm Up/Coupe de France/EHF, auto)"
           # main a pu avancer depuis le checkout du job (autre push pendant que le
           # scraping tournait) — rebase avant de pousser plutôt qu'un push qui
           # échouerait en non-fast-forward (vécu le 2026-08-01 : le fix pnpm-

@@ -5,7 +5,8 @@
     "season": "Season",
     "goalsByGameweek": "Goals by matchday",
     "rosterCount": "Roster — {count, plural, one {# player} other {# players}}",
-    "noPlayers": "No players registered yet."
+    "noPlayers": "No players registered yet.",
+    "switchClub": "Switch club"
   },
   "compare": {
     "vs": "VS",

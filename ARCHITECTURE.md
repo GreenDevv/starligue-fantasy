@@ -1617,6 +1617,18 @@ trois blocs. `UnifiedMatch` (`ClubMatchesPanel.tsx`) est exporté et réutilisé
 tel quel par `ClubMatchesCalendar` — seule source de vérité pour la couleur/le
 badge, pas de logique dupliquée entre grille et calendrier.
 
+**Cases à cocher et légende filtrées par pertinence** (2026-08-02, demande
+explicite) : un club ne joue jamais Champions League ET European League la
+même saison (compétitions mutuellement exclusives) — les cases à cocher de
+compétition ET les entrées de légende n'affichent désormais que les
+compétitions où CE club a effectivement au moins un match (résultat ou à
+venir), Starligue mise à part (toujours affichée). Générique sur les 5
+`CompetitionKind` plutôt que spécifique à Champions/European League :
+s'applique aussi à Warm Up/Coupe de France si un club n'y participe pas.
+`kindsWithMatches` (calculé une fois dans `ClubMatchesPanel`, dérivé de
+`allResults`/`allUpcoming` avant filtrage par cases cochées) est la source de
+vérité partagée entre `competitionCheckboxes` et `MatchesLegend`.
+
 ### 19.2 Coupes d'Europe EHF (Champions League + European League)
 
 EHF Champions League ajoutée le 2026-08-02, EHF European League ajoutée le
@@ -1687,34 +1699,62 @@ comptage exhaustif), 18 impliquant un club Starligue ; sur EHF EL 2025/26
 2026/27 existe) : 172 matchs découverts, 9 impliquant un club Starligue (3
 clubs × ~3 matchs déjà joués/à jouer à cette date de la saison passée).
 
-**Logos hotlinkés (contrairement à Warm Up)** : l'API EHF fournit une URL de
-logo stable sur son propre CDN (`res.ehf.eu`), hotlinkée directement plutôt
-que de reconstruire un pipeline de backfill local comme
-`scripts/backfill-warmup-logos.ts` — inutile pour cette source. **Piège
-trouvé et corrigé** : `ClubLogo` (`src/components/ui/ClubLogo.tsx`) passait
-systématiquement par `next/image`, qui exige une liste blanche statique de
-domaines dans `next.config.mjs` — crash `Invalid src prop ... hostname not
-configured` au premier chargement avec un logo EHF. Corrigé en réutilisant
-exactement le même contournement que `PlayerAvatar` pour les photos joueurs
-hotlinkées (domaines de clubs externes imprévisibles) : un `<img>` classique
-pour toute URL absolue (`http...`), `next/image` conservé pour les chemins
-locaux (`/clubs/...`) — aucune whitelist à maintenir dans `next.config.mjs`.
+**Logos backfillés localement, comme Warm Up (pas de hotlink)** : un premier
+jet hotlinkait directement le CDN EHF (`res.ehf.eu`), stable en apparence —
+revenu en arrière le 2026-08-02 à la demande de l'utilisateur, pour les mêmes
+garanties de disponibilité que Warm Up plutôt que de dépendre d'un CDN tiers
+(cohérent avec "aucun logo hotlinké" déjà appliqué partout ailleurs dans le
+projet, y compris les clubs Starligue eux-mêmes). `scripts/backfill-ehf-logos.ts`
+(nouveau, même principe que `scripts/backfill-warmup-logos.ts` : re-scrape
+l'API EHF lui-même plutôt que de lire `FriendlyMatch`, dont les URLs de logo
+ne sont plus conservées une fois résolues en chemin local) télécharge vers le
+même dossier partagé `public/clubs/warmup/` — un club hors DB a le même logo
+quelle que soit la compétition. Certains clubs EHF n'ont tout simplement
+aucun logo publié côté API (vérifié le 2026-08-02, ex: Aalborg Håndbold,
+Orlen Wisla Plock) : retombent sur les initiales (`ClubLogo`) comme un
+adversaire Warm Up jamais backfillé, comportement attendu, pas une erreur.
+**Piège rencontré et abandonné en cours de route** : le hotlink direct avait
+d'abord fait planter `ClubLogo` (`next/image` exige une liste blanche
+statique de domaines dans `next.config.mjs`, `<img>` classique utilisé en
+contournement le temps du premier jet, cf. même astuce que `PlayerAvatar`
+pour les photos joueurs) — non pertinent une fois le hotlink abandonné, mais
+le contournement `<img>` reste en place dans `ClubLogo` par prudence (défense
+en profondeur si jamais un logo hotlinké venait à réapparaître).
 
 **Ingestion** : `syncChampionsLeagueMatches`/`syncEuropeanLeagueMatches`
 (`src/lib/ingestion/warmup.ts`) — `syncFriendlyMatches` accepte désormais un
-paramètre `source: "lnh" | "ehf"` qui bascule la résolution logo/division
-(locale+backfillée pour lnh, directe depuis le payload EHF sinon) et le
+paramètre `source: "lnh" | "ehf"` qui ne bascule plus que la résolution de
+DIVISION (locale+dérivée du HTML pour lnh, code nation direct pour ehf) et le
 préfixe de `dedupeKey` (`"ehf:" + matchId`, au lieu de `"lnh:" +
-calendars_id`). `FriendlyMatch.source` gagne la valeur `EHF_SCRAPER`
-(migration `20260802120000_add_ehf_scraper_source`).
+calendars_id`) — la résolution de LOGO est désormais identique pour les deux
+sources (`resolveLocalWarmupLogoUrl`, voir plus haut). `FriendlyMatch.source`
+gagne la valeur `EHF_SCRAPER` (migration `20260802120000_add_ehf_scraper_source`).
 
 **Cron** : `POST /api/cron/sync-champions-league` et `POST /api/cron/
 sync-european-league`, planifiés dans `cron-daily.yml` (06:00 UTC, jobs
-indépendants, ne dépendent pas de `backfill-warmup-logos` — pas de backfill
-nécessaire pour cette source).
+indépendants). `backfill-warmup-logos` en dépend désormais aussi (en plus de
+`sync-warmup`/`sync-coupe-de-france`) avec `if: ${{ !cancelled() }}` : tourne
+même si `sync-european-league` échoue (cas attendu tant qu'EHF n'a pas publié
+la page), le comportement par défaut de GitHub Actions (skip si une
+dépendance échoue) aurait sinon empêché tout backfill de tourner — y compris
+Warm Up/Coupe de France, sans rapport avec l'échec EHF.
 
 **Affichage** : `get{ChampionsLeague,EuropeanLeague}Matches`/
 `getClub{ChampionsLeague,EuropeanLeague}Matches`
 (`src/lib/matches/get-warmup-matches.ts`), même traitement que Warm Up/Coupe
 de France sur la home (`MatchesStrip`, bloc masqué si aucun match) et sur la
 page club (`ClubMatchesPanel`, §19.1) — nomenclature `CL`/`EL`.
+
+### 19.3 Page club : changer de club depuis le logo
+
+Ajouté le 2026-08-02 (demande explicite) : le logo du club en en-tête de
+`/clubs/[id]` est cliquable et ouvre un menu déroulant listant les clubs
+Starligue actifs (`getActiveClubs`, déjà utilisé pour la bande de logos de la
+home) pour naviguer directement vers un autre club sans repasser par le
+dashboard. `ClubSwitcher` (`src/components/clubs/ClubSwitcher.tsx`) reprend
+telle quelle la mécanique clic-dehors/Échap de `LocaleSwitcher`
+(`src/components/LocaleSwitcher.tsx`, seul autre menu déroulant du projet) —
+`pointerdown` hors du conteneur ou touche Échap ferme le menu, `role="listbox"`/
+`role="option"` pour l'accessibilité. Le club courant reste dans la liste
+(mis en évidence, teinte accent) plutôt qu'exclu — repère visuel "où je suis"
+dans la liste alphabétique plutôt que de la raccourcir.

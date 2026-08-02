@@ -5,7 +5,8 @@
     "season": "Sæson",
     "goalsByGameweek": "Mål pr. runde",
     "rosterCount": "Trup — {count, plural, one {# spiller} other {# spillere}}",
-    "noPlayers": "Ingen spillere registreret endnu."
+    "noPlayers": "Ingen spillere registreret endnu.",
+    "switchClub": "Skift klub"
   },
   "compare": {
     "vs": "VS",
