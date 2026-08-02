@@ -31,7 +31,19 @@
     "calendarPrevMonth": "Mes anterior",
     "calendarNextMonth": "Mes següent",
     "calendarNoMatches": "No hi ha partits aquest mes per a aquest filtre.",
-    "tooltipRank": "Classificació actual: {rank}"
+    "tooltipRank": "Classificació actual: {rank}",
+    "legendTitle": "Llegenda",
+    "legendWin": "Victòria",
+    "legendLoss": "Derrota",
+    "legendDraw": "Empat",
+    "legendUpcoming": "Proper",
+    "competitionShortWarmup": "WU",
+    "competitionShortCoupe": "CDF",
+    "calendarTitle": "Calendari",
+    "competitionChampionsLeague": "EHF Champions League",
+    "competitionShortChampionsLeague": "CL",
+    "competitionEuropeanLeague": "EHF European League",
+    "competitionShortEuropeanLeague": "EL"
   },
   "charts": {
     "goalsFor": "Gols marcats",

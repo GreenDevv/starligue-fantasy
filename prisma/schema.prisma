@@ -53,6 +53,7 @@ enum DataSource {
   CSV
   API_SPORTS
   LNH_SCRAPER
+  EHF_SCRAPER
   MANUAL
 }
 

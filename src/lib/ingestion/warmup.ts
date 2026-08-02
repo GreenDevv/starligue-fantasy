@@ -1,19 +1,22 @@
-// Ingestion des matchs hors championnat (mode "Warm Up" et Coupe de France,
-// ARCHITECTURE.md) — voir src/lib/data-providers/lnh-scraper.provider.ts::
-// fetchWarmupMatches/fetchCoupeDeFranceMatches pour la source (compétitions
-// officiellement labellisées ainsi par la LNH, calendrier global univers=matchs-6892,
-// distinct du calendrier Daikin StarLigue déjà scrapé). Contrairement à Match
-// (championnat), pas de notion de journée/deadline/classement ici — juste une liste
-// de rencontres, upsert idempotent par dedupeKey (même convention que NewsItem, cf.
-// src/lib/news/sync.ts). Les deux compétitions partagent la même table FriendlyMatch
-// (competitionLabel les distingue à l'affichage) et donc la même mécanique
-// d'ingestion (syncFriendlyMatches) — seule la source scrapée diffère. Le nom de ce
-// fichier ("warmup") est resté historique (première compétition couverte).
+// Ingestion des matchs hors championnat (mode "Warm Up", Coupe de France, EHF
+// Champions League, EHF European League — ARCHITECTURE.md §19) — voir
+// src/lib/data-providers/lnh-scraper.provider.ts::fetchWarmupMatches/
+// fetchCoupeDeFranceMatches et src/lib/data-providers/ehf-scraper.provider.ts::
+// fetchChampionsLeagueMatches/fetchEuropeanLeagueMatches pour les sources.
+// Contrairement à Match (championnat), pas de notion de journée/deadline/classement
+// ici — juste une liste de rencontres, upsert idempotent par dedupeKey (même
+// convention que NewsItem, cf. src/lib/news/sync.ts). Les quatre compétitions
+// partagent la même table FriendlyMatch (competitionLabel les distingue à
+// l'affichage) et donc la même mécanique d'ingestion (syncFriendlyMatches) — seules
+// la source scrapée et la résolution logo/division des clubs hors DB diffèrent
+// (`source`, voir plus bas). Le nom de ce fichier ("warmup") est resté historique
+// (première compétition couverte).
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { prisma } from "@/lib/db";
 import { createLnhScraperProvider, type ScrapedWarmupMatch } from "@/lib/data-providers/lnh-scraper.provider";
-import { getActiveClubIdBySlug } from "@/lib/clubs/get-active-club-slugs";
+import { fetchChampionsLeagueMatches, fetchEuropeanLeagueMatches } from "@/lib/data-providers/ehf-scraper.provider";
+import { getActiveClubIdBySlug, getActiveClubSlugsAndNames } from "@/lib/clubs/get-active-club-slugs";
 import { WARMUP_FOREIGN_CLUB_DIVISIONS } from "@/lib/clubs/warmup-foreign-divisions";
 
 export interface WarmupSyncResult {
@@ -52,15 +55,31 @@ function resolveDivision(slug: string, hrefDivision: string | null): string | nu
   return WARMUP_FOREIGN_CLUB_DIVISIONS[slug.toLowerCase()] ?? null;
 }
 
+// "lnh" (Warm Up/Coupe de France) : logos hors DB résolus localement depuis
+// public/clubs/warmup/ (backfillés à la main, filesystem prod éphémère — voir
+// resolveLocalWarmupLogoUrl) et division dérivée du HTML lnh.fr. "ehf" (EHF
+// Champions League ET European League, même API) : l'API fournit déjà une URL de
+// logo stable (CDN res.ehf.eu, pas de session/expiration observée) et un code
+// nation à 3 lettres tout prêt — hotlinkée directement, pas besoin de réinventer un
+// pipeline de backfill pour cette source (contrairement à lnh.fr, dont les URLs de
+// logo ne sont pas considérées assez stables pour du hotlink direct, cf.
+// ARCHITECTURE.md §19).
+type FriendlySource = "lnh" | "ehf";
+
 /**
  * Filtre : garde un match seulement si au moins un des deux clubs a un effectif
  * pour la saison active (getActiveClubIdBySlug — pas juste "existe dans la table
  * Club", qui contient aussi d'anciens clubs relégués comme Dijon/Istres, présents
  * pour le Mode Simulation 2025/26 mais pas la saison Daikin StarLigue 2026/27).
- * Cœur partagé par syncWarmupMatches et syncCoupeDeFranceMatches — seule la liste de
- * matchs déjà scrapée/filtrée par compétition en amont diffère.
+ * Cœur partagé par syncWarmupMatches/syncCoupeDeFranceMatches/
+ * syncChampionsLeagueMatches — seules la liste de matchs déjà scrapée/filtrée par
+ * compétition en amont et la source diffèrent.
  */
-async function syncFriendlyMatches(seasonId: string, matches: ScrapedWarmupMatch[]): Promise<WarmupSyncResult> {
+async function syncFriendlyMatches(
+  seasonId: string,
+  matches: ScrapedWarmupMatch[],
+  source: FriendlySource = "lnh"
+): Promise<WarmupSyncResult> {
   const clubIdBySlug = await getActiveClubIdBySlug(seasonId);
 
   let upserted = 0;
@@ -75,11 +94,19 @@ async function syncFriendlyMatches(seasonId: string, matches: ScrapedWarmupMatch
       continue;
     }
 
-    const dedupeKey = `lnh:${m.calendarsId}`;
-    const homeClubLogoUrl = homeClubId ? null : resolveLocalWarmupLogoUrl(m.homeClubSlug);
-    const awayClubLogoUrl = awayClubId ? null : resolveLocalWarmupLogoUrl(m.awayClubSlug);
-    const homeClubDivision = homeClubId ? null : resolveDivision(m.homeClubSlug, m.homeClubDivision);
-    const awayClubDivision = awayClubId ? null : resolveDivision(m.awayClubSlug, m.awayClubDivision);
+    const dedupeKey = `${source}:${m.calendarsId}`;
+    const homeClubLogoUrl = homeClubId
+      ? null
+      : source === "ehf"
+        ? (m.homeClubLogoUrl || null)
+        : resolveLocalWarmupLogoUrl(m.homeClubSlug);
+    const awayClubLogoUrl = awayClubId
+      ? null
+      : source === "ehf"
+        ? (m.awayClubLogoUrl || null)
+        : resolveLocalWarmupLogoUrl(m.awayClubSlug);
+    const homeClubDivision = homeClubId ? null : source === "ehf" ? m.homeClubDivision : resolveDivision(m.homeClubSlug, m.homeClubDivision);
+    const awayClubDivision = awayClubId ? null : source === "ehf" ? m.awayClubDivision : resolveDivision(m.awayClubSlug, m.awayClubDivision);
 
     await prisma.friendlyMatch.upsert({
       where: { dedupeKey },
@@ -99,6 +126,7 @@ async function syncFriendlyMatches(seasonId: string, matches: ScrapedWarmupMatch
         homeScore: m.homeScore,
         awayScore: m.awayScore,
         dedupeKey,
+        source: source === "ehf" ? "EHF_SCRAPER" : "LNH_SCRAPER",
       },
       // kickoffAt/status/scores peuvent changer d'un run à l'autre (heure provisoire
       // ajustée, match qui se termine) — clubs/compétition/dedupeKey n'ont pas de
@@ -141,4 +169,34 @@ export async function syncCoupeDeFranceMatches(
   const provider = createLnhScraperProvider();
   const matches = await provider.fetchCoupeDeFranceMatches(lnhSeasonsId, seasonStartYear);
   return syncFriendlyMatches(seasonId, matches);
+}
+
+// EHF Champions League Men 2026/27 — clubs Starligue engagés à ce jour : HBC
+// Nantes, Montpellier Handball, Paris Saint-Germain (src/lib/data-providers/
+// ehf-scraper.provider.ts). Aucun paramètre seasonsId/seasonStartYear ici
+// contrairement à syncWarmupMatches/syncCoupeDeFranceMatches : la saison EHF
+// (2026/27) est encodée dans l'URL de la page scrapée, pas de notion de
+// "seasons_id" partagée avec lnh.fr. `knownClubs` (slug lnh.fr + nom) sert à
+// résoudre les équipes EHF par correspondance de nom (aucun identifiant partagé
+// entre les deux sources) — voir resolveClubSlug dans le provider.
+export async function syncChampionsLeagueMatches(seasonId: string): Promise<WarmupSyncResult> {
+  const knownClubs = await getActiveClubSlugsAndNames(seasonId);
+  const matches = await fetchChampionsLeagueMatches(knownClubs);
+  return syncFriendlyMatches(seasonId, matches, "ehf");
+}
+
+// EHF European League Men 2026/27 — 2ᵉ compétition européenne EHF, même mécanique
+// exacte que syncChampionsLeagueMatches (même API, même table FriendlyMatch, même
+// résolution de club par nom). Demande explicite de l'utilisateur le 2026-08-02,
+// alors que la page saison n'existe pas encore côté EHF
+// (`https://ehfel.eurohandball.com/men/2026-27/matches/` → 404 au moment d'écrire ce
+// code, confirmé par l'utilisateur ET vérifié) : grâce à la découverte dynamique des
+// identifiants de compétition (voir le provider), ce cron commencera à fonctionner
+// tout seul dès qu'EHF publiera la page — `fetchEhfCompetitionMatches` lève une
+// IngestionError récupérable en attendant (page 404), sans bloquer les autres jobs
+// du cron quotidien.
+export async function syncEuropeanLeagueMatches(seasonId: string): Promise<WarmupSyncResult> {
+  const knownClubs = await getActiveClubSlugsAndNames(seasonId);
+  const matches = await fetchEuropeanLeagueMatches(knownClubs);
+  return syncFriendlyMatches(seasonId, matches, "ehf");
 }

@@ -169,5 +169,11 @@
       "readyWithGameweek": "Equip preparat — ens veiem a la jornada {number}.",
       "readyForSeason": "Equip preparat per a la temporada."
     }
+  },
+  "championsLeague": {
+    "title": "EHF Champions League"
+  },
+  "europeanLeague": {
+    "title": "EHF European League"
   }
 }

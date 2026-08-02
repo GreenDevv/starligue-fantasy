@@ -4,14 +4,7 @@ import { useMemo, useState } from "react";
 import { useTranslations, useFormatter } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ClubLogo } from "@/components/ui/ClubLogo";
-
-interface CalendarEntry {
-  id: string;
-  kickoffAt: Date;
-  opponent: { shortName: string; name: string; logoUrl: string | null };
-  href: string | null;
-  tooltip: string;
-}
+import type { UnifiedMatch } from "@/components/clubs/ClubMatchesPanel";
 
 function startOfMonth(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), 1);
@@ -25,30 +18,50 @@ function isSameMonth(a: Date, b: Date): boolean {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
 }
 
+// Bornes de navigation : du premier mois avec un match au dernier, en incluant
+// TOUJOURS le mois en cours (même sans aucun match dedans) — sinon "aujourd'hui"
+// pourrait tomber hors de la plage navigable (ex: tous les matchs filtrés sont à
+// venir, mois courant absent de la liste) et le mois initial (voir plus bas) ne
+// serait pas atteignable en arrière.
+function monthRange(matches: UnifiedMatch[]): { first: Date; last: Date } {
+  const today = startOfMonth(new Date());
+  const times = matches.map((m) => startOfMonth(m.kickoffAt).getTime());
+  times.push(today.getTime());
+  return { first: new Date(Math.min(...times)), last: new Date(Math.max(...times)) };
+}
+
+function outcomeToneClasses(m: UnifiedMatch): string {
+  if (m.ownScore === null || m.opponentScore === null) return "border-accent/50 bg-accent/5";
+  if (m.ownScore > m.opponentScore) return "border-points-pos/60 bg-points-pos/10";
+  if (m.ownScore < m.opponentScore) return "border-points-neg/60 bg-points-neg/10";
+  return "border-accent-secondary/60 bg-accent-secondary/10";
+}
+
 // 1er janvier 2024 = un lundi — ancre pratique pour dériver les 7 abréviations de
 // jour localisées (via Intl, donc correctes dans les 8 langues du site) sans
 // dupliquer une table de traduction dédiée.
 const MONDAY_ANCHOR = new Date(2024, 0, 1);
 
-// Vue calendrier mensuel des prochains matchs (championnat + Warm Up fusionnés,
-// cf. ClubMatchesPanel) — demande explicite de l'utilisateur plutôt qu'une simple
-// liste. Navigation mois par mois bornée à [mois du jour ; mois du dernier match] :
-// tous les matchs passés en argument sont par construction à venir (>= aujourd'hui),
-// donc naviguer plus loin ne montrerait jamais que des mois vides.
-export function ClubMatchesCalendar({ matches }: { matches: CalendarEntry[] }) {
+// Vue calendrier mensuel — résultats ET prochains matchs (championnat + Warm Up +
+// Coupe de France) fusionnés, demande explicite de l'utilisateur ("mets les
+// résultats aussi dans le calendrier") plutôt qu'un calendrier limité aux matchs à
+// venir. Teinte par résultat (victoire/défaite/nul/à venir) + badge de nomenclature
+// par compétition sur chaque jour joué — voir la légende dans ClubMatchesPanel, qui
+// utilise exactement les mêmes couleurs/codes. Navigation mois par mois bornée à
+// [premier mois avec un match ou le mois courant ; dernier mois avec un match ou le
+// mois courant].
+export function ClubMatchesCalendar({ matches }: { matches: UnifiedMatch[] }) {
   const t = useTranslations("matches");
   const format = useFormatter();
 
-  const today = useMemo(() => startOfMonth(new Date()), []);
-  const initialMonth = matches.length > 0 ? startOfMonth(matches[0]!.kickoffAt) : today;
-  const [month, setMonth] = useState(initialMonth);
+  const [month, setMonth] = useState(() => startOfMonth(new Date()));
 
-  const lastMonth = matches.length > 0 ? startOfMonth(matches[matches.length - 1]!.kickoffAt) : today;
-  const canGoPrev = month > today;
-  const canGoNext = month < lastMonth;
+  const { first, last } = useMemo(() => monthRange(matches), [matches]);
+  const canGoPrev = month > first;
+  const canGoNext = month < last;
 
   const byDay = useMemo(() => {
-    const map = new Map<number, CalendarEntry[]>();
+    const map = new Map<number, UnifiedMatch[]>();
     for (const m of matches) {
       if (!isSameMonth(m.kickoffAt, month)) continue;
       const day = m.kickoffAt.getDate();
@@ -107,14 +120,20 @@ export function ClubMatchesCalendar({ matches }: { matches: CalendarEntry[] }) {
         {cells.map((day, i) => {
           if (day === null) return <div key={`empty-${i}`} />;
           const dayMatches = byDay.get(day) ?? [];
+          const tone = dayMatches.length > 0 ? outcomeToneClasses(dayMatches[0]!) : "border-border/40";
           return (
             <div
               key={day}
-              className={`flex min-h-[52px] sm:min-h-[64px] flex-col items-center gap-1 rounded-md border p-1 ${
-                dayMatches.length > 0 ? "border-accent/50 bg-accent/5" : "border-border/40"
-              }`}
+              className={`relative flex min-h-[52px] sm:min-h-[64px] flex-col items-center gap-1 rounded-md border p-1 ${tone}`}
             >
-              <span className="text-[10px] text-text-muted">{day}</span>
+              <div className="flex w-full items-center justify-between">
+                <span className="text-[10px] text-text-muted">{day}</span>
+                {dayMatches.length > 0 && (
+                  <span className="text-[7px] font-semibold uppercase leading-none tracking-wide text-text-muted/80">
+                    {dayMatches[0]!.badge}
+                  </span>
+                )}
+              </div>
               <div className="flex flex-wrap items-center justify-center gap-0.5">
                 {dayMatches.map((m) =>
                   m.href ? (

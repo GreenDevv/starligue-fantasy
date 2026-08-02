@@ -31,7 +31,19 @@
     "calendarPrevMonth": "Previous month",
     "calendarNextMonth": "Next month",
     "calendarNoMatches": "No matches this month for this filter.",
-    "tooltipRank": "Current rank: {rank}"
+    "tooltipRank": "Current rank: {rank}",
+    "legendTitle": "Legend",
+    "legendWin": "Win",
+    "legendLoss": "Loss",
+    "legendDraw": "Draw",
+    "legendUpcoming": "Upcoming",
+    "competitionShortWarmup": "WU",
+    "competitionShortCoupe": "CDF",
+    "calendarTitle": "Calendar",
+    "competitionChampionsLeague": "EHF Champions League",
+    "competitionShortChampionsLeague": "CL",
+    "competitionEuropeanLeague": "EHF European League",
+    "competitionShortEuropeanLeague": "EL"
   },
   "charts": {
     "goalsFor": "Goals scored",

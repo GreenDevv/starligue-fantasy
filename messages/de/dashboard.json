@@ -169,5 +169,11 @@
       "readyWithGameweek": "Kader bereit — bis Spieltag {number}.",
       "readyForSeason": "Kader bereit für die Saison."
     }
+  },
+  "championsLeague": {
+    "title": "EHF Champions League"
+  },
+  "europeanLeague": {
+    "title": "EHF European League"
   }
 }

@@ -31,7 +31,19 @@
     "calendarPrevMonth": "Mes anterior",
     "calendarNextMonth": "Mes siguiente",
     "calendarNoMatches": "No hay partidos este mes para este filtro.",
-    "tooltipRank": "Clasificación actual: {rank}"
+    "tooltipRank": "Clasificación actual: {rank}",
+    "legendTitle": "Leyenda",
+    "legendWin": "Victoria",
+    "legendLoss": "Derrota",
+    "legendDraw": "Empate",
+    "legendUpcoming": "Próximo",
+    "competitionShortWarmup": "WU",
+    "competitionShortCoupe": "CDF",
+    "calendarTitle": "Calendario",
+    "competitionChampionsLeague": "EHF Champions League",
+    "competitionShortChampionsLeague": "CL",
+    "competitionEuropeanLeague": "EHF European League",
+    "competitionShortEuropeanLeague": "EL"
   },
   "charts": {
     "goalsFor": "Goles marcados",

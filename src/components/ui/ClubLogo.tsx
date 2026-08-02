@@ -80,6 +80,14 @@ export function ClubLogo({ club, size = "sm", className = "", title, largeOnDesk
   }
 
   const needsWhiteBg = WHITE_BG_CLUBS.has(club.shortName);
+  // Un logo hotlinké (URL absolue http(s), ex: adversaire EHF Champions League,
+  // src/lib/data-providers/ehf-scraper.provider.ts) vient d'un domaine externe
+  // imprévisible — incompatible avec next/image sans whitelist statique par domaine
+  // dans next.config.mjs (même contrainte que PlayerAvatar pour les photos joueurs
+  // hotlinkées). Nos propres logos (clubs Starligue, adversaires Warm Up/Coupe de
+  // France backfillés) restent des chemins locaux (`/clubs/...`) et passent par
+  // next/image comme avant.
+  const isHotlinked = club.logoUrl.startsWith("http");
 
   return (
     <span
@@ -87,13 +95,24 @@ export function ClubLogo({ club, size = "sm", className = "", title, largeOnDesk
       style={sizeStyle}
       title={title}
     >
-      <Image
-        src={club.logoUrl}
-        alt={club.name ?? club.shortName}
-        width={imagePx}
-        height={imagePx}
-        className="h-full w-full object-contain"
-      />
+      {isHotlinked ? (
+        // eslint-disable-next-line @next/next/no-img-element -- logo hébergé sur un domaine externe imprévisible, incompatible avec next/image sans whitelist statique
+        <img
+          src={club.logoUrl}
+          alt={club.name ?? club.shortName}
+          className="h-full w-full object-contain"
+          loading="lazy"
+          referrerPolicy="no-referrer"
+        />
+      ) : (
+        <Image
+          src={club.logoUrl}
+          alt={club.name ?? club.shortName}
+          width={imagePx}
+          height={imagePx}
+          className="h-full w-full object-contain"
+        />
+      )}
     </span>
   );
 }

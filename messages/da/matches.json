@@ -31,7 +31,19 @@
     "calendarPrevMonth": "Forrige måned",
     "calendarNextMonth": "Næste måned",
     "calendarNoMatches": "Ingen kampe denne måned for dette filter.",
-    "tooltipRank": "Nuværende placering: {rank}"
+    "tooltipRank": "Nuværende placering: {rank}",
+    "legendTitle": "Signaturforklaring",
+    "legendWin": "Sejr",
+    "legendLoss": "Nederlag",
+    "legendDraw": "Uafgjort",
+    "legendUpcoming": "Kommende",
+    "competitionShortWarmup": "WU",
+    "competitionShortCoupe": "CDF",
+    "calendarTitle": "Kalender",
+    "competitionChampionsLeague": "EHF Champions League",
+    "competitionShortChampionsLeague": "CL",
+    "competitionEuropeanLeague": "EHF European League",
+    "competitionShortEuropeanLeague": "EL"
   },
   "charts": {
     "goalsFor": "Scorede mål",

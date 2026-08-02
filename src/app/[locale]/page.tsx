@@ -7,7 +7,12 @@ import { getDashboardMatchStrips } from "@/lib/matches/dashboard-strips";
 import { getNewsFeed } from "@/lib/news/get-feed";
 import { getTeamOfWeekCard, getPerformancesCard } from "@/lib/news/get-weekly-cards";
 import { getWeeklyStatLeaders } from "@/lib/stats/get-weekly-leaders";
-import { getWarmupMatches, getCoupeDeFranceMatches } from "@/lib/matches/get-warmup-matches";
+import {
+  getWarmupMatches,
+  getCoupeDeFranceMatches,
+  getChampionsLeagueMatches,
+  getEuropeanLeagueMatches,
+} from "@/lib/matches/get-warmup-matches";
 import { getActiveClubs } from "@/lib/clubs/get-active-clubs";
 import { MatchesStrip } from "@/components/dashboard/MatchesStrip";
 import { ClubLogo } from "@/components/ui/ClubLogo";
@@ -74,18 +79,31 @@ export default async function HomePage({
     );
   }
 
-  const [standings, matchStrips, newsFeed, teamOfWeek, performances, leaders, warmupMatches, coupeDeFranceMatches, clubs] =
-    await Promise.all([
-      getClubStandings(season.id),
-      getDashboardMatchStrips(season.id),
-      getNewsFeed(season.id, { category: category ?? undefined, page }),
-      getTeamOfWeekCard(season.id),
-      getPerformancesCard(season.id),
-      getWeeklyStatLeaders(season.id),
-      getWarmupMatches(season.id),
-      getCoupeDeFranceMatches(season.id),
-      getActiveClubs(season.id),
-    ]);
+  const [
+    standings,
+    matchStrips,
+    newsFeed,
+    teamOfWeek,
+    performances,
+    leaders,
+    warmupMatches,
+    coupeDeFranceMatches,
+    championsLeagueMatches,
+    europeanLeagueMatches,
+    clubs,
+  ] = await Promise.all([
+    getClubStandings(season.id),
+    getDashboardMatchStrips(season.id),
+    getNewsFeed(season.id, { category: category ?? undefined, page }),
+    getTeamOfWeekCard(season.id),
+    getPerformancesCard(season.id),
+    getWeeklyStatLeaders(season.id),
+    getWarmupMatches(season.id),
+    getCoupeDeFranceMatches(season.id),
+    getChampionsLeagueMatches(season.id),
+    getEuropeanLeagueMatches(season.id),
+    getActiveClubs(season.id),
+  ]);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-4 px-4 pb-16 pt-6 sm:px-6">
@@ -166,6 +184,28 @@ export default async function HomePage({
               matches={coupeDeFranceMatches}
               fixedColumns={2}
               title={t("coupeDeFrance.title")}
+              disableLink
+              showDate
+            />
+          )}
+          {championsLeagueMatches.length > 0 && (
+            <MatchesStrip
+              variant="upcoming"
+              gameweekNumber={null}
+              matches={championsLeagueMatches}
+              fixedColumns={2}
+              title={t("championsLeague.title")}
+              disableLink
+              showDate
+            />
+          )}
+          {europeanLeagueMatches.length > 0 && (
+            <MatchesStrip
+              variant="upcoming"
+              gameweekNumber={null}
+              matches={europeanLeagueMatches}
+              fixedColumns={2}
+              title={t("europeanLeague.title")}
               disableLink
               showDate
             />

@@ -169,5 +169,11 @@
       "readyWithGameweek": "Plantel pronto — encontro na jornada {number}.",
       "readyForSeason": "Plantel pronto para a época."
     }
+  },
+  "championsLeague": {
+    "title": "EHF Champions League"
+  },
+  "europeanLeague": {
+    "title": "EHF European League"
   }
 }

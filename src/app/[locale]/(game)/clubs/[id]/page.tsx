@@ -5,7 +5,12 @@ import { prisma } from "@/lib/db";
 import { resolveSeasonMode, resolveModeSeason } from "@/lib/team/active-team-context";
 import { SIMULATION_SEASON_LABEL } from "@/lib/simulation/constants";
 import { getClubPageData } from "@/lib/clubs/club-page-data";
-import { getClubWarmupMatches, getClubCoupeDeFranceMatches } from "@/lib/matches/get-warmup-matches";
+import {
+  getClubWarmupMatches,
+  getClubCoupeDeFranceMatches,
+  getClubChampionsLeagueMatches,
+  getClubEuropeanLeagueMatches,
+} from "@/lib/matches/get-warmup-matches";
 import { getClubStandings } from "@/lib/standings/get";
 import { POSITIONS } from "@/lib/squad/validation";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
@@ -26,18 +31,27 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
   });
   if (!club) notFound();
 
-  const [roster, { results, upcoming, goalsChartEntries }, warmupMatches, coupeDeFranceMatches, standings] =
-    await Promise.all([
-      prisma.player.findMany({
-        where: { clubId: club.id, seasonId: season.id },
-        orderBy: [{ lastName: "asc" }],
-        select: { id: true, firstName: true, lastName: true, position: true, photoUrl: true, marketValue: true },
-      }),
-      getClubPageData(club.id, season.id, mode),
-      getClubWarmupMatches(club.id, season.id),
-      getClubCoupeDeFranceMatches(club.id, season.id),
-      getClubStandings(season.id),
-    ]);
+  const [
+    roster,
+    { results, upcoming, goalsChartEntries },
+    warmupMatches,
+    coupeDeFranceMatches,
+    championsLeagueMatches,
+    europeanLeagueMatches,
+    standings,
+  ] = await Promise.all([
+    prisma.player.findMany({
+      where: { clubId: club.id, seasonId: season.id },
+      orderBy: [{ lastName: "asc" }],
+      select: { id: true, firstName: true, lastName: true, position: true, photoUrl: true, marketValue: true },
+    }),
+    getClubPageData(club.id, season.id, mode),
+    getClubWarmupMatches(club.id, season.id),
+    getClubCoupeDeFranceMatches(club.id, season.id),
+    getClubChampionsLeagueMatches(club.id, season.id),
+    getClubEuropeanLeagueMatches(club.id, season.id),
+    getClubStandings(season.id),
+  ]);
 
   // Rang actuel de chaque adversaire pour l'info-bulle des matchs Starligue
   // (ClubMatchesPanel) — demande explicite de l'utilisateur ("son classement
@@ -70,15 +84,17 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
         </div>
       </div>
 
-      {/* Résultats / prochains matchs — championnat + Warm Up + Coupe de France
-          fusionnés, filtrables par compétition et domicile-extérieur
-          (ARCHITECTURE.md §19) */}
+      {/* Résultats / prochains matchs — championnat + Warm Up + Coupe de France +
+          EHF Champions League + EHF European League fusionnés, filtrables par
+          compétition et domicile-extérieur (ARCHITECTURE.md §19) */}
       <ClubMatchesPanel
         club={club}
         results={results}
         upcoming={upcoming}
         warmupMatches={warmupMatches}
         coupeDeFranceMatches={coupeDeFranceMatches}
+        championsLeagueMatches={championsLeagueMatches}
+        europeanLeagueMatches={europeanLeagueMatches}
         rankByClubId={rankByClubId}
       />
 

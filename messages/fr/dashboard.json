@@ -169,5 +169,11 @@
       "readyWithGameweek": "Effectif prêt — rendez-vous en journée {number}.",
       "readyForSeason": "Effectif prêt pour la saison."
     }
+  },
+  "championsLeague": {
+    "title": "EHF Champions League"
+  },
+  "europeanLeague": {
+    "title": "EHF European League"
   }
 }

@@ -1,4 +1,4 @@
-name: Cron quotidien (actus + matchs Warm Up/Coupe de France lnh.fr)
+name: Cron quotidien (actus + matchs Warm Up/Coupe de France/coupes d'Europe EHF)
 
 # Remplace le service Railway "cron-daily" (image curlimages/curl), qui n'a jamais
 # fonctionné : startCommand et cronSchedule tous deux vides côté Railway (confirmé via
@@ -11,9 +11,9 @@ name: Cron quotidien (actus + matchs Warm Up/Coupe de France lnh.fr)
 # le 2026-08-01 : horaire différent voulu (le soir, après les matchs, plutôt que le
 # matin avec le reste) — cf. ce fichier pour le détail.
 #
-# Quatre jobs, trois indépendants + un qui dépend des deux syncs "hors championnat"
-# (l'échec de l'un ne bloque pas les autres, sauf backfill-warmup-logos qui a besoin
-# que sync-warmup ET sync-coupe-de-france soient passés) :
+# Six jobs, cinq indépendants + un qui dépend des deux syncs lnh.fr "hors
+# championnat" (l'échec de l'un ne bloque pas les autres, sauf backfill-warmup-logos
+# qui a besoin que sync-warmup ET sync-coupe-de-france soient passés) :
 #   - sync-news       : scrape lnh.fr + sites de clubs (§16)
 #   - sync-warmup     : matchs de préparation ("Warm Up", src/lib/ingestion/
 #                       warmup.ts) — calendrier ET résultats en une seule passe,
@@ -23,6 +23,21 @@ name: Cron quotidien (actus + matchs Warm Up/Coupe de France lnh.fr)
 #                       France -" (découverte le 2026-08-01, ajoutée sur le même
 #                       principe que Warm Up — src/lib/ingestion/warmup.ts::
 #                       syncCoupeDeFranceMatches, même table FriendlyMatch).
+#   - sync-champions-league : EHF Champions League Men (clubs Starligue engagés à
+#                       ce jour : Nantes/Montpellier/PSG), source différente — API
+#                       JSON EHF, pas lnh.fr (découverte le 2026-08-02,
+#                       src/lib/data-providers/ehf-scraper.provider.ts) — même
+#                       table FriendlyMatch, ne dépend pas de backfill-warmup-logos
+#                       (logos EHF hotlinkés directement, pas de backfill local
+#                       nécessaire pour cette source).
+#   - sync-european-league : EHF European League Men, même mécanique exacte que
+#                       sync-champions-league (même provider, même table). La page
+#                       saison 2026/27 n'existe pas encore côté EHF au moment
+#                       d'ajouter ce job (2026-08-02, confirmé par l'utilisateur ET
+#                       vérifié — 404) : ce job échouera (erreur récupérable)
+#                       jusqu'à sa publication, puis fonctionnera automatiquement
+#                       sans changement de configuration (contentId/competitionId
+#                       découverts dynamiquement par le provider).
 #   - backfill-warmup-logos : télécharge les logos des nouveaux adversaires Warm Up
 #                       ET Coupe de France hors DB (D2/étrangers) et les commit sur
 #                       main pour qu'un redeploy Railway les embarque
@@ -90,6 +105,46 @@ jobs:
           response=$(curl -sS -w "\n%{http_code}" -X POST \
             -H "Authorization: Bearer ${CRON_SECRET}" \
             "https://starliguefantasy.fr/api/cron/sync-coupe-de-france")
+          body=$(echo "$response" | sed '$d')
+          status=$(echo "$response" | tail -n 1)
+
+          echo "$body" | python3 -m json.tool || echo "$body"
+
+          if [ "$status" -ge 300 ]; then
+            echo "::error::HTTP $status"
+            exit 1
+          fi
+
+  sync-champions-league:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler /api/cron/sync-champions-league
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          response=$(curl -sS -w "\n%{http_code}" -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://starliguefantasy.fr/api/cron/sync-champions-league")
+          body=$(echo "$response" | sed '$d')
+          status=$(echo "$response" | tail -n 1)
+
+          echo "$body" | python3 -m json.tool || echo "$body"
+
+          if [ "$status" -ge 300 ]; then
+            echo "::error::HTTP $status"
+            exit 1
+          fi
+
+  sync-european-league:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler /api/cron/sync-european-league
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          response=$(curl -sS -w "\n%{http_code}" -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://starliguefantasy.fr/api/cron/sync-european-league")
           body=$(echo "$response" | sed '$d')
           status=$(echo "$response" | tail -n 1)
 

@@ -1,25 +1,34 @@
-// Résout les matchs hors championnat (Warm Up ET Coupe de France, ARCHITECTURE.md
-// §19) à afficher sur la page d'accueil, dans le même MatchesStrip que le
-// championnat (src/components/dashboard/MatchesStrip.tsx) — une seule liste
-// chronologique par compétition (mélange résultats déjà connus et matchs à venir, le
-// score s'affiche par match selon qu'il est renseigné ou non), pas de séparation
-// résultats/à venir comme pour le championnat : contrairement à une journée de
-// championnat, il n'y a pas de notion de "dernière journée"/"prochaine journée" ici.
-// Les deux compétitions partagent la table FriendlyMatch (competitionLabel les
-// distingue) — chaque fonction filtre donc explicitement sur son propre ensemble de
-// libellés pour ne pas mélanger les deux à l'affichage (ex: le strip "Warm Up" de la
-// home ne doit jamais afficher un match de Coupe de France, et réciproquement).
+// Résout les matchs hors championnat (Warm Up, Coupe de France, EHF Champions
+// League, EHF European League — ARCHITECTURE.md §19) à afficher sur la page
+// d'accueil, dans le même MatchesStrip que le championnat (src/components/
+// dashboard/MatchesStrip.tsx) — une seule liste chronologique par compétition
+// (mélange résultats déjà connus et matchs à venir, le score s'affiche par match
+// selon qu'il est renseigné ou non), pas de séparation résultats/à venir comme pour
+// le championnat : contrairement à une journée de championnat, il n'y a pas de
+// notion de "dernière journée"/"prochaine journée" ici. Les quatre compétitions
+// partagent la table FriendlyMatch (competitionLabel les distingue) — chaque
+// fonction filtre donc explicitement sur son propre ensemble de libellés pour ne
+// pas les mélanger à l'affichage (ex: le strip "Warm Up" de la home ne doit jamais
+// afficher un match de Coupe de France/Champions League/European League, et
+// réciproquement).
 //
-// getClubWarmupMatches/getClubCoupeDeFranceMatches (perspective isHome/opponent,
-// même forme que ClubPageMatch de src/lib/clubs/club-page-data.ts) servent à
-// fusionner ces compétitions et le championnat dans un seul flux sur la page club
+// getClubWarmupMatches/getClubCoupeDeFranceMatches/getClubChampionsLeagueMatches/
+// getClubEuropeanLeagueMatches (perspective isHome/opponent, même forme que
+// ClubPageMatch de src/lib/clubs/club-page-data.ts) servent à fusionner ces
+// compétitions et le championnat dans un seul flux sur la page club
 // (ClubMatchesPanel) — seuls les clubs Daikin StarLigue ont une page, pas besoin de
-// filtrer les adversaires hors DB (D2/étrangers), ils n'apparaissent que comme
-// adversaire dans la liste d'un club Starligue.
+// filtrer les adversaires hors DB (D2/étrangers/clubs européens), ils n'apparaissent
+// que comme adversaire dans la liste d'un club Starligue.
 import { prisma } from "@/lib/db";
+import { EHF_CHAMPIONS_LEAGUE_LABEL, EHF_EUROPEAN_LEAGUE_LABEL } from "@/lib/data-providers/ehf-scraper.provider";
 
 const WARMUP_LABELS = ["Warm Up", "Trophée des Champions - WUP"];
 const COUPE_DE_FRANCE_LABELS = ["Coupe de France"];
+// Réutilise les constantes du provider (pas de libellé redupliqué en chaîne libre) :
+// un éventuel changement de libellé stocké en DB doit casser la compilation ici
+// plutôt que de faire silencieusement disparaître ces matchs de l'affichage.
+const CHAMPIONS_LEAGUE_LABELS = [EHF_CHAMPIONS_LEAGUE_LABEL];
+const EUROPEAN_LEAGUE_LABELS = [EHF_EUROPEAN_LEAGUE_LABEL];
 
 export interface WarmupMatchClub {
   shortName: string; // pour ClubLogo (tronqué à 3 lettres si pas de logo) — nom scrapé si club inconnu
@@ -79,6 +88,14 @@ export function getCoupeDeFranceMatches(seasonId: string): Promise<WarmupMatchRo
   return getFriendlyMatches(seasonId, COUPE_DE_FRANCE_LABELS);
 }
 
+export function getChampionsLeagueMatches(seasonId: string): Promise<WarmupMatchRow[]> {
+  return getFriendlyMatches(seasonId, CHAMPIONS_LEAGUE_LABELS);
+}
+
+export function getEuropeanLeagueMatches(seasonId: string): Promise<WarmupMatchRow[]> {
+  return getFriendlyMatches(seasonId, EUROPEAN_LEAGUE_LABELS);
+}
+
 export interface ClubWarmupMatch {
   id: string;
   isHome: boolean;
@@ -123,4 +140,12 @@ export function getClubWarmupMatches(clubId: string, seasonId: string): Promise<
 
 export function getClubCoupeDeFranceMatches(clubId: string, seasonId: string): Promise<ClubWarmupMatch[]> {
   return getClubFriendlyMatches(clubId, seasonId, COUPE_DE_FRANCE_LABELS);
+}
+
+export function getClubChampionsLeagueMatches(clubId: string, seasonId: string): Promise<ClubWarmupMatch[]> {
+  return getClubFriendlyMatches(clubId, seasonId, CHAMPIONS_LEAGUE_LABELS);
+}
+
+export function getClubEuropeanLeagueMatches(clubId: string, seasonId: string): Promise<ClubWarmupMatch[]> {
+  return getClubFriendlyMatches(clubId, seasonId, EUROPEAN_LEAGUE_LABELS);
 }

@@ -1599,3 +1599,122 @@ seulement à partir de `lg`. Sur mobile, ça écrasait les logos des encarts
 `flex flex-col gap-3` (toujours empilé, quelle que soit la taille d'écran) —
 le bloc Warm Up, déjà positionné après ce conteneur, en profite aussi
 (pleine largeur sur mobile comme sur desktop).
+
+### 19.1 Page club : calendrier unifié résultats+à venir, code couleur, légende
+
+Extension de `ClubMatchesPanel`/`ClubMatchesCalendar` (2026-08-02, demande
+explicite) : les résultats utilisent désormais le même gabarit "grille de
+logos" que les prochains matchs (`MatchesGrid`, remplace l'ancien rendu en
+liste `MatchRow`), le calendrier mensuel affiche résultats ET matchs à venir
+(plus seulement à venir), et chaque encart/case est teinté par résultat —
+victoire (`points-pos`, vert), défaite (`points-neg`, rouge), nul
+(`accent-secondary`, ambre), à venir (`accent`, teal neutre, comportement
+historique). Chaque match porte aussi un badge court de nomenclature par
+compétition (`J{n}` localisé pour Starligue via `list.gameweekShort`, `WU`
+Warm Up, `CDF` Coupe de France, `CL` EHF Champions League — voir §19.2),
+expliqué par une légende (`MatchesLegend`) affichée une fois au-dessus des
+trois blocs. `UnifiedMatch` (`ClubMatchesPanel.tsx`) est exporté et réutilisé
+tel quel par `ClubMatchesCalendar` — seule source de vérité pour la couleur/le
+badge, pas de logique dupliquée entre grille et calendrier.
+
+### 19.2 Coupes d'Europe EHF (Champions League + European League)
+
+EHF Champions League ajoutée le 2026-08-02, EHF European League ajoutée le
+même jour en suivant (demande explicite : "comportement similaire à celui de
+la Champion's League"), sur le même principe que Warm Up/Coupe de France
+(même table `FriendlyMatch`, même pipeline `syncFriendlyMatches`). Une seule
+implémentation générique (`fetchEhfCompetitionMatches`,
+`src/lib/data-providers/ehf-scraper.provider.ts`) sert les deux coupes — même
+site (`ehfcl.`/`ehfel.eurohandball.com`), même API, même gabarit de page.
+Clubs Starligue engagés à ce jour : Champions League — HBC Nantes,
+Montpellier Handball, Paris Saint-Germain (phase de groupes du 09/09 au
+29/10/2026, 6 matchs chacun) ; European League — page saison 2026/27 pas
+encore publiée par EHF au moment d'écrire ce code (voir plus bas), dernière
+édition connue (2025/26) : Fenix Toulouse, Montpellier Handball, Saint-Raphaël
+Var Handball.
+
+**Source** : contrairement à lnh.fr (HTML scrapé), les deux sites EHF
+exposent une vraie API JSON (endpoint Umbraco `competitionmatchesapi`,
+découvert par inspection réseau) — pas de parsing HTML pour les matchs
+eux-mêmes, validation Zod du payload comme `ApiSportsProvider`.
+
+**`contentId`/`competitionId` découverts dynamiquement, pas codés en dur** :
+ces identifiants Umbraco (opaques, propres à chaque édition annuelle) sont
+extraits par regex depuis le HTML de la page saison
+(`data-currentcontentid="…"`/`data-competition-id="…"`, présents dans le HTML
+servi côté serveur, pas seulement après hydratation Vue — vérifié le
+2026-08-02 sur les deux sites). Un premier jet les avait figés en constantes
+pour la Champions League ; corrigé avant commit en généralisant à la
+découverte dynamique, précisément à cause de l'European League : sa page
+2026/27 (`https://ehfel.eurohandball.com/men/2026-27/matches/`) **n'existe pas
+encore** (404, confirmé par l'utilisateur ET vérifié directement) — avec des
+IDs codés en dur, il aurait fallu attendre la publication puis modifier le
+code. Avec la découverte dynamique, le cron déployé aujourd'hui commencera à
+fonctionner tout seul dès qu'EHF publiera la page, sans changement : en
+attendant, `fetchText` lève une `IngestionError` récupérable sur 404, le cron
+échoue proprement (job indépendant, ne bloque pas les autres) jusqu'à la
+publication.
+
+**Résolution du club Starligue par correspondance de nom, pas par table
+figée** : l'API EHF n'expose aucun identifiant partagé avec lnh.fr. Un
+premier jet utilisait une table figée par compétition (3 clubs Champions
+League codés en dur) — remplacée avant commit par `resolveClubSlug`,
+générique et réutilisable pour n'importe quelle compétition/club futur :
+noms normalisés (accents retirés, mots de bruit "handball"/"hand"/"hb"/"hc"/
+"hbc"/"club" retirés des deux côtés), comparaison stricte après
+normalisation (pas de sous-chaîne floue, pour éviter tout faux positif — un
+club non reconnu reste simplement traité comme hors DB). Vérifié
+empiriquement le 2026-08-02 sur les vrais noms EHF malgré des écarts de forme
+(ex: EHF dit "Paris Saint-Germain", notre DB "Paris Saint-Germain Handball" ;
+EHF dit "Saint-Raphael Var Handball" sans accent, notre DB "Saint-Raphaël Var
+Handball") : tous les clubs Starligue connus des deux compétitions matchent
+correctement. `getActiveClubSlugsAndNames`
+(`src/lib/clubs/get-active-club-slugs.ts`) fournit la liste slug+nom des
+clubs actifs à `syncChampionsLeagueMatches`/`syncEuropeanLeagueMatches`.
+
+**Pagination** : la sémantique du curseur (`matchId` + `futureMatches=true/
+false`) n'est documentée nulle part côté EHF et ne suit ni l'ordre
+chronologique ni l'ordre du tableau retourné (vérifié empiriquement). Plutôt
+que de deviner un algorithme fragile, `fetchAllMatches` explore en largeur
+(flood-fill) : chaque `matchId` découvert est à son tour essayé comme curseur,
+dans les deux sens (`true` ET `false` — un match déjà joué peut sortir du pool
+"à venir" et devenir injoignable en pagination purement future). ~2 requêtes
+par match (~300 pour une saison complète de phase de groupes), acceptable
+pour un cron quotidien. Vérifié le 2026-08-02 sur EHF CL 2026/27 : 144 matchs
+découverts pour 144 matchs réellement publiés (convergence confirmée par
+comptage exhaustif), 18 impliquant un club Starligue ; sur EHF EL 2025/26
+(dernière édition publiée, utilisée pour valider le mécanisme avant que
+2026/27 existe) : 172 matchs découverts, 9 impliquant un club Starligue (3
+clubs × ~3 matchs déjà joués/à jouer à cette date de la saison passée).
+
+**Logos hotlinkés (contrairement à Warm Up)** : l'API EHF fournit une URL de
+logo stable sur son propre CDN (`res.ehf.eu`), hotlinkée directement plutôt
+que de reconstruire un pipeline de backfill local comme
+`scripts/backfill-warmup-logos.ts` — inutile pour cette source. **Piège
+trouvé et corrigé** : `ClubLogo` (`src/components/ui/ClubLogo.tsx`) passait
+systématiquement par `next/image`, qui exige une liste blanche statique de
+domaines dans `next.config.mjs` — crash `Invalid src prop ... hostname not
+configured` au premier chargement avec un logo EHF. Corrigé en réutilisant
+exactement le même contournement que `PlayerAvatar` pour les photos joueurs
+hotlinkées (domaines de clubs externes imprévisibles) : un `<img>` classique
+pour toute URL absolue (`http...`), `next/image` conservé pour les chemins
+locaux (`/clubs/...`) — aucune whitelist à maintenir dans `next.config.mjs`.
+
+**Ingestion** : `syncChampionsLeagueMatches`/`syncEuropeanLeagueMatches`
+(`src/lib/ingestion/warmup.ts`) — `syncFriendlyMatches` accepte désormais un
+paramètre `source: "lnh" | "ehf"` qui bascule la résolution logo/division
+(locale+backfillée pour lnh, directe depuis le payload EHF sinon) et le
+préfixe de `dedupeKey` (`"ehf:" + matchId`, au lieu de `"lnh:" +
+calendars_id`). `FriendlyMatch.source` gagne la valeur `EHF_SCRAPER`
+(migration `20260802120000_add_ehf_scraper_source`).
+
+**Cron** : `POST /api/cron/sync-champions-league` et `POST /api/cron/
+sync-european-league`, planifiés dans `cron-daily.yml` (06:00 UTC, jobs
+indépendants, ne dépendent pas de `backfill-warmup-logos` — pas de backfill
+nécessaire pour cette source).
+
+**Affichage** : `get{ChampionsLeague,EuropeanLeague}Matches`/
+`getClub{ChampionsLeague,EuropeanLeague}Matches`
+(`src/lib/matches/get-warmup-matches.ts`), même traitement que Warm Up/Coupe
+de France sur la home (`MatchesStrip`, bloc masqué si aucun match) et sur la
+page club (`ClubMatchesPanel`, §19.1) — nomenclature `CL`/`EL`.

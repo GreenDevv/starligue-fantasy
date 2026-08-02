@@ -169,5 +169,11 @@
       "readyWithGameweek": "Skład gotowy — do zobaczenia w kolejce {number}.",
       "readyForSeason": "Skład gotowy na sezon."
     }
+  },
+  "championsLeague": {
+    "title": "EHF Champions League"
+  },
+  "europeanLeague": {
+    "title": "EHF European League"
   }
 }

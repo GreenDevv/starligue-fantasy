@@ -169,5 +169,11 @@
       "readyWithGameweek": "Trup klar — vi ses i runde {number}.",
       "readyForSeason": "Trup klar til sæsonen."
     }
+  },
+  "championsLeague": {
+    "title": "EHF Champions League"
+  },
+  "europeanLeague": {
+    "title": "EHF European League"
   }
 }
