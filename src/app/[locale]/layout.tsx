@@ -136,6 +136,17 @@ export default async function RootLayout({
             __html: JSON.stringify(jsonLd(locale, t("siteName"), t("description"))),
           }}
         />
+        {/* Anti-flash IntroSplash (src/components/intro/IntroSplash.tsx) : posé sur
+            <html> de façon synchrone, avant hydratation React, pour qu'un visiteur
+            qui a déjà vu l'intro (localStorage) ne voie jamais l'overlay clignoter
+            le temps que l'effet React se déclenche — voir la règle CSS associée
+            dans globals.css. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(localStorage.getItem('sf-intro-seen')==='1'){document.documentElement.classList.add('sf-intro-seen')}}catch(e){}",
+          }}
+        />
         <NextIntlClientProvider messages={messages}>
           <Providers>{children}</Providers>
           <CookieBanner />

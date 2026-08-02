@@ -24,6 +24,7 @@ import { StatLeadersSection } from "@/components/starligue/StatLeadersSection";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { ComingSoon } from "@/components/ComingSoon";
+import { IntroSplash } from "@/components/intro/IntroSplash";
 import type { NewsCategory } from "@prisma/client";
 import type { Metadata } from "next";
 
@@ -107,6 +108,7 @@ export default async function HomePage({
 
   return (
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-4 px-4 pb-16 pt-6 sm:px-6">
+      <IntroSplash clubs={clubs} />
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <p className="font-arcade text-sm uppercase tracking-[0.3em] text-accent-secondary">
