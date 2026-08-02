@@ -92,7 +92,13 @@ async function syncFriendlyMatches(
     const homeClubId = clubIdBySlug.get(m.homeClubSlug.toLowerCase()) ?? null;
     const awayClubId = clubIdBySlug.get(m.awayClubSlug.toLowerCase()) ?? null;
 
-    if (!homeClubId && !awayClubId) {
+    // "ehf" : matches déjà pré-filtrés en amont par groupe (filterToRelevantGroups,
+    // src/lib/data-providers/ehf-scraper.provider.ts) — un match entre deux clubs
+    // NI l'un ni l'autre Starligue est volontairement gardé s'il appartient à un
+    // groupe qui compte un de nos clubs (page "groupe", tous les matchs + classement,
+    // demande explicite de l'utilisateur). "lnh" : filtre habituel, pas de notion de
+    // groupe équivalente pour Warm Up/Coupe de France.
+    if (source === "lnh" && !homeClubId && !awayClubId) {
       skippedNoStarligueClub++;
       continue;
     }
@@ -122,13 +128,16 @@ async function syncFriendlyMatches(
         awayScore: m.awayScore,
         dedupeKey,
         source: source === "ehf" ? "EHF_SCRAPER" : "LNH_SCRAPER",
+        groupLabel: m.groupLabel,
       },
       // kickoffAt/status/scores peuvent changer d'un run à l'autre (heure provisoire
       // ajustée, match qui se termine) — clubs/compétition/dedupeKey n'ont pas de
       // raison de changer une fois le match identifié par calendars_id. Les logos/
       // divisions aussi : un nouveau passage de scripts/backfill-warmup-logos.ts ou
       // un ajout à WARMUP_FOREIGN_CLUB_DIVISIONS doit se répercuter sans tout
-      // ré-upserter depuis zéro.
+      // ré-upserter depuis zéro. groupLabel : ne change normalement jamais une fois
+      // la phase de groupes fixée, mais re-écrit quand même par cohérence avec le
+      // reste (idempotent).
       update: {
         kickoffAt: m.kickoffAt,
         status: m.status,
@@ -138,6 +147,7 @@ async function syncFriendlyMatches(
         homeClubDivision,
         awayClubLogoUrl,
         awayClubDivision,
+        groupLabel: m.groupLabel,
       },
     });
     upserted++;

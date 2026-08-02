@@ -110,6 +110,16 @@ const EhfMatchSchema = z.object({
   venue: z.object({
     date: z.object({ utc: z.string() }),
   }),
+  // `group` n'est vérifié présent que pour la phase de groupes (144 matchs
+  // observés le 2026-08-02) — rendu optionnel/nullable à tous les niveaux par
+  // prudence : les tours suivants (barrages, Final4) n'ont probablement plus
+  // cette notion, pas encore vérifiable tant qu'ils ne sont pas programmés.
+  comp: z
+    .object({
+      group: z.object({ name: z.string().nullable() }).nullable().optional(),
+    })
+    .nullable()
+    .optional(),
   homeTeam: EhfTeamSchema,
   guestTeam: EhfTeamSchema,
 });
@@ -147,6 +157,7 @@ export function mapEhfMatch(m: EhfMatch, competitionLabel: string, knownClubs: {
     status: decided ? "FINISHED" : "SCHEDULED",
     homeScore: homeGoals,
     awayScore: awayGoals,
+    groupLabel: m.comp?.group?.name ?? null,
   };
 }
 
@@ -260,6 +271,29 @@ function apiBaseForUrl(pageUrl: string): string {
   return `${origin}/umbraco/api/competitionmatchesapi`;
 }
 
+// Fonction pure (testée) — garde TOUS les matchs des groupes contenant au moins un
+// club Starligue, pas seulement les matchs qui impliquent directement ce club.
+// Nécessaire pour la page "groupe" (tous les matchs + classement d'un groupe EHF,
+// demande explicite de l'utilisateur) : un groupe de phase de groupes compte 4
+// équipes pour 12 matchs (aller-retour) au total, dont seulement 6 impliquent
+// notre club — les 6 autres (entre les 3 adversaires) ne seraient jamais gardés
+// par le filtre habituel "au moins un club actif" (syncFriendlyMatches). Un match
+// gardé par cette fonction peut donc avoir homeClubId ET awayClubId tous les deux
+// null une fois synchronisé — voir le commentaire sur FriendlyMatch.groupLabel.
+export function filterToRelevantGroups(
+  matches: ScrapedWarmupMatch[],
+  knownClubs: { slug: string; name: string }[]
+): ScrapedWarmupMatch[] {
+  const knownSlugs = new Set(knownClubs.map((c) => c.slug));
+  const relevantGroups = new Set(
+    matches
+      .filter((m) => knownSlugs.has(m.homeClubSlug) || knownSlugs.has(m.awayClubSlug))
+      .map((m) => m.groupLabel)
+      .filter((g): g is string => g !== null)
+  );
+  return matches.filter((m) => m.groupLabel !== null && relevantGroups.has(m.groupLabel));
+}
+
 // Fonction générique partagée par les deux coupes — voir commentaire d'en-tête.
 // `knownClubs` : clubs Starligue actifs cette saison (slug lnh.fr + nom), pour
 // résoudre homeClubSlug/awayClubSlug par correspondance de nom (resolveClubSlug).
@@ -272,7 +306,8 @@ export async function fetchEhfCompetitionMatches(
   const { contentId, competitionId } = extractCompetitionIds(html);
   const apiBase = apiBaseForUrl(pageUrl);
   const matches = await fetchAllMatches(apiBase, contentId, competitionId);
-  return matches.map((m) => mapEhfMatch(m, competitionLabel, knownClubs));
+  const mapped = matches.map((m) => mapEhfMatch(m, competitionLabel, knownClubs));
+  return filterToRelevantGroups(mapped, knownClubs);
 }
 
 export function fetchChampionsLeagueMatches(knownClubs: { slug: string; name: string }[]): Promise<ScrapedWarmupMatch[]> {

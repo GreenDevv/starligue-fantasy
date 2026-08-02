@@ -219,10 +219,21 @@ model FriendlyMatch {
   awayScore        Int?
   source           DataSource  @default(LNH_SCRAPER)
   dedupeKey        String      @unique // "lnh:" + calendars_id lnh.fr — idempotence
+  // Groupe de phase de groupes EHF ("A".."F") — renseigné uniquement pour les
+  // matchs EHF Champions League/European League (comp.group.name côté API EHF),
+  // toujours null pour Warm Up/Coupe de France/Starligue. Sert à afficher la page
+  // "groupe" (tous les matchs + classement du groupe, y compris les matchs qui
+  // n'impliquent aucun club Starligue — voir src/lib/ingestion/warmup.ts,
+  // filterToRelevantGroups) : contrairement au reste de FriendlyMatch, ces lignes
+  // peuvent avoir homeClubId ET awayClubId tous les deux null (aucune des deux
+  // équipes n'est un club Starligue, seule leur appartenance au même groupe qu'un
+  // de nos clubs justifie leur présence en base).
+  groupLabel       String?
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
 
   @@index([seasonId, kickoffAt])
+  @@index([competitionLabel, groupLabel])
 }
 
 // Historique des confrontations directes entre deux clubs, au-delà de ce que Match

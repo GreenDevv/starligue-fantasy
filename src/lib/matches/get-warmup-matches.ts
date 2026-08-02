@@ -103,6 +103,10 @@ export interface ClubWarmupMatch {
   ownScore: number | null;
   opponentScore: number | null;
   kickoffAt: Date;
+  // Groupe de phase de groupes EHF ("A".."F") — toujours null pour Warm Up/Coupe
+  // de France. Sert à construire le lien vers la page groupe (tous les matchs +
+  // classement, demande explicite de l'utilisateur) dans ClubMatchesPanel.
+  groupLabel: string | null;
 }
 
 async function getClubFriendlyMatches(
@@ -130,6 +134,7 @@ async function getClubFriendlyMatches(
       ownScore: isHome ? m.homeScore : m.awayScore,
       opponentScore: isHome ? m.awayScore : m.homeScore,
       kickoffAt: m.kickoffAt,
+      groupLabel: m.groupLabel,
     };
   });
 }

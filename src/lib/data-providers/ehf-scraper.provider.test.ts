@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { mapEhfMatch, parseClubLogosFromHtml, EHF_CHAMPIONS_LEAGUE_LABEL, type EhfMatch } from "./ehf-scraper.provider";
+import {
+  mapEhfMatch,
+  parseClubLogosFromHtml,
+  filterToRelevantGroups,
+  EHF_CHAMPIONS_LEAGUE_LABEL,
+  type EhfMatch,
+} from "./ehf-scraper.provider";
+import type { ScrapedWarmupMatch } from "./lnh-scraper.provider";
 
 // Échantillon représentatif des 18 clubs Starligue (slug lnh.fr + nom complet) —
 // mêmes valeurs que celles renvoyées par getActiveClubSlugsAndNames en prod.
@@ -24,10 +31,12 @@ function match(opts: {
   awayName: string;
   awayNation?: string | null;
   awayGoals?: number | null;
+  groupName?: string | null;
 }): EhfMatch {
   return {
     matchID: opts.id ?? "202711020101015",
     venue: { date: { utc: opts.utc ?? "2026-09-09T18:45:00Z" } },
+    comp: { group: { name: opts.groupName === undefined ? "B" : opts.groupName } },
     homeTeam: {
       team: {
         name: opts.homeName,
@@ -115,6 +124,57 @@ describe("mapEhfMatch", () => {
   it("étiquette la compétition passée en paramètre (générique, pas figée)", () => {
     const m = mapEhfMatch(match({ homeName: "HBC Nantes", awayName: "X" }), "EHF European League", KNOWN_CLUBS);
     expect(m.competitionLabel).toBe("EHF European League");
+  });
+
+  it("conserve le groupe (comp.group.name), null si absent", () => {
+    const withGroup = map({ homeName: "HBC Nantes", awayName: "X", groupName: "C" });
+    expect(withGroup.groupLabel).toBe("C");
+
+    const withoutGroup = map({ homeName: "HBC Nantes", awayName: "X", groupName: null });
+    expect(withoutGroup.groupLabel).toBeNull();
+  });
+});
+
+describe("filterToRelevantGroups", () => {
+  function unified(opts: { home: string; away: string; group: string | null }): ScrapedWarmupMatch {
+    return {
+      calendarsId: `${opts.home}-${opts.away}`,
+      competitionLabel: EHF_CHAMPIONS_LEAGUE_LABEL,
+      homeClubSlug: opts.home,
+      homeClubName: opts.home,
+      homeClubLogoUrl: "",
+      homeClubDivision: null,
+      awayClubSlug: opts.away,
+      awayClubName: opts.away,
+      awayClubLogoUrl: "",
+      awayClubDivision: null,
+      kickoffAt: new Date("2026-09-09T18:45:00Z"),
+      status: "SCHEDULED",
+      homeScore: null,
+      awayScore: null,
+      groupLabel: opts.group,
+    };
+  }
+
+  it("garde tous les matchs d'un groupe dès qu'un club connu y joue, même les matchs entre les 3 autres équipes", () => {
+    const matches = [
+      unified({ home: "nantes", away: "melsungen", group: "B" }), // notre club, groupe B
+      unified({ home: "melsungen", away: "plock", group: "B" }), // aucun club connu, mais groupe B pertinent
+      unified({ home: "veszprem", away: "porto", group: "A" }), // groupe A, aucun club connu -> hors périmètre
+    ];
+    const result = filterToRelevantGroups(matches, [{ slug: "nantes", name: "HBC Nantes" }]);
+    expect(result).toHaveLength(2);
+    expect(result.map((m) => m.groupLabel)).toEqual(["B", "B"]);
+  });
+
+  it("exclut un match sans groupe même si un club connu y joue (barrages/Final4 futurs, pas encore vérifiable)", () => {
+    const matches = [unified({ home: "nantes", away: "x", group: null })];
+    expect(filterToRelevantGroups(matches, [{ slug: "nantes", name: "HBC Nantes" }])).toHaveLength(0);
+  });
+
+  it("retourne un tableau vide si aucun club connu ne joue dans aucun groupe", () => {
+    const matches = [unified({ home: "veszprem", away: "porto", group: "A" })];
+    expect(filterToRelevantGroups(matches, [{ slug: "nantes", name: "HBC Nantes" }])).toHaveLength(0);
   });
 });
 

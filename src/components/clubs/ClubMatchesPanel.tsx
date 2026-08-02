@@ -7,6 +7,7 @@ import { ClubLogo } from "@/components/ui/ClubLogo";
 import { ClubMatchesCalendar } from "@/components/clubs/ClubMatchesCalendar";
 import type { ClubPageMatch } from "@/lib/clubs/club-page-data";
 import type { ClubWarmupMatch } from "@/lib/matches/get-warmup-matches";
+import { ehfCompetitionSlug } from "@/lib/matches/ehf-competition-slugs";
 
 type VenueFilter = "all" | "home" | "away";
 export type CompetitionKind = "starligue" | "warmup" | "coupe" | "championsLeague" | "europeanLeague";
@@ -36,7 +37,7 @@ export interface UnifiedMatch {
   ownScore: number | null;
   opponentScore: number | null;
   opponent: { shortName: string; name: string; logoUrl: string | null };
-  href: string | null; // null pour Warm Up/Coupe de France : l'adversaire n'a pas toujours de page /clubs/[id] (D2/étranger)
+  href: string | null; // null pour Warm Up/Coupe de France (l'adversaire n'a pas toujours de page /clubs/[id], D2/étranger) ; pour Champions League/European League, pointe vers la page groupe (tous les matchs + classement) dès qu'un groupLabel est connu
   tooltip: string;
   badge: string;
 }
@@ -251,7 +252,10 @@ export function ClubMatchesPanel({
       ownScore: m.ownScore,
       opponentScore: m.opponentScore,
       opponent: m.opponent,
-      href: null,
+      href:
+        (kind === "championsLeague" || kind === "europeanLeague") && m.groupLabel
+          ? `/matches/ehf/${ehfCompetitionSlug(kind)}/${m.groupLabel}`
+          : null,
       tooltip: `${competitionLabel}\n${m.opponent.division ? `${m.opponent.name} (${m.opponent.division})` : m.opponent.name}`,
       badge: shortBadge,
     });

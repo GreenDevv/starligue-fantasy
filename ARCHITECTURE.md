@@ -1796,3 +1796,43 @@ telle quelle la mécanique clic-dehors/Échap de `LocaleSwitcher`
 `role="option"` pour l'accessibilité. Le club courant reste dans la liste
 (mis en évidence, teinte accent) plutôt qu'exclu — repère visuel "où je suis"
 dans la liste alphabétique plutôt que de la raccourcir.
+
+### 19.4 Page groupe EHF Champions League/European League
+
+Ajouté le 2026-08-02 (demande explicite) : cliquer sur un match Champions
+League/European League (page club, §19.1) mène vers
+`/matches/ehf/[competition]/[group]` (`competition` = `champions-league` ou
+`european-league`, mapping dans
+`src/lib/matches/ehf-competition-slugs.ts`) — page listant l'intégralité des
+matchs du groupe (les 4 équipes, y compris les confrontations n'impliquant
+aucun club Starligue) et son classement calculé.
+
+**Pas d'API de classement EHF dédiée** : reconnaissance effectuée sur
+`https://ehfcl.eurohandball.com/men/2026-27/standings/#group-phase` — seule
+une liste de matchs bruts (déjà consommée par `fetchEhfCompetitionMatches`)
+est exposée, avec `comp.group.name` (`"A".."F"`). Le classement est donc
+calculé nous-mêmes, `computeGroupStandings`
+(`src/lib/matches/group-standings.ts`, fonction pure testée) — mêmes règles
+que `computeClubStandings` (§ classement Starligue) mais keyed par NOM
+d'équipe plutôt que clubId, la plupart des équipes d'un groupe EHF n'étant
+pas des clubs Starligue connus de notre DB.
+
+**Stockage** : `FriendlyMatch.groupLabel` (nullable, toujours null pour Warm
+Up/Coupe de France) — `filterToRelevantGroups`
+(`src/lib/data-providers/ehf-scraper.provider.ts`) élargit désormais
+l'ingestion à TOUT le groupe dès qu'un club Starligue y joue (et pas
+seulement aux matchs touchant ce club), pour que la page groupe puisse
+afficher les 4 équipes sans appel EHF live à la demande — cohérent avec
+l'architecture "cron → DB → lectures rapides" déjà en place.
+`syncFriendlyMatches` (`src/lib/ingestion/warmup.ts`) autorise donc, pour la
+seule source `"ehf"`, des lignes `FriendlyMatch` avec `homeClubId`/
+`awayClubId` NULS DES DEUX CÔTÉS (nouveau cas — un match entre deux clubs
+hors DB) ; `getGroupMatches` (`src/lib/matches/get-group-matches.ts`)
+retombe sur le nom/logo scrapés dans ce cas, comme le fait déjà
+`get-warmup-matches.ts` par club.
+
+**Affichage** : tableau de classement (rang/J/V/N/D/BP/BC/Diff/Pts, réutilise
+les libellés courts `dashboard.clubStandingsWidget.col.*` déjà utilisés par
+le widget "Classement Starligue" plutôt que de les dupliquer) + grille des 12
+matchs du groupe (score si joué, date sinon), logo/nom cliquables vers
+`/clubs/[id]` seulement pour un club Starligue connu.

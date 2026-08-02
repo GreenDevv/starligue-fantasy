@@ -45,6 +45,11 @@
     "competitionEuropeanLeague": "EHF European League",
     "competitionShortEuropeanLeague": "EL"
   },
+  "group": {
+    "title": "Grupo {group}",
+    "standingsTitle": "Classificação",
+    "matchesTitle": "Todos os jogos"
+  },
   "charts": {
     "goalsFor": "Golos marcados",
     "goalsAgainst": "Golos sofridos",

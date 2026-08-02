@@ -132,6 +132,10 @@ export interface ScrapedWarmupMatch {
   status: "SCHEDULED" | "FINISHED";
   homeScore: number | null;
   awayScore: number | null;
+  // Groupe de phase de groupes EHF ("A".."F") — toujours null pour Warm Up/Coupe
+  // de France (lnh.fr n'a pas cette notion), voir src/lib/data-providers/
+  // ehf-scraper.provider.ts::mapEhfMatch.
+  groupLabel: string | null;
 }
 
 // Stats détaillées d'un joueur pour un match précis — tableau joueurs de champ
@@ -677,6 +681,7 @@ function parseFriendlyMatchesFromHtml(
       status: scoreMatch ? "FINISHED" : "SCHEDULED",
       homeScore: scoreMatch ? parseInt(scoreMatch[1]!, 10) : null,
       awayScore: scoreMatch ? parseInt(scoreMatch[2]!, 10) : null,
+      groupLabel: null,
     });
   }
 
