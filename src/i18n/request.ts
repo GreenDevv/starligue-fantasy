@@ -66,5 +66,25 @@ export default getRequestConfig(async ({ requestLocale }) => {
   return {
     locale,
     messages: await loadMessages(locale),
+    // Sans timeZone explicite, next-intl retombe sur le fuseau de l'environnement
+    // d'exécution — le SERVEUR (Railway, UTC) et le NAVIGATEUR (fuseau local du
+    // visiteur, ex: Europe/Paris) divergent alors, ce qui ne pose aucun problème
+    // pour formater une date déjà fixée (kickoffAt vient de la DB en UTC absolu),
+    // mais casse toute date CONSTRUITE localement (`new Date(year, month, 1)`,
+    // ex: le mois courant du calendrier club, ClubMatchesCalendar.tsx) : cette
+    // construction utilise nécessairement le fuseau du runtime qui l'exécute (JS
+    // natif, non contournable), donc "1er août 00:00" construit côté client
+    // (Europe/Paris, UTC+2 l'été) vaut "31 juillet 22:00 UTC" — et si le
+    // FORMATTAGE utilise ensuite le fuseau UTC (résolu côté serveur puis propagé
+    // tel quel à l'hydratation client, next-intl ne réévalue pas côté navigateur)
+    // ça affiche "juillet" au lieu d'"août". Repéré le 2026-08-02 par l'utilisateur
+    // sur le calendrier de la page club, uniquement en prod (le décalage
+    // serveur/navigateur n'existe pas en dev où les deux tournent sur la même
+    // machine). Toutes les dates de l'app concernent un pays unique (Starligue,
+    // handball français) quelle que soit la langue d'affichage choisie — fixer
+    // Europe/Paris pour TOUT le monde (pas seulement les visiteurs français)
+    // élimine la classe de bug entière plutôt que de la corriger composant par
+    // composant.
+    timeZone: "Europe/Paris",
   };
 });
