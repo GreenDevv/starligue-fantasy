@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Barlow_Condensed, Inter, VT323 } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
@@ -40,6 +40,17 @@ const OG_LOCALE: Record<string, string> = {
   pt: "pt_PT",
   da: "da_DK",
   pl: "pl_PL",
+};
+
+// userScalable/maximumScale à 1 : évite qu'un pincer-zoomer résiduel persiste
+// après une navigation interne (SPA, pas de rechargement complet) et laisse un
+// espace vide sur le côté — bug de zoom Safari rapporté par l'utilisateur, le
+// layout lui-même est full-width (vérifié en Playwright mobile, aucun débordement).
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export async function generateMetadata({
