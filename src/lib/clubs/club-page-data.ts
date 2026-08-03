@@ -94,3 +94,15 @@ export async function getClubPageData(clubId: string, seasonId: string, mode: Se
 
   return { results, upcoming, goalsChartEntries };
 }
+
+// Les 5 derniers matchs Starligue décidés, en ordre chronologique (le plus ancien
+// à gauche, le plus récent à droite) — `results` (ci-dessus) est trié "plus
+// récent d'abord". Complété par des `null` à gauche si moins de 5 matchs joués
+// (début de saison). Fonction pure, réutilisée par la page club ET la page
+// head-to-head (ClubFormBadge) : `results` applique déjà la règle anti-spoiler
+// simulation (curseur admin, jamais Match.status directement, voir commentaire en
+// tête de fichier), donc toute page qui l'utilise en hérite automatiquement.
+export function getLastFiveForm(results: ClubPageMatch[]): (ClubPageMatch | null)[] {
+  const chronological = results.slice(0, 5).reverse();
+  return [...Array<null>(Math.max(0, 5 - chronological.length)).fill(null), ...chronological];
+}

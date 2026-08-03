@@ -6,7 +6,9 @@ import { resolveSeasonMode, resolveModeSeason } from "@/lib/team/active-team-con
 import { SIMULATION_SEASON_LABEL } from "@/lib/simulation/constants";
 import { getClubStandings, type ClubStandingRow } from "@/lib/standings/get";
 import { getHeadToHead } from "@/lib/clubs/head-to-head";
+import { getClubPageData, getLastFiveForm } from "@/lib/clubs/club-page-data";
 import { ClubLogo } from "@/components/ui/ClubLogo";
+import { ClubFormBadge } from "@/components/clubs/ClubFormBadge";
 
 export default async function ClubCompareVsPage({ params }: { params: { id: string; opponentId: string } }) {
   const tClubs = await getTranslations("clubs");
@@ -34,13 +36,22 @@ export default async function ClubCompareVsPage({ params }: { params: { id: stri
   ]);
   if (!clubA || !clubB) notFound();
 
-  const [standings, h2h] = await Promise.all([
+  const [standings, h2h, dataA, dataB] = await Promise.all([
     getClubStandings(season.id),
     getHeadToHead(clubA.id, clubB.id),
+    getClubPageData(clubA.id, season.id, mode),
+    getClubPageData(clubB.id, season.id, mode),
   ]);
 
   const standingA = standings.rows.find((r) => r.clubId === clubA.id) ?? null;
   const standingB = standings.rows.find((r) => r.clubId === clubB.id) ?? null;
+
+  // Forme sur les 5 derniers matchs Starligue de CHAQUE club (pas les
+  // confrontations directes ci-dessous, qui sont autre chose) — demande explicite
+  // de l'utilisateur, même composant que l'en-tête de /clubs/[id] pour garantir la
+  // même règle anti-spoiler simulation (voir club-page-data.ts).
+  const lastFiveA = getLastFiveForm(dataA.results);
+  const lastFiveB = getLastFiveForm(dataB.results);
 
   const winsA = h2h.filter((m) => m.clubAScore > m.clubBScore).length;
   const winsB = h2h.filter((m) => m.clubBScore > m.clubAScore).length;
@@ -59,11 +70,27 @@ export default async function ClubCompareVsPage({ params }: { params: { id: stri
         <Link href={`/clubs/${clubA.id}`} className="flex flex-1 flex-col items-center gap-2 text-center hover:text-accent">
           <ClubLogo club={clubA} size="lg" />
           <span className="text-sm font-medium text-text">{clubA.name}</span>
+          {standingA && (
+            <ClubFormBadge
+              wins={standingA.wins}
+              draws={standingA.draws}
+              losses={standingA.losses}
+              lastFive={lastFiveA}
+            />
+          )}
         </Link>
         <span className="font-display text-lg uppercase tracking-widest text-text-muted">{tClubs("compare.vs")}</span>
         <Link href={`/clubs/${clubB.id}`} className="flex flex-1 flex-col items-center gap-2 text-center hover:text-accent">
           <ClubLogo club={clubB} size="lg" />
           <span className="text-sm font-medium text-text">{clubB.name}</span>
+          {standingB && (
+            <ClubFormBadge
+              wins={standingB.wins}
+              draws={standingB.draws}
+              losses={standingB.losses}
+              lastFive={lastFiveB}
+            />
+          )}
         </Link>
       </div>
       <p className="-mt-3 text-center text-xs text-text-muted">
