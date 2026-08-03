@@ -7,7 +7,8 @@
     "rosterCount": "Kader — {count, plural, one {# Spieler} other {# Spieler}}",
     "noPlayers": "Bisher kein Spieler erfasst.",
     "switchClub": "Verein wechseln",
-    "backToNews": "Starligue-News"
+    "backToNews": "Starligue-News",
+    "recentForm": "Letzte 5 Starligue-Spiele"
   },
   "compare": {
     "vs": "VS",

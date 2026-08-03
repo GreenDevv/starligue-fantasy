@@ -7,7 +7,8 @@
     "rosterCount": "Trup — {count, plural, one {# spiller} other {# spillere}}",
     "noPlayers": "Ingen spillere registreret endnu.",
     "switchClub": "Skift klub",
-    "backToNews": "Starligue-nyheder"
+    "backToNews": "Starligue-nyheder",
+    "recentForm": "Seneste 5 Starligue-kampe"
   },
   "compare": {
     "vs": "VS",

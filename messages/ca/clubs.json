@@ -7,7 +7,8 @@
     "rosterCount": "Plantilla — {count, plural, one {# jugador} other {# jugadors}}",
     "noPlayers": "Cap jugador registrat de moment.",
     "switchClub": "Canviar de club",
-    "backToNews": "Notícies Starligue"
+    "backToNews": "Notícies Starligue",
+    "recentForm": "Últims 5 partits de Starligue"
   },
   "compare": {
     "vs": "VS",

@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { resolveSeasonMode, resolveModeSeason } from "@/lib/team/active-team-context";
 import { SIMULATION_SEASON_LABEL } from "@/lib/simulation/constants";
-import { getClubPageData } from "@/lib/clubs/club-page-data";
+import { getClubPageData, type ClubPageMatch } from "@/lib/clubs/club-page-data";
 import {
   getClubWarmupMatches,
   getClubCoupeDeFranceMatches,
@@ -70,6 +70,21 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
   // src/lib/standings/compute.ts et live-sync.ts).
   const clubStanding = standings.rows.find((r) => r.clubId === club.id);
 
+  // Forme sur les 5 derniers matchs Starligue (championnat uniquement, jamais Warm
+  // Up/Coupe de France/EHF) — demande explicite de l'utilisateur. Réutilise
+  // `results` (déjà calculé plus haut par getClubPageData, ordre plus récent
+  // d'abord) plutôt que de reformuler une requête : ce tableau applique déjà la
+  // règle anti-spoiler simulation (curseur admin, jamais Match.status directement
+  // — cf. commentaire en tête de club-page-data.ts), donc la forme n'expose jamais
+  // un résultat que l'utilisateur n'a pas encore "découvert" en avançant. Les
+  // pastilles manquantes (saison qui vient de commencer) sont neutres, ajoutées à
+  // gauche pour garder le match le plus récent ancré à droite.
+  const lastFiveChronological = [...results].slice(0, 5).reverse();
+  const lastFive: (ClubPageMatch | null)[] = [
+    ...Array<null>(Math.max(0, 5 - lastFiveChronological.length)).fill(null),
+    ...lastFiveChronological,
+  ];
+
   const rosterByPosition = POSITIONS.map((pos) => ({
     position: pos,
     players: roster.filter((p) => p.position === pos),
@@ -109,6 +124,27 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
               {tDash("clubStandingsWidget.col.draws")} · {clubStanding.losses}
               {tDash("clubStandingsWidget.col.losses")}
             </span>
+            {/* Forme sur les 5 derniers matchs Starligue — mêmes couleurs que la
+                légende victoire/défaite/nul de ClubMatchesPanel. Pastille neutre
+                (non remplie) pour un match qui n'a pas encore eu lieu (début de
+                saison). */}
+            <div className="mt-1.5 flex items-center gap-1" aria-label={tClubs("detail.recentForm")}>
+              {lastFive.map((m, i) => {
+                if (!m || m.ownScore === null || m.opponentScore === null) {
+                  return <span key={`empty-${i}`} className="h-2.5 w-2.5 rounded-full border border-border" />;
+                }
+                const outcome = m.ownScore > m.opponentScore ? "win" : m.ownScore < m.opponentScore ? "loss" : "draw";
+                const tone =
+                  outcome === "win" ? "bg-points-pos" : outcome === "loss" ? "bg-points-neg" : "bg-accent-secondary";
+                return (
+                  <span
+                    key={m.id}
+                    title={`${m.opponent.shortName} ${m.ownScore}-${m.opponentScore}`}
+                    className={`h-2.5 w-2.5 rounded-full ${tone}`}
+                  />
+                );
+              })}
+            </div>
           </div>
         )}
       </div>

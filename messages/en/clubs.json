@@ -7,7 +7,8 @@
     "rosterCount": "Roster — {count, plural, one {# player} other {# players}}",
     "noPlayers": "No players registered yet.",
     "switchClub": "Switch club",
-    "backToNews": "Starligue news"
+    "backToNews": "Starligue news",
+    "recentForm": "Last 5 Starligue matches"
   },
   "compare": {
     "vs": "VS",
