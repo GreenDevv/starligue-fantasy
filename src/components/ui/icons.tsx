@@ -247,3 +247,24 @@ export function InfoIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+// Hamburger — déclencheur du menu mobile plein écran (MobileMenu.tsx).
+export function MenuIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4 6h16" />
+      <path d="M4 12h16" />
+      <path d="M4 18h16" />
+    </svg>
+  );
+}
+
+// Croix de fermeture — menu mobile plein écran + variante mobile de ClubSwitcher.
+export function CloseIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <path d="M6 6l12 12" />
+      <path d="M18 6L6 18" />
+    </svg>
+  );
+}

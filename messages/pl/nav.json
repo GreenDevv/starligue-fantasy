@@ -9,5 +9,8 @@
   "deconnexion": "Wyloguj się",
   "deconnexionAriaLabel": "Wyloguj się",
   "deconnexionTitle": "Wylogowanie ({name})",
-  "languageSelector": "Zmień język"
+  "languageSelector": "Zmień język",
+  "account": "Konto",
+  "openMenu": "Otwórz menu",
+  "closeMenu": "Zamknij menu"
 }

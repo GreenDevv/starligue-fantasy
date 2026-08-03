@@ -9,5 +9,8 @@
   "deconnexion": "Tancar sessió",
   "deconnexionAriaLabel": "Tancar sessió",
   "deconnexionTitle": "Tancar sessió ({name})",
-  "languageSelector": "Canviar idioma"
+  "languageSelector": "Canviar idioma",
+  "account": "Compte",
+  "openMenu": "Obrir el menú",
+  "closeMenu": "Tancar el menú"
 }

@@ -8,8 +8,9 @@ import { routing, type AppLocale } from "@/i18n/routing";
 import { FlagIcon } from "@/components/ui/FlagIcon";
 
 // Noms natifs (pas de traduction croisée : chaque langue s'affiche dans sa
-// propre langue, convention standard des sélecteurs de langue).
-const LOCALE_NAME: Record<AppLocale, string> = {
+// propre langue, convention standard des sélecteurs de langue). Exporté :
+// réutilisé par MobileMenu.tsx (sélecteur de langue inline plein écran).
+export const LOCALE_NAME: Record<AppLocale, string> = {
   fr: "Français",
   en: "English",
   es: "Español",

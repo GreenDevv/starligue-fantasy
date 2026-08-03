@@ -1,11 +1,13 @@
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { DeadlineBanner } from "@/components/DeadlineBanner";
-import { NavBar, MobileTabBar } from "@/components/NavBar";
+import { NavBar } from "@/components/NavBar";
 import { SeasonToggle } from "@/components/SeasonToggle";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { MobileMenu } from "@/components/MobileMenu";
 import { resolveSeasonMode } from "@/lib/team/active-team-context";
 
 export default async function GameLayout({
@@ -13,7 +15,11 @@ export default async function GameLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [session, activeSeason] = await Promise.all([auth(), prisma.season.findFirst({ where: { isActive: true } })]);
+  const [session, activeSeason, t] = await Promise.all([
+    auth(),
+    prisma.season.findFirst({ where: { isActive: true } }),
+    getTranslations("nav"),
+  ]);
   const seasonMode = resolveSeasonMode();
   // @ts-expect-error — role étendu
   const isAdmin = session?.user?.role === "ADMIN";
@@ -41,27 +47,30 @@ export default async function GameLayout({
             Starligue Fantasy
           </Link>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
-            {isAdmin && <SeasonToggle initialMode={seasonMode} />}
-            <NavBar />
-            {session?.user && (
-              <Link
-                href="/account"
-                className="rounded-md px-2.5 py-1.5 text-sm text-text-muted transition-colors hover:text-text"
-              >
-                Compte
-              </Link>
-            )}
-            <LocaleSwitcher />
-            <AuthButton userName={session?.user?.name} />
+            {/* Desktop uniquement : sur mobile, tout (nav + saison + compte +
+                langue + connexion) est regroupé dans MobileMenu (menu hamburger
+                plein écran) — demande explicite de l'utilisateur plutôt que de
+                garder ces contrôles entassés dans le header. */}
+            <div className="hidden items-center gap-2 sm:flex sm:gap-3">
+              {isAdmin && <SeasonToggle initialMode={seasonMode} />}
+              <NavBar />
+              {session?.user && (
+                <Link
+                  href="/account"
+                  className="rounded-md px-2.5 py-1.5 text-sm text-text-muted transition-colors hover:text-text"
+                >
+                  {t("account")}
+                </Link>
+              )}
+              <LocaleSwitcher />
+              <AuthButton userName={session?.user?.name} />
+            </div>
+            <MobileMenu userName={session?.user?.name} isAdmin={isAdmin} seasonMode={seasonMode} />
           </div>
         </div>
       </nav>
       <DeadlineBanner initialGameweek={bannerGameweek} />
-      <main className="mx-auto max-w-2xl px-4 py-6 pb-24 sm:pb-6">{children}</main>
-      {/* Rendue hors du <nav> sticky ci-dessus (backdrop-blur-sm y créerait un
-          containing block pour ce fixed, le collant sous le header au lieu du
-          bas de l'écran) — voir commentaire dans NavBar.tsx. */}
-      <MobileTabBar />
+      <main className="mx-auto max-w-2xl px-4 py-6 pb-6">{children}</main>
     </div>
   );
 }

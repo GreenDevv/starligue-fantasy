@@ -9,5 +9,8 @@
   "deconnexion": "Log ud",
   "deconnexionAriaLabel": "Log ud",
   "deconnexionTitle": "Log ud ({name})",
-  "languageSelector": "Skift sprog"
+  "languageSelector": "Skift sprog",
+  "account": "Konto",
+  "openMenu": "Åbn menu",
+  "closeMenu": "Luk menu"
 }

@@ -448,9 +448,9 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
         </div>
       </div>
 
-      {/* Sticky validation footer — bottom décalé au-dessus de la MobileTabBar sous
-          sm: (sinon le bouton se retrouve sous la nav mobile, inaccessible). */}
-      <div className="fixed inset-x-0 bottom-[calc(52px+env(safe-area-inset-bottom))] border-t border-border bg-bg/95 px-4 py-4 backdrop-blur-sm sm:bottom-0">
+      {/* Sticky validation footer — zone de sécurité iOS en bas, plus de
+          MobileTabBar à éviter (menu hamburger plein écran désormais). */}
+      <div className="fixed inset-x-0 bottom-0 border-t border-border bg-bg/95 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 backdrop-blur-sm">
         <div className="mx-auto max-w-2xl">
           {error && (
             <p className="mb-2 text-center text-sm text-points-neg">{error}</p>

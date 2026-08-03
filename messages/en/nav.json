@@ -9,5 +9,8 @@
   "deconnexion": "Log out",
   "deconnexionAriaLabel": "Log out",
   "deconnexionTitle": "Log out ({name})",
-  "languageSelector": "Change language"
+  "languageSelector": "Change language",
+  "account": "Account",
+  "openMenu": "Open menu",
+  "closeMenu": "Close menu"
 }

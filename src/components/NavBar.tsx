@@ -16,7 +16,10 @@ import {
 // d'une ligue (FantasyTeam.leagueId jamais optionnel) — /leagues est le point
 // d'entrée, cliquer sur une ligue affiche l'équipe qui lui est associée
 // (src/app/[locale]/(game)/leagues/[id]/page.tsx).
-const NAV_ITEMS = [
+// Exporté : réutilisé par MobileMenu.tsx (menu plein écran mobile, remplace
+// l'ancienne MobileTabBar — demande explicite de l'utilisateur de tout
+// regrouper dans un seul menu hamburger plutôt que garder une barre du bas).
+export const NAV_ITEMS = [
   { href: "/dashboard", key: "dashboard", Icon: DashboardIcon },
   { href: "/market", key: "market", Icon: MarketIcon },
   { href: "/predictions", key: "predictions", Icon: TargetIcon },
@@ -25,7 +28,7 @@ const NAV_ITEMS = [
   { href: "/matches", key: "matches", Icon: CalendarIcon },
 ] as const;
 
-function isActive(pathname: string, href: string): boolean {
+export function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -57,46 +60,5 @@ export function NavBar() {
         );
       })}
     </div>
-  );
-}
-
-// Tab bar mobile fixe en bas façon panneau de contrôle borne d'arcade — DOIT être
-// rendue en dehors de tout ancêtre avec backdrop-filter/filter/transform (ex: le
-// <nav> sticky du header a backdrop-blur-sm), sans quoi cet ancêtre devient le
-// containing block du `fixed` et la barre se retrouve collée sous lui au lieu du
-// bas de l'écran. Rendue directement au niveau racine du layout, pas depuis
-// l'intérieur du header.
-export function MobileTabBar() {
-  const pathname = usePathname();
-  const t = useTranslations("nav");
-
-  return (
-    <nav
-      className="fixed inset-x-0 bottom-0 z-20 border-t border-accent/20 bg-surface/95 shadow-[0_-1px_12px_rgba(45,212,191,0.12)] backdrop-blur-sm sm:hidden"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-    >
-      <div className="grid grid-cols-6">
-        {NAV_ITEMS.map(({ href, key, Icon }) => {
-          const active = isActive(pathname, href);
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                "relative flex min-h-[52px] flex-col items-center justify-center gap-0.5 py-1.5 text-[10px] uppercase tracking-wide transition-colors",
-                active ? "text-accent drop-shadow-[0_0_6px_rgba(45,212,191,0.7)]" : "text-text-muted"
-              )}
-              aria-current={active ? "page" : undefined}
-            >
-              {active && (
-                <span className="absolute top-0 h-0.5 w-6 rounded-full bg-accent shadow-glow-accent" />
-              )}
-              <Icon className="h-5 w-5" strokeWidth={active ? 2.1 : 1.8} />
-              {t(key)}
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
   );
 }

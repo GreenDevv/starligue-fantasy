@@ -197,10 +197,9 @@ export function StartView({ mode }: { mode: SeasonMode }) {
         <CaptainPicker squad={squad} captainId={captainId} onSelect={setCaptainId} />
       </div>
 
-      {/* bottom décalé au-dessus de la MobileTabBar (fixed elle aussi, ~52px + zone
-          de sécurité iOS) sous sm: — sinon le bouton se retrouve sous la nav mobile,
-          inaccessible. sm:bottom-0 replaque au ras du bas quand la tab bar disparaît. */}
-      <div className="fixed inset-x-0 bottom-[calc(52px+env(safe-area-inset-bottom))] border-t border-border bg-bg/95 px-4 py-4 backdrop-blur-sm sm:bottom-0">
+      {/* zone de sécurité iOS en bas — plus de MobileTabBar à éviter (menu
+          hamburger plein écran désormais, aucune barre fixe permanente). */}
+      <div className="fixed inset-x-0 bottom-0 border-t border-border bg-bg/95 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 backdrop-blur-sm">
         <div className="mx-auto max-w-2xl">
           {error && <p className="mb-2 text-center text-sm text-points-neg">{error}</p>}
           <button

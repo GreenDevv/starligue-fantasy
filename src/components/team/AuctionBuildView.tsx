@@ -457,7 +457,9 @@ export function AuctionBuildView({ leagueId, leagueSuffix }: { leagueId: string;
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-[calc(52px+env(safe-area-inset-bottom))] border-t border-border bg-bg/95 px-4 py-4 backdrop-blur-sm sm:bottom-0">
+      {/* Zone de sécurité iOS en bas — plus de MobileTabBar à éviter (menu
+          hamburger plein écran désormais). */}
+      <div className="fixed inset-x-0 bottom-0 border-t border-border bg-bg/95 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 backdrop-blur-sm">
         <div className="mx-auto max-w-2xl">
           {errors.length > 0 && (
             <ul className="mb-2 space-y-0.5 text-center text-sm text-points-neg">

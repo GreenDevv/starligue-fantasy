@@ -2,15 +2,45 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { ClubLogo } from "@/components/ui/ClubLogo";
+import { CloseIcon } from "@/components/ui/icons";
+import { cn } from "@/lib/utils";
 
 interface SwitcherClub {
   id: string;
   name: string;
   shortName: string;
   logoUrl: string | null;
+}
+
+const listVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.03, delayChildren: 0.05 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0 },
+};
+
+// Sous sm: (< 640px, seuil Tailwind), le logo ouvre un menu plein écran animé
+// (Framer Motion) plutôt que le petit dropdown desktop — demande explicite de
+// l'utilisateur ("un vrai menu qui prenne tout l'écran... comme un menu
+// hamburger"). Détection JS (pas de solution CSS pure possible ici : les deux
+// variantes ont des structures DOM différentes, coords calculées vs plein écran).
+function useIsMobile(): boolean {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia("(max-width: 639.98px)");
+    setIsMobile(mql.matches);
+    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+  return isMobile;
 }
 
 // Logo du club cliquable ouvrant un menu déroulant pour naviguer directement vers
@@ -23,7 +53,9 @@ interface SwitcherClub {
 // permet de voir en un coup d'œil "où je suis" dans la liste alphabétique).
 export function ClubSwitcher({ currentClub, clubs }: { currentClub: SwitcherClub; clubs: SwitcherClub[] }) {
   const t = useTranslations("clubs");
+  const tNav = useTranslations("nav");
   const router = useRouter();
+  const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -52,6 +84,16 @@ export function ClubSwitcher({ currentClub, clubs }: { currentClub: SwitcherClub
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
+
+  // Verrouille le scroll de fond pendant que le panneau plein écran mobile est
+  // ouvert (sans effet en desktop, le dropdown ne couvre pas la page).
+  useEffect(() => {
+    if (!open || !isMobile) return undefined;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open, isMobile]);
 
   function toggle() {
     if (!open) {
@@ -82,6 +124,7 @@ export function ClubSwitcher({ currentClub, clubs }: { currentClub: SwitcherClub
       </button>
 
       {typeof document !== "undefined" &&
+        !isMobile &&
         open &&
         createPortal(
           <div
@@ -107,6 +150,72 @@ export function ClubSwitcher({ currentClub, clubs }: { currentClub: SwitcherClub
               </button>
             ))}
           </div>,
+          document.body
+        )}
+
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {isMobile && open && (
+              <motion.div
+                ref={menuRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label={t("detail.switchClub")}
+                className="fixed inset-0 z-[200] flex flex-col bg-bg"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+              >
+                <div className="flex items-center justify-between border-b border-border px-4 py-3">
+                  <span className="font-display text-base uppercase tracking-wide text-text">
+                    {t("detail.switchClub")}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    aria-label={tNav("closeMenu")}
+                    className="rounded-md p-2 text-text-muted transition-colors hover:text-text"
+                  >
+                    <CloseIcon className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <motion.div
+                  className="flex-1 overflow-y-auto p-3"
+                  variants={listVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  <div className="grid grid-cols-2 gap-2">
+                    {clubs.map((c) => (
+                      <motion.button
+                        key={c.id}
+                        variants={itemVariants}
+                        type="button"
+                        aria-current={c.id === currentClub.id ? "true" : undefined}
+                        onClick={() => select(c.id)}
+                        className={cn(
+                          "flex flex-col items-center gap-2 rounded-lg border px-3 py-4 text-center text-sm transition-colors",
+                          c.id === currentClub.id
+                            ? "border-accent/50 bg-accent/10 text-accent"
+                            : "border-border text-text-muted hover:bg-border/20 hover:text-text"
+                        )}
+                      >
+                        <ClubLogo club={c} size="lg" />
+                        {/* w-full : sans largeur contrainte dans ce flex-col centré,
+                            le span se dimensionne sur son propre contenu et
+                            `truncate` n'a alors plus rien à couper (chevauchement
+                            observé sur les noms de club longs). */}
+                        <span className="w-full truncate">{c.name}</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
           document.body
         )}
     </>

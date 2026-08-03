@@ -9,5 +9,8 @@
   "deconnexion": "Abmelden",
   "deconnexionAriaLabel": "Abmelden",
   "deconnexionTitle": "Abmelden ({name})",
-  "languageSelector": "Sprache ändern"
+  "languageSelector": "Sprache ändern",
+  "account": "Konto",
+  "openMenu": "Menü öffnen",
+  "closeMenu": "Menü schließen"
 }
