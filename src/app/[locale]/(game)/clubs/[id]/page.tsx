@@ -88,10 +88,18 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
       <div className="flex items-center gap-4 pixel-corners border border-border bg-surface p-4">
         <ClubSwitcher currentClub={club} clubs={allClubs} rankByClubId={rankByClubId} />
 
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl text-text">{club.name}</h1>
+          <p className="text-sm text-text-muted">
+            {isSimulation ? tClubs("detail.simulation") : tClubs("detail.season")} {season.label}
+          </p>
+        </div>
+
         {/* Rang + V/N/D Starligue du club — demande explicite de l'utilisateur
             ("en jaune, en assez gros"), même palette/police que les autres valeurs
             numériques mises en avant (points, prix, deadline — ARCHITECTURE.md
-            §8.1 : accent-secondary + police arcade réservées à cet usage). */}
+            §8.1 : accent-secondary + police arcade réservées à cet usage). Sur la
+            droite pour équilibrer avec le logo à gauche (demande explicite). */}
         {clubStanding && (
           <div className="flex shrink-0 flex-col items-center leading-none">
             <span className="font-arcade text-4xl text-accent-secondary">{clubStanding.rank}</span>
@@ -103,13 +111,6 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
             </span>
           </div>
         )}
-
-        <div>
-          <h1 className="text-2xl text-text">{club.name}</h1>
-          <p className="text-sm text-text-muted">
-            {isSimulation ? tClubs("detail.simulation") : tClubs("detail.season")} {season.label}
-          </p>
-        </div>
       </div>
 
       {/* Résultats / prochains matchs — championnat + Warm Up + Coupe de France +
