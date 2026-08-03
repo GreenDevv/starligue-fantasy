@@ -47,10 +47,12 @@ export default async function GameLayout({
             Starligue Fantasy
           </Link>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
-            {/* Desktop uniquement : sur mobile, tout (nav + saison + compte +
-                langue + connexion) est regroupé dans MobileMenu (menu hamburger
-                plein écran) — demande explicite de l'utilisateur plutôt que de
-                garder ces contrôles entassés dans le header. */}
+            {/* Desktop uniquement : sur mobile, nav + saison + compte + connexion
+                sont regroupés dans MobileMenu (menu hamburger plein écran) —
+                demande explicite de l'utilisateur plutôt que de garder ces
+                contrôles entassés dans le header. LocaleSwitcher reste exclu de
+                ce regroupement (demande explicite) : rendu ci-dessous, toujours
+                visible quel que soit le breakpoint. */}
             <div className="hidden items-center gap-2 sm:flex sm:gap-3">
               {isAdmin && <SeasonToggle initialMode={seasonMode} />}
               <NavBar />
@@ -62,9 +64,9 @@ export default async function GameLayout({
                   {t("account")}
                 </Link>
               )}
-              <LocaleSwitcher />
               <AuthButton userName={session?.user?.name} />
             </div>
+            <LocaleSwitcher />
             <MobileMenu userName={session?.user?.name} isAdmin={isAdmin} seasonMode={seasonMode} />
           </div>
         </div>

@@ -5,13 +5,9 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
-import { Link, useRouter, usePathname } from "@/i18n/navigation";
-import { routing, type AppLocale } from "@/i18n/routing";
+import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS, isActive } from "@/components/NavBar";
-import { FlagIcon } from "@/components/ui/FlagIcon";
-import { LOCALE_NAME } from "@/components/LocaleSwitcher";
 import { SeasonToggle } from "@/components/SeasonToggle";
 import { MenuIcon, CloseIcon, LogoutIcon } from "@/components/ui/icons";
 import type { SeasonMode } from "@/lib/team/active-team-context";
@@ -28,11 +24,11 @@ const itemVariants = {
 
 // Menu mobile plein écran — remplace, sous sm:, à la fois l'ancienne
 // MobileTabBar (barre fixe du bas, 6 onglets trop serrés) ET les icônes du
-// header (SeasonToggle/Compte/LocaleSwitcher/AuthButton) qui s'entassaient sur
-// mobile. Demande explicite de l'utilisateur : "tout regrouper dans un seul
-// menu" plutôt que garder plusieurs zones de navigation séparées. Desktop
-// inchangé (le déclencheur est sm:hidden, le header classique reste sm:flex
-// dans GameLayout).
+// header (SeasonToggle/Compte/AuthButton) qui s'entassaient sur mobile.
+// LocaleSwitcher reste volontairement EN DEHORS de ce menu (demande explicite
+// de l'utilisateur) — rendu à côté, toujours visible dans le header, voir
+// GameLayout. Desktop inchangé (le déclencheur est sm:hidden, le header
+// classique reste sm:flex dans GameLayout).
 export function MobileMenu({
   userName,
   isAdmin,
@@ -43,10 +39,8 @@ export function MobileMenu({
   seasonMode: SeasonMode;
 }) {
   const t = useTranslations("nav");
-  const locale = useLocale() as AppLocale;
-  const router = useRouter();
+  const locale = useLocale();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
 
   // Ferme automatiquement à toute navigation (lien cliqué, bouton retour du
@@ -68,12 +62,6 @@ export function MobileMenu({
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
-
-  function selectLocale(nextLocale: AppLocale) {
-    setOpen(false);
-    if (nextLocale === locale) return;
-    router.replace({ pathname, query: Object.fromEntries(searchParams) }, { locale: nextLocale });
-  }
 
   function handleLogout() {
     setOpen(false);
@@ -165,30 +153,6 @@ export function MobileMenu({
                       <SeasonToggle initialMode={seasonMode} />
                     </motion.div>
                   )}
-
-                  <motion.div variants={itemVariants} className="px-3 py-2">
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">
-                      {t("languageSelector")}
-                    </p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {routing.locales.map((l) => (
-                        <button
-                          key={l}
-                          type="button"
-                          onClick={() => selectLocale(l)}
-                          className={cn(
-                            "flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors",
-                            l === locale
-                              ? "border-accent/50 bg-accent/10 text-accent"
-                              : "border-border text-text-muted hover:text-text"
-                          )}
-                        >
-                          <FlagIcon locale={l} />
-                          {LOCALE_NAME[l]}
-                        </button>
-                      ))}
-                    </div>
-                  </motion.div>
 
                   <motion.div variants={itemVariants} className="mt-auto border-t border-border pt-3">
                     {userName ? (

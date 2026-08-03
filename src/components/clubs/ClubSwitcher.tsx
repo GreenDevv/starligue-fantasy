@@ -183,35 +183,32 @@ export function ClubSwitcher({ currentClub, clubs }: { currentClub: SwitcherClub
                 </div>
 
                 <motion.div
-                  className="flex-1 overflow-y-auto p-3"
+                  className="flex flex-1 flex-col gap-1 overflow-y-auto p-3"
                   variants={listVariants}
                   initial="hidden"
                   animate="visible"
                 >
-                  <div className="grid grid-cols-2 gap-2">
-                    {clubs.map((c) => (
-                      <motion.button
-                        key={c.id}
-                        variants={itemVariants}
-                        type="button"
-                        aria-current={c.id === currentClub.id ? "true" : undefined}
-                        onClick={() => select(c.id)}
-                        className={cn(
-                          "flex flex-col items-center gap-2 rounded-lg border px-3 py-4 text-center text-sm transition-colors",
-                          c.id === currentClub.id
-                            ? "border-accent/50 bg-accent/10 text-accent"
-                            : "border-border text-text-muted hover:bg-border/20 hover:text-text"
-                        )}
-                      >
-                        <ClubLogo club={c} size="lg" />
-                        {/* w-full : sans largeur contrainte dans ce flex-col centré,
-                            le span se dimensionne sur son propre contenu et
-                            `truncate` n'a alors plus rien à couper (chevauchement
-                            observé sur les noms de club longs). */}
-                        <span className="w-full truncate">{c.name}</span>
-                      </motion.button>
-                    ))}
-                  </div>
+                  {clubs.map((c) => (
+                    <motion.button
+                      key={c.id}
+                      variants={itemVariants}
+                      type="button"
+                      aria-current={c.id === currentClub.id ? "true" : undefined}
+                      onClick={() => select(c.id)}
+                      className={cn(
+                        "flex w-full items-center gap-3 rounded-lg border px-3 py-3 text-left text-base transition-colors",
+                        c.id === currentClub.id
+                          ? "border-accent/50 bg-accent/10 text-accent"
+                          : "border-border text-text-muted hover:bg-border/20 hover:text-text"
+                      )}
+                    >
+                      <ClubLogo club={c} size="md" />
+                      {/* min-w-0 : en ligne flex, un enfant sans largeur contrainte
+                          ne peut pas rétrécir sous sa taille de contenu par défaut
+                          — `truncate` resterait sans effet sur un nom long sinon. */}
+                      <span className="min-w-0 flex-1 truncate">{c.name}</span>
+                    </motion.button>
+                  ))}
                 </motion.div>
               </motion.div>
             )}
