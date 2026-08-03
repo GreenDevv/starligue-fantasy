@@ -26,6 +26,12 @@ interface StripMatch {
   homeScore: number | null;
   awayScore: number | null;
   kickoffAt: string | Date;
+  // URL personnalisée pour CE match précis (ex: page groupe EHF depuis la home,
+  // /matches/ehf/[competition]/[group]) — prioritaire sur `disableLink` et sur la
+  // résolution par défaut (/matches/[id] ou /clubs/.../vs/...). Chaîne (pas une
+  // fonction) : ce composant est un Client Component, une fonction passée depuis
+  // une page serveur ne serait pas sérialisable à travers la frontière RSC.
+  href?: string;
 }
 
 interface MatchesStripProps {
@@ -169,11 +175,13 @@ export function MatchesStrip({
       ) : (
         <div className={`grid ${gridCols} ${outerGap}`}>
           {matches.map((m) => {
-            const href = disableLink
-              ? null
-              : variant === "results"
-                ? `/matches/${m.id}`
-                : `/clubs/${m.homeClub.id}/vs/${m.awayClub.id}`;
+            const href =
+              m.href ??
+              (disableLink
+                ? null
+                : variant === "results"
+                  ? `/matches/${m.id}`
+                  : `/clubs/${m.homeClub.id}/vs/${m.awayClub.id}`);
             const hasScore = m.homeScore !== null && m.awayScore !== null;
             const homeRank = m.homeClub.id ? rankByClubId?.[m.homeClub.id] : undefined;
             const awayRank = m.awayClub.id ? rankByClubId?.[m.awayClub.id] : undefined;

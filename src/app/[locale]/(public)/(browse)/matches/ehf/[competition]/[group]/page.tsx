@@ -23,7 +23,6 @@ function teamHref(team: GroupTeam): string | null {
 
 export default async function EhfGroupPage({ params }: { params: { competition: string; group: string } }) {
   const t = await getTranslations("matches");
-  const tClubs = await getTranslations("clubs");
   const tDashboard = await getTranslations("dashboard");
 
   const competitionLabel = ehfCompetitionLabelFromSlug(params.competition);
@@ -56,11 +55,27 @@ export default async function EhfGroupPage({ params }: { params: { competition: 
 
   const col = (key: string) => tDashboard(`clubStandingsWidget.col.${key}`);
 
+  // Le club Starligue du groupe (toujours exactement une des 4 équipes, les
+  // autres sont hors DB — voir FriendlyMatch/homeClubId dans schema.prisma) —
+  // sert de destination au lien retour, cohérent avec les pages head-to-head
+  // (/clubs/[id]/vs/[opponentId]) plutôt qu'un lien vers /dashboard (Fantasy,
+  // n'a plus de sens ici depuis que cette page est en mode Starligue public).
+  const starligueTeam = [...teamByName.values()].find((team) => team.clubId);
+
   return (
     <div className="flex flex-col gap-5">
-      <Link href="/dashboard" className="text-sm text-text-muted hover:text-text transition-colors">
-        ← {tClubs("detail.backToDashboard")}
-      </Link>
+      {starligueTeam ? (
+        <Link
+          href={`/clubs/${starligueTeam.clubId}`}
+          className="text-sm text-text-muted hover:text-text transition-colors"
+        >
+          ← {starligueTeam.name}
+        </Link>
+      ) : (
+        <Link href="/matches" className="text-sm text-text-muted hover:text-text transition-colors">
+          ← {t("list.title")}
+        </Link>
+      )}
 
       <div>
         <h1 className="text-xl text-text">{competitionLabel}</h1>

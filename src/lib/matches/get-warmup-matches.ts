@@ -48,6 +48,11 @@ export interface WarmupMatchRow {
   homeScore: number | null;
   awayScore: number | null;
   kickoffAt: Date;
+  // Groupe de phase de groupes EHF ("A".."F") — null pour Warm Up/Coupe de France,
+  // et pour un tour EHF hors phase de groupes (qualifs/knockout). Sert à construire
+  // le lien vers /matches/ehf/[competition]/[group] depuis la home (ARCHITECTURE.md
+  // §19), même info que ClubWarmupMatch.groupLabel ci-dessous.
+  groupLabel: string | null;
 }
 
 function toDisplayClub(
@@ -77,6 +82,7 @@ async function getFriendlyMatches(seasonId: string, competitionLabels: string[])
     homeScore: m.homeScore,
     awayScore: m.awayScore,
     kickoffAt: m.kickoffAt,
+    groupLabel: m.groupLabel,
   }));
 }
 

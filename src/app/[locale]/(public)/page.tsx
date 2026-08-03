@@ -13,6 +13,7 @@ import {
   getChampionsLeagueMatches,
   getEuropeanLeagueMatches,
 } from "@/lib/matches/get-warmup-matches";
+import { ehfCompetitionSlug } from "@/lib/matches/ehf-competition-slugs";
 import { getActiveClubs } from "@/lib/clubs/get-active-clubs";
 import { MatchesStrip } from "@/components/dashboard/MatchesStrip";
 import { ClubLogo } from "@/components/ui/ClubLogo";
@@ -204,7 +205,15 @@ export default async function HomePage({
             <MatchesStrip
               variant="upcoming"
               gameweekNumber={null}
-              matches={championsLeagueMatches}
+              matches={championsLeagueMatches.map((m) => ({
+                id: m.id,
+                homeClub: m.homeClub,
+                awayClub: m.awayClub,
+                homeScore: m.homeScore,
+                awayScore: m.awayScore,
+                kickoffAt: m.kickoffAt,
+                href: m.groupLabel ? `/matches/ehf/${ehfCompetitionSlug("championsLeague")}/${m.groupLabel}` : undefined,
+              }))}
               fixedColumns={2}
               title={t("championsLeague.title")}
               disableLink
@@ -215,7 +224,15 @@ export default async function HomePage({
             <MatchesStrip
               variant="upcoming"
               gameweekNumber={null}
-              matches={europeanLeagueMatches}
+              matches={europeanLeagueMatches.map((m) => ({
+                id: m.id,
+                homeClub: m.homeClub,
+                awayClub: m.awayClub,
+                homeScore: m.homeScore,
+                awayScore: m.awayScore,
+                kickoffAt: m.kickoffAt,
+                href: m.groupLabel ? `/matches/ehf/${ehfCompetitionSlug("europeanLeague")}/${m.groupLabel}` : undefined,
+              }))}
               fixedColumns={2}
               title={t("europeanLeague.title")}
               disableLink
