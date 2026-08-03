@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
@@ -50,8 +50,20 @@ function useIsMobile(): boolean {
 // rognerait sinon un menu positionné en absolute (même piège déjà résolu pour
 // PlayerSeasonRecapTrigger, src/components/players/PlayerSeasonRecapTrigger.tsx).
 // `clubs` inclut le club courant (mis en évidence dans la liste plutôt qu'exclu —
-// permet de voir en un coup d'œil "où je suis" dans la liste alphabétique).
-export function ClubSwitcher({ currentClub, clubs }: { currentClub: SwitcherClub; clubs: SwitcherClub[] }) {
+// permet de voir en un coup d'œil "où je suis" dans la liste). Triée par
+// classement Starligue courant (`rankByClubId`, même source que le tableau des
+// classements club-page-data.ts) plutôt qu'alphabétiquement — demande explicite
+// de l'utilisateur : refléter l'ordre du classement dans ce menu, sans afficher
+// le rang lui-même (juste l'ordre).
+export function ClubSwitcher({
+  currentClub,
+  clubs,
+  rankByClubId,
+}: {
+  currentClub: SwitcherClub;
+  clubs: SwitcherClub[];
+  rankByClubId: Record<string, number>;
+}) {
   const t = useTranslations("clubs");
   const tNav = useTranslations("nav");
   const router = useRouter();
@@ -60,6 +72,14 @@ export function ClubSwitcher({ currentClub, clubs }: { currentClub: SwitcherClub
   const [coords, setCoords] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const orderedClubs = useMemo(
+    () =>
+      [...clubs].sort(
+        (a, b) => (rankByClubId[a.id] ?? Infinity) - (rankByClubId[b.id] ?? Infinity)
+      ),
+    [clubs, rankByClubId]
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -134,7 +154,7 @@ export function ClubSwitcher({ currentClub, clubs }: { currentClub: SwitcherClub
             style={{ position: "fixed", top: coords.top, left: coords.left, zIndex: 100 }}
             className="pixel-corners-sm flex max-h-80 w-56 flex-col gap-0.5 overflow-y-auto border border-border bg-surface p-1 shadow-lg"
           >
-            {clubs.map((c) => (
+            {orderedClubs.map((c) => (
               <button
                 key={c.id}
                 type="button"
@@ -188,7 +208,7 @@ export function ClubSwitcher({ currentClub, clubs }: { currentClub: SwitcherClub
                   initial="hidden"
                   animate="visible"
                 >
-                  {clubs.map((c) => (
+                  {orderedClubs.map((c) => (
                     <motion.button
                       key={c.id}
                       variants={itemVariants}

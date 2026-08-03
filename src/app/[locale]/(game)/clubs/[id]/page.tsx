@@ -79,7 +79,7 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
       {/* Club header — logo cliquable, ouvre un menu déroulant pour naviguer vers
           un autre club (demande explicite de l'utilisateur) */}
       <div className="flex items-center gap-4 pixel-corners border border-border bg-surface p-4">
-        <ClubSwitcher currentClub={club} clubs={allClubs} />
+        <ClubSwitcher currentClub={club} clubs={allClubs} rankByClubId={rankByClubId} />
         <div>
           <h1 className="text-2xl text-text">{club.name}</h1>
           <p className="text-sm text-text-muted">
