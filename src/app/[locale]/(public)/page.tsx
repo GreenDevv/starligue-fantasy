@@ -16,7 +16,7 @@ import {
 import { ehfCompetitionSlug } from "@/lib/matches/ehf-competition-slugs";
 import { getActiveClubs } from "@/lib/clubs/get-active-clubs";
 import { MatchesStrip } from "@/components/dashboard/MatchesStrip";
-import { ClubLogo } from "@/components/ui/ClubLogo";
+import { ClubLogoLink } from "@/components/starligue/ClubLogoLink";
 import { StandingsSection } from "@/components/starligue/StandingsSection";
 import { NewsFeed } from "@/components/starligue/NewsFeed";
 import { StarligueBestXICard } from "@/components/starligue/StarligueBestXICard";
@@ -154,9 +154,7 @@ export default async function HomePage({
           desktop (sm:) : inchangé, une seule ligne pleine largeur. */}
       <div className="pixel-corners grid grid-cols-8 place-items-center gap-1 border border-border bg-surface px-3 py-3 sm:flex sm:items-center sm:justify-between sm:overflow-x-auto">
         {clubs.map((club) => (
-          <Link key={club.id} href={`/clubs/${club.id}`} className="shrink-0 transition-opacity hover:opacity-80">
-            <ClubLogo club={club} size="lg" sizeClassName="w-8 h-8 sm:w-12 sm:h-12" title={club.name} />
-          </Link>
+          <ClubLogoLink key={club.id} club={club} />
         ))}
       </div>
 
