@@ -6,7 +6,8 @@
     "goalsByGameweek": "Tore pro Spieltag",
     "rosterCount": "Kader — {count, plural, one {# Spieler} other {# Spieler}}",
     "noPlayers": "Bisher kein Spieler erfasst.",
-    "switchClub": "Verein wechseln"
+    "switchClub": "Verein wechseln",
+    "backToNews": "Starligue-News"
   },
   "compare": {
     "vs": "VS",

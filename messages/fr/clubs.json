@@ -6,7 +6,8 @@
     "goalsByGameweek": "Buts par journée",
     "rosterCount": "Effectif — {count, plural, one {# joueur} other {# joueurs}}",
     "noPlayers": "Aucun joueur enregistré pour l'instant.",
-    "switchClub": "Changer de club"
+    "switchClub": "Changer de club",
+    "backToNews": "Actus Starligue"
   },
   "compare": {
     "vs": "VS",

@@ -6,7 +6,8 @@
     "goalsByGameweek": "Gole w poszczególnych kolejkach",
     "rosterCount": "Skład — {count, plural, one {# zawodnik} few {# zawodników} many {# zawodników} other {# zawodnika}}",
     "noPlayers": "Brak zarejestrowanych zawodników na razie.",
-    "switchClub": "Zmień klub"
+    "switchClub": "Zmień klub",
+    "backToNews": "Aktualności Starligue"
   },
   "compare": {
     "vs": "VS",

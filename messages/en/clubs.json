@@ -6,7 +6,8 @@
     "goalsByGameweek": "Goals by matchday",
     "rosterCount": "Roster — {count, plural, one {# player} other {# players}}",
     "noPlayers": "No players registered yet.",
-    "switchClub": "Switch club"
+    "switchClub": "Switch club",
+    "backToNews": "Starligue news"
   },
   "compare": {
     "vs": "VS",

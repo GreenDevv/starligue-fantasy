@@ -141,12 +141,13 @@ export default async function HomePage({
         </Link>
       </div>
 
-      {/* Les 16 clubs Starligue de la saison, une seule ligne sur toute la largeur
-          (scrollable horizontalement sur mobile si jamais ça ne tient pas). */}
-      <div className="pixel-corners flex items-center justify-between gap-1 overflow-x-auto border border-border bg-surface px-3 py-3">
+      {/* Les 16 clubs Starligue de la saison. Sur mobile : grille 8 colonnes (2
+          lignes) avec logos réduits pour voir tout le monde sans scroller. Sur
+          desktop (sm:) : inchangé, une seule ligne pleine largeur. */}
+      <div className="pixel-corners grid grid-cols-8 place-items-center gap-1 border border-border bg-surface px-3 py-3 sm:flex sm:items-center sm:justify-between sm:overflow-x-auto">
         {clubs.map((club) => (
           <Link key={club.id} href={`/clubs/${club.id}`} className="shrink-0 transition-opacity hover:opacity-80">
-            <ClubLogo club={club} size="lg" title={club.name} />
+            <ClubLogo club={club} size="lg" sizeClassName="w-8 h-8 sm:w-12 sm:h-12" title={club.name} />
           </Link>
         ))}
       </div>

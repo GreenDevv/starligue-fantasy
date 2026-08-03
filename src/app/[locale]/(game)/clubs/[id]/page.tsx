@@ -72,8 +72,8 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <Link href="/dashboard" className="text-sm text-text-muted hover:text-text transition-colors">
-        ← {tClubs("detail.backToDashboard")}
+      <Link href="/" className="text-sm text-text-muted hover:text-text transition-colors">
+        ← {tClubs("detail.backToNews")}
       </Link>
 
       {/* Club header — logo cliquable, ouvre un menu déroulant pour naviguer vers

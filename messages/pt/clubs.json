@@ -6,7 +6,8 @@
     "goalsByGameweek": "Golos por jornada",
     "rosterCount": "Plantel — {count, plural, one {# jogador} other {# jogadores}}",
     "noPlayers": "Ainda não há jogadores registados.",
-    "switchClub": "Mudar de clube"
+    "switchClub": "Mudar de clube",
+    "backToNews": "Notícias Starligue"
   },
   "compare": {
     "vs": "VS",

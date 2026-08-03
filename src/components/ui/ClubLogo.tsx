@@ -20,6 +20,11 @@ interface ClubLogoProps {
   // fixe) par des classes Tailwind : un style inline a toujours priorité sur une
   // classe, même avec préfixe sm:, donc impossible de superposer les deux.
   largeOnDesktop?: boolean;
+  // Classes Tailwind de taille arbitraires (ex: "w-8 h-8 sm:w-12 sm:h-12"),
+  // prioritaires sur `size`/`largeOnDesktop` — échappatoire pour un besoin de
+  // taille responsive qui ne correspond à aucune entrée de SIZE_CLASSES (ex:
+  // grille 2×8 logos sur mobile home, réduite uniquement sur mobile).
+  sizeClassName?: string;
 }
 
 const SIZES: Record<LogoSize, number> = {
@@ -53,14 +58,14 @@ const DESKTOP_SIZES: Record<LogoSize, number> = {
 // blanche derrière pour rester visibles sur les fonds sombres du site.
 export const WHITE_BG_CLUBS = new Set(["CRMHB", "USAM"]);
 
-export function ClubLogo({ club, size = "sm", className = "", title, largeOnDesktop = false }: ClubLogoProps) {
+export function ClubLogo({ club, size = "sm", className = "", title, largeOnDesktop = false, sizeClassName }: ClubLogoProps) {
   const px = SIZES[size];
   // width/height next/image : qualité du srcset seulement (le rendu réel vient de
   // la taille du <span> parent + object-contain) — donner la taille desktop (la
   // plus grande possible) évite le flou une fois agrandi au-delà de sm:.
-  const imagePx = largeOnDesktop ? DESKTOP_SIZES[size] : px;
-  const sizeClass = largeOnDesktop ? SIZE_CLASSES[size] : undefined;
-  const sizeStyle = largeOnDesktop ? undefined : { width: px, height: px };
+  const imagePx = largeOnDesktop || sizeClassName ? DESKTOP_SIZES[size] : px;
+  const sizeClass = sizeClassName ?? (largeOnDesktop ? SIZE_CLASSES[size] : undefined);
+  const sizeStyle = sizeClass ? undefined : { width: px, height: px };
 
   if (!club.logoUrl) {
     return (
