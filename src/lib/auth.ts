@@ -11,7 +11,7 @@ const loginSchema = z.object({
   password: z.string().min(6),
 });
 
-const PROTECTED_PREFIXES = ["/team", "/market", "/leagues", "/leaderboard", "/matches", "/players", "/dashboard", "/account"];
+const PROTECTED_PREFIXES = ["/team", "/market", "/leagues", "/leaderboard", "/predictions", "/dashboard", "/account"];
 const ADMIN_PREFIXES = ["/admin"];
 
 // localePrefix "always" : toutes les langues sont préfixées, y compris le FR

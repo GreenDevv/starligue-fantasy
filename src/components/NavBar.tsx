@@ -8,7 +8,6 @@ import {
   MarketIcon,
   LeaguesIcon,
   LeaderboardIcon,
-  CalendarIcon,
   TargetIcon,
 } from "@/components/ui/icons";
 
@@ -16,6 +15,9 @@ import {
 // d'une ligue (FantasyTeam.leagueId jamais optionnel) — /leagues est le point
 // d'entrée, cliquer sur une ligue affiche l'équipe qui lui est associée
 // (src/app/[locale]/(game)/leagues/[id]/page.tsx).
+// Pas d'entrée "Calendrier" : /matches est passée en mode Starligue (public),
+// voir PublicNavBar.tsx — ces items sont désormais réservés au mode Fantasy
+// (connexion requise).
 // Exporté : réutilisé par MobileMenu.tsx (menu plein écran mobile, remplace
 // l'ancienne MobileTabBar — demande explicite de l'utilisateur de tout
 // regrouper dans un seul menu hamburger plutôt que garder une barre du bas).
@@ -25,7 +27,6 @@ export const NAV_ITEMS = [
   { href: "/predictions", key: "predictions", Icon: TargetIcon },
   { href: "/leagues", key: "leagues", Icon: LeaguesIcon },
   { href: "/leaderboard", key: "leaderboard", Icon: LeaderboardIcon },
-  { href: "/matches", key: "matches", Icon: CalendarIcon },
 ] as const;
 
 export function isActive(pathname: string, href: string): boolean {

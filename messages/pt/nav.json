@@ -5,6 +5,8 @@
   "leagues": "Ligas",
   "leaderboard": "Classificação",
   "matches": "Calendário",
+  "players": "Jogadores",
+  "stats": "Estatísticas",
   "connexion": "Entrar",
   "deconnexion": "Sair",
   "deconnexionAriaLabel": "Terminar sessão",
@@ -12,5 +14,7 @@
   "languageSelector": "Mudar de idioma",
   "account": "Conta",
   "openMenu": "Abrir menu",
-  "closeMenu": "Fechar menu"
+  "closeMenu": "Fechar menu",
+  "fantasy": "Fantasy",
+  "starligue": "Starligue"
 }

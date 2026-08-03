@@ -21,8 +21,6 @@ import { NewsFeed } from "@/components/starligue/NewsFeed";
 import { StarligueBestXICard } from "@/components/starligue/StarligueBestXICard";
 import { StarliguePerformancesCard } from "@/components/starligue/StarliguePerformancesCard";
 import { StatLeadersSection } from "@/components/starligue/StatLeadersSection";
-import { AuthButton } from "@/components/auth/AuthButton";
-import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { ComingSoon } from "@/components/ComingSoon";
 import { IntroSplash } from "@/components/intro/IntroSplash";
 import type { NewsCategory } from "@prisma/client";
@@ -48,12 +46,14 @@ export async function generateMetadata({
 // Page d'accueil du site — vue d'ensemble de la Daikin StarLigue en un coup d'œil
 // (résultats, prochains matchs, classement, actus scrapées lnh.fr + clubs, équipe
 // type et meilleures perfs de la semaine, leaders stats) + porte d'entrée vers le
-// jeu Fantasy Starligue (connexion/déconnexion, message de bienvenue). Publique —
-// hors PROTECTED_PREFIXES (src/lib/auth.ts), accessible sans compte, pas de
-// redirection non plus pour un utilisateur déjà connecté. Anciennement /starligue,
-// devenu la home sur demande explicite ; /starligue redirige ici désormais
-// (src/app/(public)/starligue/page.tsx), /starligue/[id] (détail d'une actu) reste
-// à son emplacement d'origine.
+// jeu Fantasy Starligue (message de bienvenue). Mode Starligue (public) — hors
+// PROTECTED_PREFIXES (src/lib/auth.ts), accessible sans compte, pas de
+// redirection non plus pour un utilisateur déjà connecté. Header/nav communs
+// (LocaleSwitcher, bouton "Fantasy" qui sert aussi de connexion) fournis par
+// (public)/layout.tsx, pas par cette page. Anciennement /starligue, devenu la
+// home sur demande explicite ; /starligue redirige ici désormais
+// (src/app/[locale]/(public)/starligue/page.tsx), /starligue/[id] (détail
+// d'une actu) reste à son emplacement d'origine.
 export default async function HomePage({
   searchParams,
 }: {
@@ -122,17 +122,11 @@ export default async function HomePage({
   return (
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-4 px-4 pb-16 pt-6 sm:px-6">
       <IntroSplash clubs={clubs} />
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <p className="font-arcade text-sm uppercase tracking-[0.3em] text-accent-secondary">
-            {t("home.seasonLabel", { label: season.label })}
-          </p>
-          <h1 className="font-display text-3xl uppercase tracking-wide text-text">{t("home.title")}</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <LocaleSwitcher />
-          <AuthButton userName={session?.user?.name} />
-        </div>
+      <div className="flex flex-col gap-1">
+        <p className="font-arcade text-sm uppercase tracking-[0.3em] text-accent-secondary">
+          {t("home.seasonLabel", { label: season.label })}
+        </p>
+        <h1 className="font-display text-3xl uppercase tracking-wide text-text">{t("home.title")}</h1>
       </div>
 
       <div className="pixel-corners flex flex-col items-start gap-2 border border-border bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">

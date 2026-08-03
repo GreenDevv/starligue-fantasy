@@ -1,6 +1,15 @@
 {
+  "list": {
+    "title": "Jogadores",
+    "playerCount": "{count, plural, one {# jogador} other {# jogadores}} · {seasonMode}",
+    "searchPlaceholder": "Procurar um jogador ou clube…",
+    "allPositions": "Todos",
+    "allClubs": "Todos os clubes",
+    "noPlayersFound": "Nenhum jogador encontrado"
+  },
   "detail": {
     "backToMarket": "Mercado",
+    "backToPlayers": "Jogadores",
     "avgRatingShort": "méd. {rating}/10",
     "valueEvolution": "Evolução do valor",
     "seasonStats": "Estatísticas da época {season}",

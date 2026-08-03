@@ -5,6 +5,8 @@
   "leagues": "Ligaer",
   "leaderboard": "Stilling",
   "matches": "Kampprogram",
+  "players": "Spillere",
+  "stats": "Statistik",
   "connexion": "Log ind",
   "deconnexion": "Log ud",
   "deconnexionAriaLabel": "Log ud",
@@ -12,5 +14,7 @@
   "languageSelector": "Skift sprog",
   "account": "Konto",
   "openMenu": "Åbn menu",
-  "closeMenu": "Luk menu"
+  "closeMenu": "Luk menu",
+  "fantasy": "Fantasy",
+  "starligue": "Starligue"
 }

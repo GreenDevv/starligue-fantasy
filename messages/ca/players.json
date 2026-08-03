@@ -1,6 +1,15 @@
 {
+  "list": {
+    "title": "Jugadors",
+    "playerCount": "{count, plural, one {# jugador} other {# jugadors}} · {seasonMode}",
+    "searchPlaceholder": "Cerca un jugador o club…",
+    "allPositions": "Tots",
+    "allClubs": "Tots els clubs",
+    "noPlayersFound": "No s'ha trobat cap jugador"
+  },
   "detail": {
     "backToMarket": "Mercat",
+    "backToPlayers": "Jugadors",
     "avgRatingShort": "mitjana {rating}/10",
     "valueEvolution": "Evolució del valor",
     "seasonStats": "Stats temporada {season}",

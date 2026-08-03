@@ -1,6 +1,15 @@
 {
+  "list": {
+    "title": "Zawodnicy",
+    "playerCount": "{count, plural, one {# zawodnik} few {# zawodników} many {# zawodników} other {# zawodnika}} · {seasonMode}",
+    "searchPlaceholder": "Szukaj zawodnika lub klubu…",
+    "allPositions": "Wszyscy",
+    "allClubs": "Wszystkie kluby",
+    "noPlayersFound": "Nie znaleziono zawodnika"
+  },
   "detail": {
     "backToMarket": "Rynek",
+    "backToPlayers": "Zawodnicy",
     "avgRatingShort": "śr. {rating}/10",
     "valueEvolution": "Zmiana wartości",
     "seasonStats": "Statystyki sezonu {season}",

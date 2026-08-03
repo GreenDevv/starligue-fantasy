@@ -1,6 +1,15 @@
 {
+  "list": {
+    "title": "Spillere",
+    "playerCount": "{count, plural, one {# spiller} other {# spillere}} · {seasonMode}",
+    "searchPlaceholder": "Søg efter en spiller eller klub…",
+    "allPositions": "Alle",
+    "allClubs": "Alle klubber",
+    "noPlayersFound": "Ingen spillere fundet"
+  },
   "detail": {
     "backToMarket": "Marked",
+    "backToPlayers": "Spillere",
     "avgRatingShort": "gns. {rating}/10",
     "valueEvolution": "Værdiudvikling",
     "seasonStats": "Sæsonstatistik {season}",

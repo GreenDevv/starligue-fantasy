@@ -12,9 +12,9 @@ export default auth((req) => handleI18nRouting(req));
 
 // Exclut TOUT /api (pas seulement /api/auth) : sinon next-intl tenterait de
 // préfixer/rediriger les appels fetch("/api/...") du client. Exclut aussi tout
-// chemin avec une extension de fichier (ex: /clubs/hbcn.png) — sans ça, un
-// asset statique placé sous un préfixe protégé (public/clubs/*.png vs
-// PROTECTED_PREFIXES "/clubs" dans auth.ts) se fait rediriger au lieu d'être
+// chemin avec une extension de fichier (ex: /market/icon.png) — sans ça, un
+// asset statique placé sous un préfixe protégé (public/market/*.png vs
+// PROTECTED_PREFIXES "/market" dans auth.ts) se fait rediriger au lieu d'être
 // servi, pour tout visiteur non connecté.
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],

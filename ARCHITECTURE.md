@@ -708,29 +708,45 @@ cette page.
 
 ### 8.2 Pages
 
+Le site a deux modes, séparés visuellement (nav dédiée) et en termes de permissions
+(`PROTECTED_PREFIXES`/`ADMIN_PREFIXES` dans `src/lib/auth.ts`) :
+
+- **Mode Starligue** (`(public)/`, aucune connexion requise) : données du
+  championnat + auth. Layout `src/app/[locale]/(public)/layout.tsx` (nav
+  `PublicNavBar`/`PublicMobileMenu`, bouton coloré "Fantasy" vers le mode
+  Fantasy). `/clubs`, `/matches`, `/players` sont regroupées sous
+  `(public)/(browse)/` (layout dédié qui fournit leur `<main>`).
+- **Mode Fantasy** (`(game)/`, connexion requise) : le jeu lui-même. Layout
+  `src/app/[locale]/(game)/layout.tsx` (nav `NavBar`/`MobileMenu`, bouton coloré
+  "Starligue" vers `/`).
+
+`/admin` (rôle ADMIN) reste un troisième espace séparé, hors de cette bascule.
+
 ```
-/                       Page d'accueil du site — actus/résultats/classement Daikin
-                        StarLigue (§16), + porte d'entrée jeu (connexion/déconnexion,
-                        message de bienvenue, CTA "Créer mon équipe"/"Accéder à
-                        Fantasy Starligue"). Anciennement /starligue (redirige ici).
-/login /register        Auth
-/leagues                Mes ligues (+ créer / rejoindre par code) — sert aussi de
-                        verrou obligatoire quand l'utilisateur n'a encore aucune ligue
-/leagues/[id]           Classement de ligue, évolution des rangs
-/team                   ★ Vue terrain : alignement, points live de la journée
+/                       (Starligue) Page d'accueil du site — actus/résultats/classement
+                        Daikin StarLigue (§16), + porte d'entrée jeu (message de
+                        bienvenue, CTA "Créer mon équipe"/"Accéder à Fantasy
+                        Starligue"). Anciennement /starligue (redirige ici).
+/login /register        (Starligue) Auth
+/matches                (Starligue) Calendrier + résultats par journée
+/clubs/[id]             (Starligue) Fiche club
+/players/[id]           (Starligue) Fiche joueur : notes match par match, points générés
+/starligue/[id]         (Starligue) Détail d'une actu (texte intégral, §16) —
+                        /starligue seul redirige vers / (voir plus haut)
+/leagues                (Fantasy) Mes ligues (+ créer / rejoindre par code) — sert aussi
+                        de verrou obligatoire quand l'utilisateur n'a encore aucune ligue
+/leagues/[id]           (Fantasy) Classement de ligue, évolution des rangs
+/team                   (Fantasy) ★ Vue terrain : alignement, points live de la journée
                         (sélecteur de ligue si l'utilisateur en a plusieurs)
-/team/identity          Renommage d'équipe (voir §5.x) — accessible depuis /team,
-                        plus imposé à l'onboarding
-/team/build             Constitution initiale de l'effectif (wizard 7 postes,
+/team/identity          (Fantasy) Renommage d'équipe (voir §5.x) — accessible depuis
+                        /team, plus imposé à l'onboarding
+/team/build             (Fantasy) Constitution initiale de l'effectif (wizard 7 postes,
                         budget restant affiché en permanence, validation finale)
-/market                 Marché : table filtrable (poste, club, prix, forme),
+/market                 (Fantasy) Marché : table filtrable (poste, club, prix, forme),
                         utilisée pendant le build (et les transferts en v2)
-/players/[id]           Fiche joueur : notes match par match, points générés
-/matches                Calendrier + résultats par journée
-/leaderboard            Classement global paginé + classement de la journée
+/predictions            (Fantasy) Pronostics de journée (multiplicateur, §14)
+/leaderboard            (Fantasy) Classement global paginé + classement de la journée
 /admin                  Dashboard imports CSV, config scoring, logs ingestion, recompute
-/starligue/[id]         Détail d'une actu (texte intégral, §16) — /starligue seul
-                        redirige vers / (voir plus haut)
 ```
 
 ### 8.3 Parcours d'inscription (critique)

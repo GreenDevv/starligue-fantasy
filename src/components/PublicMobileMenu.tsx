@@ -7,7 +7,8 @@ import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { NAV_ITEMS, isActive } from "@/components/NavBar";
+import { PUBLIC_NAV_ITEMS } from "@/components/PublicNavBar";
+import { isActive } from "@/components/NavBar";
 import { ModeSwitchLink } from "@/components/nav/ModeSwitchLink";
 import { SeasonToggle } from "@/components/SeasonToggle";
 import { MenuIcon, CloseIcon, LogoutIcon } from "@/components/ui/icons";
@@ -23,19 +24,19 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-// Menu mobile plein écran — remplace, sous sm:, à la fois l'ancienne
-// MobileTabBar (barre fixe du bas, 6 onglets trop serrés) ET les icônes du
-// header (SeasonToggle/Compte/AuthButton) qui s'entassaient sur mobile.
-// LocaleSwitcher reste volontairement EN DEHORS de ce menu (demande explicite
-// de l'utilisateur) — rendu à côté, toujours visible dans le header, voir
-// GameLayout. Desktop inchangé (le déclencheur est sm:hidden, le header
-// classique reste sm:flex dans GameLayout).
-export function MobileMenu({
+// Menu mobile plein écran du mode Starligue — même shell (portail/animations/
+// Escape/lock scroll) que MobileMenu.tsx (mode Fantasy), dupliqué
+// volontairement plutôt que généralisé en un composant à options : le contenu
+// diffère trop (pas de bloc compte ici, bouton "Fantasy" en tête de liste)
+// pour qu'un partage vaille la complexité d'une API à branches.
+export function PublicMobileMenu({
   userName,
+  fantasyHref,
   isAdmin,
   seasonMode,
 }: {
   userName?: string | null;
+  fantasyHref: string;
   isAdmin: boolean;
   seasonMode: SeasonMode;
 }) {
@@ -44,9 +45,6 @@ export function MobileMenu({
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  // Ferme automatiquement à toute navigation (lien cliqué, bouton retour du
-  // navigateur, etc.) — évite un menu plein écran qui reste ouvert par-dessus
-  // la nouvelle page.
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
@@ -66,7 +64,7 @@ export function MobileMenu({
 
   function handleLogout() {
     setOpen(false);
-    signOut({ callbackUrl: `/${locale}/login` });
+    signOut({ callbackUrl: `/${locale}/` });
   }
 
   return (
@@ -117,12 +115,12 @@ export function MobileMenu({
                   animate="visible"
                 >
                   <motion.div variants={itemVariants} className="mb-1">
-                    <ModeSwitchLink href="/" tone="starligue">
-                      {t("starligue")}
+                    <ModeSwitchLink href={fantasyHref} tone="fantasy">
+                      {t("fantasy")}
                     </ModeSwitchLink>
                   </motion.div>
 
-                  {NAV_ITEMS.map(({ href, key, Icon }) => {
+                  {PUBLIC_NAV_ITEMS.map(({ href, key, Icon }) => {
                     const active = isActive(pathname, href);
                     return (
                       <motion.div key={href} variants={itemVariants}>
@@ -141,28 +139,18 @@ export function MobileMenu({
                     );
                   })}
 
-                  <motion.div variants={itemVariants} className="my-2 border-t border-border" />
-
-                  {userName && (
-                    <motion.div variants={itemVariants}>
-                      <Link
-                        href="/account"
-                        onClick={() => setOpen(false)}
-                        className="flex items-center gap-3 rounded-lg px-3 py-3 text-base text-text-muted transition-colors hover:bg-border/20 hover:text-text"
-                      >
-                        {t("account")}
-                      </Link>
-                    </motion.div>
-                  )}
-
                   {isAdmin && (
                     <motion.div variants={itemVariants} className="px-3 py-2">
                       <SeasonToggle initialMode={seasonMode} />
                     </motion.div>
                   )}
 
-                  <motion.div variants={itemVariants} className="mt-auto border-t border-border pt-3">
-                    {userName ? (
+                  {/* Pas de lien "Connexion" ici : le bouton "Fantasy" en tête de
+                      liste sert déjà de point d'entrée pour se connecter si
+                      besoin. Seule la déconnexion (utilisateur déjà connecté)
+                      reste affichée. */}
+                  {userName && (
+                    <motion.div variants={itemVariants} className="mt-auto border-t border-border pt-3">
                       <button
                         type="button"
                         onClick={handleLogout}
@@ -171,16 +159,8 @@ export function MobileMenu({
                         <LogoutIcon className="h-5 w-5" />
                         {t("deconnexion")}
                       </button>
-                    ) : (
-                      <Link
-                        href="/login"
-                        onClick={() => setOpen(false)}
-                        className="flex items-center gap-3 rounded-lg px-3 py-3 text-base text-accent"
-                      >
-                        {t("connexion")}
-                      </Link>
-                    )}
-                  </motion.div>
+                    </motion.div>
+                  )}
                 </motion.div>
               </motion.div>
             )}

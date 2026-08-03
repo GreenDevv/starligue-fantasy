@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default async function MatchesPage({ searchParams }: Props) {
-  const t = await getTranslations("matches");
+  const [t, tCommon] = await Promise.all([getTranslations("matches"), getTranslations("common")]);
   const format = await getFormatter();
 
   function formatKickoff(date: Date): string {
@@ -83,6 +83,9 @@ export default async function MatchesPage({ searchParams }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
+      <Link href="/" className="text-sm text-text-muted hover:text-text transition-colors">
+        ← {tCommon("home")}
+      </Link>
       <h1 className="text-2xl text-text">{t("list.title")}</h1>
 
       {/* Gameweek navigation */}

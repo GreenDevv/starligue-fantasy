@@ -8,6 +8,7 @@ import { SeasonToggle } from "@/components/SeasonToggle";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { MobileMenu } from "@/components/MobileMenu";
+import { ModeSwitchLink } from "@/components/nav/ModeSwitchLink";
 import { resolveSeasonMode } from "@/lib/team/active-team-context";
 
 export default async function GameLayout({
@@ -66,6 +67,9 @@ export default async function GameLayout({
               )}
               <AuthButton userName={session?.user?.name} />
             </div>
+            <ModeSwitchLink href="/" tone="starligue">
+              {t("starligue")}
+            </ModeSwitchLink>
             <LocaleSwitcher />
             <MobileMenu userName={session?.user?.name} isAdmin={isAdmin} seasonMode={seasonMode} />
           </div>
