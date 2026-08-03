@@ -53,18 +53,30 @@ export async function getSimulationDashboardMatchStrips(
   return { lastResults, upcoming };
 }
 
-export async function getDashboardMatchStrips(seasonId: string): Promise<DashboardStrips> {
+export async function getDashboardMatchStrips(
+  seasonId: string,
+  // Numéro de journée forcé pour "prochains matchs" (dropdown de navigation sur la
+  // home, demande explicite de l'utilisateur) — sans effet sur les autres appelants
+  // (TeamView/SimulationView) qui ne passent pas ce paramètre : comportement par
+  // défaut inchangé (auto-détection de la prochaine journée non close).
+  upcomingOverride?: number
+): Promise<DashboardStrips> {
   const [lastFinishedGameweek, upcomingGameweek] = await Promise.all([
     prisma.gameweek.findFirst({
       where: { seasonId, matches: { some: { status: "FINISHED" } } },
       orderBy: { number: "desc" },
       include: { matches: { include: { homeClub: CLUB_SELECT, awayClub: CLUB_SELECT }, orderBy: { kickoffAt: "asc" } } },
     }),
-    prisma.gameweek.findFirst({
-      where: { seasonId, deadlineAt: { gt: new Date() } },
-      orderBy: { number: "asc" },
-      include: { matches: { include: { homeClub: CLUB_SELECT, awayClub: CLUB_SELECT }, orderBy: { kickoffAt: "asc" } } },
-    }),
+    upcomingOverride
+      ? prisma.gameweek.findUnique({
+          where: { seasonId_number: { seasonId, number: upcomingOverride } },
+          include: { matches: { include: { homeClub: CLUB_SELECT, awayClub: CLUB_SELECT }, orderBy: { kickoffAt: "asc" } } },
+        })
+      : prisma.gameweek.findFirst({
+          where: { seasonId, deadlineAt: { gt: new Date() } },
+          orderBy: { number: "asc" },
+          include: { matches: { include: { homeClub: CLUB_SELECT, awayClub: CLUB_SELECT }, orderBy: { kickoffAt: "asc" } } },
+        }),
   ]);
 
   return {

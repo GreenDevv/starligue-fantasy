@@ -57,7 +57,7 @@ export async function generateMetadata({
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: { category?: string; page?: string };
+  searchParams: { category?: string; page?: string; gw?: string };
 }) {
   if (process.env.COMING_SOON === "true") {
     return <ComingSoon />;
@@ -71,6 +71,12 @@ export default async function HomePage({
     ? (searchParams.category as NewsCategory)
     : null;
   const page = searchParams.page ? Number(searchParams.page) : 1;
+  // Journée forcée pour le strip "prochains matchs" (dropdown de navigation,
+  // demande explicite de l'utilisateur) — absente/invalide = comportement par
+  // défaut (auto-détection de la prochaine journée non close), voir
+  // getDashboardMatchStrips.
+  const gwOverrideParsed = searchParams.gw ? Number(searchParams.gw) : NaN;
+  const gwOverride = Number.isInteger(gwOverrideParsed) && gwOverrideParsed > 0 ? gwOverrideParsed : undefined;
 
   if (!season) {
     return (
@@ -83,6 +89,7 @@ export default async function HomePage({
   const [
     standings,
     matchStrips,
+    totalGameweeks,
     newsFeed,
     teamOfWeek,
     performances,
@@ -94,7 +101,8 @@ export default async function HomePage({
     clubs,
   ] = await Promise.all([
     getClubStandings(season.id),
-    getDashboardMatchStrips(season.id),
+    getDashboardMatchStrips(season.id, gwOverride),
+    prisma.gameweek.count({ where: { seasonId: season.id } }),
     getNewsFeed(season.id, { category: category ?? undefined, page }),
     getTeamOfWeekCard(season.id),
     getPerformancesCard(season.id),
@@ -105,6 +113,11 @@ export default async function HomePage({
     getEuropeanLeagueMatches(season.id),
     getActiveClubs(season.id),
   ]);
+
+  // Position au classement Starligue de chaque club — affichée discrètement (entre
+  // parenthèses) à côté des logos dans les strips championnat ci-dessous (demande
+  // explicite de l'utilisateur), même source que le widget "Classement Starligue".
+  const rankByClubId: Record<string, number> = Object.fromEntries(standings.rows.map((r) => [r.clubId, r.rank]));
 
   return (
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-4 px-4 pb-16 pt-6 sm:px-6">
@@ -168,6 +181,8 @@ export default async function HomePage({
             matches={matchStrips.upcoming.matches}
             fixedColumns={2}
             tone="highlight"
+            rankByClubId={rankByClubId}
+            gameweekNav={{ total: totalGameweeks, hrefBase: "/" }}
           />
           {warmupMatches.length > 0 && (
             <MatchesStrip
@@ -226,6 +241,7 @@ export default async function HomePage({
             gameweekNumber={matchStrips.lastResults.gameweekNumber}
             matches={matchStrips.lastResults.matches}
             fixedColumns={2}
+            rankByClubId={rankByClubId}
           />
           <StandingsSection gameweekNumber={standings.gameweekNumber} rows={standings.rows} />
         </div>

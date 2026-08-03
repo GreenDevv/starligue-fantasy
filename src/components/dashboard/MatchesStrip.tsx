@@ -3,6 +3,7 @@
 import { useTranslations, useFormatter } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ClubLogo } from "@/components/ui/ClubLogo";
+import { GameweekDropdown } from "@/components/dashboard/GameweekDropdown";
 import type { WidgetSize } from "@/lib/dashboard/layout";
 
 interface StripClub {
@@ -62,6 +63,16 @@ interface MatchesStripProps {
   // "prochains matchs" sur la home, pour le distinguer des résultats). Purement
   // visuel, aucun effet sur le comportement.
   tone?: "default" | "highlight";
+  // Position au classement Starligue par clubId — affichée discrètement entre
+  // parenthèses sous chaque logo (demande explicite de l'utilisateur). Absent par
+  // défaut : n'affecte aucun usage existant (Warm Up/Coupe de France/EHF, où les
+  // clubs n'ont pas forcément d'id DB ni de classement Starligue pertinent).
+  rankByClubId?: Record<string, number>;
+  // Dropdown de navigation par journée (remplace le simple libellé "Journée N" par
+  // un bouton ouvrant la liste de toutes les journées) — demande explicite de
+  // l'utilisateur, seulement câblée sur le strip "prochains matchs" de la home.
+  // Absent par défaut : le libellé reste un texte simple partout ailleurs.
+  gameweekNav?: { total: number; hrefBase: string };
 }
 
 // Même design que "wide", réduit à l'échelle pour "square"/"mini" (widget dashboard
@@ -117,6 +128,8 @@ export function MatchesStrip({
   disableLink,
   showDate,
   tone = "default",
+  rankByClubId,
+  gameweekNav,
 }: MatchesStripProps) {
   const t = useTranslations("dashboard");
   const format = useFormatter();
@@ -130,12 +143,23 @@ export function MatchesStrip({
     <div className={`pixel-corners border px-3 py-2.5 ${containerTone}`}>
       <div className="mb-2 flex items-center justify-between">
         <p className="text-[10px] uppercase tracking-widest text-text-muted">{title}</p>
-        {gameweekNumber !== null && (
-          <p className="text-[10px] uppercase tracking-widest text-text-muted">
-            {t("matchesStrip.gameweek", { number: gameweekNumber })}
-            {dateRange && <span className="text-text-muted/70"> · {dateRange}</span>}
-          </p>
-        )}
+        {gameweekNumber !== null &&
+          (gameweekNav ? (
+            <div className="flex items-center gap-1">
+              <GameweekDropdown
+                current={gameweekNumber}
+                total={gameweekNav.total}
+                hrefBase={gameweekNav.hrefBase}
+                label={t("matchesStrip.gameweek", { number: gameweekNumber })}
+              />
+              {dateRange && <span className="text-[10px] text-text-muted/70">· {dateRange}</span>}
+            </div>
+          ) : (
+            <p className="text-[10px] uppercase tracking-widest text-text-muted">
+              {t("matchesStrip.gameweek", { number: gameweekNumber })}
+              {dateRange && <span className="text-text-muted/70"> · {dateRange}</span>}
+            </p>
+          ))}
       </div>
 
       {matches.length === 0 ? (
@@ -151,15 +175,27 @@ export function MatchesStrip({
                 ? `/matches/${m.id}`
                 : `/clubs/${m.homeClub.id}/vs/${m.awayClub.id}`;
             const hasScore = m.homeScore !== null && m.awayScore !== null;
+            const homeRank = m.homeClub.id ? rankByClubId?.[m.homeClub.id] : undefined;
+            const awayRank = m.awayClub.id ? rankByClubId?.[m.awayClub.id] : undefined;
             const logosRow = (
-              <div className="flex items-center justify-center gap-0.5">
-                <ClubLogo club={m.homeClub} size={logo} title={clubTooltip(m.homeClub)} />
+              <div className="flex items-center justify-center gap-1">
+                <div className="flex flex-col items-center gap-0.5">
+                  <ClubLogo club={m.homeClub} size={logo} title={clubTooltip(m.homeClub)} />
+                  {homeRank !== undefined && (
+                    <span className="text-[8px] leading-none text-text-muted/70">({homeRank})</span>
+                  )}
+                </div>
                 {hasScore && (
                   <span className="font-arcade text-sm tracking-wide text-text">
                     {m.homeScore}-{m.awayScore}
                   </span>
                 )}
-                <ClubLogo club={m.awayClub} size={logo} title={clubTooltip(m.awayClub)} />
+                <div className="flex flex-col items-center gap-0.5">
+                  <ClubLogo club={m.awayClub} size={logo} title={clubTooltip(m.awayClub)} />
+                  {awayRank !== undefined && (
+                    <span className="text-[8px] leading-none text-text-muted/70">({awayRank})</span>
+                  )}
+                </div>
               </div>
             );
             const content = showDate ? (

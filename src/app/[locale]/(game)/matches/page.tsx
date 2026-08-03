@@ -2,6 +2,8 @@ import { prisma } from "@/lib/db";
 import { Link } from "@/i18n/navigation";
 import { getTranslations, getFormatter } from "next-intl/server";
 import { ClubLogo } from "@/components/ui/ClubLogo";
+import { GameweekTimeline } from "@/components/matches/GameweekTimeline";
+import { getClubStandings } from "@/lib/standings/get";
 
 interface Props {
   searchParams: { gw?: string };
@@ -51,7 +53,7 @@ export default async function MatchesPage({ searchParams }: Props) {
     gwNumber = next?.number ?? last?.number ?? 1;
   }
 
-  const [gameweek, totalGameweeks] = await Promise.all([
+  const [gameweek, totalGameweeks, standings] = await Promise.all([
     prisma.gameweek.findUnique({
       where: { seasonId_number: { seasonId: season.id, number: gwNumber } },
       include: {
@@ -65,10 +67,19 @@ export default async function MatchesPage({ searchParams }: Props) {
       },
     }),
     prisma.gameweek.count({ where: { seasonId: season.id } }),
+    getClubStandings(season.id),
   ]);
 
   const prevGw = gwNumber > 1 ? gwNumber - 1 : null;
   const nextGw = gwNumber < totalGameweeks ? gwNumber + 1 : null;
+
+  // Position au classement Starligue de chaque club — affichée discrètement (entre
+  // parenthèses) à côté des logos ci-dessous (demande explicite de l'utilisateur).
+  const rankByClubId: Record<string, number> = Object.fromEntries(standings.rows.map((r) => [r.clubId, r.rank]));
+  const gameweekItems = Array.from({ length: totalGameweeks }, (_, i) => {
+    const number = i + 1;
+    return { number, label: t("list.gameweekShort", { number }) };
+  });
 
   return (
     <div className="flex flex-col gap-4">
@@ -103,6 +114,10 @@ export default async function MatchesPage({ searchParams }: Props) {
         )}
       </div>
 
+      {/* Timeline horizontale — navigation directe vers n'importe quelle journée
+          (demande explicite de l'utilisateur, en complément des flèches ci-dessus) */}
+      <GameweekTimeline items={gameweekItems} current={gwNumber} hrefBase="/matches" />
+
       {/* Matches */}
       {!gameweek ? (
         <div className="py-8 text-center text-text-muted">{t("list.notFound")}</div>
@@ -128,6 +143,9 @@ export default async function MatchesPage({ searchParams }: Props) {
                   >
                     <p className={`truncate text-sm ${homeWin ? "font-semibold text-text" : "text-text-muted"}`}>
                       {m.homeClub.shortName}
+                      {rankByClubId[m.homeClub.id] !== undefined && (
+                        <span className="text-text-muted/70"> ({rankByClubId[m.homeClub.id]})</span>
+                      )}
                     </p>
                     <ClubLogo club={m.homeClub} size="sm" />
                   </Link>
@@ -161,6 +179,9 @@ export default async function MatchesPage({ searchParams }: Props) {
                     <ClubLogo club={m.awayClub} size="sm" />
                     <p className={`truncate text-sm ${awayWin ? "font-semibold text-text" : "text-text-muted"}`}>
                       {m.awayClub.shortName}
+                      {rankByClubId[m.awayClub.id] !== undefined && (
+                        <span className="text-text-muted/70"> ({rankByClubId[m.awayClub.id]})</span>
+                      )}
                     </p>
                   </Link>
                 </div>

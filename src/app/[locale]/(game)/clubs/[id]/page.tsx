@@ -22,6 +22,7 @@ import { ClubSwitcher } from "@/components/clubs/ClubSwitcher";
 export default async function ClubPage({ params }: { params: { id: string } }) {
   const t = await getTranslations("labels");
   const tClubs = await getTranslations("clubs");
+  const tDash = await getTranslations("dashboard");
   const mode = resolveSeasonMode();
   const season = await resolveModeSeason(mode);
   if (!season) notFound();
@@ -63,6 +64,12 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
   // type trivialement sérialisable à travers la frontière RSC.
   const rankByClubId: Record<string, number> = Object.fromEntries(standings.rows.map((r) => [r.clubId, r.rank]));
 
+  // Rang + V/N/D du club affiché — mis en avant dans l'en-tête (demande explicite
+  // de l'utilisateur), même source que rankByClubId ci-dessus (donc toujours à
+  // jour : Match Starligue uniquement, jamais Warm Up/Coupe de France/EHF, voir
+  // src/lib/standings/compute.ts et live-sync.ts).
+  const clubStanding = standings.rows.find((r) => r.clubId === club.id);
+
   const rosterByPosition = POSITIONS.map((pos) => ({
     position: pos,
     players: roster.filter((p) => p.position === pos),
@@ -80,6 +87,23 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
           un autre club (demande explicite de l'utilisateur) */}
       <div className="flex items-center gap-4 pixel-corners border border-border bg-surface p-4">
         <ClubSwitcher currentClub={club} clubs={allClubs} rankByClubId={rankByClubId} />
+
+        {/* Rang + V/N/D Starligue du club — demande explicite de l'utilisateur
+            ("en jaune, en assez gros"), même palette/police que les autres valeurs
+            numériques mises en avant (points, prix, deadline — ARCHITECTURE.md
+            §8.1 : accent-secondary + police arcade réservées à cet usage). */}
+        {clubStanding && (
+          <div className="flex shrink-0 flex-col items-center leading-none">
+            <span className="font-arcade text-4xl text-accent-secondary">{clubStanding.rank}</span>
+            <span className="mt-0.5 text-[11px] uppercase tracking-wide text-text-muted">
+              {clubStanding.wins}
+              {tDash("clubStandingsWidget.col.wins")} · {clubStanding.draws}
+              {tDash("clubStandingsWidget.col.draws")} · {clubStanding.losses}
+              {tDash("clubStandingsWidget.col.losses")}
+            </span>
+          </div>
+        )}
+
         <div>
           <h1 className="text-2xl text-text">{club.name}</h1>
           <p className="text-sm text-text-muted">
