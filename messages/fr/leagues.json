@@ -57,6 +57,7 @@
     "ALREADY_MEMBER": "Tu es déjà membre de cette ligue",
     "OWNER_CANNOT_LEAVE": "Le créateur ne peut pas quitter sa ligue. Supprime-la ou transfère-la.",
     "AUCTION_MODE_ADMIN_ONLY": "Le mode Enchères est réservé à l'administrateur",
-    "AUCTION_LIVE_ONLY": "Le mode Enchères n'est disponible que pour le jeu en direct"
+    "AUCTION_LIVE_ONLY": "Le mode Enchères n'est disponible que pour le jeu en direct",
+    "INVALID_CHARACTERS": "Les caractères < et > ne sont pas autorisés dans le chat"
   }
 }

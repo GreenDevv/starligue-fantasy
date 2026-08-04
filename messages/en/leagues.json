@@ -57,6 +57,7 @@
     "ALREADY_MEMBER": "You're already a member of this league",
     "OWNER_CANNOT_LEAVE": "The creator can't leave their own league. Delete it or transfer ownership.",
     "AUCTION_MODE_ADMIN_ONLY": "Auction mode is reserved for the site admin",
-    "AUCTION_LIVE_ONLY": "Auction mode is only available for the live game"
+    "AUCTION_LIVE_ONLY": "Auction mode is only available for the live game",
+    "INVALID_CHARACTERS": "The characters < and > aren't allowed in chat"
   }
 }

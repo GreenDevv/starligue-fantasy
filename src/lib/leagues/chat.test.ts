@@ -29,4 +29,20 @@ describe("validateChatMessageContent", () => {
     const result = validateChatMessageContent("a".repeat(CHAT_MESSAGE_MAX_LENGTH));
     expect(result.valid).toBe(true);
   });
+
+  it("rejette une tentative de balise HTML", () => {
+    const result = validateChatMessageContent("<script>alert(1)</script>");
+    expect(result.valid).toBe(false);
+    expect(result.error).toEqual({ code: "INVALID_CHARACTERS" });
+  });
+
+  it("rejette un simple chevron isolé", () => {
+    expect(validateChatMessageContent("gg > vous").valid).toBe(false);
+    expect(validateChatMessageContent("gg < vous").valid).toBe(false);
+  });
+
+  it("accepte un message avec accents et ponctuation normale", () => {
+    const result = validateChatMessageContent("gg les gars, à la revanche !! 😅");
+    expect(result.valid).toBe(true);
+  });
 });

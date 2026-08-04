@@ -57,6 +57,7 @@
     "ALREADY_MEMBER": "Ja ets membre d'aquesta lliga",
     "OWNER_CANNOT_LEAVE": "El creador no pot sortir de la seva pròpia lliga. Elimina-la o transfereix-ne la propietat.",
     "AUCTION_MODE_ADMIN_ONLY": "El mode Subhasta està reservat a l'administrador",
-    "AUCTION_LIVE_ONLY": "El mode Subhasta només està disponible per al joc en directe"
+    "AUCTION_LIVE_ONLY": "El mode Subhasta només està disponible per al joc en directe",
+    "INVALID_CHARACTERS": "Els caràcters < i > no estan permesos al xat"
   }
 }

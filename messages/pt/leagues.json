@@ -57,6 +57,7 @@
     "ALREADY_MEMBER": "Já és membro desta liga",
     "OWNER_CANNOT_LEAVE": "O criador não pode sair da sua liga. Elimina-a ou transfere-a.",
     "AUCTION_MODE_ADMIN_ONLY": "O modo Leilão é reservado ao administrador",
-    "AUCTION_LIVE_ONLY": "O modo Leilão só está disponível para o jogo em direto"
+    "AUCTION_LIVE_ONLY": "O modo Leilão só está disponível para o jogo em direto",
+    "INVALID_CHARACTERS": "Os caracteres < e > não são permitidos no chat"
   }
 }

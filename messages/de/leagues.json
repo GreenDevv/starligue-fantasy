@@ -57,6 +57,7 @@
     "ALREADY_MEMBER": "Du bist bereits Mitglied dieser Liga",
     "OWNER_CANNOT_LEAVE": "Der Ersteller kann seine Liga nicht verlassen. Lösche sie oder übertrage sie.",
     "AUCTION_MODE_ADMIN_ONLY": "Der Auktionsmodus ist dem Administrator vorbehalten",
-    "AUCTION_LIVE_ONLY": "Der Auktionsmodus ist nur für das Live-Spiel verfügbar"
+    "AUCTION_LIVE_ONLY": "Der Auktionsmodus ist nur für das Live-Spiel verfügbar",
+    "INVALID_CHARACTERS": "Die Zeichen < und > sind im Chat nicht erlaubt"
   }
 }

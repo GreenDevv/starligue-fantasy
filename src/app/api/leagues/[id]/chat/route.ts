@@ -75,6 +75,17 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
   const validated = validateChatMessageContent(parsed.data.content);
   if (!validated.valid) {
+    // INVALID_CHARACTERS remonté sous son propre code (plutôt qu'aplati sous
+    // INVALID_INPUT comme EMPTY/TOO_LONG) : resolveApiError côté client
+    // (LeagueChat.tsx) résout le message affiché uniquement à partir du code,
+    // il lui faut donc un code dédié pour afficher un message spécifique
+    // (leagues.errors.INVALID_CHARACTERS) plutôt que le générique "Champs invalides".
+    if (validated.error?.code === "INVALID_CHARACTERS") {
+      return NextResponse.json(
+        { error: { code: "INVALID_CHARACTERS", message: "Les caractères < et > ne sont pas autorisés" } },
+        { status: 400 }
+      );
+    }
     const message =
       validated.error?.code === "EMPTY"
         ? "Le message ne peut pas être vide"

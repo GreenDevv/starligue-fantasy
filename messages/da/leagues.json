@@ -57,6 +57,7 @@
     "ALREADY_MEMBER": "Du er allerede medlem af denne liga",
     "OWNER_CANNOT_LEAVE": "Ejeren kan ikke forlade sin egen liga. Slet den, eller overdrag den.",
     "AUCTION_MODE_ADMIN_ONLY": "Auktionstilstand er forbeholdt administratoren",
-    "AUCTION_LIVE_ONLY": "Auktionstilstand er kun tilgængelig for det direkte spil"
+    "AUCTION_LIVE_ONLY": "Auktionstilstand er kun tilgængelig for det direkte spil",
+    "INVALID_CHARACTERS": "Tegnene < og > er ikke tilladt i chatten"
   }
 }

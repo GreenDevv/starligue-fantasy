@@ -57,6 +57,7 @@
     "ALREADY_MEMBER": "Jesteś już członkiem tej ligi",
     "OWNER_CANNOT_LEAVE": "Założyciel nie może opuścić własnej ligi. Usuń ją lub przekaż innej osobie.",
     "AUCTION_MODE_ADMIN_ONLY": "Tryb Aukcji jest zarezerwowany dla administratora",
-    "AUCTION_LIVE_ONLY": "Tryb Aukcji jest dostępny tylko w grze na żywo"
+    "AUCTION_LIVE_ONLY": "Tryb Aukcji jest dostępny tylko w grze na żywo",
+    "INVALID_CHARACTERS": "Znaki < i > są niedozwolone na czacie"
   }
 }
