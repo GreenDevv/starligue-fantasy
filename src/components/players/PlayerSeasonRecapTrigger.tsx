@@ -12,6 +12,11 @@ import type { PlayerSeasonRecap } from "@/lib/players/season-recap";
 // que paramétrer les chaînes traduites avec cette valeur.
 const RECAP_SEASON_LABEL = "2025/2026";
 
+// Doit rester synchronisé avec la classe `w-64` du popup ci-dessous (16rem =
+// 256px, base 16px/rem) — sert à empêcher le popup de déborder à droite de
+// l'écran sur mobile (voir clamp dans show()).
+const POPUP_WIDTH = 256;
+
 interface PlayerSeasonRecapTriggerProps {
   playerId: string;
   isGoalkeeper: boolean;
@@ -45,7 +50,14 @@ export function PlayerSeasonRecapTrigger({ playerId, isGoalkeeper }: PlayerSeaso
   function show() {
     clearCloseTimer();
     const rect = triggerRef.current?.getBoundingClientRect();
-    if (rect) setCoords({ top: rect.bottom + 6, left: rect.left });
+    if (rect) {
+      // Le trigger est souvent collé au bord droit de la ligne (juste avant le
+      // prix) — sans clamp, le popup (élargi pour la lisibilité) déborderait
+      // hors de l'écran sur mobile plutôt que de rester lisible en entier.
+      const margin = 8;
+      const left = Math.min(rect.left, window.innerWidth - POPUP_WIDTH - margin);
+      setCoords({ top: rect.bottom + 6, left: Math.max(margin, left) });
+    }
     setOpen(true);
     if (state.status === "idle") {
       setState({ status: "loading" });
@@ -72,6 +84,11 @@ export function PlayerSeasonRecapTrigger({ playerId, isGoalkeeper }: PlayerSeaso
         (stopPropagation) et le survol restent fonctionnels ; seul le focus
         clavier dédié à l'icône est sacrifié (feature secondaire, hover-first).
       */}
+      {/* bg/ring persistants (pas seulement au survol) — demande explicite de
+          l'utilisateur : ce déclencheur passait inaperçu à côté du prix
+          (text-text-muted discret, invisible tant qu'on ne survolait pas), il
+          doit maintenant se voir immédiatement, y compris au tap sur mobile où
+          il n'y a pas de survol. */}
       <span
         ref={triggerRef}
         aria-label={t("recap.ariaLabel", { season: RECAP_SEASON_LABEL })}
@@ -81,9 +98,9 @@ export function PlayerSeasonRecapTrigger({ playerId, isGoalkeeper }: PlayerSeaso
           e.stopPropagation();
           open ? setOpen(false) : show();
         }}
-        className="inline-flex shrink-0 items-center justify-center rounded-full p-0.5 text-text-muted transition-colors hover:text-accent"
+        className="inline-flex shrink-0 items-center justify-center rounded-full bg-accent/15 p-1 text-accent ring-1 ring-accent/40 transition-colors hover:bg-accent/25 hover:ring-accent/60"
       >
-        <InfoIcon className="h-4 w-4" />
+        <InfoIcon className="h-3.5 w-3.5" />
       </span>
 
       {typeof document !== "undefined" &&
@@ -98,19 +115,19 @@ export function PlayerSeasonRecapTrigger({ playerId, isGoalkeeper }: PlayerSeaso
                 style={{ position: "fixed", top: coords.top, left: coords.left, zIndex: 100 }}
                 onMouseEnter={clearCloseTimer}
                 onMouseLeave={scheduleHide}
-                className="pixel-corners-sm w-52 border border-border bg-surface p-2.5 shadow-lg"
+                className="pixel-corners-sm w-64 border border-border bg-surface p-3.5 shadow-lg"
               >
-                <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-widest text-text-muted">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-text-muted">
                   {t("recap.title", { season: RECAP_SEASON_LABEL })}
                 </p>
                 {state.status !== "done" ? (
-                  <p className="py-1 text-xs text-text-muted">{t("recap.loading")}</p>
+                  <p className="py-1 text-sm text-text-muted">{t("recap.loading")}</p>
                 ) : state.recap === null ? (
-                  <p className="py-1 text-xs text-text-muted">
+                  <p className="py-1 text-sm text-text-muted">
                     {t("recap.noStats", { season: RECAP_SEASON_LABEL })}
                   </p>
                 ) : (
-                  <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                     <RecapStat label={t("recap.matches")} value={state.recap.matchesPlayed} />
                     <RecapStat label={t("recap.rating")} value={state.recap.avgRating ?? "—"} />
                     {isGoalkeeper ? (
@@ -141,8 +158,8 @@ export function PlayerSeasonRecapTrigger({ playerId, isGoalkeeper }: PlayerSeaso
 function RecapStat({ label, value }: { label: string; value: string | number }) {
   return (
     <div>
-      <p className="font-arcade text-sm tracking-wide text-text">{value}</p>
-      <p className="text-[9px] uppercase tracking-wide text-text-muted">{label}</p>
+      <p className="font-arcade text-lg tracking-wide text-text">{value}</p>
+      <p className="text-[10px] uppercase tracking-wide text-text-muted">{label}</p>
     </div>
   );
 }
