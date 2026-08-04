@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
@@ -8,12 +9,21 @@ import { useRouter } from "@/i18n/navigation";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { CloseIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
+import type { ClubPageMatch } from "@/lib/clubs/club-page-data";
 
 interface SwitcherClub {
   id: string;
   name: string;
   shortName: string;
   logoUrl: string | null;
+}
+
+interface ClubStandingSummary {
+  rank: number;
+  points: number;
+  wins: number;
+  draws: number;
+  losses: number;
 }
 
 const listVariants = {
@@ -43,26 +53,102 @@ function useIsMobile(): boolean {
   return isMobile;
 }
 
-// Logo du club cliquable ouvrant un menu déroulant pour naviguer directement vers
-// la page d'un autre club (demande explicite de l'utilisateur, page club
-// /clubs/[id]). Menu monté via portal en position fixed, calée sur le
-// getBoundingClientRect du logo — le conteneur d'en-tête (pixel-corners, clip-path)
-// rognerait sinon un menu positionné en absolute (même piège déjà résolu pour
-// PlayerSeasonRecapTrigger, src/components/players/PlayerSeasonRecapTrigger.tsx).
+// Pastilles de forme (5 derniers matchs), en compact — même logique de couleur que
+// ClubFormBadge (src/components/clubs/ClubFormBadge.tsx) mais réimplémentée ici :
+// ce composant est un Server Component async (traductions serveur), impossible à
+// réutiliser tel quel dans ce Client Component pour chaque ligne du menu.
+function FormPastilles({ lastFive }: { lastFive: (ClubPageMatch | null)[] }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {lastFive.map((m, i) => {
+        if (!m || m.ownScore === null || m.opponentScore === null) {
+          return <span key={`empty-${i}`} className="h-1.5 w-1.5 rounded-full border border-border" />;
+        }
+        const result = m.ownScore > m.opponentScore ? "win" : m.ownScore < m.opponentScore ? "loss" : "draw";
+        const tone = result === "win" ? "bg-points-pos" : result === "loss" ? "bg-points-neg" : "bg-accent-secondary";
+        return <span key={m.id} className={cn("h-1.5 w-1.5 rounded-full", tone)} />;
+      })}
+    </div>
+  );
+}
+
+// Ligne d'un club dans le menu (desktop ET mobile) : logo, nom, bilan V/N/D, forme
+// et points au classement — demande explicite de l'utilisateur d'enrichir chaque
+// ligne (pas juste le club courant) avec ces trois informations, points mis en
+// évidence (même traitement visuel que le rang dans l'en-tête : accent-secondary +
+// police arcade). `nameClassName` permet de réduire la police du nom sur mobile
+// pour laisser plus de place à ces infos, sans toucher à la taille du logo (demande
+// explicite : "ne touche pas à la taille du logo... réduis la police du nom").
+function ClubRow({
+  club,
+  standing,
+  lastFive,
+  logoSize,
+  nameClassName,
+}: {
+  club: SwitcherClub;
+  standing: ClubStandingSummary | undefined;
+  lastFive: (ClubPageMatch | null)[];
+  logoSize: "sm" | "md";
+  nameClassName: string;
+}) {
+  const tDash = useTranslations("dashboard");
+
+  return (
+    <div className="flex min-w-0 flex-1 items-center gap-2">
+      <ClubLogo club={club} size={logoSize} />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className={cn("truncate", nameClassName)}>{club.name}</span>
+          {standing && (
+            <span className="shrink-0 font-arcade text-sm tracking-wide text-accent-secondary">
+              {standing.points} {tDash("clubStandingsWidget.col.points")}
+            </span>
+          )}
+        </div>
+        {standing && (
+          <div className="mt-0.5 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-text-muted">
+            <span>
+              {standing.wins}
+              {tDash("clubStandingsWidget.col.wins")} · {standing.draws}
+              {tDash("clubStandingsWidget.col.draws")} · {standing.losses}
+              {tDash("clubStandingsWidget.col.losses")}
+            </span>
+            <FormPastilles lastFive={lastFive} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Bandeau d'en-tête club — toute la surface (logo + nom + badge, passés en
+// children) ouvre un menu déroulant pour naviguer directement vers la page d'un
+// autre club (demande explicite de l'utilisateur, page club /clubs/[id] ; d'abord
+// limité au logo seul, puis étendu à toute la div). Menu monté via portal en
+// position fixed, calée sur le getBoundingClientRect du bouton déclencheur — le
+// conteneur d'en-tête (pixel-corners, clip-path) rognerait sinon un menu positionné
+// en absolute (même piège déjà résolu pour PlayerSeasonRecapTrigger,
+// src/components/players/PlayerSeasonRecapTrigger.tsx).
 // `clubs` inclut le club courant (mis en évidence dans la liste plutôt qu'exclu —
 // permet de voir en un coup d'œil "où je suis" dans la liste). Triée par
-// classement Starligue courant (`rankByClubId`, même source que le tableau des
+// classement Starligue courant (`standingsByClubId`, même source que le tableau des
 // classements club-page-data.ts) plutôt qu'alphabétiquement — demande explicite
-// de l'utilisateur : refléter l'ordre du classement dans ce menu, sans afficher
-// le rang lui-même (juste l'ordre).
+// de l'utilisateur : refléter l'ordre du classement dans ce menu. Chaque ligne
+// affiche désormais aussi bilan/forme/points de CE club (pas seulement celui
+// affiché en en-tête) — demande explicite de l'utilisateur.
 export function ClubSwitcher({
   currentClub,
   clubs,
-  rankByClubId,
+  standingsByClubId,
+  formByClubId,
+  children,
 }: {
   currentClub: SwitcherClub;
   clubs: SwitcherClub[];
-  rankByClubId: Record<string, number>;
+  standingsByClubId: Record<string, ClubStandingSummary>;
+  formByClubId: Record<string, (ClubPageMatch | null)[]>;
+  children?: ReactNode;
 }) {
   const t = useTranslations("clubs");
   const tNav = useTranslations("nav");
@@ -76,9 +162,9 @@ export function ClubSwitcher({
   const orderedClubs = useMemo(
     () =>
       [...clubs].sort(
-        (a, b) => (rankByClubId[a.id] ?? Infinity) - (rankByClubId[b.id] ?? Infinity)
+        (a, b) => (standingsByClubId[a.id]?.rank ?? Infinity) - (standingsByClubId[b.id]?.rank ?? Infinity)
       ),
-    [clubs, rankByClubId]
+    [clubs, standingsByClubId]
   );
 
   useEffect(() => {
@@ -138,9 +224,10 @@ export function ClubSwitcher({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={t("detail.switchClub")}
-        className="block shrink-0 rounded-lg transition-opacity hover:opacity-80"
+        className="flex w-full items-center gap-4 pixel-corners border border-border bg-surface p-4 text-left transition-colors hover:bg-border/10"
       >
-        <ClubLogo club={currentClub} size="xl" largeOnDesktop />
+        <ClubLogo club={currentClub} size="xl" largeOnDesktop className="shrink-0" />
+        {children}
       </button>
 
       {typeof document !== "undefined" &&
@@ -152,7 +239,7 @@ export function ClubSwitcher({
             role="listbox"
             aria-label={t("detail.switchClub")}
             style={{ position: "fixed", top: coords.top, left: coords.left, zIndex: 100 }}
-            className="pixel-corners-sm flex max-h-80 w-56 flex-col gap-0.5 overflow-y-auto border border-border bg-surface p-1 shadow-lg"
+            className="pixel-corners-sm flex max-h-96 w-80 flex-col gap-0.5 overflow-y-auto border border-border bg-surface p-1 shadow-lg"
           >
             {orderedClubs.map((c) => (
               <button
@@ -161,12 +248,17 @@ export function ClubSwitcher({
                 role="option"
                 aria-selected={c.id === currentClub.id}
                 onClick={() => select(c.id)}
-                className={`flex items-center gap-2 rounded px-2 py-1.5 text-left text-sm transition-colors ${
+                className={`flex items-center rounded px-2 py-1.5 text-left text-sm transition-colors ${
                   c.id === currentClub.id ? "bg-accent/10 text-accent" : "text-text-muted hover:bg-border/20 hover:text-text"
                 }`}
               >
-                <ClubLogo club={c} size="sm" />
-                <span className="truncate">{c.name}</span>
+                <ClubRow
+                  club={c}
+                  standing={standingsByClubId[c.id]}
+                  lastFive={formByClubId[c.id] ?? []}
+                  logoSize="sm"
+                  nameClassName="text-sm"
+                />
               </button>
             ))}
           </div>,
@@ -216,17 +308,22 @@ export function ClubSwitcher({
                       aria-current={c.id === currentClub.id ? "true" : undefined}
                       onClick={() => select(c.id)}
                       className={cn(
-                        "flex w-full items-center gap-3 rounded-lg border px-3 py-3 text-left text-base transition-colors",
+                        "flex w-full items-center rounded-lg border px-3 py-2.5 text-left transition-colors",
                         c.id === currentClub.id
                           ? "border-accent/50 bg-accent/10 text-accent"
                           : "border-border text-text-muted hover:bg-border/20 hover:text-text"
                       )}
                     >
-                      <ClubLogo club={c} size="md" />
-                      {/* min-w-0 : en ligne flex, un enfant sans largeur contrainte
-                          ne peut pas rétrécir sous sa taille de contenu par défaut
-                          — `truncate` resterait sans effet sur un nom long sinon. */}
-                      <span className="min-w-0 flex-1 truncate">{c.name}</span>
+                      {/* Logo taille inchangée (demande explicite) ; police du nom
+                          réduite (text-sm au lieu de text-base hérité) pour laisser
+                          la place au bilan/forme/points sur la ligne du dessous. */}
+                      <ClubRow
+                        club={c}
+                        standing={standingsByClubId[c.id]}
+                        lastFive={formByClubId[c.id] ?? []}
+                        logoSize="md"
+                        nameClassName="text-sm"
+                      />
                     </motion.button>
                   ))}
                 </motion.div>

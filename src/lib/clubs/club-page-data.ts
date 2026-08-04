@@ -106,3 +106,71 @@ export function getLastFiveForm(results: ClubPageMatch[]): (ClubPageMatch | null
   const chronological = results.slice(0, 5).reverse();
   return [...Array<null>(Math.max(0, 5 - chronological.length)).fill(null), ...chronological];
 }
+
+// Même calcul que getLastFiveForm ci-dessus, mais pour tous les clubs d'un coup (une
+// seule requête sur tous les matchs de la saison) — utilisé par ClubSwitcher pour
+// afficher la forme de chaque club dans le menu déroulant, pas seulement celui de la
+// page courante. Hérite de la même règle anti-spoiler simulation (curseur admin, cf.
+// commentaire en tête de fichier).
+export async function getAllClubsLastFiveForm(
+  seasonId: string,
+  mode: SeasonMode,
+  clubIds: string[]
+): Promise<Record<string, (ClubPageMatch | null)[]>> {
+  let simulationCursor = 0;
+  if (mode === "simulation") {
+    const season = await prisma.season.findUnique({
+      where: { id: seasonId },
+      select: { currentSimulationGameweekNumber: true },
+    });
+    simulationCursor = season?.currentSimulationGameweekNumber ?? 0;
+  }
+
+  const matches = await prisma.match.findMany({
+    where: { seasonId },
+    include: {
+      gameweek: { select: { number: true } },
+      homeClub: CLUB_SELECT,
+      awayClub: CLUB_SELECT,
+    },
+    orderBy: { kickoffAt: "asc" },
+  });
+
+  const resultsByClub = new Map<string, ClubPageMatch[]>();
+  function pushResult(clubId: string, row: ClubPageMatch) {
+    const arr = resultsByClub.get(clubId);
+    if (arr) arr.push(row);
+    else resultsByClub.set(clubId, [row]);
+  }
+
+  for (const m of matches) {
+    const isDecided = mode === "simulation" ? m.gameweek.number <= simulationCursor : m.status === "FINISHED";
+    if (!isDecided || m.homeScore === null || m.awayScore === null) continue;
+
+    const base = { id: m.id, gameweekNumber: m.gameweek.number, kickoffAt: m.kickoffAt };
+    pushResult(m.homeClubId, {
+      ...base,
+      isHome: true,
+      opponent: m.awayClub,
+      ownScore: m.homeScore,
+      opponentScore: m.awayScore,
+    });
+    pushResult(m.awayClubId, {
+      ...base,
+      isHome: false,
+      opponent: m.homeClub,
+      ownScore: m.awayScore,
+      opponentScore: m.homeScore,
+    });
+  }
+
+  return Object.fromEntries(
+    clubIds.map((id) => {
+      // resultsByClub est en ordre chronologique croissant (requête triée asc,
+      // poussé dans cet ordre) ; getLastFiveForm attend l'ordre inverse (plus
+      // récent d'abord), comme `results` dans getClubPageData ci-dessus.
+      const mostRecentFirst = [...(resultsByClub.get(id) ?? [])].reverse();
+      return [id, getLastFiveForm(mostRecentFirst)];
+    })
+  );
+}

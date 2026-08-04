@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { resolveSeasonMode, resolveModeSeason } from "@/lib/team/active-team-context";
 import { SIMULATION_SEASON_LABEL } from "@/lib/simulation/constants";
-import { getClubPageData, getLastFiveForm } from "@/lib/clubs/club-page-data";
+import { getClubPageData, getLastFiveForm, getAllClubsLastFiveForm } from "@/lib/clubs/club-page-data";
 import {
   getClubWarmupMatches,
   getClubCoupeDeFranceMatches,
@@ -57,6 +57,24 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
     getActiveClubs(season.id),
   ]);
 
+  // Bilan V/N/D + points + forme de TOUS les clubs (pas seulement celui affiché) —
+  // demande explicite de l'utilisateur pour enrichir chaque ligne du menu
+  // ClubSwitcher, même source que rankByClubId/clubStanding ci-dessous.
+  const standingsByClubId: Record<
+    string,
+    { rank: number; points: number; wins: number; draws: number; losses: number }
+  > = Object.fromEntries(
+    standings.rows.map((r) => [
+      r.clubId,
+      { rank: r.rank, points: r.points, wins: r.wins, draws: r.draws, losses: r.losses },
+    ])
+  );
+  const formByClubId = await getAllClubsLastFiveForm(
+    season.id,
+    mode,
+    allClubs.map((c) => c.id)
+  );
+
   // Rang actuel de chaque adversaire pour l'info-bulle des matchs Starligue
   // (ClubMatchesPanel) — demande explicite de l'utilisateur ("son classement
   // actuel"), donc le dernier snapshot connu, pas le rang au moment du match.
@@ -88,11 +106,17 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
         ← {tClubs("detail.backToNews")}
       </Link>
 
-      {/* Club header — logo cliquable, ouvre un menu déroulant pour naviguer vers
-          un autre club (demande explicite de l'utilisateur) */}
-      <div className="flex items-center gap-4 pixel-corners border border-border bg-surface p-4">
-        <ClubSwitcher currentClub={club} clubs={allClubs} rankByClubId={rankByClubId} />
-
+      {/* Club header — toute la div ouvre le menu déroulant pour naviguer vers un
+          autre club (demande explicite de l'utilisateur : cliquer n'importe où
+          dans le bandeau, pas seulement le logo). ClubSwitcher fournit le
+          <button> englobant + le menu ; le contenu visuel (logo/nom/badge) lui est
+          passé en children. */}
+      <ClubSwitcher
+        currentClub={club}
+        clubs={allClubs}
+        standingsByClubId={standingsByClubId}
+        formByClubId={formByClubId}
+      >
         <div className="min-w-0 flex-1">
           <h1 className="text-2xl text-text">{club.name}</h1>
           <p className="text-sm text-text-muted">
@@ -116,7 +140,7 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
             className="shrink-0"
           />
         )}
-      </div>
+      </ClubSwitcher>
 
       {/* Résultats / prochains matchs — championnat + Warm Up + Coupe de France +
           EHF Champions League + EHF European League fusionnés, filtrables par
