@@ -9,7 +9,14 @@ set -e
 #
 # Les images Xcode Cloud n'ont pas Node.js préinstallé (Homebrew si) — voir
 # https://capgo.app/blog/how-to-build-capacitor-app-in-xcode-cloud/
-cd "$CI_WORKSPACE"
+#
+# $CI_WORKSPACE vide/non défini dans cet environnement (`cd ""` ne fait rien,
+# silencieusement, pas d'erreur — d'où le `pwd` de contrôle plus bas qui a
+# révélé le vrai souci). On calcule la racine du repo depuis l'emplacement du
+# script lui-même (ios/App/ci_scripts/../../..) plutôt que de dépendre d'une
+# variable d'env Apple dont le nom/la présence n'est pas fiable ici.
+cd "$(dirname "$0")/../../.."
+pwd
 
 if ! command -v node >/dev/null 2>&1; then
   echo "Node.js absent — installation via Homebrew"
