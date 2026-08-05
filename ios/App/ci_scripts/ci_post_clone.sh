@@ -6,8 +6,18 @@ set -e
 # locaux vers node_modules/.pnpm/... (voir ARCHITECTURE.md §20.1), inexistants
 # sur un clone frais. Ce script tourne automatiquement après le clone, avant
 # la résolution des packages Swift, pour les peupler.
+#
+# Les images Xcode Cloud n'ont pas Node.js préinstallé (Homebrew si) — voir
+# https://capgo.app/blog/how-to-build-capacitor-app-in-xcode-cloud/
 cd "$CI_WORKSPACE"
 
+if ! command -v node >/dev/null 2>&1; then
+  echo "Node.js absent — installation via Homebrew"
+  brew install node@20
+  brew link node@20 --force --overwrite
+fi
+
+node --version
 corepack enable
 corepack prepare pnpm@11.10.0 --activate
 pnpm install --frozen-lockfile
