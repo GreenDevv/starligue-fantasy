@@ -130,7 +130,19 @@
     "sourceError": "błąd: {error}",
     "sourceSummary": "{fetched} pobranych · {inserted} nowych · {duplicates} duplikatów · {tooOld} zbyt starych",
     "empty": "Brak aktualności na razie.",
-    "viewSource": "Zobacz źródło"
+    "viewSource": "Zobacz źródło",
+    "addButton": "Dodaj aktualność",
+    "formTitle": "Nowa aktualność",
+    "titleLabel": "Tytuł",
+    "categoryLabel": "Kategoria",
+    "imageUrlLabel": "URL obrazka",
+    "clubLabel": "Klub",
+    "playerLabel": "Zawodnik",
+    "noneOption": "— Brak —",
+    "excerptLabel": "Skrót",
+    "contentLabel": "Treść",
+    "sourceUrlLabel": "URL źródła",
+    "titleRequired": "Tytuł jest wymagany"
   },
   "players": {
     "title": "Zawodnicy",

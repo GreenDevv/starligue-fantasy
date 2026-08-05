@@ -130,7 +130,19 @@
     "sourceError": "error: {error}",
     "sourceSummary": "{fetched} recuperades · {inserted} noves · {duplicates} duplicades · {tooOld} massa antigues",
     "empty": "Cap notícia de moment.",
-    "viewSource": "Veure la font"
+    "viewSource": "Veure la font",
+    "addButton": "Afegir una notícia",
+    "formTitle": "Nova notícia",
+    "titleLabel": "Títol",
+    "categoryLabel": "Categoria",
+    "imageUrlLabel": "URL de la imatge",
+    "clubLabel": "Club",
+    "playerLabel": "Jugador",
+    "noneOption": "— Cap —",
+    "excerptLabel": "Resum",
+    "contentLabel": "Contingut",
+    "sourceUrlLabel": "URL de la font",
+    "titleRequired": "El títol és obligatori"
   },
   "players": {
     "title": "Jugadors",

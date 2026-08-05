@@ -130,7 +130,19 @@
     "sourceError": "erro: {error}",
     "sourceSummary": "{fetched} obtidas · {inserted} novas · {duplicates} duplicadas · {tooOld} demasiado antigas",
     "empty": "Ainda não há notícias.",
-    "viewSource": "Ver a fonte"
+    "viewSource": "Ver a fonte",
+    "addButton": "Adicionar uma notícia",
+    "formTitle": "Nova notícia",
+    "titleLabel": "Título",
+    "categoryLabel": "Categoria",
+    "imageUrlLabel": "URL da imagem",
+    "clubLabel": "Clube",
+    "playerLabel": "Jogador",
+    "noneOption": "— Nenhum —",
+    "excerptLabel": "Resumo",
+    "contentLabel": "Conteúdo",
+    "sourceUrlLabel": "URL da fonte",
+    "titleRequired": "O título é obrigatório"
   },
   "players": {
     "title": "Jogadores",

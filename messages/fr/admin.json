@@ -130,7 +130,19 @@
     "sourceError": "erreur : {error}",
     "sourceSummary": "{fetched} récupérées · {inserted} nouvelles · {duplicates} doublons · {tooOld} trop anciennes",
     "empty": "Aucune actu pour l'instant.",
-    "viewSource": "Voir la source"
+    "viewSource": "Voir la source",
+    "addButton": "Ajouter une actu",
+    "formTitle": "Nouvelle actu",
+    "titleLabel": "Titre",
+    "categoryLabel": "Catégorie",
+    "imageUrlLabel": "URL image",
+    "clubLabel": "Club",
+    "playerLabel": "Joueur",
+    "noneOption": "— Aucun —",
+    "excerptLabel": "Résumé",
+    "contentLabel": "Contenu",
+    "sourceUrlLabel": "URL source",
+    "titleRequired": "Le titre est requis"
   },
   "players": {
     "title": "Joueurs",

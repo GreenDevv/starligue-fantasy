@@ -130,7 +130,19 @@
     "sourceError": "error: {error}",
     "sourceSummary": "{fetched} fetched · {inserted} new · {duplicates} duplicates · {tooOld} too old",
     "empty": "No news yet.",
-    "viewSource": "View source"
+    "viewSource": "View source",
+    "addButton": "Add a news item",
+    "formTitle": "New news item",
+    "titleLabel": "Title",
+    "categoryLabel": "Category",
+    "imageUrlLabel": "Image URL",
+    "clubLabel": "Club",
+    "playerLabel": "Player",
+    "noneOption": "— None —",
+    "excerptLabel": "Excerpt",
+    "contentLabel": "Content",
+    "sourceUrlLabel": "Source URL",
+    "titleRequired": "Title is required"
   },
   "players": {
     "title": "Players",

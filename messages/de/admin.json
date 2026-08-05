@@ -130,7 +130,19 @@
     "sourceError": "Fehler: {error}",
     "sourceSummary": "{fetched} abgerufen · {inserted} neu · {duplicates} Duplikate · {tooOld} zu alt",
     "empty": "Bisher keine News.",
-    "viewSource": "Quelle ansehen"
+    "viewSource": "Quelle ansehen",
+    "addButton": "News hinzufügen",
+    "formTitle": "Neue Meldung",
+    "titleLabel": "Titel",
+    "categoryLabel": "Kategorie",
+    "imageUrlLabel": "Bild-URL",
+    "clubLabel": "Verein",
+    "playerLabel": "Spieler",
+    "noneOption": "— Keine —",
+    "excerptLabel": "Kurzfassung",
+    "contentLabel": "Inhalt",
+    "sourceUrlLabel": "Quell-URL",
+    "titleRequired": "Titel ist erforderlich"
   },
   "players": {
     "title": "Spieler",

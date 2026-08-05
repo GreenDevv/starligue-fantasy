@@ -24,6 +24,31 @@ interface SourceSummary {
   error: string | null;
 }
 
+interface ClubOption {
+  id: string;
+  shortName: string;
+}
+
+interface PlayerOption {
+  id: string;
+  firstName: string;
+  lastName: string;
+  club: { shortName: string };
+}
+
+const CREATABLE_CATEGORIES = ["GENERAL", "TRANSFER", "INJURY"] as const;
+
+const EMPTY_FORM = {
+  category: "GENERAL" as (typeof CREATABLE_CATEGORIES)[number],
+  title: "",
+  excerpt: "",
+  content: "",
+  imageUrl: "",
+  sourceUrl: "",
+  clubId: "",
+  playerId: "",
+};
+
 export default function AdminNewsPage() {
   const t = useTranslations("admin");
   const tLabels = useTranslations("labels");
@@ -36,6 +61,13 @@ export default function AdminNewsPage() {
   const [syncError, setSyncError] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const [showForm, setShowForm] = useState(false);
+  const [clubs, setClubs] = useState<ClubOption[]>([]);
+  const [players, setPlayers] = useState<PlayerOption[]>([]);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
+
   async function load() {
     setLoading(true);
     const res = await fetch("/api/admin/news");
@@ -47,6 +79,58 @@ export default function AdminNewsPage() {
   useEffect(() => {
     load();
   }, []);
+
+  async function openForm() {
+    setShowForm(true);
+    setCreateError("");
+    if (clubs.length === 0) {
+      const [clubsRes, playersRes] = await Promise.all([
+        fetch("/api/admin/clubs"),
+        fetch("/api/admin/players"),
+      ]);
+      const clubsJson = (await clubsRes.json()) as { data?: { clubs: ClubOption[] } };
+      const playersJson = (await playersRes.json()) as { data?: { players: PlayerOption[] } };
+      if (clubsJson.data?.clubs) setClubs(clubsJson.data.clubs);
+      if (playersJson.data?.players) setPlayers(playersJson.data.players);
+    }
+  }
+
+  async function handleCreate() {
+    if (!form.title.trim()) {
+      setCreateError(t("news.titleRequired"));
+      return;
+    }
+    setCreating(true);
+    setCreateError("");
+    try {
+      const res = await fetch("/api/admin/news", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: form.category,
+          title: form.title.trim(),
+          excerpt: form.excerpt.trim(),
+          content: form.content.trim(),
+          imageUrl: form.imageUrl.trim(),
+          sourceUrl: form.sourceUrl.trim(),
+          clubId: form.clubId,
+          playerId: form.playerId,
+        }),
+      });
+      const json = (await res.json()) as { data?: NewsRow; error?: { message?: string; code?: string } };
+      if (res.ok && json.data) {
+        setNews((prev) => [json.data as NewsRow, ...prev]);
+        setForm(EMPTY_FORM);
+        setShowForm(false);
+      } else {
+        setCreateError(resolveApiError(tRoot, "admin", json.error?.code));
+      }
+    } catch {
+      setCreateError(t("common.networkError"));
+    } finally {
+      setCreating(false);
+    }
+  }
 
   async function handleSync() {
     setSyncing(true);
@@ -90,14 +174,145 @@ export default function AdminNewsPage() {
             {t("news.subtitle", { count: news.length })}
           </p>
         </div>
-        <button
-          onClick={handleSync}
-          disabled={syncing}
-          className="shrink-0 rounded bg-accent px-4 py-2 text-sm font-semibold text-bg transition-opacity disabled:opacity-40"
-        >
-          {syncing ? t("news.syncing") : t("news.syncButton")}
-        </button>
+        <div className="flex shrink-0 gap-2">
+          <button
+            onClick={showForm ? () => setShowForm(false) : openForm}
+            className="rounded border border-border px-4 py-2 text-sm font-semibold text-text transition-colors hover:bg-surface"
+          >
+            {showForm ? t("common.cancel") : t("news.addButton")}
+          </button>
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            className="rounded bg-accent px-4 py-2 text-sm font-semibold text-bg transition-opacity disabled:opacity-40"
+          >
+            {syncing ? t("news.syncing") : t("news.syncButton")}
+          </button>
+        </div>
       </div>
+
+      {showForm && (
+        <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+          <p className="text-sm font-medium text-text">{t("news.formTitle")}</p>
+
+          {createError && <p className="rounded bg-points-neg/10 px-3 py-2 text-xs text-points-neg">{createError}</p>}
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="flex flex-col gap-1 sm:col-span-2">
+              <span className="text-xs text-text-muted">{t("news.titleLabel")}</span>
+              <input
+                type="text"
+                value={form.title}
+                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                className="rounded border border-border bg-bg px-3 py-2 text-sm text-text"
+              />
+            </label>
+
+            <label className="flex flex-col gap-1">
+              <span className="text-xs text-text-muted">{t("news.categoryLabel")}</span>
+              <select
+                value={form.category}
+                onChange={(e) => setForm((f) => ({ ...f, category: e.target.value as (typeof CREATABLE_CATEGORIES)[number] }))}
+                className="rounded border border-border bg-bg px-3 py-2 text-sm text-text"
+              >
+                {CREATABLE_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {tLabels(`newsCategory.${c}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="flex flex-col gap-1">
+              <span className="text-xs text-text-muted">{t("news.imageUrlLabel")}</span>
+              <input
+                type="text"
+                value={form.imageUrl}
+                onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))}
+                className="rounded border border-border bg-bg px-3 py-2 text-sm text-text"
+              />
+            </label>
+
+            <label className="flex flex-col gap-1">
+              <span className="text-xs text-text-muted">{t("news.clubLabel")}</span>
+              <select
+                value={form.clubId}
+                onChange={(e) => setForm((f) => ({ ...f, clubId: e.target.value }))}
+                className="rounded border border-border bg-bg px-3 py-2 text-sm text-text"
+              >
+                <option value="">{t("news.noneOption")}</option>
+                {clubs.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.shortName}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="flex flex-col gap-1">
+              <span className="text-xs text-text-muted">{t("news.playerLabel")}</span>
+              <select
+                value={form.playerId}
+                onChange={(e) => setForm((f) => ({ ...f, playerId: e.target.value }))}
+                className="rounded border border-border bg-bg px-3 py-2 text-sm text-text"
+              >
+                <option value="">{t("news.noneOption")}</option>
+                {players.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.firstName} {p.lastName} ({p.club.shortName})
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="flex flex-col gap-1 sm:col-span-2">
+              <span className="text-xs text-text-muted">{t("news.excerptLabel")}</span>
+              <input
+                type="text"
+                value={form.excerpt}
+                onChange={(e) => setForm((f) => ({ ...f, excerpt: e.target.value }))}
+                className="rounded border border-border bg-bg px-3 py-2 text-sm text-text"
+              />
+            </label>
+
+            <label className="flex flex-col gap-1 sm:col-span-2">
+              <span className="text-xs text-text-muted">{t("news.contentLabel")}</span>
+              <textarea
+                value={form.content}
+                onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
+                rows={4}
+                className="rounded border border-border bg-bg px-3 py-2 text-sm text-text"
+              />
+            </label>
+
+            <label className="flex flex-col gap-1 sm:col-span-2">
+              <span className="text-xs text-text-muted">{t("news.sourceUrlLabel")}</span>
+              <input
+                type="text"
+                value={form.sourceUrl}
+                onChange={(e) => setForm((f) => ({ ...f, sourceUrl: e.target.value }))}
+                className="rounded border border-border bg-bg px-3 py-2 text-sm text-text"
+              />
+            </label>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => setShowForm(false)}
+              className="rounded px-4 py-2 text-sm text-text-muted hover:text-text"
+            >
+              {t("common.cancel")}
+            </button>
+            <button
+              onClick={handleCreate}
+              disabled={creating}
+              className="rounded bg-accent px-4 py-2 text-sm font-semibold text-bg transition-opacity disabled:opacity-40"
+            >
+              {creating ? t("common.saving") : t("common.save")}
+            </button>
+          </div>
+        </div>
+      )}
 
       {syncError && <p className="rounded bg-points-neg/10 px-3 py-2 text-xs text-points-neg">{syncError}</p>}
 

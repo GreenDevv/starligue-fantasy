@@ -130,7 +130,19 @@
     "sourceError": "fejl: {error}",
     "sourceSummary": "{fetched} hentet · {inserted} nye · {duplicates} dubletter · {tooOld} for gamle",
     "empty": "Ingen nyheder endnu.",
-    "viewSource": "Se kilden"
+    "viewSource": "Se kilden",
+    "addButton": "Tilføj en nyhed",
+    "formTitle": "Ny nyhed",
+    "titleLabel": "Titel",
+    "categoryLabel": "Kategori",
+    "imageUrlLabel": "Billede-URL",
+    "clubLabel": "Klub",
+    "playerLabel": "Spiller",
+    "noneOption": "— Ingen —",
+    "excerptLabel": "Resumé",
+    "contentLabel": "Indhold",
+    "sourceUrlLabel": "Kilde-URL",
+    "titleRequired": "Titel er obligatorisk"
   },
   "players": {
     "title": "Spillere",
