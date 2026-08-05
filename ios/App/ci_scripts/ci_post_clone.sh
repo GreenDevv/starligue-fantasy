@@ -13,8 +13,10 @@ cd "$CI_WORKSPACE"
 
 if ! command -v node >/dev/null 2>&1; then
   echo "Node.js absent — installation via Homebrew"
-  brew install node@20
-  brew link node@20 --force --overwrite
+  # pnpm 11.x exige Node >= 22.13 (utilise le module natif node:sqlite) —
+  # node@20 (déprécié côté Homebrew de toute façon) fait planter corepack.
+  brew install node@22
+  brew link node@22 --force --overwrite
 fi
 
 node --version
