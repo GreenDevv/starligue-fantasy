@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations, useFormatter } from "next-intl";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { resizeImageToDataUri } from "@/lib/image/resize-to-data-uri";
 
 interface NewsRow {
   id: string;
@@ -67,6 +68,9 @@ export default function AdminNewsPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [imagePreviewError, setImagePreviewError] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -122,6 +126,8 @@ export default function AdminNewsPage() {
         setNews((prev) => [json.data as NewsRow, ...prev]);
         setForm(EMPTY_FORM);
         setShowForm(false);
+        setImagePreviewError(false);
+        setUploadError("");
       } else {
         setCreateError(resolveApiError(tRoot, "admin", json.error?.code));
       }
@@ -129,6 +135,23 @@ export default function AdminNewsPage() {
       setCreateError(t("common.networkError"));
     } finally {
       setCreating(false);
+    }
+  }
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploading(true);
+    setUploadError("");
+    try {
+      const dataUri = await resizeImageToDataUri(file);
+      setForm((f) => ({ ...f, imageUrl: dataUri }));
+      setImagePreviewError(false);
+    } catch {
+      setUploadError(t("players.uploadError"));
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -228,9 +251,27 @@ export default function AdminNewsPage() {
               <input
                 type="text"
                 value={form.imageUrl}
-                onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))}
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, imageUrl: e.target.value }));
+                  setImagePreviewError(false);
+                }}
                 className="rounded border border-border bg-bg px-3 py-2 text-sm text-text"
               />
+              <div className="mt-1 flex items-center gap-3">
+                {form.imageUrl && !imagePreviewError && (
+                  <img
+                    src={form.imageUrl}
+                    alt=""
+                    onError={() => setImagePreviewError(true)}
+                    className="h-12 w-20 shrink-0 rounded border border-border object-cover"
+                  />
+                )}
+                <label className="cursor-pointer rounded border border-border px-3 py-1.5 text-xs text-text-muted hover:bg-surface">
+                  {uploading ? t("common.importing") : t("players.uploadFromComputer")}
+                  <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={handleFileUpload} />
+                </label>
+              </div>
+              {uploadError && <p className="text-xs text-points-neg">{uploadError}</p>}
             </label>
 
             <label className="flex flex-col gap-1">
