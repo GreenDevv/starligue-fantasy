@@ -27,4 +27,11 @@ pnpm install --frozen-lockfile
 # ios/App/App/public, capacitor.config.json, config.xml sont volontairement
 # gitignorés (ios/.gitignore) — générés par `cap sync` avant chaque build en
 # local, jamais commités. Sans cette étape, Xcode Cloud ne les trouve pas.
-npx cap sync ios
+# Binaire local direct plutôt que `npx cap` : `npx` a résolu une version
+# différente d'@capacitor/cli dans cet environnement CI, qui ne reconnaissait
+# pas la plateforme iOS pourtant bien présente (erreur "has not been added
+# yet") — le binaire dans node_modules/.bin est garanti être exactement la
+# version 7.6.8 du lockfile.
+pwd
+ls -la ios/App
+node_modules/.bin/cap sync ios
