@@ -108,6 +108,9 @@ model User {
   leagueChatMessages  LeagueChatMessage[]
   passwordResetTokens PasswordResetToken[]
   pushTokens          PushToken[]
+  chatMessageReports  ChatMessageReport[]
+  blockedUsers        BlockedUser[]        @relation("Blocker")
+  blockedByUsers      BlockedUser[]        @relation("Blocked")
 }
 
 // Mot de passe oublié — ARCHITECTURE.md §6.1. tokenHash (sha256 du token brut
@@ -886,15 +889,44 @@ model League {
 // (comme League elle-même, voir plan de fusion live/simulation étape 5). Contenu
 // validé par src/lib/leagues/chat.ts (fonction pure, trim + longueur max).
 model LeagueChatMessage {
-  id        String   @id @default(cuid())
+  id        String              @id @default(cuid())
   leagueId  String
-  league    League   @relation(fields: [leagueId], references: [id])
+  league    League              @relation(fields: [leagueId], references: [id])
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User                @relation(fields: [userId], references: [id])
   content   String
-  createdAt DateTime @default(now())
+  createdAt DateTime            @default(now())
+  reports   ChatMessageReport[]
 
   @@index([leagueId, createdAt])
+}
+
+// Modération minimale du chat de ligue — guideline App Store 1.2 (apps avec
+// communication entre utilisateurs doivent permettre de signaler/bloquer).
+// Un signalement par (message, utilisateur) — pas de dashboard admin dédié en
+// v1, consultable directement en base par l'admin du site en attendant.
+model ChatMessageReport {
+  id         String            @id @default(cuid())
+  messageId  String
+  message    LeagueChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  reportedBy String
+  reporter   User              @relation(fields: [reportedBy], references: [id])
+  createdAt  DateTime          @default(now())
+
+  @@unique([messageId, reportedBy])
+}
+
+// Bloque un utilisateur au niveau du compte (pas scopé à une ligue) — filtre
+// ses messages dans tous les chats de ligue partagés avec le bloqueur.
+model BlockedUser {
+  id        String   @id @default(cuid())
+  blockerId String
+  blocker   User     @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId String
+  blocked   User     @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
 }
 
 model LeagueMember {

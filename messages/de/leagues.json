@@ -48,7 +48,12 @@
     "emptyState": "Noch niemand hat die Feindseligkeiten eröffnet. Die Ehre gebührt dir.",
     "you": "Du",
     "inputPlaceholder": "Schick deinen Gegnern eine Spitze…",
-    "send": "Senden"
+    "send": "Senden",
+    "moreActions": "Weitere Aktionen",
+    "report": "Melden",
+    "reported": "Gemeldet",
+    "block": "Blockieren",
+    "blockConfirm": "Diesen Nutzer blockieren?"
   },
   "errors": {
     "NO_ACTIVE_SEASON": "Momentan keine aktive Saison",

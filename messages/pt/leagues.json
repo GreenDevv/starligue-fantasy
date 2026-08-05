@@ -48,7 +48,12 @@
     "emptyState": "Ainda ninguém iniciou as hostilidades. A honra é tua.",
     "you": "Tu",
     "inputPlaceholder": "Manda uma farpa aos teus adversários…",
-    "send": "Enviar"
+    "send": "Enviar",
+    "moreActions": "Mais ações",
+    "report": "Denunciar",
+    "reported": "Denunciado",
+    "block": "Bloquear",
+    "blockConfirm": "Bloquear este utilizador?"
   },
   "errors": {
     "NO_ACTIVE_SEASON": "Nenhuma época ativa neste momento",

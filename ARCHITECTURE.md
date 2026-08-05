@@ -1966,3 +1966,33 @@ vrai jeton FCM nativement).
   (`dedupeKey` unique, ex. `"lineup-deadline:{gameweekId}:{userId}"`) — sans
   ça un run de cron qui chevauche la fenêtre de rappel renotifierait tout le
   monde.
+
+## 21. Modération du chat de ligue
+
+Ajouté le 2026-08-05 en préparation de la soumission App Store : la
+guideline de review 1.2 (apps avec communication entre utilisateurs) exige
+au minimum un moyen de signaler un contenu abusif et de bloquer un
+utilisateur, en plus d'un contact publié (déjà en place,
+`contact@starliguefantasy.fr`, `/confidentialite`).
+
+- `ChatMessageReport` (Prisma) — un signalement par `(messageId, reportedBy)`
+  (contrainte unique, upsert idempotent). Pas de dashboard admin dédié en
+  v1 : consultable directement en base par l'admin en attendant un volume
+  qui le justifie.
+- `BlockedUser` — bloque au niveau du **compte**, pas d'une ligue en
+  particulier (`blockerId`/`blockedId`, unique) : un utilisateur bloqué
+  voit ses messages masqués dans tous les chats de ligue partagés avec le
+  bloqueur.
+- `POST /api/leagues/[id]/chat/[messageId]/report` — signale un message.
+- `POST /api/blocked-users` (`{ userId }`) / `DELETE /api/blocked-users/[userId]`
+  — bloquer/débloquer (pas de garde-fou "impossible de bloquer soi-même"
+  nécessaire côté UI : le bouton n'apparaît jamais sur ses propres messages
+  dans `LeagueChat.tsx`, mais l'API le refuse quand même si appelée
+  directement, `CANNOT_BLOCK_SELF`).
+- `GET /api/leagues/[id]/chat` exclut désormais les messages des
+  utilisateurs bloqués par le viewer (`userId: { notIn: blockedIds }`).
+- `LeagueChat.tsx` — petit menu "⋯" sur les messages des autres (jamais sur
+  les siens), avec confirmation à deux étapes pour bloquer (pattern déjà
+  utilisé pour quitter/supprimer une ligue, `LeagueDetailActions.tsx`) mais
+  signalement direct sans confirmation (action réversible en impact,
+  n'affecte que soi).

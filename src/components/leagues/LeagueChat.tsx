@@ -24,6 +24,7 @@ function mergeMessages(prev: ChatMessage[], incoming: ChatMessage[]): ChatMessag
 
 export function LeagueChat({ leagueId, currentUserId }: { leagueId: string; currentUserId: string }) {
   const t = useTranslations("leagues");
+  const tCommon = useTranslations("common");
   const tRoot = useTranslations();
   const format = useFormatter();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -32,6 +33,33 @@ export function LeagueChat({ leagueId, currentUserId }: { leagueId: string; curr
   const [error, setError] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const latestCreatedAt = useRef<string | null>(null);
+  // Menu signaler/bloquer (guideline App Store 1.2, ARCHITECTURE.md §21) —
+  // un seul menu ouvert à la fois, fermé par défaut, jamais sur ses propres
+  // messages.
+  const [menuOpenFor, setMenuOpenFor] = useState<string | null>(null);
+  const [confirmingBlockOf, setConfirmingBlockOf] = useState<string | null>(null);
+  const [reportedIds, setReportedIds] = useState<Set<string>>(new Set());
+
+  async function handleReport(messageId: string) {
+    setMenuOpenFor(null);
+    const res = await fetch(`/api/leagues/${leagueId}/chat/${messageId}/report`, { method: "POST" });
+    if (res.ok) {
+      setReportedIds((prev) => new Set(prev).add(messageId));
+    }
+  }
+
+  async function handleBlock(userId: string) {
+    setMenuOpenFor(null);
+    setConfirmingBlockOf(null);
+    const res = await fetch("/api/blocked-users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId }),
+    });
+    if (res.ok) {
+      setMessages((prev) => prev.filter((m) => m.userId !== userId));
+    }
+  }
 
   const fetchNew = useCallback(async () => {
     const url = latestCreatedAt.current
@@ -97,9 +125,21 @@ export function LeagueChat({ leagueId, currentUserId }: { leagueId: string; curr
             const mine = m.userId === currentUserId;
             return (
               <div key={m.id} className={mine ? "self-end text-right" : "self-start"}>
-                <p className="text-[10px] text-text-muted">
-                  {mine ? t("chat.you") : m.userName} · {format.dateTime(new Date(m.createdAt), { hour: "2-digit", minute: "2-digit" })}
-                </p>
+                <div className={`flex items-center gap-1.5 ${mine ? "flex-row-reverse" : ""}`}>
+                  <p className="text-[10px] text-text-muted">
+                    {mine ? t("chat.you") : m.userName} · {format.dateTime(new Date(m.createdAt), { hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                  {!mine && (
+                    <button
+                      type="button"
+                      onClick={() => setMenuOpenFor(menuOpenFor === m.id ? null : m.id)}
+                      aria-label={t("chat.moreActions")}
+                      className="text-text-muted hover:text-text"
+                    >
+                      ⋯
+                    </button>
+                  )}
+                </div>
                 <p
                   className={[
                     "pixel-corners-sm mt-0.5 inline-block max-w-xs break-words px-3 py-1.5 text-sm",
@@ -108,6 +148,47 @@ export function LeagueChat({ leagueId, currentUserId }: { leagueId: string; curr
                 >
                   {m.content}
                 </p>
+                {menuOpenFor === m.id && (
+                  <div className="pixel-corners-sm mt-1 flex flex-col items-start gap-1 border border-border bg-surface p-2 text-left">
+                    {confirmingBlockOf === m.userId ? (
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="text-text-muted">{t("chat.blockConfirm")}</span>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmingBlockOf(null)}
+                          className="text-text-muted hover:text-text"
+                        >
+                          {tCommon("cancel")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleBlock(m.userId)}
+                          className="font-semibold text-points-neg"
+                        >
+                          {tCommon("confirm")}
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          disabled={reportedIds.has(m.id)}
+                          onClick={() => handleReport(m.id)}
+                          className="text-xs text-text-muted hover:text-text disabled:opacity-40"
+                        >
+                          {reportedIds.has(m.id) ? t("chat.reported") : t("chat.report")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmingBlockOf(m.userId)}
+                          className="text-xs text-points-neg hover:text-points-neg/80"
+                        >
+                          {t("chat.block")}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })

@@ -48,7 +48,12 @@
     "emptyState": "Ningú ha començat les hostilitats encara. L'honor és teu.",
     "you": "Tu",
     "inputPlaceholder": "Envia una punxada als teus rivals…",
-    "send": "Enviar"
+    "send": "Enviar",
+    "moreActions": "Més accions",
+    "report": "Denunciar",
+    "reported": "Denunciat",
+    "block": "Bloquejar",
+    "blockConfirm": "Bloquejar aquest usuari?"
   },
   "errors": {
     "NO_ACTIVE_SEASON": "No hi ha cap temporada activa ara mateix",

@@ -29,9 +29,16 @@ export async function GET(request: Request, { params }: { params: { id: string }
   const since = url.searchParams.get("since");
   const sinceDate = since ? new Date(since) : null;
 
+  const blocked = await prisma.blockedUser.findMany({
+    where: { blockerId: session.user.id },
+    select: { blockedId: true },
+  });
+  const blockedIds = blocked.map((b) => b.blockedId);
+
   const messages = await prisma.leagueChatMessage.findMany({
     where: {
       leagueId: params.id,
+      ...(blockedIds.length > 0 ? { userId: { notIn: blockedIds } } : {}),
       ...(sinceDate && !isNaN(sinceDate.getTime()) ? { createdAt: { gt: sinceDate } } : {}),
     },
     orderBy: { createdAt: sinceDate ? "asc" : "desc" },

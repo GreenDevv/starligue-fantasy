@@ -48,7 +48,12 @@
     "emptyState": "Nadie ha empezado las hostilidades todavía. El honor es tuyo.",
     "you": "Tú",
     "inputPlaceholder": "Manda una pulla a tus rivales…",
-    "send": "Enviar"
+    "send": "Enviar",
+    "moreActions": "Más acciones",
+    "report": "Denunciar",
+    "reported": "Denunciado",
+    "block": "Bloquear",
+    "blockConfirm": "¿Bloquear a este usuario?"
   },
   "errors": {
     "NO_ACTIVE_SEASON": "No hay ninguna temporada activa ahora mismo",

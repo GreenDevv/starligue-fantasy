@@ -48,7 +48,12 @@
     "emptyState": "Ingen har endnu indledt fjendtlighederne. Æren er din.",
     "you": "Dig",
     "inputPlaceholder": "Send en gliring til dine modstandere…",
-    "send": "Send"
+    "send": "Send",
+    "moreActions": "Flere handlinger",
+    "report": "Anmeld",
+    "reported": "Anmeldt",
+    "block": "Bloker",
+    "blockConfirm": "Bloker denne bruger?"
   },
   "errors": {
     "NO_ACTIVE_SEASON": "Ingen aktiv sæson for øjeblikket",

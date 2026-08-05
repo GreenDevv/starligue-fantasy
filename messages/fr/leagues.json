@@ -48,7 +48,12 @@
     "emptyState": "Personne n'a encore lancé les hostilités. À toi l'honneur.",
     "you": "Toi",
     "inputPlaceholder": "Envoie une pique à tes adversaires…",
-    "send": "Envoyer"
+    "send": "Envoyer",
+    "moreActions": "Plus d'actions",
+    "report": "Signaler",
+    "reported": "Signalé",
+    "block": "Bloquer",
+    "blockConfirm": "Bloquer cet utilisateur ?"
   },
   "errors": {
     "NO_ACTIVE_SEASON": "Aucune saison active pour le moment",

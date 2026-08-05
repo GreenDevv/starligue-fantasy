@@ -48,7 +48,12 @@
     "emptyState": "No one's started the beef yet. Do the honors.",
     "you": "You",
     "inputPlaceholder": "Send a jab at your rivals…",
-    "send": "Send"
+    "send": "Send",
+    "moreActions": "More actions",
+    "report": "Report",
+    "reported": "Reported",
+    "block": "Block",
+    "blockConfirm": "Block this user?"
   },
   "errors": {
     "NO_ACTIVE_SEASON": "No active season right now",

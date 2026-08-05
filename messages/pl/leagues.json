@@ -48,7 +48,12 @@
     "emptyState": "Nikt jeszcze nie rzucił pierwszej złośliwości. Twoja kolej.",
     "you": "Ty",
     "inputPlaceholder": "Wbij szpilkę przeciwnikom…",
-    "send": "Wyślij"
+    "send": "Wyślij",
+    "moreActions": "Więcej opcji",
+    "report": "Zgłoś",
+    "reported": "Zgłoszono",
+    "block": "Zablokuj",
+    "blockConfirm": "Zablokować tego użytkownika?"
   },
   "errors": {
     "NO_ACTIVE_SEASON": "Brak aktywnego sezonu w tej chwili",
