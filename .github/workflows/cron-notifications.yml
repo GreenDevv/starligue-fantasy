@@ -1,0 +1,33 @@
+name: Cron notifications push (app mobile)
+
+# Route derrière : /api/cron/notify-deadlines — ARCHITECTURE.md §20.2. Rappelle
+# l'alignement non finalisé avant la deadline de journée et le pronostic
+# manquant avant le verrouillage d'un match. Fenêtre de */15 min : les deadlines
+# elles-mêmes sont peu fréquentes (une par journée/match), la fréquence sert
+# surtout à rattraper la fenêtre de rappel (GameConfig NOTIFICATION_LEAD_MINUTES)
+# sans la rater — idempotent (NotificationLog) donc sans risque de doublon.
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  notify-deadlines:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler /api/cron/notify-deadlines
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          response=$(curl -sS -w "\n%{http_code}" -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://starliguefantasy.fr/api/cron/notify-deadlines")
+          body=$(echo "$response" | sed '$d')
+          status=$(echo "$response" | tail -n 1)
+
+          echo "$body" | python3 -m json.tool || echo "$body"
+
+          if [ "$status" -ge 300 ]; then
+            echo "::error::HTTP $status"
+            exit 1
+          fi

@@ -26,7 +26,7 @@ export default async function PublicLayout({ children }: { children: React.React
 
   return (
     <div className="min-h-screen bg-bg">
-      <nav className="sticky top-0 z-10 border-b border-border bg-surface/90 backdrop-blur-sm">
+      <nav className="sticky top-0 z-10 border-b border-border bg-surface/90 pt-[env(safe-area-inset-top)] backdrop-blur-sm">
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-3 sm:max-w-none sm:gap-4 sm:px-6 xl:max-w-6xl">
           <Link
             href="/"

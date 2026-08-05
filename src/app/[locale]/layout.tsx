@@ -46,11 +46,16 @@ const OG_LOCALE: Record<string, string> = {
 // après une navigation interne (SPA, pas de rechargement complet) et laisse un
 // espace vide sur le côté — bug de zoom Safari rapporté par l'utilisateur, le
 // layout lui-même est full-width (vérifié en Playwright mobile, aucun débordement).
+// viewportFit "cover" : nécessaire pour que env(safe-area-inset-*) résolve à
+// une vraie valeur (sinon toujours 0, spec WebKit) — la WebView Capacitor de
+// l'app mobile dessine sous la status bar/l'encoche (pas de plugin StatusBar,
+// ARCHITECTURE.md §20.1), les navs sticky compensent via cette variable.
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: "cover",
 };
 
 export async function generateMetadata({

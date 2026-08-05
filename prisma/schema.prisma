@@ -107,6 +107,7 @@ model User {
   simulationTeams     SimulationTeam[]
   leagueChatMessages  LeagueChatMessage[]
   passwordResetTokens PasswordResetToken[]
+  pushTokens          PushToken[]
 }
 
 // Mot de passe oublié — ARCHITECTURE.md §6.1. tokenHash (sha256 du token brut
@@ -120,6 +121,33 @@ model PasswordResetToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Notifications push (app mobile Capacitor) — ARCHITECTURE.md §20.2. Un token
+// FCM par device, upserté par `token` (jamais de create() nu — même règle
+// d'idempotence que l'ingestion de données externes).
+enum PushPlatform {
+  IOS
+  ANDROID
+}
+
+model PushToken {
+  id        String       @id @default(cuid())
+  userId    String
+  token     String       @unique
+  platform  PushPlatform
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Dédoublonnage des rappels de deadline entre deux runs de
+// cron-notifications (§20.2) — même pattern que SocialPost.dedupeKey.
+model NotificationLog {
+  id        String   @id @default(cuid())
+  userId    String
+  dedupeKey String   @unique
+  sentAt    DateTime @default(now())
 }
 
 // Requis par @auth/prisma-adapter (OAuth Google + credentials)

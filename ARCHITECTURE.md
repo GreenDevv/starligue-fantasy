@@ -575,6 +575,9 @@ POST   /api/cron/post-stat-leaders        → publie les 3 carrousels Instagram 
                                              (attaque/gardiens/défense) des journées notées pas encore
                                              postées (matin J+1, après compute-scores) — §17.
                                              PLANIFIÉ, post-stat-leaders.yml, 07:00 UTC
+POST   /api/cron/notify-deadlines         → rappels push (app mobile) avant deadline
+                                             alignement/pronostic (§20.2) — PLANIFIÉ,
+                                             cron-notifications.yml, toutes les 15 min
 ```
 
 **Déclenchement (routes planifiées) : GitHub Actions, pas Railway**
@@ -1852,3 +1855,83 @@ les libellés courts `dashboard.clubStandingsWidget.col.*` déjà utilisés par
 le widget "Classement Starligue" plutôt que de les dupliquer) + grille des 12
 matchs du groupe (score si joué, date sinon), logo/nom cliquables vers
 `/clubs/[id]` seulement pour un club Starligue connu.
+
+## 20. Application mobile (iOS/Android)
+
+### 20.1 Principe — shell Capacitor "live URL"
+
+Le site étant server-rendered (Auth.js, Prisma, pas d'export statique), l'app
+mobile ne réimplémente rien côté UI : Capacitor charge directement
+`https://starliguefantasy.fr/fr` dans une WebView native
+(`capacitor.config.ts`, `server.url`). Le `/fr` explicite évite le hop de
+redirection de `localePrefix: "always"` (`src/i18n/routing.ts`).
+
+Comme la WebView charge la vraie origine HTTPS (pas le pseudo-scheme
+`capacitor://localhost` utilisé en mode "bundle statique embarqué"), les
+cookies de session Auth.js (`Secure; SameSite=Lax`, défaut de `src/lib/auth.ts`,
+stratégie JWT) fonctionnent sans configuration supplémentaire.
+
+`ios/` et `android/` sont les projets natifs générés par `npx cap add`
+(committés, avec leurs propres `.gitignore` pour les artefacts de build —
+Pods/DerivedData/Gradle ne sont pas versionnés). Icônes et splash screens
+sont générés depuis `assets/logo.png` (script `scripts/generate-app-icon.ts`,
+même esprit visuel que `src/app/icon.tsx`) via
+`npx @capacitor/assets generate --ios|--android --iconBackgroundColor
+'#0E1116' ...` — toujours avec `--ios` ou `--android` explicite, sinon l'outil
+génère aussi une piste PWA non désirée (`icons/`, `public/manifest.webmanifest`)
+qu'il faudrait nettoyer.
+
+⚠️ **Capacitor pinné en 7.x** (`@capacitor/core`/`cli`/`ios`/`android` = `7.6.8`,
+plugins `app`/`push-notifications`/`splash-screen` en `7.x` correspondants) —
+délibéré, ne pas "corriger" vers le tag `latest` (8.5.0 au 2026-08-05). La
+ligne 8.x publiée comme `latest` est en avance sur ses propres plugins
+officiels : `@capacitor/push-notifications@8.1.2` et `@capacitor/status-bar@8.0.3`
+référencent une API Swift (`CAPPluginCall.reject`, `CAPBridgeProtocol.webView`,
+`PluginConfig.getString/getArray`) absente de **toutes** les versions
+publiées de `@capacitor/core` 8.x testées (8.0.0/8.1.0/8.5.0) — bug amont, pas
+un problème de version chez nous. `@capacitor/status-bar` a été abandonné
+entièrement (cosmétique, pas de version 7.x ni 8.x qui compile) ; `SceneDelegate.swift`
+et `AppDelegate.swift` (`ios/App/App/`) ont aussi été retouchés à la main pour
+matcher le template natif de la ligne 7.x (`SceneDelegateProxy` n'existe pas
+en 7.x ; le pont token push `didRegisterForRemoteNotificationsWithDeviceToken`
+→ `NotificationCenter` a dû être ajouté manuellement, absent du template).
+Revoir ce pin quand `@capacitor/push-notifications` publie une version dont
+le peer dep matche vraiment `core@latest`.
+
+Bundle ID / package name (identique iOS/Android, quasi impossible à changer
+après publication) : `fr.starliguefantasy.app`.
+
+Checklist des étapes manuelles (comptes développeur, Firebase, Xcode/Android
+Studio, soumission stores) : `docs/mobile-app.md`.
+
+### 20.2 Notifications push
+
+Motivation principale de l'app mobile (avec la visibilité stores) : rappeler
+les deadlines avant qu'elles ne verrouillent l'alignement ou les pronostics.
+Un seul backend d'envoi (Firebase Cloud Messaging) pour les deux plateformes
+— FCM relaie vers APNs côté iOS, évite de gérer les certificats Apple
+directement dans le code.
+
+- `PushToken` (Prisma) — un token FCM par device, upserté par valeur unique
+  (`token`), jamais de `create()` nu (règle ingestion idempotente).
+- `POST /api/push-tokens` — enregistre/rafraîchit le token du device courant
+  (session requise) ; `DELETE` au logout.
+- `src/lib/push/register-push.ts` — no-op si
+  `!Capacitor.isNativePlatform()` (donc totalement invisible sur le web),
+  monté depuis `src/components/Providers.tsx`.
+- `src/lib/push/send-push-client.ts` — client `firebase-admin` instancié
+  paresseusement (pattern `src/lib/email/resend-client.ts`), lit
+  `FIREBASE_SERVICE_ACCOUNT_JSON`.
+- `src/lib/notifications/deadline-reminders.ts` — logique métier pure
+  (règle CLAUDE.md), sélectionne les `userId` à relancer : alignement non
+  validé/sans capitaine avant `Gameweek.deadlineAt`, pronostic manquant avant
+  `Match.kickoffAt`. Testée en vitest, indépendante de Prisma/FCM.
+- `GameConfig["NOTIFICATION_LEAD_MINUTES"]` — délai avant deadline auquel la
+  relance part (pattern `parseOddsConfig`, `src/lib/predictions/odds.ts`).
+- `GET /api/cron/notify-deadlines` — auth `verifyCronAuth`
+  (`src/lib/cron-auth.ts`), appelé toutes les 15 min par
+  `.github/workflows/cron-notifications.yml` (même pattern que
+  `cron-daily.yml`/`cron-results.yml`). Idempotence via `NotificationLog`
+  (`dedupeKey` unique, ex. `"lineup-deadline:{gameweekId}:{userId}"`) — sans
+  ça un run de cron qui chevauche la fenêtre de rappel renotifierait tout le
+  monde.

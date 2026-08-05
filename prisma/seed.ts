@@ -116,6 +116,8 @@ const GAME_CONFIG: Record<string, string> = {
   PREDICTION_BASE_PROB_HOME: "0.45",
   PREDICTION_BASE_PROB_DRAW: "0.10",
   PREDICTION_BASE_PROB_AWAY: "0.45",
+  // Notifications push (app mobile) — ARCHITECTURE.md §20.2
+  NOTIFICATION_LEAD_MINUTES: "60",
 };
 
 const HOUR = 60 * 60 * 1000;

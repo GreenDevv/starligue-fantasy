@@ -25,7 +25,7 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-screen bg-bg">
-      <nav className="sticky top-0 z-10 border-b border-border bg-surface/90 backdrop-blur-sm">
+      <nav className="sticky top-0 z-10 border-b border-border bg-surface/90 pt-[env(safe-area-inset-top)] backdrop-blur-sm">
         <div className="mx-auto flex max-w-4xl items-center gap-4 px-4 py-3">
           <span className="font-display text-base uppercase tracking-widest text-accent">
             Starligue Fantasy

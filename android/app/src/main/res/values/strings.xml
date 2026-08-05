@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Starligue Fantasy</string>
+    <string name="title_activity_main">Starligue Fantasy</string>
+    <string name="package_name">fr.starliguefantasy.app</string>
+    <string name="custom_url_scheme">fr.starliguefantasy.app</string>
+</resources>
