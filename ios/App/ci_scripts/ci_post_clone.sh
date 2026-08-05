@@ -23,3 +23,8 @@ node --version
 corepack enable
 corepack prepare pnpm@11.10.0 --activate
 pnpm install --frozen-lockfile
+
+# ios/App/App/public, capacitor.config.json, config.xml sont volontairement
+# gitignorés (ios/.gitignore) — générés par `cap sync` avant chaque build en
+# local, jamais commités. Sans cette étape, Xcode Cloud ne les trouve pas.
+npx cap sync ios
