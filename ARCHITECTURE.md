@@ -1078,9 +1078,19 @@ cote = (1 / probabilité) × (1 − marge bookmaker), arrondie à 2 décimales, 
 
 Fonctions pures et testées : `src/lib/predictions/odds.ts`. Cotes calculées **une
 seule fois** par match (cron idempotent `compute-prediction-odds`, upsert par
-`matchId`) puis **figées** jusqu'au coup d'envoi — jamais recalculées après. Affichées
-à titre indicatif uniquement : elles n'entrent dans aucun calcul de points (seul le
-multiplicateur §14.3, basé sur juste/faux, compte).
+`matchId`) puis **figées** jusqu'au coup d'envoi — jamais recalculées après.
+
+⚠️ **Non affichées à l'utilisateur** (retiré le 2026-08-05) — `PredictionMarket`
+reste un prérequis structurel (`Prediction.marketId` est une FK obligatoire,
+`POST /api/predictions` renvoie `MARKET_NOT_READY` si le marché n'existe pas
+encore), mais les valeurs `oddsHome`/`oddsDraw`/`oddsAway` elles-mêmes ne
+sortent jamais de l'API (`GET /api/predictions` renvoie `canPredict: boolean`,
+pas les chiffres). Choix produit pour l'App Store : un affichage façon cote
+décimale ("1.85 / 3.20 / 4.10") ressemble visuellement à une UI de paris et
+risque de faire classer l'app en "Simulated Gambling" par la review Apple,
+même si — comme avant ce retrait — les cotes n'entraient déjà dans aucun
+calcul de score (seul le multiplicateur §14.3, basé sur juste/faux, compte).
+L'utilisateur choisit une issue sans aide visuelle.
 
 ### 14.3 Multiplicateur de journée
 

@@ -95,13 +95,11 @@ export async function GET(request: Request) {
     locked: isMatchLocked(m.kickoffAt, lockMinutesBeforeKickoff, now),
     homeClub: m.homeClub,
     awayClub: m.awayClub,
-    odds: m.predictionMarket
-      ? {
-          HOME: Number(m.predictionMarket.oddsHome),
-          DRAW: Number(m.predictionMarket.oddsDraw),
-          AWAY: Number(m.predictionMarket.oddsAway),
-        }
-      : null,
+    // Pas de cotes exposées au client — l'utilisateur choisit une issue sans
+    // aide, aucun calcul de score n'en dépend (voir multiplier.ts, basé
+    // uniquement sur le ratio pronostics justes/tentés). Retiré pour éviter
+    // toute ressemblance avec une UI de paris (classification App Store).
+    canPredict: m.predictionMarket !== null,
     myPick: m.predictionMarket?.predictions[0]?.outcome ?? null,
   }));
 

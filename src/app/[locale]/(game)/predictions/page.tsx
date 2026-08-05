@@ -24,7 +24,7 @@ interface MatchPrediction {
   locked: boolean;
   homeClub: ClubInfo;
   awayClub: ClubInfo;
-  odds: Record<PredictionOutcome, number> | null;
+  canPredict: boolean;
   myPick: PredictionOutcome | null;
 }
 
@@ -180,7 +180,7 @@ export default function PredictionsPage() {
                     ? t("lockedWithPick", { outcome: tLabels(`predictionOutcome.${m.myPick}`) })
                     : t("lockedNoPick")}
                 </p>
-              ) : !m.odds ? (
+              ) : !m.canPredict ? (
                 <p className="mt-2 text-center text-[10px] text-text-muted">{t("oddsUnavailable")}</p>
               ) : (
                 <div className="mt-2 grid grid-cols-3 gap-1.5">
@@ -193,18 +193,15 @@ export default function PredictionsPage() {
                         disabled={pendingMatchId === m.matchId}
                         onClick={() => pick(m.matchId, outcome)}
                         className={[
-                          "pixel-corners-sm flex flex-col items-center gap-0.5 border px-1 py-1.5 transition-colors",
+                          "pixel-corners-sm flex items-center justify-center border px-1 py-2.5 transition-colors",
                           isPick
                             ? "border-accent bg-accent/10 shadow-glow-accent"
                             : "border-border bg-bg hover:border-accent/40",
                           pendingMatchId === m.matchId ? "opacity-50" : "",
                         ].join(" ")}
                       >
-                        <span className={`text-[9px] uppercase tracking-wide ${isPick ? "text-accent" : "text-text-muted"}`}>
+                        <span className={`text-xs uppercase tracking-wide ${isPick ? "text-accent" : "text-text-muted"}`}>
                           {tLabels(`predictionOutcome.${outcome}`)}
-                        </span>
-                        <span className={`font-arcade text-sm tabular-nums ${isPick ? "text-accent" : "text-text"}`}>
-                          {m.odds![outcome].toFixed(2)}
                         </span>
                       </button>
                     );
