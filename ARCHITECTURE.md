@@ -1908,20 +1908,41 @@ Studio, soumission stores) : `docs/mobile-app.md`.
 
 Motivation principale de l'app mobile (avec la visibilité stores) : rappeler
 les deadlines avant qu'elles ne verrouillent l'alignement ou les pronostics.
-Un seul backend d'envoi (Firebase Cloud Messaging) pour les deux plateformes
-— FCM relaie vers APNs côté iOS, évite de gérer les certificats Apple
-directement dans le code.
 
-- `PushToken` (Prisma) — un token FCM par device, upserté par valeur unique
-  (`token`), jamais de `create()` nu (règle ingestion idempotente).
+⚠️ **Backend d'envoi séparé par plateforme**, pas un seul FCM unifié comme
+prévu initialement — `@capacitor/push-notifications` restitue côté iOS le
+token **APNs brut** (pas un jeton FCM), donc ni l'outil de test de la console
+Firebase ni `firebase-admin` (`sendEachForMulticast`) ne peuvent l'utiliser
+tel quel : il aurait fallu ajouter le SDK Firebase natif (FirebaseMessaging)
+au projet Xcode pour convertir ce token APNs en jeton FCM. Plus simple et
+plus robuste, découvert en déboguant un premier test qui n'arrivait jamais
+(2026-08-05) : envoyer **directement à APNs** depuis le serveur pour iOS,
+`firebase-admin`/FCM reste utilisé pour Android (qui, lui, restitue bien un
+vrai jeton FCM nativement).
+
+- `PushToken` (Prisma) — un token par device (APNs brut sur iOS, FCM sur
+  Android — `platform` distingue), upserté par valeur unique (`token`),
+  jamais de `create()` nu (règle ingestion idempotente).
 - `POST /api/push-tokens` — enregistre/rafraîchit le token du device courant
   (session requise) ; `DELETE` au logout.
 - `src/lib/push/register-push.ts` — no-op si
   `!Capacitor.isNativePlatform()` (donc totalement invisible sur le web),
   monté depuis `src/components/Providers.tsx`.
-- `src/lib/push/send-push-client.ts` — client `firebase-admin` instancié
-  paresseusement (pattern `src/lib/email/resend-client.ts`), lit
-  `FIREBASE_SERVICE_ACCOUNT_JSON`.
+- `src/lib/push/send-apns-client.ts` — client APNs "maison" (HTTP/2 natif de
+  Node + JWT ES256 signé avec la clé `.p8`, aucune dépendance npm
+  supplémentaire), lit `APNS_AUTH_KEY`/`APNS_KEY_ID`/`APNS_TEAM_ID`. JWT mis
+  en cache (valide ~1h côté Apple).
+- `src/lib/push/send-push-client.ts` — orchestre les deux : Android via
+  `firebase-admin` (paresseux, pattern `src/lib/email/resend-client.ts`, lit
+  `FIREBASE_SERVICE_ACCOUNT_JSON`), iOS via `send-apns-client.ts`.
+  ⚠️ **`APNS_PRODUCTION` est une bascule globale, pas par token** — tant que
+  l'app n'est distribuée que via Xcode debug (environnement APNs Sandbox),
+  la laisser à `false` (ou absente). La passer à `true` une fois en
+  TestFlight/App Store (Sandbox et Production utilisent des clés `.p8`
+  différentes, générées séparément sur Apple Developer — voir
+  `docs/mobile-app.md`). Si un jour testeurs Xcode et utilisateurs
+  TestFlight/App Store coexistent, il faudra un champ `PushToken.environment`
+  pour router par token plutôt que globalement — pas encore le cas.
 - `src/lib/notifications/deadline-reminders.ts` — logique métier pure
   (règle CLAUDE.md), sélectionne les `userId` à relancer : alignement non
   validé/sans capitaine avant `Gameweek.deadlineAt`, pronostic manquant avant

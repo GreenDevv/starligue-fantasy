@@ -12,37 +12,56 @@ un compte/outil externe et ne peuvent pas être scriptées.
 - [ ] **Google Play Console** (25$ one-time) — https://play.google.com/console/
       Créer l'app avec le package name `fr.starliguefantasy.app`.
 
-## 2. Firebase (push notifications unifiées iOS + Android)
+## 2. Firebase (Android uniquement — voir §2bis pour iOS)
 
-- [ ] Créer un projet Firebase — https://console.firebase.google.com/
+⚠️ Le plan initial prévoyait Firebase Cloud Messaging comme backend unique
+pour les deux plateformes. Abandonné pour iOS : `@capacitor/push-notifications`
+restitue le token APNs brut, pas un jeton FCM, inutilisable par Firebase sans
+ajouter son SDK natif au projet Xcode — voir ARCHITECTURE.md §20.2. Firebase
+ne sert donc plus qu'à l'envoi Android.
+
+- [x] Créer un projet Firebase — https://console.firebase.google.com/
 - [ ] Ajouter l'app Android (`fr.starliguefantasy.app`) → télécharger
       `google-services.json` → le placer dans `android/app/google-services.json`.
-- [ ] Ajouter l'app iOS (`fr.starliguefantasy.app`) → télécharger
-      `GoogleService-Info.plist` → l'ajouter au projet **via Xcode**
-      (glisser-déposer dans le navigateur de fichiers avec "Copy items if
-      needed" coché — un simple copier dans le dossier ne suffit pas, le
-      fichier doit être ajouté à la target `App`).
-- [ ] Générer une **clé d'authentification APNs** dans le compte Apple
-      Developer (Certificates, Identifiers & Profiles → Keys) et l'uploader
-      dans Firebase (Project settings → Cloud Messaging → Apple app
-      configuration).
-- [ ] Générer une clé de compte de service Firebase (Project settings →
+- [x] Générer une clé de compte de service Firebase (Project settings →
       Service accounts → Generate new private key) → poser son contenu JSON
       dans la variable d'env Railway `FIREBASE_SERVICE_ACCOUNT_JSON` (utilisée
-      par `src/lib/push/send-push-client.ts`).
+      par `src/lib/push/send-push-client.ts` pour Android).
+- [ ] L'app iOS ajoutée dans Firebase (`GoogleService-Info.plist`) et la clé
+      APNs uploadée dans Firebase Cloud Messaging config sont désormais
+      **inutiles pour l'envoi** (on ne passe plus par Firebase côté iOS) —
+      laissées en place, sans impact, pas la peine de les retirer.
 
-## 3. Xcode (ios/App/App.xcworkspace)
+## 2bis. APNs direct (iOS)
 
-- [ ] Ouvrir `ios/App/App.xcworkspace` (pas le `.xcodeproj`).
-- [ ] Signing & Capabilities → sélectionner l'équipe de signature (compte
-      Apple Developer).
-- [ ] Ajouter la capability **Push Notifications**.
-- [ ] Ajouter la capability **Background Modes** → cocher "Remote
+- [x] Apple Developer → Certificates, Identifiers & Profiles → **Keys** → créer
+      une clé APNs **Environment: Sandbox** (pour les builds Xcode debug) —
+      télécharger le `.p8` immédiatement (téléchargement unique), noter le Key ID.
+- [ ] Même chose en **Environment: Production** (pour TestFlight/App Store) —
+      clé physiquement différente, Key ID différent, `.p8` différent.
+- [ ] Poser sur Railway (variables du service `web`) :
+      - `APNS_TEAM_ID` — Team ID du compte Apple Developer
+      - `APNS_KEY_ID` — Key ID de la clé active
+      - `APNS_AUTH_KEY` — contenu complet du `.p8` actif (coller tel quel,
+        avec les retours à la ligne)
+      - `APNS_PRODUCTION` — `false` tant que seul Xcode debug est utilisé,
+        `true` une fois en TestFlight/App Store (bascule globale, voir
+        ARCHITECTURE.md §20.2 pour la limite de cette approche)
+- [ ] Au passage en TestFlight/App Store : remplacer `APNS_KEY_ID`/`APNS_AUTH_KEY`
+      par la clé Production et passer `APNS_PRODUCTION=true`.
+
+## 3. Xcode (ios/App/App.xcodeproj)
+
+- [x] Ouvrir `ios/App/App.xcodeproj` (Capacitor 7.x utilise Swift Package
+      Manager, pas CocoaPods — pas de `.xcworkspace` généré).
+- [x] Signing & Capabilities → sélectionner l'équipe de signature (compte
+      Apple Developer), device physique enregistré.
+- [x] Ajouter la capability **Push Notifications**.
+- [x] Ajouter la capability **Background Modes** → cocher "Remote
       notifications".
-- [ ] Vérifier que `GoogleService-Info.plist` apparaît dans le navigateur de
-      fichiers Xcode (pas seulement sur le disque, cf. §2).
-- [ ] Build sur un **device physique** pour tester le push (le simulateur
-      iOS ne reçoit pas de vraies notifications APNs).
+- [x] Build + run sur un **device physique** (le simulateur iOS ne reçoit
+      jamais de vraies notifications APNs) — testé et confirmé fonctionnel
+      le 2026-08-05 (push direct APNs).
 
 ## 4. Android Studio (android/)
 
