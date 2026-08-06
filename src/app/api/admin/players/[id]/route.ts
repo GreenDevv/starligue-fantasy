@@ -8,6 +8,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { createInjuryNewsItem } from "@/lib/news/generate-injury-news";
+import { notifyPlayerInjuredOwners } from "@/lib/notifications/notify-player-injured";
 
 async function requireAdmin() {
   const session = await auth();
@@ -86,6 +87,26 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       });
     } catch (e) {
       console.error("[injury-news]", e);
+    }
+  }
+
+  // Email aux propriétaires de l'effectif — uniquement à la déclaration (transition
+  // null → non-null), jamais à la levée de blessure : contrairement à l'actu
+  // ci-dessus (qui couvre les deux sens), l'email n'a de sens que quand il faut
+  // agir. Best-effort, après le commit de la déclaration (voir commentaire ci-dessus) :
+  // un échec d'envoi ne doit jamais faire regretter/annuler la déclaration.
+  if (injuredAt !== undefined && before?.injuredAt == null && player.injuredAt !== null) {
+    try {
+      await notifyPlayerInjuredOwners({
+        id: player.id,
+        firstName: player.firstName,
+        lastName: player.lastName,
+        position: player.position,
+        marketValue: Number(player.marketValue),
+        club: player.club,
+      });
+    } catch (e) {
+      console.error("[injury-email]", e);
     }
   }
 
