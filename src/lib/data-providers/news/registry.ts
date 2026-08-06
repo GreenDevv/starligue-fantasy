@@ -19,6 +19,7 @@ import { tremblayNewsProvider } from "./clubs/tremblay.provider";
 import { nimesNewsProvider } from "./clubs/nimes.provider";
 import { psgNewsProvider } from "./clubs/psg.provider";
 import { nantesNewsProvider } from "./clubs/nantes.provider";
+import { montpellierNewsProvider } from "./clubs/montpellier.provider";
 
 export const NEWS_PROVIDERS: NewsSourceProvider[] = [
   lnhNewsProvider,
@@ -34,4 +35,5 @@ export const NEWS_PROVIDERS: NewsSourceProvider[] = [
   nimesNewsProvider,
   psgNewsProvider,
   nantesNewsProvider,
+  montpellierNewsProvider,
 ];
