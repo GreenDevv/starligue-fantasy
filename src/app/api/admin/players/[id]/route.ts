@@ -31,6 +31,11 @@ const UpdateSchema = z.object({
   photoZoom: z.coerce.number().min(1).max(5).optional(),
   isActive: z.boolean().optional(),
   injuredAt: z.string().datetime().nullable().optional(),
+  // Motif libre (ex. "fin de contrat") pour les déclarations qui ne sont pas une
+  // vraie blessure médicale — n'est jamais persisté sur Player (pas de colonne
+  // dédiée), utilisé uniquement à la volée pour le wording de l'actu/l'email au
+  // moment de la déclaration (voir plus bas). Demande explicite, 2026-08-06.
+  injuryReason: z.string().trim().max(200).optional(),
 });
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
@@ -44,7 +49,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     return NextResponse.json({ error: { code: "INVALID_INPUT", details: parsed.error.issues } }, { status: 400 });
   }
 
-  const { photoUrl, injuredAt, ...rest } = parsed.data;
+  const { photoUrl, injuredAt, injuryReason, ...rest } = parsed.data;
 
   const before = await prisma.player.findUnique({ where: { id: params.id }, select: { injuredAt: true, marketValue: true } });
 
@@ -77,14 +82,17 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   // faire régresser la déclaration de blessure, qui a déjà committé à ce stade).
   if (injuredAt !== undefined && (before?.injuredAt?.getTime() ?? null) !== (player.injuredAt?.getTime() ?? null)) {
     try {
-      await createInjuryNewsItem({
-        id: player.id,
-        firstName: player.firstName,
-        lastName: player.lastName,
-        seasonId: player.seasonId,
-        injuredAt: player.injuredAt,
-        club: player.club,
-      });
+      await createInjuryNewsItem(
+        {
+          id: player.id,
+          firstName: player.firstName,
+          lastName: player.lastName,
+          seasonId: player.seasonId,
+          injuredAt: player.injuredAt,
+          club: player.club,
+        },
+        injuryReason
+      );
     } catch (e) {
       console.error("[injury-news]", e);
     }
@@ -97,14 +105,17 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   // un échec d'envoi ne doit jamais faire regretter/annuler la déclaration.
   if (injuredAt !== undefined && before?.injuredAt == null && player.injuredAt !== null) {
     try {
-      await notifyPlayerInjuredOwners({
-        id: player.id,
-        firstName: player.firstName,
-        lastName: player.lastName,
-        position: player.position,
-        marketValue: Number(player.marketValue),
-        club: player.club,
-      });
+      await notifyPlayerInjuredOwners(
+        {
+          id: player.id,
+          firstName: player.firstName,
+          lastName: player.lastName,
+          position: player.position,
+          marketValue: Number(player.marketValue),
+          club: player.club,
+        },
+        injuryReason
+      );
     } catch (e) {
       console.error("[injury-email]", e);
     }

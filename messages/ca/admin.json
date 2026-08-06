@@ -224,7 +224,8 @@
       "ambiguousReason": "correspon a diversos jugadors",
       "notFoundReason": "jugador no trobat",
       "moreUnmatched": "… i {count} més"
-    }
+    },
+    "injuryReasonPlaceholder": "Motiu (opcional) — ex. fi de contracte, suspensió…"
   },
   "transferWindows": {
     "title": "Finestres de traspassos",

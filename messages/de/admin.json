@@ -224,7 +224,8 @@
       "ambiguousReason": "entspricht mehreren Spielern",
       "notFoundReason": "Spieler nicht gefunden",
       "moreUnmatched": "… und {count} weitere"
-    }
+    },
+    "injuryReasonPlaceholder": "Grund (optional) — z. B. Vertragsende, Sperre…"
   },
   "transferWindows": {
     "title": "Transferfenster",

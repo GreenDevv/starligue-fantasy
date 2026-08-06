@@ -114,6 +114,7 @@ const emptyForm = {
   firstName: "", lastName: "", position: "CB" as Position,
   clubId: "", marketValue: "7.0", photoUrl: "", isActive: true,
   injuredAt: null as string | null,
+  injuryReason: "",
   photoCrop: { offsetX: 50, offsetY: 50, zoom: 1 } as PhotoCrop,
 };
 
@@ -145,6 +146,7 @@ function PlayerPanel({
           photoUrl: player.photoUrl ?? "",
           isActive: player.isActive,
           injuredAt: player.injuredAt,
+          injuryReason: "", // jamais persisté (voir PUT /api/admin/players/[id]) — toujours vide à l'ouverture
           photoCrop: { offsetX: player.photoOffsetX, offsetY: player.photoOffsetY, zoom: player.photoZoom },
         }
       : emptyForm
@@ -221,6 +223,7 @@ function PlayerPanel({
           photoZoom: form.photoCrop.zoom,
           isActive: form.isActive,
           injuredAt: form.injuredAt,
+          injuryReason: form.injuryReason.trim() || undefined,
         }),
       });
       const json = await res.json() as { data?: Player; error?: { message?: string; code?: string } };
@@ -451,6 +454,15 @@ function PlayerPanel({
                 </button>
               )}
             </div>
+            {!form.injuredAt && (
+              <input
+                type="text"
+                value={form.injuryReason}
+                onChange={(e) => set("injuryReason", e.target.value)}
+                placeholder={t("players.injuryReasonPlaceholder")}
+                className="mt-2 w-full rounded border border-border bg-bg px-2 py-1.5 text-xs text-text placeholder:text-text-muted/60"
+              />
+            )}
           </div>
 
           {error && (

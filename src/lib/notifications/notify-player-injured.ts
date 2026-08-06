@@ -30,7 +30,10 @@ interface InjuredPlayerForNotify {
   club: { shortName: string };
 }
 
-export async function notifyPlayerInjuredOwners(player: InjuredPlayerForNotify): Promise<NotifyInjuredResult> {
+export async function notifyPlayerInjuredOwners(
+  player: InjuredPlayerForNotify,
+  reason?: string
+): Promise<NotifyInjuredResult> {
   const [owners, jokerQuotaConfig] = await Promise.all([
     prisma.fantasySquadPlayer.findMany({
       where: { playerId: player.id },
@@ -81,6 +84,7 @@ export async function notifyPlayerInjuredOwners(player: InjuredPlayerForNotify):
         marketValue: player.marketValue,
         teams,
         transfersUrl,
+        reason,
       });
       notified++;
     } catch (e) {

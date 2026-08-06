@@ -224,7 +224,8 @@
       "ambiguousReason": "correspond à plusieurs joueurs",
       "notFoundReason": "joueur introuvable",
       "moreUnmatched": "… et {count} autre(s)"
-    }
+    },
+    "injuryReasonPlaceholder": "Motif (optionnel) — ex. fin de contrat, suspension…"
   },
   "transferWindows": {
     "title": "Fenêtres de transfert",

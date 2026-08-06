@@ -224,7 +224,8 @@
       "ambiguousReason": "pasuje do kilku zawodników",
       "notFoundReason": "nie znaleziono zawodnika",
       "moreUnmatched": "… i {count} innych"
-    }
+    },
+    "injuryReasonPlaceholder": "Powód (opcjonalnie) — np. koniec kontraktu, zawieszenie…"
   },
   "transferWindows": {
     "title": "Okna transferowe",

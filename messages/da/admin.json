@@ -224,7 +224,8 @@
       "ambiguousReason": "matcher flere spillere",
       "notFoundReason": "spiller ikke fundet",
       "moreUnmatched": "… og {count} andre"
-    }
+    },
+    "injuryReasonPlaceholder": "Årsag (valgfri) — fx kontraktophør, karantæne…"
   },
   "transferWindows": {
     "title": "Transfervinduer",

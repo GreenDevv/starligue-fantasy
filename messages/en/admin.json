@@ -224,7 +224,8 @@
       "ambiguousReason": "matches several players",
       "notFoundReason": "player not found",
       "moreUnmatched": "… and {count} more"
-    }
+    },
+    "injuryReasonPlaceholder": "Reason (optional) — e.g. contract ended, suspension…"
   },
   "transferWindows": {
     "title": "Transfer windows",

@@ -23,6 +23,12 @@ export interface InjuryEmailParams {
   marketValue: number;
   teams: InjuryEmailTeam[];
   transfersUrl: string;
+  // Motif libre saisi par l'admin (ex. "fin de contrat") pour les cas qui ne sont
+  // pas une vraie blessure médicale — remplace le mot "blessé" par un wording
+  // neutre ("indisponible") + le motif entre parenthèses. Absent = comportement
+  // par défaut inchangé (vraie blessure). Voir generate-injury-news.ts pour la
+  // même logique côté actu publique.
+  reason?: string;
 }
 
 export interface InjuryEmailContent {
@@ -62,10 +68,17 @@ export function buildInjuryEmail(params: InjuryEmailParams): InjuryEmailContent 
   const playerName = `${escapeHtml(params.playerFirstName)} ${escapeHtml(params.playerLastName)}`;
   const positionLabel = frLabels.position[params.position];
   const value = params.marketValue.toFixed(1);
+  const reason = params.reason ? escapeHtml(params.reason) : null;
 
-  const subject = `${params.playerFirstName} ${params.playerLastName} blessé — remplace-le dans ton effectif`;
-  const heading = `${playerName} est blessé pour le reste de la saison`;
-  const intro = `${playerName} (${positionLabel}, ${escapeHtml(params.clubShortName)}) vient d'être déclaré blessé pour le reste de la saison. Tu l'as dans ton effectif :`;
+  const subject = reason
+    ? `${params.playerFirstName} ${params.playerLastName} indisponible — remplace-le dans ton effectif`
+    : `${params.playerFirstName} ${params.playerLastName} blessé — remplace-le dans ton effectif`;
+  const heading = reason
+    ? `${playerName} est indisponible pour le reste de la saison`
+    : `${playerName} est blessé pour le reste de la saison`;
+  const intro = reason
+    ? `${playerName} (${positionLabel}, ${escapeHtml(params.clubShortName)}) vient d'être déclaré indisponible pour le reste de la saison (${reason}). Tu l'as dans ton effectif :`
+    : `${playerName} (${positionLabel}, ${escapeHtml(params.clubShortName)}) vient d'être déclaré blessé pour le reste de la saison. Tu l'as dans ton effectif :`;
 
   const html = renderBaseEmail({
     preheader: intro,

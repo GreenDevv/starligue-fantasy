@@ -224,7 +224,8 @@
       "ambiguousReason": "corresponde a vários jogadores",
       "notFoundReason": "jogador não encontrado",
       "moreUnmatched": "… e mais {count}"
-    }
+    },
+    "injuryReasonPlaceholder": "Motivo (opcional) — ex. fim de contrato, suspensão…"
   },
   "transferWindows": {
     "title": "Janelas de transferências",
