@@ -183,8 +183,6 @@ export default async function HomePage({
             tone="highlight"
             rankByClubId={rankByClubId}
             gameweekNav={{ total: totalGameweeks, hrefBase: "/" }}
-            collapsible
-            defaultOpen={false}
           />
           {warmupMatches.length > 0 && (
             <MatchesStrip

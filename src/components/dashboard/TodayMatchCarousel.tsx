@@ -7,12 +7,23 @@ import { Link } from "@/i18n/navigation";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import type { TodayMatchRow, TodayCompetitionKey } from "@/lib/matches/get-today-matches";
 
-const COMPETITION_LABEL_KEY: Record<TodayCompetitionKey, string> = {
-  championship: "todayMatches.championship",
-  warmup: "warmup.title",
-  coupeDeFrance: "coupeDeFrance.title",
-  championsLeague: "championsLeague.title",
-  europeanLeague: "europeanLeague.title",
+// Réutilise les abréviations déjà traduites pour /clubs (ClubMatchesPanel, namespace
+// "matches") plutôt que d'en recréer — même convention visuelle (WU/CDF/CL/EL),
+// zéro nouvelle clé i18n. Libellé complet à part, pour le tooltip uniquement.
+const COMPETITION_SHORT_KEY: Record<TodayCompetitionKey, string> = {
+  championship: "panel.competitionStarligue",
+  warmup: "panel.competitionShortWarmup",
+  coupeDeFrance: "panel.competitionShortCoupe",
+  championsLeague: "panel.competitionShortChampionsLeague",
+  europeanLeague: "panel.competitionShortEuropeanLeague",
+};
+
+const COMPETITION_FULL_KEY: Record<TodayCompetitionKey, string> = {
+  championship: "panel.competitionStarligue",
+  warmup: "panel.competitionWarmup",
+  coupeDeFrance: "panel.competitionCoupeDeFrance",
+  championsLeague: "panel.competitionChampionsLeague",
+  europeanLeague: "panel.competitionEuropeanLeague",
 };
 
 const ROTATE_MS = 4500;
@@ -24,8 +35,14 @@ const ROTATE_MS = 4500;
 // contenu vide à afficher, contrairement aux strips MatchesStrip qui ont un état
 // "aucun match" explicite (ceux-là restent visibles en permanence dans la
 // colonne matchs, ce badge n'a de raison d'exister que les jours avec match).
+//
+// Largeur : pleine largeur jusqu'à lg: (comme tout le reste sur mobile), puis
+// alignée sur celle de la colonne "prochains matchs"/tiroirs (300px, cf. le grid
+// template de page.tsx) une fois le layout 3 colonnes actif — demande explicite,
+// 2026-08-06 (le badge paraissait plus étroit que les autres cartes en mobile).
 export function TodayMatchCarousel({ matches }: { matches: TodayMatchRow[] }) {
   const t = useTranslations("dashboard");
+  const tMatches = useTranslations("matches");
   const format = useFormatter();
   const [index, setIndex] = useState(0);
 
@@ -40,21 +57,31 @@ export function TodayMatchCarousel({ matches }: { matches: TodayMatchRow[] }) {
   const m = matches[index % matches.length]!;
   const hasScore = m.homeScore !== null && m.awayScore !== null;
 
+  // Tooltip toujours renseigné (pas seulement pour les clubs hors DB) — même
+  // format 2 lignes que ClubMatchesPanel ("compétition\nclub (division)") : utile
+  // dès qu'un adversaire Warm Up/Coupe de France est hors Starligue (D2/étranger),
+  // demande explicite de l'utilisateur.
+  function clubTitle(club: TodayMatchRow["homeClub"]): string {
+    const competition = tMatches(COMPETITION_FULL_KEY[m.competitionKey]);
+    const name = club.division ? `${club.name} (${club.division})` : club.name;
+    return `${competition}\n${name}`;
+  }
+
   const body = (
-    <div className="flex flex-col items-center gap-1.5 px-4 py-2">
-      <div className="flex items-center gap-2">
-        <ClubLogo club={m.homeClub} size="sm" title={m.homeClub.division ? `${m.homeClub.name} (${m.homeClub.division})` : undefined} />
+    <div className="flex flex-col items-center gap-2 px-4 py-3">
+      <div className="flex items-center gap-3">
+        <ClubLogo club={m.homeClub} size="lg" largeOnDesktop title={clubTitle(m.homeClub)} />
         {hasScore ? (
-          <span className="font-arcade text-base leading-none tracking-wide text-text">
+          <span className="font-arcade text-xl leading-none tracking-wide text-text">
             {m.homeScore}-{m.awayScore}
           </span>
         ) : (
-          <span className="text-[10px] uppercase text-text-muted">vs</span>
+          <span className="text-xs uppercase text-text-muted">vs</span>
         )}
-        <ClubLogo club={m.awayClub} size="sm" title={m.awayClub.division ? `${m.awayClub.name} (${m.awayClub.division})` : undefined} />
+        <ClubLogo club={m.awayClub} size="lg" largeOnDesktop title={clubTitle(m.awayClub)} />
       </div>
-      <p className="flex items-center gap-1 text-[9px] uppercase tracking-wide text-text-muted">
-        <span>{t(COMPETITION_LABEL_KEY[m.competitionKey])}</span>
+      <p className="flex items-center gap-1 text-xs uppercase tracking-wide text-text-muted">
+        <span>{tMatches(COMPETITION_SHORT_KEY[m.competitionKey])}</span>
         <span>·</span>
         <span>
           {hasScore ? t("todayMatches.finished") : format.dateTime(new Date(m.kickoffAt), { hour: "2-digit", minute: "2-digit" })}
@@ -64,7 +91,7 @@ export function TodayMatchCarousel({ matches }: { matches: TodayMatchRow[] }) {
   );
 
   return (
-    <div className="pixel-corners shadow-glow-amber flex w-full flex-col items-center border border-accent-secondary/50 bg-accent-secondary/10 sm:w-64">
+    <div className="pixel-corners shadow-glow-amber flex w-full flex-col items-center border border-accent-secondary/50 bg-accent-secondary/10 lg:w-[300px]">
       <div className="flex items-center gap-1.5 pt-2">
         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-secondary" />
         <p className="font-arcade text-xs uppercase tracking-[0.25em] text-accent-secondary">{t("todayMatches.badgeTitle")}</p>
@@ -89,11 +116,11 @@ export function TodayMatchCarousel({ matches }: { matches: TodayMatchRow[] }) {
       </AnimatePresence>
 
       {matches.length > 1 && (
-        <div className="flex gap-1 pb-2">
+        <div className="flex gap-1.5 pb-2.5">
           {matches.map((mm, i) => (
             <span
               key={mm.id}
-              className={`h-1 w-1 rounded-full ${i === index ? "bg-accent-secondary" : "bg-border"}`}
+              className={`h-1.5 w-1.5 rounded-full ${i === index ? "bg-accent-secondary" : "bg-border"}`}
             />
           ))}
         </div>
