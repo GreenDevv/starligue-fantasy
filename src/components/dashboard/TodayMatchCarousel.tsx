@@ -73,17 +73,17 @@ export function TodayMatchCarousel({ matches }: { matches: TodayMatchRow[] }) {
   // 2026-08-06 ("la div est trop grande en hauteur" après l'agrandissement des
   // logos/de la largeur).
   const body = (
-    <div className="flex items-center justify-between gap-3 px-4 py-2.5">
-      <div className="flex items-center gap-2.5">
-        <ClubLogo club={m.homeClub} size="lg" largeOnDesktop title={clubTitle(m.homeClub)} />
+    <div className="flex items-center justify-between gap-3 px-4 py-2">
+      <div className="flex items-center gap-2">
+        <ClubLogo club={m.homeClub} size="md" largeOnDesktop title={clubTitle(m.homeClub)} />
         {hasScore ? (
-          <span className="font-arcade text-lg leading-none tracking-wide text-text">
+          <span className="font-arcade text-base leading-none tracking-wide text-text">
             {m.homeScore}-{m.awayScore}
           </span>
         ) : (
           <span className="text-xs uppercase text-text-muted">vs</span>
         )}
-        <ClubLogo club={m.awayClub} size="lg" largeOnDesktop title={clubTitle(m.awayClub)} />
+        <ClubLogo club={m.awayClub} size="md" largeOnDesktop title={clubTitle(m.awayClub)} />
       </div>
       <div className="flex flex-col items-end gap-0.5 text-right text-xs uppercase leading-tight tracking-wide text-text-muted">
         <span>{tMatches(COMPETITION_SHORT_KEY[m.competitionKey])}</span>
