@@ -22,13 +22,16 @@
 import { prisma } from "@/lib/db";
 import { EHF_CHAMPIONS_LEAGUE_LABEL, EHF_EUROPEAN_LEAGUE_LABEL } from "@/lib/data-providers/ehf-scraper.provider";
 
-const WARMUP_LABELS = ["Warm Up", "Trophée des Champions - WUP"];
-const COUPE_DE_FRANCE_LABELS = ["Coupe de France"];
+// Exportés (plutôt que privés au module) pour être réutilisés tels quels par
+// src/lib/matches/get-today-matches.ts (carrousel "Jour de match" de la home) —
+// jamais redupliqués en chaîne libre à un troisième endroit.
+export const WARMUP_LABELS = ["Warm Up", "Trophée des Champions - WUP"];
+export const COUPE_DE_FRANCE_LABELS = ["Coupe de France"];
 // Réutilise les constantes du provider (pas de libellé redupliqué en chaîne libre) :
 // un éventuel changement de libellé stocké en DB doit casser la compilation ici
 // plutôt que de faire silencieusement disparaître ces matchs de l'affichage.
-const CHAMPIONS_LEAGUE_LABELS = [EHF_CHAMPIONS_LEAGUE_LABEL];
-const EUROPEAN_LEAGUE_LABELS = [EHF_EUROPEAN_LEAGUE_LABEL];
+export const CHAMPIONS_LEAGUE_LABELS = [EHF_CHAMPIONS_LEAGUE_LABEL];
+export const EUROPEAN_LEAGUE_LABELS = [EHF_EUROPEAN_LEAGUE_LABEL];
 
 export interface WarmupMatchClub {
   shortName: string; // pour ClubLogo (tronqué à 3 lettres si pas de logo) — nom scrapé si club inconnu
@@ -55,7 +58,8 @@ export interface WarmupMatchRow {
   groupLabel: string | null;
 }
 
-function toDisplayClub(
+// Exportée pour get-today-matches.ts (même normalisation club connu/scrapé).
+export function toDisplayClub(
   known: { shortName: string; name: string; logoUrl: string | null } | null,
   fallbackName: string,
   logoUrl: string | null,

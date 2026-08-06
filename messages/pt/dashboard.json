@@ -56,7 +56,9 @@
     "upcoming": "Próximos jogos",
     "gameweek": "Jornada {number}",
     "noResults": "Ainda não há resultados.",
-    "noUpcoming": "Nenhum jogo agendado."
+    "noUpcoming": "Nenhum jogo agendado.",
+    "collapse": "Recolher",
+    "expand": "Expandir"
   },
   "warmup": {
     "title": "Warm-up"
@@ -175,5 +177,10 @@
   },
   "europeanLeague": {
     "title": "EHF European League"
+  },
+  "todayMatches": {
+    "badgeTitle": "Dia de jogo",
+    "championship": "Daikin Starligue",
+    "finished": "Terminado"
   }
 }

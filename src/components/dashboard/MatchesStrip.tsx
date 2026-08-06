@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations, useFormatter } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ClubLogo } from "@/components/ui/ClubLogo";
@@ -79,6 +81,16 @@ interface MatchesStripProps {
   // l'utilisateur, seulement câblée sur le strip "prochains matchs" de la home.
   // Absent par défaut : le libellé reste un texte simple partout ailleurs.
   gameweekNav?: { total: number; hrefBase: string };
+  // true : le contenu (grille de matchs) devient un tiroir ouvrable/fermable via un
+  // chevron dédié dans l'en-tête (bouton séparé du gameweekNav pour éviter un
+  // bouton imbriqué dans un bouton) — demande explicite de l'utilisateur, câblée
+  // uniquement sur les 5 strips "matchs" de la home (ARCHITECTURE.md §16/§19).
+  // Sans effet sur l'usage championnat des autres pages (club/team/simulation) si
+  // omis : le contenu reste toujours affiché comme aujourd'hui.
+  collapsible?: boolean;
+  // État initial du tiroir si collapsible est vrai (défaut : ouvert). La home
+  // l'utilise à false pour les 5 strips concernés (demande explicite).
+  defaultOpen?: boolean;
 }
 
 // Même design que "wide", réduit à l'échelle pour "square"/"mini" (widget dashboard
@@ -136,38 +148,21 @@ export function MatchesStrip({
   tone = "default",
   rankByClubId,
   gameweekNav,
+  collapsible,
+  defaultOpen = true,
 }: MatchesStripProps) {
   const t = useTranslations("dashboard");
   const format = useFormatter();
+  const [open, setOpen] = useState(defaultOpen);
   const title = titleOverride ?? (variant === "results" ? t("matchesStrip.results") : t("matchesStrip.upcoming"));
   const dateRange = formatGameweekRange(format, matches.map((m) => m.kickoffAt));
   const { logo, gridCols: responsiveGridCols, boxPad, outerGap } = SIZE_CONFIG[size];
   const gridCols = fixedColumns ? (fixedColumns === 2 ? "grid-cols-2" : "grid-cols-3") : responsiveGridCols;
   const containerTone = tone === "highlight" ? "border-accent/40 bg-accent/10" : "border-border bg-surface";
+  const isOpen = !collapsible || open;
 
-  return (
-    <div className={`pixel-corners border px-3 py-2.5 ${containerTone}`}>
-      <div className="mb-2 flex items-center justify-between">
-        <p className="text-[10px] uppercase tracking-widest text-text-muted">{title}</p>
-        {gameweekNumber !== null &&
-          (gameweekNav ? (
-            <div className="flex items-center gap-1">
-              <GameweekDropdown
-                current={gameweekNumber}
-                total={gameweekNav.total}
-                hrefBase={gameweekNav.hrefBase}
-                label={t("matchesStrip.gameweek", { number: gameweekNumber })}
-              />
-              {dateRange && <span className="text-[10px] text-text-muted/70">· {dateRange}</span>}
-            </div>
-          ) : (
-            <p className="text-[10px] uppercase tracking-widest text-text-muted">
-              {t("matchesStrip.gameweek", { number: gameweekNumber })}
-              {dateRange && <span className="text-text-muted/70"> · {dateRange}</span>}
-            </p>
-          ))}
-      </div>
-
+  const body = (
+    <>
       {matches.length === 0 ? (
         <p className="py-2 text-center text-xs text-text-muted">
           {variant === "results" ? t("matchesStrip.noResults") : t("matchesStrip.noUpcoming")}
@@ -230,6 +225,75 @@ export function MatchesStrip({
             );
           })}
         </div>
+      )}
+    </>
+  );
+
+  return (
+    <div className={`pixel-corners border px-3 py-2.5 ${containerTone}`}>
+      <div className={isOpen ? "mb-2 flex items-center justify-between" : "flex items-center justify-between"}>
+        <div className="flex items-center gap-1.5">
+          <p className="text-[10px] uppercase tracking-widest text-text-muted">{title}</p>
+          {collapsible && !isOpen && matches.length > 0 && (
+            <span className="text-[10px] text-text-muted/60">({matches.length})</span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {gameweekNumber !== null &&
+            (gameweekNav ? (
+              <div className="flex items-center gap-1">
+                <GameweekDropdown
+                  current={gameweekNumber}
+                  total={gameweekNav.total}
+                  hrefBase={gameweekNav.hrefBase}
+                  label={t("matchesStrip.gameweek", { number: gameweekNumber })}
+                />
+                {dateRange && <span className="text-[10px] text-text-muted/70">· {dateRange}</span>}
+              </div>
+            ) : (
+              <p className="text-[10px] uppercase tracking-widest text-text-muted">
+                {t("matchesStrip.gameweek", { number: gameweekNumber })}
+                {dateRange && <span className="text-text-muted/70"> · {dateRange}</span>}
+              </p>
+            ))}
+          {collapsible && (
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={isOpen}
+              aria-label={isOpen ? t("matchesStrip.collapse") : t("matchesStrip.expand")}
+              className="text-text-muted transition-colors hover:text-text"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                className={`h-3.5 w-3.5 transition-transform ${isOpen ? "rotate-180" : ""}`}
+              >
+                <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {collapsible ? (
+        <AnimatePresence initial={false}>
+          {isOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              {body}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      ) : (
+        body
       )}
     </div>
   );

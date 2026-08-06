@@ -2,7 +2,10 @@
 import { prisma } from "@/lib/db";
 import type { NewsCategory } from "@prisma/client";
 
-const PAGE_SIZE = 20;
+// 10 par défaut sur la home (demande explicite de l'utilisateur, 2026-08-06) — le
+// bouton "Afficher plus" (src/components/starligue/NewsFeedLoadMore.tsx) charge la
+// suite par lots de PAGE_SIZE via GET /api/news, sans recharger la page.
+const PAGE_SIZE = 10;
 
 export interface NewsFeedItem {
   id: string;

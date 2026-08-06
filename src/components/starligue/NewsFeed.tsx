@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { NewsCard } from "./NewsCard";
+import { NewsFeedLoadMore } from "./NewsFeedLoadMore";
 import type { NewsFeedResult } from "@/lib/news/get-feed";
 import type { NewsCategory } from "@prisma/client";
 
@@ -56,16 +57,7 @@ export async function NewsFeed({
         </div>
       )}
 
-      {feed.hasMore && (
-        <div className="mt-3 text-center">
-          <Link
-            href={`/?${activeCategory ? `category=${activeCategory}&` : ""}page=${feed.page + 1}`}
-            className="text-xs uppercase tracking-widest text-accent hover:underline"
-          >
-            {t("newsFeed.seeMore")}
-          </Link>
-        </div>
-      )}
+      <NewsFeedLoadMore category={activeCategory} initialPage={feed.page} initialHasMore={feed.hasMore} />
     </div>
   );
 }

@@ -13,9 +13,11 @@ import {
   getChampionsLeagueMatches,
   getEuropeanLeagueMatches,
 } from "@/lib/matches/get-warmup-matches";
+import { getTodayMatches } from "@/lib/matches/get-today-matches";
 import { ehfCompetitionSlug } from "@/lib/matches/ehf-competition-slugs";
 import { getActiveClubs } from "@/lib/clubs/get-active-clubs";
 import { MatchesStrip } from "@/components/dashboard/MatchesStrip";
+import { TodayMatchCarousel } from "@/components/dashboard/TodayMatchCarousel";
 import { ClubLogoLink } from "@/components/starligue/ClubLogoLink";
 import { StandingsSection } from "@/components/starligue/StandingsSection";
 import { NewsFeed } from "@/components/starligue/NewsFeed";
@@ -99,6 +101,7 @@ export default async function HomePage({
     coupeDeFranceMatches,
     championsLeagueMatches,
     europeanLeagueMatches,
+    todayMatches,
     clubs,
   ] = await Promise.all([
     getClubStandings(season.id),
@@ -112,6 +115,7 @@ export default async function HomePage({
     getCoupeDeFranceMatches(season.id),
     getChampionsLeagueMatches(season.id),
     getEuropeanLeagueMatches(season.id),
+    getTodayMatches(season.id),
     getActiveClubs(season.id),
   ]);
 
@@ -123,11 +127,14 @@ export default async function HomePage({
   return (
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-4 px-4 pb-16 pt-6 sm:px-6">
       <IntroSplash clubs={clubs} />
-      <div className="flex flex-col gap-1">
-        <p className="font-arcade text-sm uppercase tracking-[0.3em] text-accent-secondary">
-          {t("home.seasonLabel", { label: season.label })}
-        </p>
-        <h1 className="font-display text-3xl uppercase tracking-wide text-text">{t("home.title")}</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-1">
+          <p className="font-arcade text-sm uppercase tracking-[0.3em] text-accent-secondary">
+            {t("home.seasonLabel", { label: season.label })}
+          </p>
+          <h1 className="font-display text-3xl uppercase tracking-wide text-text">{t("home.title")}</h1>
+        </div>
+        <TodayMatchCarousel matches={todayMatches} />
       </div>
 
       <div className="pixel-corners flex flex-col items-start gap-2 border border-border bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -176,6 +183,8 @@ export default async function HomePage({
             tone="highlight"
             rankByClubId={rankByClubId}
             gameweekNav={{ total: totalGameweeks, hrefBase: "/" }}
+            collapsible
+            defaultOpen={false}
           />
           {warmupMatches.length > 0 && (
             <MatchesStrip
@@ -186,6 +195,8 @@ export default async function HomePage({
               title={t("warmup.title")}
               disableLink
               showDate
+              collapsible
+              defaultOpen={false}
             />
           )}
           {coupeDeFranceMatches.length > 0 && (
@@ -197,6 +208,8 @@ export default async function HomePage({
               title={t("coupeDeFrance.title")}
               disableLink
               showDate
+              collapsible
+              defaultOpen={false}
             />
           )}
           {championsLeagueMatches.length > 0 && (
@@ -216,6 +229,8 @@ export default async function HomePage({
               title={t("championsLeague.title")}
               disableLink
               showDate
+              collapsible
+              defaultOpen={false}
             />
           )}
           {europeanLeagueMatches.length > 0 && (
@@ -235,6 +250,8 @@ export default async function HomePage({
               title={t("europeanLeague.title")}
               disableLink
               showDate
+              collapsible
+              defaultOpen={false}
             />
           )}
           {teamOfWeek && <StarligueBestXICard gameweekNumber={teamOfWeek.gameweekNumber} entries={teamOfWeek.entries} />}
