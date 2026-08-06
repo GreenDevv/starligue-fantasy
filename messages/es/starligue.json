@@ -1,5 +1,6 @@
 {
   "backToNews": "← Volver a las noticias",
   "noContent": "Artículo generado automáticamente, sin texto asociado.",
+  "injuryNoContent": "Todos los propietarios de {name} en su plantilla están invitados a buscarle un sustituto lo antes posible.",
   "viewOriginal": "Ver el artículo original →"
 }

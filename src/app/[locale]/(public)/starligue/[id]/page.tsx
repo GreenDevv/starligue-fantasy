@@ -51,6 +51,13 @@ export default async function NewsItemPage({ params }: { params: { id: string } 
         </div>
       ) : item.excerpt ? (
         <p className="text-sm leading-relaxed text-text-muted">{item.excerpt}</p>
+      ) : item.category === "INJURY" && item.player ? (
+        // Actu générée (createInjuryNewsItem, jamais de content/excerpt) : un
+        // texte actionnable plutôt que le message générique "pas de texte associé"
+        // — demande explicite de l'utilisateur, 2026-08-06.
+        <p className="text-sm leading-relaxed text-text-muted">
+          {t("injuryNoContent", { name: `${item.player.firstName} ${item.player.lastName}` })}
+        </p>
       ) : (
         <p className="text-sm text-text-muted">{t("noContent")}</p>
       )}

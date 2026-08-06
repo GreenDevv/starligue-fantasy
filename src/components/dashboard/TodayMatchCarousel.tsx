@@ -67,12 +67,17 @@ export function TodayMatchCarousel({ matches }: { matches: TodayMatchRow[] }) {
     return `${competition}\n${name}`;
   }
 
+  // Logos + compétition/heure côte à côte (pas empilés) : la carte est maintenant
+  // pleine largeur (voir plus bas), autant utiliser cet espace horizontal plutôt
+  // que de faire grandir la hauteur — demande explicite de l'utilisateur,
+  // 2026-08-06 ("la div est trop grande en hauteur" après l'agrandissement des
+  // logos/de la largeur).
   const body = (
-    <div className="flex flex-col items-center gap-2 px-4 py-3">
-      <div className="flex items-center gap-3">
+    <div className="flex items-center justify-between gap-3 px-4 py-2.5">
+      <div className="flex items-center gap-2.5">
         <ClubLogo club={m.homeClub} size="lg" largeOnDesktop title={clubTitle(m.homeClub)} />
         {hasScore ? (
-          <span className="font-arcade text-xl leading-none tracking-wide text-text">
+          <span className="font-arcade text-lg leading-none tracking-wide text-text">
             {m.homeScore}-{m.awayScore}
           </span>
         ) : (
@@ -80,19 +85,18 @@ export function TodayMatchCarousel({ matches }: { matches: TodayMatchRow[] }) {
         )}
         <ClubLogo club={m.awayClub} size="lg" largeOnDesktop title={clubTitle(m.awayClub)} />
       </div>
-      <p className="flex items-center gap-1 text-xs uppercase tracking-wide text-text-muted">
+      <div className="flex flex-col items-end gap-0.5 text-right text-xs uppercase leading-tight tracking-wide text-text-muted">
         <span>{tMatches(COMPETITION_SHORT_KEY[m.competitionKey])}</span>
-        <span>·</span>
         <span>
           {hasScore ? t("todayMatches.finished") : format.dateTime(new Date(m.kickoffAt), { hour: "2-digit", minute: "2-digit" })}
         </span>
-      </p>
+      </div>
     </div>
   );
 
   return (
     <div className="pixel-corners shadow-glow-amber flex w-full flex-col items-center border border-accent-secondary/50 bg-accent-secondary/10 lg:w-[300px]">
-      <div className="flex items-center gap-1.5 pt-2">
+      <div className="flex items-center gap-1.5 pt-1.5">
         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-secondary" />
         <p className="font-arcade text-xs uppercase tracking-[0.25em] text-accent-secondary">{t("todayMatches.badgeTitle")}</p>
       </div>
@@ -116,7 +120,7 @@ export function TodayMatchCarousel({ matches }: { matches: TodayMatchRow[] }) {
       </AnimatePresence>
 
       {matches.length > 1 && (
-        <div className="flex gap-1.5 pb-2.5">
+        <div className="flex gap-1.5 pb-1.5">
           {matches.map((mm, i) => (
             <span
               key={mm.id}
