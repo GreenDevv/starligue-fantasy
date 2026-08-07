@@ -172,6 +172,13 @@
       "readyForSeason": "Trup klar til sæsonen."
     }
   },
+  "gameweekRecapModal": {
+    "leagueLabel": "{league}",
+    "title": "Runde {number} er opgjort",
+    "subtitlePositive": "{team} leverer en flot runde!",
+    "subtitleNegative": "{team} havde en svær runde.",
+    "detailCta": "Se detaljer"
+  },
   "championsLeague": {
     "title": "EHF Champions League"
   },

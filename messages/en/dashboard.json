@@ -172,6 +172,13 @@
       "readyForSeason": "Squad ready for the season."
     }
   },
+  "gameweekRecapModal": {
+    "leagueLabel": "{league}",
+    "title": "Matchday {number} scored",
+    "subtitlePositive": "{team} put together a great matchday!",
+    "subtitleNegative": "{team} had a rough matchday.",
+    "detailCta": "See details"
+  },
   "championsLeague": {
     "title": "EHF Champions League"
   },

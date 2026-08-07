@@ -386,29 +386,30 @@ model PlayerLnhSeasonStat {
 // rejointe) — leagueId nullable en transition de migration uniquement, voir
 // scripts/migrate-simulation-teams-to-leagues.ts.
 model SimulationTeam {
-  id                     String                             @id @default(cuid())
-  userId                 String
-  user                   User                               @relation(fields: [userId], references: [id])
-  seasonId               String // dénormalisé depuis league.seasonId, immuable — conservé pour toutes les requêtes déjà filtrées par seasonId
-  season                 Season                             @relation(fields: [seasonId], references: [id])
-  leagueId               String
-  league                 League                             @relation(fields: [leagueId], references: [id])
-  name                   String
-  budget                 Decimal                            @db.Decimal(6, 1)
-  totalPoints            Decimal                            @default(0) @db.Decimal(8, 1)
-  pointsConverted        Decimal                            @default(0) @db.Decimal(8, 1) // voir FantasyTeam.pointsConverted — même mécanique, src/lib/budget/points-conversion.ts
-  isValidated            Boolean                            @default(false)
-  captainId              String? // null = jamais choisi ; modifiable seulement hors verrouillage (voir src/lib/transfers/window.ts)
-  captain                Player?                            @relation("SimulationCaptain", fields: [captainId], references: [id])
-  jokersUsed             Int                                @default(0) // jokers médicaux consommés cette saison (quota : GameConfig JOKER_QUOTA_PER_SEASON)
-  pendingBonus           BonusType? // bonus choisi pour la prochaine journée non verrouillée (src/lib/bonus/*) ; appliqué et remis à null au snapshot de lineup, voir SimulationBonusUsage pour l'historique "1×/saison"
-  createdAt              DateTime                           @default(now())
-  squad                  SimulationSquadPlayer[]
-  lineups                SimulationLineup[]
-  bonusUsages            SimulationBonusUsage[]
-  pointsConversions      SimulationPointsBudgetConversion[]
-  tradeProposalsSent     SimulationTradeProposal[]          @relation("SimulationTradeProposer")
-  tradeProposalsReceived SimulationTradeProposal[]          @relation("SimulationTradeReceiver")
+  id                           String                             @id @default(cuid())
+  userId                       String
+  user                         User                               @relation(fields: [userId], references: [id])
+  seasonId                     String // dénormalisé depuis league.seasonId, immuable — conservé pour toutes les requêtes déjà filtrées par seasonId
+  season                       Season                             @relation(fields: [seasonId], references: [id])
+  leagueId                     String
+  league                       League                             @relation(fields: [leagueId], references: [id])
+  name                         String
+  budget                       Decimal                            @db.Decimal(6, 1)
+  totalPoints                  Decimal                            @default(0) @db.Decimal(8, 1)
+  pointsConverted              Decimal                            @default(0) @db.Decimal(8, 1) // voir FantasyTeam.pointsConverted — même mécanique, src/lib/budget/points-conversion.ts
+  isValidated                  Boolean                            @default(false)
+  lastPointsSeenGameweekNumber Int                                @default(0) // voir FantasyTeam.lastPointsSeenGameweekNumber — même mécanique. En simulation le "dernier scoré" se lit par équipe (lineup.points le plus récent), pas via Gameweek.isScored (chaque équipe avance à son rythme, voir team/history/[gameweekId]/page.tsx)
+  captainId                    String? // null = jamais choisi ; modifiable seulement hors verrouillage (voir src/lib/transfers/window.ts)
+  captain                      Player?                            @relation("SimulationCaptain", fields: [captainId], references: [id])
+  jokersUsed                   Int                                @default(0) // jokers médicaux consommés cette saison (quota : GameConfig JOKER_QUOTA_PER_SEASON)
+  pendingBonus                 BonusType? // bonus choisi pour la prochaine journée non verrouillée (src/lib/bonus/*) ; appliqué et remis à null au snapshot de lineup, voir SimulationBonusUsage pour l'historique "1×/saison"
+  createdAt                    DateTime                           @default(now())
+  squad                        SimulationSquadPlayer[]
+  lineups                      SimulationLineup[]
+  bonusUsages                  SimulationBonusUsage[]
+  pointsConversions            SimulationPointsBudgetConversion[]
+  tradeProposalsSent           SimulationTradeProposal[]          @relation("SimulationTradeProposer")
+  tradeProposalsReceived       SimulationTradeProposal[]          @relation("SimulationTradeReceiver")
 
   @@unique([userId, leagueId])
   @@index([seasonId])
@@ -692,31 +693,32 @@ model NewsItem {
 }
 
 model FantasyTeam {
-  id                     String                   @id @default(cuid())
-  userId                 String
-  user                   User                     @relation(fields: [userId], references: [id])
-  leagueId               String
-  league                 League                   @relation(fields: [leagueId], references: [id])
-  name                   String // "Les Experts de Tish"
-  budget                 Decimal                  @db.Decimal(6, 1) // budget restant
-  totalPoints            Decimal                  @default(0) @db.Decimal(8, 1)
-  pointsConverted        Decimal                  @default(0) @db.Decimal(8, 1) // cumul historique converti en budget (src/lib/budget/points-conversion.ts) — jamais décrémenté, totalPoints = Σ(lineup.points) - pointsConverted (voir recalcTotalPoints)
-  isValidated            Boolean                  @default(false) // 14 joueurs OK + budget OK
-  captainId              String? // null = jamais choisi ; modifiable seulement hors verrouillage (voir src/lib/transfers/window.ts)
-  captain                Player?                  @relation("FantasyCaptain", fields: [captainId], references: [id])
-  jokersUsed             Int                      @default(0) // jokers médicaux consommés cette saison (quota : GameConfig JOKER_QUOTA_PER_SEASON)
-  pendingBonus           BonusType? // bonus choisi pour la prochaine journée non verrouillée (src/lib/bonus/*) ; appliqué et remis à null au snapshot de lineup, voir FantasyBonusUsage pour l'historique "1×/saison"
-  jerseyConfig           Json // JerseyConfig (src/lib/team/jersey.ts) — pas de @default, toujours fourni à la création (même convention que FantasyLineup.entries)
-  createdAt              DateTime                 @default(now())
-  squad                  FantasySquadPlayer[]
-  lineups                FantasyLineup[]
-  bonusUsages            FantasyBonusUsage[]
-  pointsConversions      PointsBudgetConversion[]
-  tradeProposalsSent     TradeProposal[]          @relation("TradeProposer")
-  tradeProposalsReceived TradeProposal[]          @relation("TradeReceiver")
-  predictions            Prediction[]
-  auctionBids            AuctionBid[]
-  auctionSubmissions     AuctionRoundSubmission[]
+  id                           String                   @id @default(cuid())
+  userId                       String
+  user                         User                     @relation(fields: [userId], references: [id])
+  leagueId                     String
+  league                       League                   @relation(fields: [leagueId], references: [id])
+  name                         String // "Les Experts de Tish"
+  budget                       Decimal                  @db.Decimal(6, 1) // budget restant
+  totalPoints                  Decimal                  @default(0) @db.Decimal(8, 1)
+  pointsConverted              Decimal                  @default(0) @db.Decimal(8, 1) // cumul historique converti en budget (src/lib/budget/points-conversion.ts) — jamais décrémenté, totalPoints = Σ(lineup.points) - pointsConverted (voir recalcTotalPoints)
+  isValidated                  Boolean                  @default(false) // 14 joueurs OK + budget OK
+  lastPointsSeenGameweekNumber Int                      @default(0) // marqueur "récap de journée déjà vu" (src/lib/team/pending-gameweek-recap.ts) — mis à jour au dismiss du GameweekRecapModal, jamais décrémenté. Défaut 0 volontaire pour une équipe neuve (aucune journée à masquer) ; les équipes existantes à l'ajout de ce champ ont été backfillées sur la dernière journée déjà notée via scripts/backfill-recap-seen-marker.ts pour ne pas inonder les utilisateurs actuels de récaps rétroactifs.
+  captainId                    String? // null = jamais choisi ; modifiable seulement hors verrouillage (voir src/lib/transfers/window.ts)
+  captain                      Player?                  @relation("FantasyCaptain", fields: [captainId], references: [id])
+  jokersUsed                   Int                      @default(0) // jokers médicaux consommés cette saison (quota : GameConfig JOKER_QUOTA_PER_SEASON)
+  pendingBonus                 BonusType? // bonus choisi pour la prochaine journée non verrouillée (src/lib/bonus/*) ; appliqué et remis à null au snapshot de lineup, voir FantasyBonusUsage pour l'historique "1×/saison"
+  jerseyConfig                 Json // JerseyConfig (src/lib/team/jersey.ts) — pas de @default, toujours fourni à la création (même convention que FantasyLineup.entries)
+  createdAt                    DateTime                 @default(now())
+  squad                        FantasySquadPlayer[]
+  lineups                      FantasyLineup[]
+  bonusUsages                  FantasyBonusUsage[]
+  pointsConversions            PointsBudgetConversion[]
+  tradeProposalsSent           TradeProposal[]          @relation("TradeProposer")
+  tradeProposalsReceived       TradeProposal[]          @relation("TradeReceiver")
+  predictions                  Prediction[]
+  auctionBids                  AuctionBid[]
+  auctionSubmissions           AuctionRoundSubmission[]
 
   @@unique([userId, leagueId])
   @@index([leagueId, totalPoints(sort: Desc)]) // classement de ligue

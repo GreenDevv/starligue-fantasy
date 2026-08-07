@@ -34,6 +34,8 @@ import type { DashboardStrips } from "@/lib/matches/dashboard-strips";
 import type { BestXIEntry } from "@/lib/players/compute-best-xi";
 import type { ClubStandingsResult } from "@/lib/standings/get";
 import { SimulationGameweekControls, type SimulationAdminControls } from "@/components/dashboard/SimulationGameweekControls";
+import { GameweekRecapModal } from "@/components/dashboard/GameweekRecapModal";
+import type { PendingGameweekRecap } from "@/lib/team/pending-gameweek-recap";
 import { cn } from "@/lib/utils";
 
 interface DashboardViewProps {
@@ -47,6 +49,7 @@ interface DashboardViewProps {
   bestXI: BestXIEntry[];
   clubStandings: ClubStandingsResult;
   simulationAdmin: SimulationAdminControls | null;
+  pendingRecaps: PendingGameweekRecap[];
 }
 
 // mini = 1 colonne (compact), square = 2 colonnes (grand carré), wide = pleine
@@ -69,6 +72,7 @@ export function DashboardView({
   bestXI,
   clubStandings,
   simulationAdmin,
+  pendingRecaps,
 }: DashboardViewProps) {
   const t = useTranslations("dashboard");
   const tLabels = useTranslations("labels");
@@ -149,6 +153,8 @@ export function DashboardView({
 
   return (
     <div className="flex flex-col gap-4 pb-8">
+      <GameweekRecapModal recaps={pendingRecaps} />
+
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl text-text">{t("page.title")}</h1>
         <div className="flex items-center gap-3">

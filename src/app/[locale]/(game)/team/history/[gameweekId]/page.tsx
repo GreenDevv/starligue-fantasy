@@ -15,6 +15,7 @@ interface SnapshotEntry {
   position: string;
   role: "STARTER" | "BENCH";
   purchasePrice: number;
+  isCaptain?: boolean; // snapshoté au verrouillage (team.captainId à cet instant, voir cron/snapshot-lineups) — reflète le capitaine DE CETTE JOURNÉE, pas le capitaine courant de l'équipe qui a pu changer depuis (§13.4)
 }
 
 export default async function LineupDetailPage({
@@ -230,10 +231,18 @@ function PlayerRow({
   return (
     <div className="flex items-center gap-3 px-3 py-2.5">
       {entry.player && (
-        <PlayerAvatar
-          player={{ ...entry.player, position: entry.position as Position }}
-          size="sm"
-        />
+        <span className="relative">
+          <PlayerAvatar
+            player={{ ...entry.player, position: entry.position as Position }}
+            size="sm"
+          />
+          {/* Brassard de capitaine — même pattern que HandballPitch.tsx (banc) */}
+          {entry.isCaptain && (
+            <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border border-bg bg-accent-secondary text-[8px] font-bold leading-none text-bg">
+              C
+            </span>
+          )}
+        </span>
       )}
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-text">

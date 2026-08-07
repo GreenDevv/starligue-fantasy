@@ -172,6 +172,13 @@
       "readyForSeason": "Kader bereit für die Saison."
     }
   },
+  "gameweekRecapModal": {
+    "leagueLabel": "{league}",
+    "title": "Spieltag {number} gewertet",
+    "subtitlePositive": "{team} zeigt einen starken Spieltag!",
+    "subtitleNegative": "{team} hatte einen schwierigen Spieltag.",
+    "detailCta": "Details ansehen"
+  },
   "championsLeague": {
     "title": "EHF Champions League"
   },

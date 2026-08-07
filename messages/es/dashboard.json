@@ -172,6 +172,13 @@
       "readyForSeason": "Plantilla lista para la temporada."
     }
   },
+  "gameweekRecapModal": {
+    "leagueLabel": "{league}",
+    "title": "Jornada {number} puntuada",
+    "subtitlePositive": "¡{team} encadena una gran jornada!",
+    "subtitleNegative": "{team} ha tenido una jornada complicada.",
+    "detailCta": "Ver detalle"
+  },
   "championsLeague": {
     "title": "EHF Champions League"
   },
