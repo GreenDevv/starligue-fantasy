@@ -19,9 +19,9 @@ export interface ScrapedNewsItem {
 }
 
 export interface NewsSourceProvider {
-  /** "lnh" | slug du club (ex: "montpellier") — clé stable stockée dans NewsItem.sourceKey. */
+  /** "lnh" | slug du club (ex: "montpellier") | "handnews" — clé stable stockée dans NewsItem.sourceKey. */
   sourceKey: string;
-  sourceType: "LNH_SITE" | "CLUB_SITE";
+  sourceType: "LNH_SITE" | "CLUB_SITE" | "MEDIA_SITE";
   /** Lève IngestionError (recoverable) en cas d'échec — jamais fatal pour les autres sources. */
   fetchNews(): Promise<ScrapedNewsItem[]>;
   /** Optionnel : récupère le texte intégral d'un article dont fetchNews() n'a renvoyé

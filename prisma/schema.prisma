@@ -74,6 +74,7 @@ enum NewsCategory {
 enum NewsSourceType {
   LNH_SITE
   CLUB_SITE
+  MEDIA_SITE
   GENERATED
 }
 

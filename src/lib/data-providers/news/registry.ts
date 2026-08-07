@@ -4,9 +4,12 @@
 // sans toucher au pipeline. Reconnaissance du 2026-07-23 : 4 clubs tournent sous
 // WordPress avec une API REST publique (wordpress.provider.ts, factory générique,
 // beaucoup plus fiable qu'un scraping HTML) — les 12 autres restent à faire (voir
-// mémoire du projet pour l'état détaillé).
+// mémoire du projet pour l'état détaillé). handnews.provider.ts (ajouté le
+// 2026-08-07) est à part : média indépendant (sourceType MEDIA_SITE), pas lnh.fr ni
+// un club — filtré côté source à /tag/starligue/ pour rester strictement Starligue.
 import type { NewsSourceProvider } from "./types";
 import { lnhNewsProvider } from "./lnh.provider";
+import { handnewsNewsProvider } from "./handnews.provider";
 import { istresNewsProvider } from "./clubs/istres.provider";
 import { chamberyNewsProvider } from "./clubs/chambery.provider";
 import { saintRaphaelNewsProvider } from "./clubs/saint-raphael.provider";
@@ -23,6 +26,7 @@ import { montpellierNewsProvider } from "./clubs/montpellier.provider";
 
 export const NEWS_PROVIDERS: NewsSourceProvider[] = [
   lnhNewsProvider,
+  handnewsNewsProvider,
   istresNewsProvider,
   chamberyNewsProvider,
   saintRaphaelNewsProvider,
