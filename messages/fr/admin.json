@@ -4,6 +4,7 @@
     "players": "Joueurs",
     "clubs": "Clubs",
     "transfers": "Transferts",
+    "friendlyMatches": "Autres matchs",
     "news": "Actus",
     "dashboard": "Dashboard",
     "backToGame": "← Jeu"
@@ -241,5 +242,17 @@
     "opensAtLabel": "Ouverture",
     "closesAtLabel": "Fermeture",
     "simulationHelp": "Pour la simulation, l'ouverture/fermeture est jugée par rapport à la progression de chaque équipe dans le calendrier historique (pas l'horloge réelle) — voir src/lib/transfers/window.ts."
+  },
+  "friendlyMatches": {
+    "title": "Résultats — matchs hors championnat",
+    "subtitle": "{count, plural, one {# match en attente de résultat} other {# matchs en attente de résultat}}",
+    "empty": "Aucun match hors championnat pour l'instant.",
+    "manualBadge": "Saisi manuellement",
+    "postponedBadge": "Reporté",
+    "cancelledBadge": "Annulé",
+    "postponedButton": "Reporté",
+    "cancelledButton": "Annulé",
+    "undoButton": "Annuler la saisie",
+    "editButton": "Modifier"
   }
 }

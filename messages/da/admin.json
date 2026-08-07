@@ -4,6 +4,7 @@
     "players": "Spillere",
     "clubs": "Klubber",
     "transfers": "Transfers",
+    "friendlyMatches": "Andre kampe",
     "news": "Nyheder",
     "dashboard": "Dashboard",
     "backToGame": "← Spil"
@@ -241,5 +242,17 @@
     "opensAtLabel": "Åbning",
     "closesAtLabel": "Lukning",
     "simulationHelp": "For simulationen vurderes åbning/lukning i forhold til hvert holds fremskridt i den historiske kampplan (ikke det rigtige ur) — se src/lib/transfers/window.ts."
+  },
+  "friendlyMatches": {
+    "title": "Resultater — kampe uden for mesterskabet",
+    "subtitle": "{count, plural, one {# kamp mangler resultat} other {# kampe mangler resultat}}",
+    "empty": "Ingen kampe uden for mesterskabet endnu.",
+    "manualBadge": "Indtastet manuelt",
+    "postponedBadge": "Udsat",
+    "cancelledBadge": "Aflyst",
+    "postponedButton": "Udsat",
+    "cancelledButton": "Aflyst",
+    "undoButton": "Fortryd",
+    "editButton": "Rediger"
   }
 }

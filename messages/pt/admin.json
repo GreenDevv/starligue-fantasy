@@ -4,6 +4,7 @@
     "players": "Jogadores",
     "clubs": "Clubes",
     "transfers": "Transferências",
+    "friendlyMatches": "Outros jogos",
     "news": "Notícias",
     "dashboard": "Dashboard",
     "backToGame": "← Jogo"
@@ -241,5 +242,17 @@
     "opensAtLabel": "Abertura",
     "closesAtLabel": "Fecho",
     "simulationHelp": "Na simulação, a abertura/fecho é avaliada em função do avanço de cada equipa no calendário histórico (não pelo relógio real) — ver src/lib/transfers/window.ts."
+  },
+  "friendlyMatches": {
+    "title": "Resultados — jogos fora do campeonato",
+    "subtitle": "{count, plural, one {# jogo à espera de resultado} other {# jogos à espera de resultado}}",
+    "empty": "Ainda não há jogos fora do campeonato.",
+    "manualBadge": "Inserido manualmente",
+    "postponedBadge": "Adiado",
+    "cancelledBadge": "Cancelado",
+    "postponedButton": "Adiado",
+    "cancelledButton": "Cancelado",
+    "undoButton": "Desfazer",
+    "editButton": "Editar"
   }
 }

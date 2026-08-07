@@ -4,6 +4,7 @@
     "players": "Players",
     "clubs": "Clubs",
     "transfers": "Transfers",
+    "friendlyMatches": "Other matches",
     "news": "News",
     "dashboard": "Dashboard",
     "backToGame": "← Game"
@@ -241,5 +242,17 @@
     "opensAtLabel": "Opens",
     "closesAtLabel": "Closes",
     "simulationHelp": "For the simulation, opening/closing is judged relative to each team's progress through the historical calendar (not the real-world clock) — see src/lib/transfers/window.ts."
+  },
+  "friendlyMatches": {
+    "title": "Results — matches outside the championship",
+    "subtitle": "{count, plural, one {# match awaiting a result} other {# matches awaiting a result}}",
+    "empty": "No matches outside the championship yet.",
+    "manualBadge": "Manually entered",
+    "postponedBadge": "Postponed",
+    "cancelledBadge": "Cancelled",
+    "postponedButton": "Postponed",
+    "cancelledButton": "Cancelled",
+    "undoButton": "Undo entry",
+    "editButton": "Edit"
   }
 }

@@ -4,6 +4,7 @@
     "players": "Zawodnicy",
     "clubs": "Kluby",
     "transfers": "Transfery",
+    "friendlyMatches": "Inne mecze",
     "news": "Aktualności",
     "dashboard": "Panel",
     "backToGame": "← Gra"
@@ -241,5 +242,17 @@
     "opensAtLabel": "Otwarcie",
     "closesAtLabel": "Zamknięcie",
     "simulationHelp": "W trybie symulacji otwarcie/zamknięcie jest oceniane względem postępu każdej drużyny w historycznym terminarzu (nie rzeczywistego zegara) — patrz src/lib/transfers/window.ts."
+  },
+  "friendlyMatches": {
+    "title": "Wyniki — mecze poza ligą",
+    "subtitle": "{count, plural, one {# mecz czeka na wynik} few {# mecze czekają na wynik} many {# meczów czeka na wynik} other {# meczu czeka na wynik}}",
+    "empty": "Brak meczów poza ligą.",
+    "manualBadge": "Wpisano ręcznie",
+    "postponedBadge": "Odłożony",
+    "cancelledBadge": "Odwołany",
+    "postponedButton": "Odłożony",
+    "cancelledButton": "Odwołany",
+    "undoButton": "Cofnij wpis",
+    "editButton": "Edytuj"
   }
 }

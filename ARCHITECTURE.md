@@ -1866,6 +1866,41 @@ le widget "Classement Starligue" plutôt que de les dupliquer) + grille des 12
 matchs du groupe (score si joué, date sinon), logo/nom cliquables vers
 `/clubs/[id]` seulement pour un club Starligue connu.
 
+### 19.5 Saisie manuelle du résultat (admin)
+
+Demande explicite du 2026-08-07 : lnh.fr publie souvent le score d'un match
+Warm Up/Coupe de France/EHF plusieurs jours après qu'il a été joué (constaté
+en direct : Tatabanya-Nantes du 06/08 toujours `SCHEDULED`/sans score en base
+le lendemain, alors que le résultat était déjà public — repris par la presse
+handball). Contrairement au championnat (`Match`),
+ces compétitions n'ont **aucune stat joueur** (§19 "Pas de stats joueurs pour
+les Warm Up") donc rien d'autre à saisir qu'un score — pas de risque
+d'impacter le scoring fantasy, qui ne dépend jamais de `FriendlyMatch`.
+
+**Page** : `/admin/friendly-matches` — liste les `FriendlyMatch` de la saison
+active dont le coup d'envoi est passé (`GET /api/admin/friendly-matches`,
+100 derniers), avec le score déjà pré-ouvert en édition pour ceux qui n'en
+ont pas encore (`needsResult`). `PATCH /api/admin/friendly-matches/[id]`
+saisit `{ status: FINISHED, homeScore, awayScore }` (ou `POSTPONED`/
+`CANCELLED` sans score, pour un match qui ne sera de toute façon jamais
+rejoué/n'a jamais eu lieu) et marque `FriendlyMatch.source = MANUAL`.
+`DELETE /api/admin/friendly-matches/[id]` annule la saisie (remet
+`SCHEDULED`/scores nuls, `source` recalculé depuis le préfixe de
+`dedupeKey`, `"lnh:"` ou `"ehf:"`).
+
+**Protection contre l'écrasement par le cron `sync-warmup`** (chaque matin,
+§19) : `syncFriendlyMatches` (`src/lib/ingestion/warmup.ts`) charge d'abord
+la `source` déjà en base pour chaque `dedupeKey` du batch scrapé. Si elle
+vaut `MANUAL` **et** que lnh.fr n'a lui-même toujours pas de résultat
+définitif (`status !== FINISHED` ou un des deux scores encore `null`), le
+`status`/`homeScore`/`awayScore`/`source` scrapés sont omis de l'`update`
+Prisma — tout le reste (logos, division, `groupLabel`, `kickoffAt`) continue
+d'être rafraîchi normalement. Dès que lnh.fr publie enfin son propre résultat
+définitif, la condition `keepManualOverride` devient fausse et le scraper
+reprend la main pour de bon (`source` repasse à `LNH_SCRAPER`/
+`EHF_SCRAPER`) — l'admin n'a jamais besoin de penser à annuler sa saisie
+manuelle une fois que la source officielle a rattrapé son retard.
+
 ## 20. Application mobile (iOS/Android)
 
 ### 20.1 Principe — shell Capacitor "live URL"

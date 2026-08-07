@@ -4,6 +4,7 @@
     "players": "Spieler",
     "clubs": "Vereine",
     "transfers": "Transfers",
+    "friendlyMatches": "Andere Spiele",
     "news": "News",
     "dashboard": "Dashboard",
     "backToGame": "← Spiel"
@@ -241,5 +242,17 @@
     "opensAtLabel": "Öffnung",
     "closesAtLabel": "Schließung",
     "simulationHelp": "Für die Simulation wird die Öffnung/Schließung anhand des Fortschritts jedes Teams im historischen Spielplan bewertet (nicht der Echtzeituhr) — siehe src/lib/transfers/window.ts."
+  },
+  "friendlyMatches": {
+    "title": "Ergebnisse — Spiele außerhalb der Meisterschaft",
+    "subtitle": "{count, plural, one {# Spiel wartet auf ein Ergebnis} other {# Spiele warten auf ein Ergebnis}}",
+    "empty": "Noch keine Spiele außerhalb der Meisterschaft.",
+    "manualBadge": "Manuell eingetragen",
+    "postponedBadge": "Verschoben",
+    "cancelledBadge": "Abgesagt",
+    "postponedButton": "Verschoben",
+    "cancelledButton": "Abgesagt",
+    "undoButton": "Eintrag rückgängig machen",
+    "editButton": "Bearbeiten"
   }
 }

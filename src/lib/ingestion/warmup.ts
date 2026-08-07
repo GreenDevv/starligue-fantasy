@@ -85,6 +85,20 @@ async function syncFriendlyMatches(
 ): Promise<WarmupSyncResult> {
   const clubIdBySlug = await getActiveClubIdBySlug(seasonId);
 
+  // Résultat rentré à la main depuis /admin/friendly-matches (lnh.fr publie
+  // souvent le score plusieurs jours après le match, cf. mémoire projet) : à
+  // protéger d'un re-scrape qui remettrait le match en attente tant que lnh.fr
+  // n'a pas lui-même de résultat définitif — sinon la saisie manuelle serait
+  // effacée dès le prochain passage du cron (chaque matin, cf. §19). Dès que
+  // lnh.fr publie enfin un vrai résultat (FINISHED + scores non nuls), on lui
+  // redonne la main pour de bon (source repasse à LNH_SCRAPER/EHF_SCRAPER) —
+  // pas besoin que l'admin pense à annuler sa saisie.
+  const existingRows = await prisma.friendlyMatch.findMany({
+    where: { dedupeKey: { in: matches.map((m) => `${source}:${m.calendarsId}`) } },
+    select: { dedupeKey: true, source: true },
+  });
+  const existingSourceByDedupeKey = new Map(existingRows.map((r) => [r.dedupeKey, r.source]));
+
   let upserted = 0;
   let skippedNoStarligueClub = 0;
 
@@ -108,6 +122,9 @@ async function syncFriendlyMatches(
     const awayClubLogoUrl = awayClubId ? null : resolveLocalWarmupLogoUrl(m.awayClubSlug);
     const homeClubDivision = homeClubId ? null : source === "ehf" ? m.homeClubDivision : resolveDivision(m.homeClubSlug, m.homeClubDivision);
     const awayClubDivision = awayClubId ? null : source === "ehf" ? m.awayClubDivision : resolveDivision(m.awayClubSlug, m.awayClubDivision);
+    const scrapedSource = source === "ehf" ? "EHF_SCRAPER" : "LNH_SCRAPER";
+    const scrapedHasRealResult = m.status === "FINISHED" && m.homeScore !== null && m.awayScore !== null;
+    const keepManualOverride = existingSourceByDedupeKey.get(dedupeKey) === "MANUAL" && !scrapedHasRealResult;
 
     await prisma.friendlyMatch.upsert({
       where: { dedupeKey },
@@ -127,7 +144,7 @@ async function syncFriendlyMatches(
         homeScore: m.homeScore,
         awayScore: m.awayScore,
         dedupeKey,
-        source: source === "ehf" ? "EHF_SCRAPER" : "LNH_SCRAPER",
+        source: scrapedSource,
         groupLabel: m.groupLabel,
       },
       // kickoffAt/status/scores peuvent changer d'un run à l'autre (heure provisoire
@@ -137,12 +154,12 @@ async function syncFriendlyMatches(
       // un ajout à WARMUP_FOREIGN_CLUB_DIVISIONS doit se répercuter sans tout
       // ré-upserter depuis zéro. groupLabel : ne change normalement jamais une fois
       // la phase de groupes fixée, mais re-écrit quand même par cohérence avec le
-      // reste (idempotent).
+      // reste (idempotent). status/homeScore/awayScore/source omis si
+      // keepManualOverride (voir plus haut) — tout le reste continue d'être
+      // rafraîchi normalement.
       update: {
         kickoffAt: m.kickoffAt,
-        status: m.status,
-        homeScore: m.homeScore,
-        awayScore: m.awayScore,
+        ...(keepManualOverride ? {} : { status: m.status, homeScore: m.homeScore, awayScore: m.awayScore, source: scrapedSource }),
         homeClubLogoUrl,
         homeClubDivision,
         awayClubLogoUrl,

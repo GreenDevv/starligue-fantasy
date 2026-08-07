@@ -4,6 +4,7 @@
     "players": "Jugadors",
     "clubs": "Clubs",
     "transfers": "Traspassos",
+    "friendlyMatches": "Altres partits",
     "news": "Notícies",
     "dashboard": "Dashboard",
     "backToGame": "← Joc"
@@ -241,5 +242,17 @@
     "opensAtLabel": "Obertura",
     "closesAtLabel": "Tancament",
     "simulationHelp": "Per a la simulació, l'obertura/tancament es jutja en relació amb el progrés de cada equip en el calendari històric (no el rellotge real) — vegeu src/lib/transfers/window.ts."
+  },
+  "friendlyMatches": {
+    "title": "Resultats — partits fora del campionat",
+    "subtitle": "{count, plural, one {# partit pendent de resultat} other {# partits pendents de resultat}}",
+    "empty": "Encara no hi ha partits fora del campionat.",
+    "manualBadge": "Introduït manualment",
+    "postponedBadge": "Ajornat",
+    "cancelledBadge": "Cancel·lat",
+    "postponedButton": "Ajornat",
+    "cancelledButton": "Cancel·lat",
+    "undoButton": "Desfés",
+    "editButton": "Edita"
   }
 }

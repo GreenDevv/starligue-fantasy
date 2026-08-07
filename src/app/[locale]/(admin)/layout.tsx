@@ -43,6 +43,9 @@ export default async function AdminLayout({
             <Link href="/admin/transfer-windows" className="text-text-muted transition-colors hover:text-text">
               {t("nav.transfers")}
             </Link>
+            <Link href="/admin/friendly-matches" className="text-text-muted transition-colors hover:text-text">
+              {t("nav.friendlyMatches")}
+            </Link>
             <Link href="/admin/news" className="text-text-muted transition-colors hover:text-text">
               {t("nav.news")}
             </Link>
