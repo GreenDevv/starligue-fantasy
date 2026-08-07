@@ -17,11 +17,25 @@ interface NewsRow {
   player: string | null;
 }
 
+interface PendingNewsItem {
+  sourceKey: string;
+  sourceType: string;
+  category: string;
+  title: string;
+  excerpt: string | null;
+  content: string | null;
+  sourceUrl: string;
+  imageUrl: string | null;
+  publishedAt: string;
+  clubId: string | null;
+}
+
 interface SourceSummary {
   fetched: number;
   inserted: number;
   duplicates: number;
   tooOld: number;
+  pending: PendingNewsItem[];
   error: string | null;
 }
 
@@ -61,6 +75,8 @@ export default function AdminNewsPage() {
   const [syncResult, setSyncResult] = useState<Record<string, SourceSummary> | null>(null);
   const [syncError, setSyncError] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [pending, setPending] = useState<PendingNewsItem[]>([]);
+  const [publishingKey, setPublishingKey] = useState<string | null>(null);
 
   const [showForm, setShowForm] = useState(false);
   const [clubs, setClubs] = useState<ClubOption[]>([]);
@@ -159,11 +175,13 @@ export default function AdminNewsPage() {
     setSyncing(true);
     setSyncError("");
     setSyncResult(null);
+    setPending([]);
     try {
       const res = await fetch("/api/admin/news/sync", { method: "POST" });
       const json = (await res.json()) as { data?: { sources: Record<string, SourceSummary> }; error?: { message?: string; code?: string } };
       if (res.ok && json.data) {
         setSyncResult(json.data.sources);
+        setPending(Object.values(json.data.sources).flatMap((s) => s.pending));
         await load();
       } else {
         setSyncError(resolveApiError(tRoot, "admin", json.error?.code));
@@ -173,6 +191,40 @@ export default function AdminNewsPage() {
     } finally {
       setSyncing(false);
     }
+  }
+
+  function pendingKey(item: PendingNewsItem): string {
+    return `${item.sourceKey}:${item.sourceUrl}`;
+  }
+
+  async function handlePublishPending(item: PendingNewsItem) {
+    const key = pendingKey(item);
+    setPublishingKey(key);
+    try {
+      const res = await fetch("/api/admin/news/sync/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(item),
+      });
+      const json = (await res.json()) as { data?: NewsRow; error?: { code?: string } };
+      if (res.ok && json.data) {
+        setNews((prev) => [json.data as NewsRow, ...prev]);
+        setPending((prev) => prev.filter((p) => pendingKey(p) !== key));
+      } else {
+        // Déjà publiée entre-temps (409) ou erreur — dans les deux cas, plus rien à
+        // faire pour cet item : on le retire simplement de la liste d'attente.
+        setPending((prev) => prev.filter((p) => pendingKey(p) !== key));
+      }
+    } catch {
+      // pas de retrait si la requête réseau a échoué — l'admin peut réessayer
+    } finally {
+      setPublishingKey(null);
+    }
+  }
+
+  function handleIgnorePending(item: PendingNewsItem) {
+    const key = pendingKey(item);
+    setPending((prev) => prev.filter((p) => pendingKey(p) !== key));
   }
 
   async function handleDelete(id: string) {
@@ -378,6 +430,59 @@ export default function AdminNewsPage() {
                 )}
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {pending.length > 0 && (
+        <div className="flex flex-col gap-3 rounded-lg border border-accent/30 bg-accent/5 p-4">
+          <div>
+            <p className="text-sm font-medium text-text">{t("news.pendingTitle", { count: pending.length })}</p>
+            <p className="mt-0.5 text-xs text-text-muted">{t("news.pendingHint")}</p>
+          </div>
+          <div className="flex flex-col gap-2">
+            {pending.map((item) => {
+              const key = pendingKey(item);
+              return (
+                <div key={key} className="flex items-start gap-3 rounded-lg border border-border bg-surface p-3">
+                  {item.imageUrl && (
+                    <img src={item.imageUrl} alt="" className="h-14 w-20 shrink-0 rounded object-cover" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-wide text-text-muted">
+                      <span className="rounded bg-accent/10 px-1.5 py-0.5 text-accent">{item.sourceKey}</span>
+                      <span>{format.dateTime(new Date(item.publishedAt), { dateStyle: "medium" })}</span>
+                    </div>
+                    <p className="mt-1 text-sm text-text">{item.title}</p>
+                    {item.excerpt && <p className="mt-0.5 line-clamp-2 text-xs text-text-muted">{item.excerpt}</p>}
+                    <a
+                      href={item.sourceUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[11px] text-text-muted underline hover:text-text"
+                    >
+                      {t("news.viewSource")}
+                    </a>
+                  </div>
+                  <div className="flex shrink-0 flex-col gap-1.5">
+                    <button
+                      onClick={() => handlePublishPending(item)}
+                      disabled={publishingKey === key}
+                      className="rounded bg-accent px-3 py-1.5 text-xs font-semibold text-bg transition-opacity disabled:opacity-40"
+                    >
+                      {publishingKey === key ? t("common.saving") : t("news.publishButton")}
+                    </button>
+                    <button
+                      onClick={() => handleIgnorePending(item)}
+                      disabled={publishingKey === key}
+                      className="rounded border border-border px-3 py-1.5 text-xs text-text-muted transition-colors hover:bg-bg"
+                    >
+                      {t("news.ignoreButton")}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

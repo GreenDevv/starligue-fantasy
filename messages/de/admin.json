@@ -33,7 +33,8 @@
     "SCRAPER_ERROR": "Scraper-Fehler (externe Quelle)",
     "NO_DATA": "Keine Daten gefunden",
     "INVALID_RANGE": "Das Schließungsdatum muss nach dem Öffnungsdatum liegen",
-    "COMPUTE_ERROR": "Fehler bei der Berechnung"
+    "COMPUTE_ERROR": "Fehler bei der Berechnung",
+    "ALREADY_PUBLISHED": "In der Zwischenzeit bereits veröffentlicht"
   },
   "dashboard": {
     "title": "Admin-Dashboard",
@@ -143,7 +144,11 @@
     "excerptLabel": "Kurzfassung",
     "contentLabel": "Inhalt",
     "sourceUrlLabel": "Quell-URL",
-    "titleRequired": "Titel ist erforderlich"
+    "titleRequired": "Titel ist erforderlich",
+    "pendingTitle": "News zur Freigabe ({count})",
+    "pendingHint": "Gefunden jenseits von heute (Fenster auf die letzten 3 Tage erweitert, nur beim manuellen Sync) — einzeln prüfen und freigeben, bevor sie veröffentlicht werden.",
+    "publishButton": "Veröffentlichen",
+    "ignoreButton": "Ignorieren"
   },
   "players": {
     "title": "Spieler",

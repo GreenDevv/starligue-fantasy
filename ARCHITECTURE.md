@@ -1195,7 +1195,7 @@ résultats.
 ### 16.1 Sources et pipeline d'ingestion
 
 Modèle `NewsItem` (catégories `TRANSFER|INJURY|TEAM_OF_WEEK|PERFORMANCE|GENERAL`,
-`sourceType` `LNH_SITE|CLUB_SITE|GENERATED`). Deux origines :
+`sourceType` `LNH_SITE|CLUB_SITE|MEDIA_SITE|GENERATED`). Deux origines :
 
 - **Scrapé** : cron quotidien `POST /api/cron/sync-news` (`0 7 * * *`) itère un
   registre de providers (`src/lib/data-providers/news/registry.ts`) — un par site
@@ -1206,6 +1206,9 @@ Modèle `NewsItem` (catégories `TRANSFER|INJURY|TEAM_OF_WEEK|PERFORMANCE|GENERA
   `/ajaxpost1`). Les sites de clubs sont ajoutés incrémentalement (16 structures HTML
   indépendantes, reconnaissance site par site) — le pipeline tourne de bout en bout
   avec lnh.fr seul, chaque club ajouté n'est qu'un fichier + une ligne de registre.
+  `sourceType MEDIA_SITE` : média handball indépendant (ni lnh.fr ni un club) —
+  handnews.fr, ajouté le 2026-08-07 (`src/lib/data-providers/news/handnews.provider.ts`),
+  filtré à `/tag/starligue/` côté source pour rester strictement Starligue.
 - **Généré en interne** : déclaration/levée de blessure par l'admin (hook dans
   `PUT /api/admin/players/[id]`, catégorie `INJURY`) ; équipe type + meilleures
   performances de la journée, générées juste après `computeGameweekScores` dans
@@ -1224,7 +1227,31 @@ Deux niveaux (`src/lib/news/dedupe.ts`) :
   lnh.fr et sur le site d'un club avec un titre différent — détecté en logique
   applicative (similarité de Jaccard sur les tokens du titre, même club ou l'un des
   deux transverse, écart de date ≤ 2 jours), pas encodable en contrainte SQL.
-  Publication automatique, pas de file de modération admin.
+  Publication automatique pour un item "aujourd'hui" — voir §16.3 pour la
+  nuance apportée sur le run manuel.
+
+### 16.3 Fenêtre élargie + validation admin (déclenchement manuel uniquement)
+
+Demande explicite du 2026-08-07 : `runNewsSync` (`src/lib/news/sync.ts`) ne
+retient par défaut que les articles publiés **aujourd'hui** (`todayStart`,
+comportement historique, toujours celui du cron quotidien `sync-news`, sans
+supervision humaine). `POST /api/admin/news/sync` (déclenchement manuel depuis
+`/admin/news`) passe désormais `{ windowDays: 3 }` : un article publié
+aujourd'hui ou hier ou avant-hier n'est plus rejeté "trop ancien" — mais un
+article strictement antérieur à aujourd'hui n'est **pas non plus auto-publié**.
+Il est renvoyé sous forme de `PendingNewsItem` (déjà classifié/clubId résolu/
+contenu intégral pré-récupéré, exactement comme s'il allait être inséré), affiché
+dans un nouveau bloc "Actus en attente de validation" sur `/admin/news` avec
+un bouton Publier/Ignorer par item. Publier appelle `POST /api/admin/news/
+sync/confirm`, qui rejoue à l'identique l'insertion `NewsItem` qu'aurait faite
+`runNewsSync` (même `dedupeKey`, `sourceType`/`sourceKey` d'origine préservés —
+pas requalifié en `GENERATED`/`admin` comme la création manuelle libre de
+§16.1) après avoir revérifié les deux contrôles anti-doublon (au cas où l'item
+aurait été publié entre-temps par une autre source ou un double clic — 409
+`ALREADY_PUBLISHED`). Ignorer ne fait rien côté serveur (pas de table de
+rejets persistée) : l'item n'est simplement pas publié, il pourra
+réapparaître en pending au prochain run manuel tant qu'il reste dans la
+fenêtre de 3 jours.
 
 ## 17. Publication Instagram (@starliguefantasy)
 

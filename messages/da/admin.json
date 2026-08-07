@@ -33,7 +33,8 @@
     "SCRAPER_ERROR": "Fejl i scraperen (ekstern kilde)",
     "NO_DATA": "Ingen data fundet",
     "INVALID_RANGE": "Lukkedatoen skal være efter åbningsdatoen",
-    "COMPUTE_ERROR": "Fejl under beregning"
+    "COMPUTE_ERROR": "Fejl under beregning",
+    "ALREADY_PUBLISHED": "Allerede udgivet i mellemtiden"
   },
   "dashboard": {
     "title": "Admin Dashboard",
@@ -143,7 +144,11 @@
     "excerptLabel": "Resumé",
     "contentLabel": "Indhold",
     "sourceUrlLabel": "Kilde-URL",
-    "titleRequired": "Titel er obligatorisk"
+    "titleRequired": "Titel er obligatorisk",
+    "pendingTitle": "Nyheder der venter på godkendelse ({count})",
+    "pendingHint": "Fundet ældre end i dag (vinduet udvidet til de sidste 3 dage, kun ved manuel synkronisering) — skal godkendes en ad gangen, før de offentliggøres.",
+    "publishButton": "Udgiv",
+    "ignoreButton": "Ignorer"
   },
   "players": {
     "title": "Spillere",

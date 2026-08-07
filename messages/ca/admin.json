@@ -33,7 +33,8 @@
     "SCRAPER_ERROR": "Error de l'scraper (font externa)",
     "NO_DATA": "No s'han trobat dades",
     "INVALID_RANGE": "La data de tancament ha de ser posterior a la data d'obertura",
-    "COMPUTE_ERROR": "Error durant el càlcul"
+    "COMPUTE_ERROR": "Error durant el càlcul",
+    "ALREADY_PUBLISHED": "Ja publicada mentrestant"
   },
   "dashboard": {
     "title": "Dashboard Admin",
@@ -143,7 +144,11 @@
     "excerptLabel": "Resum",
     "contentLabel": "Contingut",
     "sourceUrlLabel": "URL de la font",
-    "titleRequired": "El títol és obligatori"
+    "titleRequired": "El títol és obligatori",
+    "pendingTitle": "Notícies pendents de validació ({count})",
+    "pendingHint": "Trobades més enllà d'avui (finestra ampliada als últims 3 dies, només en sincronització manual) — a validar una per una abans de publicar-les.",
+    "publishButton": "Publica",
+    "ignoreButton": "Ignora"
   },
   "players": {
     "title": "Jugadors",

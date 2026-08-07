@@ -33,7 +33,8 @@
     "SCRAPER_ERROR": "Błąd scrapera (źródło zewnętrzne)",
     "NO_DATA": "Nie znaleziono żadnych danych",
     "INVALID_RANGE": "Data zamknięcia musi być późniejsza niż data otwarcia",
-    "COMPUTE_ERROR": "Błąd podczas obliczeń"
+    "COMPUTE_ERROR": "Błąd podczas obliczeń",
+    "ALREADY_PUBLISHED": "Już opublikowano w międzyczasie"
   },
   "dashboard": {
     "title": "Panel Admina",
@@ -143,7 +144,11 @@
     "excerptLabel": "Skrót",
     "contentLabel": "Treść",
     "sourceUrlLabel": "URL źródła",
-    "titleRequired": "Tytuł jest wymagany"
+    "titleRequired": "Tytuł jest wymagany",
+    "pendingTitle": "Aktualności do zatwierdzenia ({count})",
+    "pendingHint": "Znalezione starsze niż dzisiaj (okno rozszerzone do 3 ostatnich dni, tylko przy ręcznej synchronizacji) — do zatwierdzenia jedna po drugiej przed publikacją.",
+    "publishButton": "Publikuj",
+    "ignoreButton": "Zignoruj"
   },
   "players": {
     "title": "Zawodnicy",

@@ -33,7 +33,8 @@
     "SCRAPER_ERROR": "Scraper error (external source)",
     "NO_DATA": "No data found",
     "INVALID_RANGE": "The closing date must be after the opening date",
-    "COMPUTE_ERROR": "Error while computing"
+    "COMPUTE_ERROR": "Error while computing",
+    "ALREADY_PUBLISHED": "Already published in the meantime"
   },
   "dashboard": {
     "title": "Admin Dashboard",
@@ -143,7 +144,11 @@
     "excerptLabel": "Excerpt",
     "contentLabel": "Content",
     "sourceUrlLabel": "Source URL",
-    "titleRequired": "Title is required"
+    "titleRequired": "Title is required",
+    "pendingTitle": "News awaiting approval ({count})",
+    "pendingHint": "Found beyond today (window widened to the last 3 days, manual sync only) — review and approve one by one before they go live.",
+    "publishButton": "Publish",
+    "ignoreButton": "Ignore"
   },
   "players": {
     "title": "Players",
