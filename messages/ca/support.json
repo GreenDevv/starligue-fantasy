@@ -1,0 +1,32 @@
+{
+  "backLink": "← Torna a l'inici",
+  "title": "Suport",
+  "intro": "Un dubte, un error, un problema de compte? Escriu-nos, responem directament — sense bot, sense formulari interminable.",
+  "contact": {
+    "title": "Contacta'ns",
+    "text": "Per a qualsevol dubte, error o denúncia, escriu a:",
+    "responseTime": "Resposta en pocs dies."
+  },
+  "faq": {
+    "title": "Preguntes freqüents",
+    "items": {
+      "password": {
+        "q": "He oblidat la contrasenya",
+        "a": "Utilitza l'enllaç «Contrasenya oblidada» a la pàgina d'inici de sessió per definir-ne una de nova per correu."
+      },
+      "deleteAccount": {
+        "q": "Com elimino el meu compte?",
+        "a": "Des de l'app: El meu compte → Zona de perill → Eliminar el meu compte. L'eliminació és immediata i definitiva, sense haver de passar pel suport."
+      },
+      "report": {
+        "q": "Vull denunciar un missatge o bloquejar un jugador",
+        "a": "Al xat de lliga, qualsevol missatge es pot denunciar o el seu autor bloquejar directament des de l'app."
+      },
+      "bug": {
+        "q": "He trobat un error",
+        "a": "Escriu-nos a l'adreça de dalt descrivint què ha passat, idealment amb una captura de pantalla."
+      }
+    }
+  },
+  "privacyLink": "Consulta també la nostra política de privadesa"
+}

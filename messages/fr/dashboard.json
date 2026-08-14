@@ -45,7 +45,8 @@
     "ctaLoggedIn": "Accéder à Fantasy Starligue →",
     "ctaGuest": "Créer mon équipe Fantasy →",
     "footerDisclaimer": "Projet perso, sans rapport officiel avec la LNH ou la Daikin StarLigue.",
-    "footerPrivacyLink": "Confidentialité & cookies"
+    "footerPrivacyLink": "Confidentialité & cookies",
+    "footerSupportLink": "Support"
   },
   "page": {
     "title": "Dashboard",

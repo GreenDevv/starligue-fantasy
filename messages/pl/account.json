@@ -7,8 +7,20 @@
   "favoritePlayerLocked": "Wybór jest ostateczny i nie można go zmienić po zapisaniu.",
   "savedMessage": "Zapisano! Pseudonim widoczny u góry zaktualizuje się przy następnym logowaniu.",
   "saving": "Zapisywanie…",
+  "deleteSection": {
+    "title": "Strefa zagrożenia",
+    "description": "Trwale usuń swoje konto i dane osobowe. Tej czynności nie można cofnąć.",
+    "button": "Usuń moje konto",
+    "confirmTitle": "Potwierdź usunięcie",
+    "confirmDescription": "To jest ostateczne: twoje konto, drużyny i ulubiony zawodnik zostaną usunięte. Ligi, które utworzyłeś, również zostaną usunięte dla wszystkich członków.",
+    "passwordLabel": "Potwierdź swoim hasłem",
+    "cancel": "Anuluj",
+    "confirmButton": "Usuń trwale",
+    "deleting": "Usuwanie…"
+  },
   "errors": {
     "FAVORITE_PLAYER_LOCKED": "Ulubiony zawodnik jest ostateczny po zapisaniu",
-    "INVALID_PLAYER": "Nie znaleziono ulubionego zawodnika"
+    "INVALID_PLAYER": "Nie znaleziono ulubionego zawodnika",
+    "INVALID_PASSWORD": "Nieprawidłowe hasło"
   }
 }

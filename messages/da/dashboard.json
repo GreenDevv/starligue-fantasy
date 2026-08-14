@@ -45,7 +45,8 @@
     "ctaLoggedIn": "Gå til Fantasy Starligue →",
     "ctaGuest": "Opret mit Fantasy-hold →",
     "footerDisclaimer": "Personligt projekt, uden officiel tilknytning til LNH eller Daikin StarLigue.",
-    "footerPrivacyLink": "Privatliv & cookies"
+    "footerPrivacyLink": "Privatliv & cookies",
+    "footerSupportLink": "Support"
   },
   "page": {
     "title": "Dashboard",

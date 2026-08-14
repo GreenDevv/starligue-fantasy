@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { signOut } from "next-auth/react";
 import { resolveApiError } from "@/lib/api/error-messages";
 import { PlayerSearch, type PlayerSearchOption } from "@/components/players/PlayerSearch";
 
@@ -16,6 +17,7 @@ export default function AccountPage() {
   const t = useTranslations();
   const tAccount = useTranslations("account");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [favoritePlayerId, setFavoritePlayerId] = useState("");
@@ -28,6 +30,11 @@ export default function AccountPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -70,6 +77,27 @@ export default function AccountPage() {
       setSaved(true);
     }
     setSaving(false);
+  }
+
+  async function handleDelete(e: React.FormEvent) {
+    e.preventDefault();
+    setDeleting(true);
+    setDeleteError(null);
+
+    const res = await fetch("/api/account", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: deletePassword }),
+    });
+
+    if (!res.ok) {
+      const json = (await res.json()) as { error?: { code?: string; message: string } };
+      setDeleteError(resolveApiError(t, "account", json.error?.code));
+      setDeleting(false);
+      return;
+    }
+
+    await signOut({ callbackUrl: `/${locale}` });
   }
 
   if (loading) {
@@ -141,6 +169,64 @@ export default function AccountPage() {
           {saving ? tAccount("saving") : tCommon("save")}
         </button>
       </form>
+
+      <div className="mt-10 rounded-lg border border-points-neg/30 p-4">
+        <h2 className="font-display text-sm uppercase tracking-wide text-points-neg">
+          {tAccount("deleteSection.title")}
+        </h2>
+        <p className="mt-1 text-xs text-text-muted">{tAccount("deleteSection.description")}</p>
+
+        {!confirmingDelete ? (
+          <button
+            type="button"
+            onClick={() => setConfirmingDelete(true)}
+            className="mt-3 rounded-lg border border-points-neg/50 px-4 py-2 text-sm font-semibold text-points-neg transition-colors hover:bg-points-neg/10"
+          >
+            {tAccount("deleteSection.button")}
+          </button>
+        ) : (
+          <form onSubmit={handleDelete} className="mt-3 flex flex-col gap-3">
+            <p className="text-xs text-text-muted">{tAccount("deleteSection.confirmDescription")}</p>
+            <div>
+              <label className="mb-1 block text-xs uppercase tracking-widest text-text-muted">
+                {tAccount("deleteSection.passwordLabel")}
+              </label>
+              <input
+                type="password"
+                required
+                autoFocus
+                value={deletePassword}
+                onChange={(e) => {
+                  setDeletePassword(e.target.value);
+                  setDeleteError(null);
+                }}
+                className="w-full rounded-lg border border-border bg-bg px-4 py-2.5 text-text outline-none focus:border-points-neg"
+              />
+            </div>
+            {deleteError && <p className="rounded-lg bg-points-neg/10 px-4 py-2 text-sm text-points-neg">{deleteError}</p>}
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setConfirmingDelete(false);
+                  setDeletePassword("");
+                  setDeleteError(null);
+                }}
+                className="flex-1 rounded-lg border border-border py-2.5 text-sm font-semibold text-text transition-colors hover:bg-surface"
+              >
+                {tAccount("deleteSection.cancel")}
+              </button>
+              <button
+                type="submit"
+                disabled={deleting}
+                className="flex-1 rounded-lg bg-points-neg py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-50"
+              >
+                {deleting ? tAccount("deleteSection.deleting") : tAccount("deleteSection.confirmButton")}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
     </div>
   );
 }

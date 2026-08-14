@@ -7,8 +7,20 @@
   "favoritePlayerLocked": "Définitif, non modifiable une fois déclaré.",
   "savedMessage": "Enregistré ! Le pseudo affiché en haut se met à jour à la prochaine connexion.",
   "saving": "Enregistrement…",
+  "deleteSection": {
+    "title": "Zone sensible",
+    "description": "Supprimer définitivement ton compte et tes données personnelles. Cette action est irréversible.",
+    "button": "Supprimer mon compte",
+    "confirmTitle": "Confirmer la suppression",
+    "confirmDescription": "Cette action est définitive : ton compte, tes équipes et ton joueur préféré seront supprimés. Les ligues dont tu es le créateur seront elles aussi supprimées pour tous les membres.",
+    "passwordLabel": "Confirme avec ton mot de passe",
+    "cancel": "Annuler",
+    "confirmButton": "Supprimer définitivement",
+    "deleting": "Suppression…"
+  },
   "errors": {
     "FAVORITE_PLAYER_LOCKED": "Le joueur préféré est définitif une fois déclaré",
-    "INVALID_PLAYER": "Joueur préféré introuvable"
+    "INVALID_PLAYER": "Joueur préféré introuvable",
+    "INVALID_PASSWORD": "Mot de passe incorrect"
   }
 }

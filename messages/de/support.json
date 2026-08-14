@@ -1,0 +1,32 @@
+{
+  "backLink": "← Zurück zur Startseite",
+  "title": "Support",
+  "intro": "Eine Frage, ein Bug, ein Kontoproblem? Schreib uns, wir antworten direkt — kein Bot, kein endloses Formular.",
+  "contact": {
+    "title": "Kontakt",
+    "text": "Für Fragen, Bugs oder Meldungen schreib an:",
+    "responseTime": "Antwort innerhalb weniger Tage."
+  },
+  "faq": {
+    "title": "Häufige Fragen",
+    "items": {
+      "password": {
+        "q": "Ich habe mein Passwort vergessen",
+        "a": "Nutze den Link „Passwort vergessen“ auf der Anmeldeseite, um per E-Mail ein neues festzulegen."
+      },
+      "deleteAccount": {
+        "q": "Wie lösche ich mein Konto?",
+        "a": "In der App: Mein Konto → Gefahrenzone → Konto löschen. Die Löschung ist sofort und endgültig, ohne über den Support zu gehen."
+      },
+      "report": {
+        "q": "Ich möchte eine Nachricht melden oder einen Spieler blockieren",
+        "a": "Im Liga-Chat kann jede Nachricht gemeldet oder ihr Autor direkt in der App blockiert werden."
+      },
+      "bug": {
+        "q": "Ich habe einen Bug gefunden",
+        "a": "Schreib uns an die obige Adresse und beschreibe, was passiert ist, idealerweise mit einem Screenshot."
+      }
+    }
+  },
+  "privacyLink": "Siehe auch unsere Datenschutzerklärung"
+}

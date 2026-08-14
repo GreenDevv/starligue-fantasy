@@ -1,0 +1,32 @@
+{
+  "backLink": "← Back to home",
+  "title": "Support",
+  "intro": "A question, a bug, an account issue? Write to us, we reply directly — no bot, no endless form.",
+  "contact": {
+    "title": "Contact us",
+    "text": "For any question, bug, or report, write to:",
+    "responseTime": "Reply within a few days."
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "items": {
+      "password": {
+        "q": "I forgot my password",
+        "a": "Use the \"Forgot password\" link on the login page to set a new one by email."
+      },
+      "deleteAccount": {
+        "q": "How do I delete my account?",
+        "a": "In the app: My account → Danger zone → Delete my account. Deletion is immediate and permanent, no need to go through support."
+      },
+      "report": {
+        "q": "I want to report a message or block a player",
+        "a": "In the league chat, any message can be reported or its author blocked directly from the app."
+      },
+      "bug": {
+        "q": "I found a bug",
+        "a": "Write to us at the address above describing what happened, ideally with a screenshot."
+      }
+    }
+  },
+  "privacyLink": "See also our privacy policy"
+}

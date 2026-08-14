@@ -7,8 +7,20 @@
   "favoritePlayerLocked": "Definitiu, no es pot modificar un cop declarat.",
   "savedMessage": "Desat! El nom d'usuari que es mostra a dalt s'actualitzarà la propera vegada que iniciïs sessió.",
   "saving": "Desant…",
+  "deleteSection": {
+    "title": "Zona de perill",
+    "description": "Elimina definitivament el teu compte i les teves dades personals. Aquesta acció no es pot desfer.",
+    "button": "Eliminar el meu compte",
+    "confirmTitle": "Confirmar l'eliminació",
+    "confirmDescription": "Aquesta acció és definitiva: el teu compte, els teus equips i el teu jugador preferit s'eliminaran. Les lligues que hagis creat també s'eliminaran per a tots els membres.",
+    "passwordLabel": "Confirma amb la teva contrasenya",
+    "cancel": "Cancel·la",
+    "confirmButton": "Eliminar definitivament",
+    "deleting": "Eliminant…"
+  },
   "errors": {
     "FAVORITE_PLAYER_LOCKED": "El jugador preferit és definitiu un cop declarat",
-    "INVALID_PLAYER": "Jugador preferit no trobat"
+    "INVALID_PLAYER": "Jugador preferit no trobat",
+    "INVALID_PASSWORD": "Contrasenya incorrecta"
   }
 }

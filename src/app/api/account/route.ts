@@ -1,12 +1,16 @@
 export const dynamic = "force-dynamic";
 
-// GET  /api/account — infos du compte connecté (pseudo, email, joueur préféré)
-// PUT  /api/account — modifie le pseudo et/ou le joueur préféré
+// GET    /api/account — infos du compte connecté (pseudo, email, joueur préféré)
+// PUT    /api/account — modifie le pseudo et/ou le joueur préféré
+// DELETE /api/account — supprime le compte (App Store guideline 5.1.1(v))
 
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { compare } from "bcryptjs";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { deleteTeamsCascade, deleteSimulationTeamsCascade } from "@/lib/leagues/standings";
+import { SIMULATION_SEASON_LABEL } from "@/lib/simulation/constants";
 
 export async function GET() {
   const session = await auth();
@@ -91,4 +95,111 @@ export async function PUT(req: Request) {
   });
 
   return NextResponse.json({ data: user });
+}
+
+const deleteSchema = z.object({
+  password: z.string().min(1),
+});
+
+// Suppression = anonymisation + purge des identifiants, pas un DELETE de la ligne
+// User : énormément de tables (FantasyTeam, LeagueMember, LeagueChatMessage,
+// League.owner...) référencent userId sans onDelete cascade (voir
+// prisma/schema.prisma), et on veut de toute façon garder l'intégrité des
+// classements/chats partagés avec d'autres membres plutôt que de les corrompre.
+// En pratique le compte est bien supprimé : plus de mot de passe/email d'origine
+// donc plus aucun moyen de se reconnecter — ce n'est pas une simple désactivation.
+// Les ligues possédées sont détruites en cascade (même comportement que DELETE
+// /api/leagues/[id], que le owner peut déjà déclencher lui-même) ; les ligues où
+// l'utilisateur n'est que membre sont quittées (même comportement que DELETE
+// /api/leagues/[id]/members/me).
+export async function DELETE(req: Request) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: { code: "UNAUTHORIZED", message: "Connexion requise" } }, { status: 401 });
+  }
+  const userId = session.user.id;
+
+  const body = await req.json().catch(() => null);
+  const parsed = deleteSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: { code: "INVALID_INPUT", message: parsed.error.issues[0]?.message ?? "Mot de passe requis" } },
+      { status: 400 },
+    );
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { passwordHash: true } });
+  if (!user?.passwordHash) {
+    return NextResponse.json({ error: { code: "NOT_FOUND" } }, { status: 404 });
+  }
+
+  const valid = await compare(parsed.data.password, user.passwordHash);
+  if (!valid) {
+    return NextResponse.json(
+      { error: { code: "INVALID_PASSWORD", message: "Mot de passe incorrect" } },
+      { status: 401 },
+    );
+  }
+
+  await prisma.$transaction(async (tx) => {
+    const ownedLeagues = await tx.league.findMany({
+      where: { ownerId: userId },
+      select: { id: true, season: { select: { label: true } } },
+    });
+    for (const league of ownedLeagues) {
+      const isSimulation = league.season.label === SIMULATION_SEASON_LABEL;
+      if (isSimulation) {
+        const teams = await tx.simulationTeam.findMany({ where: { leagueId: league.id }, select: { id: true } });
+        await deleteSimulationTeamsCascade(tx, teams.map((t) => t.id));
+      } else {
+        const teams = await tx.fantasyTeam.findMany({ where: { leagueId: league.id }, select: { id: true } });
+        await deleteTeamsCascade(tx, teams.map((t) => t.id));
+      }
+      await tx.leagueMember.deleteMany({ where: { leagueId: league.id } });
+      await tx.league.delete({ where: { id: league.id } });
+    }
+
+    const memberships = await tx.leagueMember.findMany({
+      where: { userId },
+      select: { leagueId: true, league: { select: { season: { select: { label: true } } } } },
+    });
+    for (const membership of memberships) {
+      const isSimulation = membership.league.season.label === SIMULATION_SEASON_LABEL;
+      if (isSimulation) {
+        const team = await tx.simulationTeam.findFirst({
+          where: { userId, leagueId: membership.leagueId },
+          select: { id: true },
+        });
+        if (team) await deleteSimulationTeamsCascade(tx, [team.id]);
+      } else {
+        const team = await tx.fantasyTeam.findUnique({
+          where: { userId_leagueId: { userId, leagueId: membership.leagueId } },
+          select: { id: true },
+        });
+        if (team) await deleteTeamsCascade(tx, [team.id]);
+      }
+      await tx.leagueMember.delete({ where: { leagueId_userId: { leagueId: membership.leagueId, userId } } });
+    }
+
+    await tx.pushToken.deleteMany({ where: { userId } });
+    await tx.passwordResetToken.deleteMany({ where: { userId } });
+    await tx.account.deleteMany({ where: { userId } });
+    await tx.blockedUser.deleteMany({ where: { OR: [{ blockerId: userId }, { blockedId: userId }] } });
+
+    // Ligne User conservée (voir commentaire plus haut) mais entièrement
+    // scrubée : email unique dérivé de l'id pour ne jamais entrer en conflit
+    // avec un futur compte, passwordHash à null (login impossible même si
+    // l'email était deviné).
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        name: "Utilisateur supprimé",
+        email: `deleted-${userId}@starliguefantasy.fr`,
+        passwordHash: null,
+        favoritePlayerId: null,
+      },
+    });
+  });
+
+  return NextResponse.json({ data: { success: true } });
 }

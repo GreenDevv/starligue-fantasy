@@ -7,8 +7,20 @@
   "favoritePlayerLocked": "Definitivo, no se puede modificar una vez declarado.",
   "savedMessage": "¡Guardado! El nombre de usuario que se muestra arriba se actualizará la próxima vez que inicies sesión.",
   "saving": "Guardando…",
+  "deleteSection": {
+    "title": "Zona de peligro",
+    "description": "Elimina definitivamente tu cuenta y tus datos personales. Esta acción no se puede deshacer.",
+    "button": "Eliminar mi cuenta",
+    "confirmTitle": "Confirmar la eliminación",
+    "confirmDescription": "Esta acción es definitiva: tu cuenta, tus equipos y tu jugador favorito se eliminarán. Las ligas que hayas creado también se eliminarán para todos los miembros.",
+    "passwordLabel": "Confirma con tu contraseña",
+    "cancel": "Cancelar",
+    "confirmButton": "Eliminar definitivamente",
+    "deleting": "Eliminando…"
+  },
   "errors": {
     "FAVORITE_PLAYER_LOCKED": "El jugador favorito es definitivo una vez declarado",
-    "INVALID_PLAYER": "Jugador favorito no encontrado"
+    "INVALID_PLAYER": "Jugador favorito no encontrado",
+    "INVALID_PASSWORD": "Contraseña incorrecta"
   }
 }

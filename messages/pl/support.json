@@ -1,0 +1,32 @@
+{
+  "backLink": "← Powrót do strony głównej",
+  "title": "Wsparcie",
+  "intro": "Pytanie, błąd, problem z kontem? Napisz do nas, odpowiadamy bezpośrednio — bez bota, bez niekończącego się formularza.",
+  "contact": {
+    "title": "Skontaktuj się z nami",
+    "text": "W razie pytań, błędów lub zgłoszeń napisz na:",
+    "responseTime": "Odpowiedź w ciągu kilku dni."
+  },
+  "faq": {
+    "title": "Najczęstsze pytania",
+    "items": {
+      "password": {
+        "q": "Zapomniałem/łam hasła",
+        "a": "Skorzystaj z linku „Nie pamiętam hasła” na stronie logowania, aby ustawić nowe przez email."
+      },
+      "deleteAccount": {
+        "q": "Jak usunąć moje konto?",
+        "a": "W aplikacji: Moje konto → Strefa zagrożenia → Usuń moje konto. Usunięcie jest natychmiastowe i trwałe, bez konieczności kontaktu ze wsparciem."
+      },
+      "report": {
+        "q": "Chcę zgłosić wiadomość lub zablokować gracza",
+        "a": "W czacie ligi każdą wiadomość można zgłosić, a jej autora zablokować bezpośrednio z poziomu aplikacji."
+      },
+      "bug": {
+        "q": "Znalazłem/łam błąd",
+        "a": "Napisz do nas na powyższy adres, opisując co się stało, najlepiej z zrzutem ekranu."
+      }
+    }
+  },
+  "privacyLink": "Zobacz też naszą politykę prywatności"
+}

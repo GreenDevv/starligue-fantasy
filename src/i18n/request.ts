@@ -28,6 +28,7 @@ const NAMESPACES = [
   "predictions",
   "starligue",
   "confidentialite",
+  "support",
   "auth",
   "admin",
 ] as const;
@@ -52,6 +53,7 @@ async function loadMessages(locale: AppLocale) {
     import(`../../messages/${locale}/predictions.json`),
     import(`../../messages/${locale}/starligue.json`),
     import(`../../messages/${locale}/confidentialite.json`),
+    import(`../../messages/${locale}/support.json`),
     import(`../../messages/${locale}/auth.json`),
     import(`../../messages/${locale}/admin.json`),
   ]);

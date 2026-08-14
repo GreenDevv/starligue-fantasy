@@ -1,0 +1,32 @@
+{
+  "backLink": "← Retour à l'accueil",
+  "title": "Support",
+  "intro": "Une question, un bug, un souci de compte ? Écris-nous, on répond directement — pas de bot, pas de formulaire à rallonge.",
+  "contact": {
+    "title": "Nous contacter",
+    "text": "Pour toute question, bug ou signalement, écris à :",
+    "responseTime": "Réponse sous quelques jours."
+  },
+  "faq": {
+    "title": "Questions fréquentes",
+    "items": {
+      "password": {
+        "q": "J'ai oublié mon mot de passe",
+        "a": "Utilise le lien « Mot de passe oublié » sur la page de connexion pour en définir un nouveau par email."
+      },
+      "deleteAccount": {
+        "q": "Comment supprimer mon compte ?",
+        "a": "Depuis l'app : Mon compte → Zone sensible → Supprimer mon compte. La suppression est immédiate et définitive, sans passer par le support."
+      },
+      "report": {
+        "q": "Je veux signaler un message ou bloquer un joueur",
+        "a": "Dans le chat de ligue, chaque message peut être signalé ou son auteur bloqué directement depuis l'app."
+      },
+      "bug": {
+        "q": "J'ai trouvé un bug",
+        "a": "Écris-nous à l'adresse ci-dessus en décrivant ce qui s'est passé, idéalement avec une capture d'écran."
+      }
+    }
+  },
+  "privacyLink": "Voir aussi notre politique de confidentialité"
+}

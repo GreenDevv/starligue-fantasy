@@ -275,6 +275,10 @@ export default async function HomePage({
         {t("home.footerDisclaimer")} ·{" "}
         <Link href="/confidentialite" className="hover:underline">
           {t("home.footerPrivacyLink")}
+        </Link>{" "}
+        ·{" "}
+        <Link href="/support" className="hover:underline">
+          {t("home.footerSupportLink")}
         </Link>
       </p>
     </main>

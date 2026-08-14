@@ -1,0 +1,32 @@
+{
+  "backLink": "← Voltar ao início",
+  "title": "Suporte",
+  "intro": "Uma dúvida, um bug, um problema na conta? Escreve-nos, respondemos diretamente — sem bot, sem formulário interminável.",
+  "contact": {
+    "title": "Contacta-nos",
+    "text": "Para qualquer dúvida, bug ou denúncia, escreve para:",
+    "responseTime": "Resposta em poucos dias."
+  },
+  "faq": {
+    "title": "Perguntas frequentes",
+    "items": {
+      "password": {
+        "q": "Esqueci-me da palavra-passe",
+        "a": "Usa o link «Esqueci-me da palavra-passe» na página de login para definir uma nova por email."
+      },
+      "deleteAccount": {
+        "q": "Como elimino a minha conta?",
+        "a": "A partir da app: A minha conta → Zona de perigo → Eliminar a minha conta. A eliminação é imediata e definitiva, sem ser necessário passar pelo suporte."
+      },
+      "report": {
+        "q": "Quero denunciar uma mensagem ou bloquear um jogador",
+        "a": "No chat da liga, qualquer mensagem pode ser denunciada ou o seu autor bloqueado diretamente a partir da app."
+      },
+      "bug": {
+        "q": "Encontrei um bug",
+        "a": "Escreve-nos para o endereço acima descrevendo o que aconteceu, idealmente com uma captura de ecrã."
+      }
+    }
+  },
+  "privacyLink": "Consulta também a nossa política de privacidade"
+}

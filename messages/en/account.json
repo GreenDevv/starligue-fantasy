@@ -7,8 +7,20 @@
   "favoritePlayerLocked": "Final choice, can't be changed once set.",
   "savedMessage": "Saved! Your displayed username will update next time you log in.",
   "saving": "Saving…",
+  "deleteSection": {
+    "title": "Danger zone",
+    "description": "Permanently delete your account and personal data. This action cannot be undone.",
+    "button": "Delete my account",
+    "confirmTitle": "Confirm deletion",
+    "confirmDescription": "This is permanent: your account, teams and favorite player will be deleted. Leagues you created will also be deleted for all members.",
+    "passwordLabel": "Confirm with your password",
+    "cancel": "Cancel",
+    "confirmButton": "Delete permanently",
+    "deleting": "Deleting…"
+  },
   "errors": {
     "FAVORITE_PLAYER_LOCKED": "The favorite player choice is final once set",
-    "INVALID_PLAYER": "Favorite player not found"
+    "INVALID_PLAYER": "Favorite player not found",
+    "INVALID_PASSWORD": "Incorrect password"
   }
 }

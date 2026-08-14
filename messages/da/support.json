@@ -1,0 +1,32 @@
+{
+  "backLink": "← Tilbage til forsiden",
+  "title": "Support",
+  "intro": "Et spørgsmål, en fejl, et kontoproblem? Skriv til os, vi svarer direkte — ingen bot, ingen endeløs formular.",
+  "contact": {
+    "title": "Kontakt os",
+    "text": "For spørgsmål, fejl eller anmeldelser, skriv til:",
+    "responseTime": "Svar inden for få dage."
+  },
+  "faq": {
+    "title": "Ofte stillede spørgsmål",
+    "items": {
+      "password": {
+        "q": "Jeg har glemt min adgangskode",
+        "a": "Brug linket \"Glemt adgangskode\" på login-siden for at angive en ny via email."
+      },
+      "deleteAccount": {
+        "q": "Hvordan sletter jeg min konto?",
+        "a": "I appen: Min konto → Farezone → Slet min konto. Sletning sker øjeblikkeligt og permanent, uden om support."
+      },
+      "report": {
+        "q": "Jeg vil anmelde en besked eller blokere en spiller",
+        "a": "I liga-chatten kan enhver besked anmeldes, eller dens forfatter blokeres direkte fra appen."
+      },
+      "bug": {
+        "q": "Jeg har fundet en fejl",
+        "a": "Skriv til os på adressen ovenfor med en beskrivelse af, hvad der skete, gerne med et skærmbillede."
+      }
+    }
+  },
+  "privacyLink": "Se også vores privatlivspolitik"
+}

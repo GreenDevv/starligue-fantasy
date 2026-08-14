@@ -7,8 +7,20 @@
   "favoritePlayerLocked": "Endgültig, nach der Angabe nicht mehr änderbar.",
   "savedMessage": "Gespeichert! Der oben angezeigte Benutzername wird bei der nächsten Anmeldung aktualisiert.",
   "saving": "Wird gespeichert…",
+  "deleteSection": {
+    "title": "Gefahrenzone",
+    "description": "Dein Konto und deine persönlichen Daten dauerhaft löschen. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "button": "Konto löschen",
+    "confirmTitle": "Löschung bestätigen",
+    "confirmDescription": "Das ist endgültig: dein Konto, deine Teams und dein Lieblingsspieler werden gelöscht. Ligen, die du erstellt hast, werden ebenfalls für alle Mitglieder gelöscht.",
+    "passwordLabel": "Mit deinem Passwort bestätigen",
+    "cancel": "Abbrechen",
+    "confirmButton": "Endgültig löschen",
+    "deleting": "Wird gelöscht…"
+  },
   "errors": {
     "FAVORITE_PLAYER_LOCKED": "Der Lieblingsspieler ist nach der Angabe endgültig",
-    "INVALID_PLAYER": "Lieblingsspieler nicht gefunden"
+    "INVALID_PLAYER": "Lieblingsspieler nicht gefunden",
+    "INVALID_PASSWORD": "Falsches Passwort"
   }
 }
