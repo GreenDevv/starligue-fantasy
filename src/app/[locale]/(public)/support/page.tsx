@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 
 export const metadata = {
-  title: "Support — Starligue Fantasy",
+  title: "Support — Handball Fantasy",
 };
 
 const SUPPORT_EMAIL = "contact@starliguefantasy.fr";

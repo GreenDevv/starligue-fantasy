@@ -1,4 +1,4 @@
-# Starligue Fantasy
+# Handball Fantasy
 Jeu fantasy basé sur la Starligue (handball D1 FR). Lire ARCHITECTURE.md avant toute feature.
 
 ## Stack

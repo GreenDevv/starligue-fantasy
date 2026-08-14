@@ -95,7 +95,7 @@ export function renderBaseEmail({ preheader, heading, bodyParagraphs, cta, footN
             </tr>
             <tr>
               <td align="center" style="padding-top:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
-                <a href="${SITE_URL}" style="color:${COLORS.textMuted};font-size:12px;text-decoration:none;">Starligue Fantasy — ${SITE_URL.replace(/^https?:\/\//, "")}</a>
+                <a href="${SITE_URL}" style="color:${COLORS.textMuted};font-size:12px;text-decoration:none;">Handball Fantasy — ${SITE_URL.replace(/^https?:\/\//, "")}</a>
               </td>
             </tr>
           </table>

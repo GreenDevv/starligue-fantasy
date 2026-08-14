@@ -98,7 +98,7 @@ export function MobileMenu({
               >
                 <div className="flex items-center justify-between border-b border-border px-4 py-3 pt-[calc(env(safe-area-inset-top)+0.75rem)]">
                   <span className="font-display text-base uppercase tracking-widest text-accent">
-                    Starligue Fantasy
+                    Handball Fantasy
                   </span>
                   <button
                     type="button"

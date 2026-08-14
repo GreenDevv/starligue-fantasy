@@ -1,4 +1,4 @@
-# Starligue Fantasy — Architecture système v1.0
+# Handball Fantasy — Architecture système v1.0
 
 > Jeu de fantasy handball basé sur la Liqui Moly Starligue (D1 française), saison 2026/2027.
 > Document de référence pour le développement avec Claude Code. À placer à la racine du repo.
@@ -7,7 +7,7 @@
 
 ## 1. Vue d'ensemble
 
-Starligue Fantasy reprend le modèle Premier League Fantasy appliqué au handball français :
+Handball Fantasy reprend le modèle Premier League Fantasy appliqué au handball français :
 
 - À l'inscription, chaque utilisateur reçoit un **budget** (valeur configurable, ex : 100 M).
 - Il compose un effectif de **14 joueurs : 2 par poste × 7 postes** (Gardien, Ailier Gauche, Arrière Gauche, Demi-Centre, Arrière Droit, Ailier Droit, Pivot).
@@ -858,7 +858,7 @@ Railway :
 ## 11. CLAUDE.md suggéré (à créer à la racine)
 
 ```md
-# Starligue Fantasy
+# Handball Fantasy
 Jeu fantasy basé sur la Starligue (handball D1 FR). Lire ARCHITECTURE.md avant toute feature.
 
 ## Stack

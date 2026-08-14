@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 
 export const metadata = {
-  title: "Confidentialité & cookies — Starligue Fantasy",
+  title: "Confidentialité & cookies — Handball Fantasy",
 };
 
 // Politique de confidentialité + cookies (une seule page, pratique courante pour un

@@ -32,7 +32,7 @@ export default async function PublicLayout({ children }: { children: React.React
             href="/"
             className="whitespace-nowrap font-display text-base uppercase tracking-widest text-accent"
           >
-            Starligue Fantasy
+            Handball Fantasy
           </Link>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
             {/* Desktop uniquement : sur mobile, nav + connexion sont regroupés

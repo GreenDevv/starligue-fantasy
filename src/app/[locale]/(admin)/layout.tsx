@@ -28,7 +28,7 @@ export default async function AdminLayout({
       <nav className="sticky top-0 z-10 border-b border-border bg-surface/90 pt-[env(safe-area-inset-top)] backdrop-blur-sm">
         <div className="mx-auto flex max-w-4xl items-center gap-4 px-4 py-3">
           <span className="font-display text-base uppercase tracking-widest text-accent">
-            Starligue Fantasy
+            Handball Fantasy
           </span>
           <span className="rounded-full bg-points-neg/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-points-neg">
             {t("nav.badge")}

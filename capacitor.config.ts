@@ -6,7 +6,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 // redirection de next-intl (`localePrefix: "always"`, voir src/i18n/routing.ts).
 const config: CapacitorConfig = {
   appId: "fr.starliguefantasy.app",
-  appName: "Starligue Fantasy",
+  appName: "Handball Fantasy",
   webDir: "capacitor-www",
   server: {
     url: "https://starliguefantasy.fr/fr",

@@ -45,7 +45,7 @@ export default async function GameLayout({
             href="/"
             className="whitespace-nowrap font-display text-base uppercase tracking-widest text-accent"
           >
-            Starligue Fantasy
+            Handball Fantasy
           </Link>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
             {/* Desktop uniquement : sur mobile, nav + saison + compte + connexion

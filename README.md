@@ -1,4 +1,4 @@
-# Starligue Fantasy
+# Handball Fantasy
 
 Jeu fantasy basé sur la Daikin Starligue (handball D1 France). Compose ton équipe avec de vrais joueurs, marque des points sur leurs performances réelles chaque journée, défie tes amis.
 
