@@ -83,7 +83,6 @@ export async function generateMetadata({
       "fantasy handball",
       "handball",
       "Starligue",
-      "Daikin Starligue",
       "jeu fantasy handball",
       "handball D1",
       "pronostics handball",
