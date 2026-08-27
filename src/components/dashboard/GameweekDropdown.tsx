@@ -70,7 +70,7 @@ export function GameweekDropdown({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={label}
-        className="flex items-center gap-0.5 text-[10px] uppercase tracking-widest text-text-muted transition-colors hover:text-text"
+        className="flex shrink-0 items-center gap-0.5 whitespace-nowrap text-[10px] uppercase tracking-widest text-text-muted transition-colors hover:text-text"
       >
         {label}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3 w-3">
