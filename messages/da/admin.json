@@ -264,7 +264,13 @@
       "notFoundReason": "spiller ikke fundet",
       "moreUnmatched": "… og {count} andre"
     },
-    "injuryReasonPlaceholder": "Årsag (valgfri) — fx kontraktophør, karantæne…"
+    "injuryReasonPlaceholder": "Årsag (valgfri) — fx kontraktophør, karantæne…",
+    "lnhPhotoImport": {
+      "title": "Spillerfotos (lnh.fr)",
+      "button": "Hent fra lnh.fr",
+      "help": "rigtige udklippede fotos udgivet af LNH (daikin-starligue/joueurs) — erstatter gradvist de generiske silhuetter, opretter eller sletter ingen spillere",
+      "scrapedResult": "{withPhoto}/{total} spillere med foto fundet på lnh.fr"
+    }
   },
   "transferWindows": {
     "title": "Transfervinduer",
