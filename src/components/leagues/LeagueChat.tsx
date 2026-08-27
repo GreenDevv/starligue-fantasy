@@ -41,10 +41,16 @@ export function LeagueChat({ leagueId, currentUserId }: { leagueId: string; curr
   const [reportedIds, setReportedIds] = useState<Set<string>>(new Set());
 
   async function handleReport(messageId: string) {
-    setMenuOpenFor(null);
     const res = await fetch(`/api/leagues/${leagueId}/chat/${messageId}/report`, { method: "POST" });
     if (res.ok) {
+      // Le menu reste ouvert : c'est lui qui contient le bouton, et c'est ce
+      // bouton qui bascule sur "Signalé" (désactivé) pour donner une
+      // confirmation visible. Le fermer ici — même après le fetch — masque
+      // cette confirmation dans le même rendu et donne l'impression que rien
+      // ne s'est passé. L'utilisateur referme lui-même via "⋯".
       setReportedIds((prev) => new Set(prev).add(messageId));
+    } else {
+      setError(resolveApiError(tRoot, "leagues", (await res.json().catch(() => null))?.error?.code));
     }
   }
 
