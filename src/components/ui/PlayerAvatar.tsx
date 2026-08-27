@@ -84,13 +84,15 @@ export function PlayerAvatar({ player, size = "md", className = "", variant = "a
             referrerPolicy="no-referrer"
             onError={() => setErrored(true)}
           />
-        ) : (
+        ) : (player.photoZoom ?? 1) > 1 ? (
           // Zoom implémenté en agrandissant la boîte de l'image elle-même (object-fit:
           // cover recalculé à cette taille) plutôt qu'un transform:scale() post-crop —
           // ce dernier ne fait que magnifier la fenêtre déjà sélectionnée par
           // object-position au lieu de vraiment "dézoomer" sur plus de résolution/zone
           // de la photo. Même formule que PitchSlotAvatar (rendu SVG du terrain) et
           // PhotoPositionEditor (aperçu admin) — les trois doivent rester identiques.
+          // N'a d'effet visuel qu'à zoom>1 (voir branche par défaut ci-dessous) — un
+          // admin qui a réellement calibré ce joueur via PhotoPositionEditor.
           // eslint-disable-next-line @next/next/no-img-element -- photo hébergée sur des domaines de clubs externes/imprévisibles, incompatible avec next/image sans whitelist statique
           <img
             src={player.photoUrl!}
@@ -102,6 +104,23 @@ export function PlayerAvatar({ player, size = "md", className = "", variant = "a
               left: `${(100 - (player.photoZoom ?? 1) * 100) * ((player.photoOffsetX ?? 50) / 100)}%`,
               top: `${(100 - (player.photoZoom ?? 1) * 100) * ((player.photoOffsetY ?? 50) / 100)}%`,
             }}
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            onError={() => setErrored(true)}
+          />
+        ) : (
+          // Par défaut (aucun réglage admin, zoom<=1 — la formule ci-dessus n'a
+          // alors AUCUN effet, cf. commentaire) : recadrage centré classique qui
+          // coupe le haut de la tête sur les photos lnh.fr (cadrées tête en haut,
+          // corps entier 2:3 écrasé dans une pastille 1:1 carrée). Même recadrage
+          // que variant="photo" focus="head" (object-top), fiable sans réglage
+          // par joueur pour la même raison — demande explicite de l'utilisateur
+          // une fois les vraies photos en place sur le banc.
+          // eslint-disable-next-line @next/next/no-img-element -- photo hébergée sur des domaines de clubs externes/imprévisibles, incompatible avec next/image sans whitelist statique
+          <img
+            src={player.photoUrl!}
+            alt={`${player.firstName} ${player.lastName}`}
+            className="h-full w-full object-cover object-top"
             loading="lazy"
             referrerPolicy="no-referrer"
             onError={() => setErrored(true)}

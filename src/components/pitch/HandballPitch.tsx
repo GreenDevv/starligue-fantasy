@@ -64,11 +64,16 @@ const PHOTO_HEIGHT = PHOTO_WIDTH * 1.5;
 // Coordonnées calibrées à la main via l'éditeur interactif (glisser-déposer +
 // détection de chevauchement en direct, cf. session) — formation resserrée
 // mais vérifiée sans aucun contact entre jetons.
+// GK/PV/CB descendus le 2026-08-27 (demande explicite) : à leur y d'origine, le
+// CB (le plus haut de l'axe central) avait le haut de sa silhouette (coords.y -
+// PHOTO_HEIGHT) au-dessus de VIEW_TOP → tête coupée par le cadrage. PV et GK
+// descendus d'autant pour garder l'écart avec le voisin du dessus (silhouette +
+// nom, cf. boucle SVG) sans se chevaucher.
 const SLOT_COORDS: Record<Position, { x: number; y: number }> = {
-  GK: { x: 100.9, y: 174.7 },
-  PV: { x: 100.3, y: 127.5 },
+  GK: { x: 100.9, y: 198 },
+  PV: { x: 100.3, y: 147 },
   LB: { x: 165.4, y: 93 },
-  CB: { x: 99.2, y: 82.8 },
+  CB: { x: 99.2, y: 99 },
   RB: { x: 35.6, y: 95.2 },
   LW: { x: 169.1, y: 151 },
   RW: { x: 29, y: 154.5 },
