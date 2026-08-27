@@ -26,6 +26,15 @@ export interface HeadToHeadMatch {
   clubAIsHome: boolean;
   clubAScore: number;
   clubBScore: number;
+  // Diffuseur TV officiel (Match.broadcasterName/broadcasterUrl, ARCHITECTURE.md
+  // §4.2) — renseigné seulement pour un match déjà en base (source 1,
+  // getDecidedMatchesFromOwnDb : saison live 2026/27 + Simulation 2025/26).
+  // Absent (undefined) pour le cache ClubHeadToHeadMatch et le backfill lnh.fr
+  // (saisons historiques, sources 2/3) : ni l'un ni l'autre ne capture cette
+  // donnée aujourd'hui — lnh.fr n'affiche de toute façon plus le diffuseur
+  // d'origine sur le calendrier d'une saison archivée.
+  broadcasterName?: string | null;
+  broadcasterUrl?: string | null;
 }
 
 const TARGET_COUNT = 10;
@@ -58,7 +67,17 @@ const HISTORICAL_SEASONS = [
 
 const MAX_SEASONS_TO_SCAN = 8;
 
-function toEntry(clubAId: string, homeClubId: string, awayClubId: string, homeScore: number, awayScore: number, playedAt: Date, seasonLabel: string): HeadToHeadMatch {
+function toEntry(
+  clubAId: string,
+  homeClubId: string,
+  awayClubId: string,
+  homeScore: number,
+  awayScore: number,
+  playedAt: Date,
+  seasonLabel: string,
+  broadcasterName?: string | null,
+  broadcasterUrl?: string | null
+): HeadToHeadMatch {
   const clubAIsHome = homeClubId === clubAId;
   return {
     playedAt,
@@ -66,6 +85,8 @@ function toEntry(clubAId: string, homeClubId: string, awayClubId: string, homeSc
     clubAIsHome,
     clubAScore: clubAIsHome ? homeScore : awayScore,
     clubBScore: clubAIsHome ? awayScore : homeScore,
+    broadcasterName,
+    broadcasterUrl,
   };
 }
 
@@ -107,7 +128,9 @@ async function getDecidedMatchesFromOwnDb(clubAId: string, clubBId: string): Pro
     for (const m of matches) {
       const isDecided = isSimulation ? m.gameweek.number <= (cursor ?? 0) : m.status === "FINISHED";
       if (!isDecided || m.homeScore === null || m.awayScore === null) continue;
-      entries.push(toEntry(clubAId, m.homeClubId, m.awayClubId, m.homeScore, m.awayScore, m.kickoffAt, season.label));
+      entries.push(
+        toEntry(clubAId, m.homeClubId, m.awayClubId, m.homeScore, m.awayScore, m.kickoffAt, season.label, m.broadcasterName, m.broadcasterUrl)
+      );
     }
   }
 
