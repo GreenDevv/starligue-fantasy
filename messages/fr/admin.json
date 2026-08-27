@@ -62,19 +62,52 @@
     "testSeasonNote": "Note : nécessite une saison \"2024-2025\" en base et que les clubs existent avec leurs shortNames corrects. Les matchs seront créés dans la saison correspondante si elle existe.",
     "csvFormatsNote": "Formats CSV : voir ARCHITECTURE.md §7.",
     "cron": {
-      "syncPlayersLnh": { "label": "Sync joueurs LNH", "description": "Scrape noms + postes + clubs depuis lnh.fr (nécessite clubs avec slug LNH configuré)" },
-      "syncPlayersApiSports": { "label": "Sync joueurs API-Sports", "description": "Importe noms/prénoms depuis API-Sports (saison active)" },
-      "syncFixtures": { "label": "Sync calendrier", "description": "Importe fixtures + résultats depuis API-Sports (saison active)" },
-      "syncResults": { "label": "Sync résultats", "description": "Met à jour les scores des matchs terminés" },
-      "syncRatings": { "label": "Sync notes LNH", "description": "Scrape les notes LNH des matchs d'hier (expérimental)" },
-      "snapshotLineups": { "label": "Snapshot lineups", "description": "Gèle les alignements dont la deadline est passée" },
-      "computeScores": { "label": "Calculer les points", "description": "Calcule les points des journées avec toutes les notes" },
-      "syncStandings": { "label": "Sync classement LNH", "description": "Scrape le classement officiel Daikin StarLigue et snapshote la journée en cours" }
+      "syncPlayersLnh": {
+        "label": "Sync joueurs LNH",
+        "description": "Scrape noms + postes + clubs depuis lnh.fr (nécessite clubs avec slug LNH configuré)"
+      },
+      "syncPlayersApiSports": {
+        "label": "Sync joueurs API-Sports",
+        "description": "Importe noms/prénoms depuis API-Sports (saison active)"
+      },
+      "syncFixtures": {
+        "label": "Sync calendrier",
+        "description": "Importe fixtures + résultats depuis API-Sports (saison active)"
+      },
+      "syncResults": {
+        "label": "Sync résultats",
+        "description": "Met à jour les scores des matchs terminés"
+      },
+      "syncRatings": {
+        "label": "Sync notes LNH",
+        "description": "Scrape les notes LNH des matchs d'hier (expérimental)"
+      },
+      "snapshotLineups": {
+        "label": "Snapshot lineups",
+        "description": "Gèle les alignements dont la deadline est passée"
+      },
+      "computeScores": {
+        "label": "Calculer les points",
+        "description": "Calcule les points des journées avec toutes les notes"
+      },
+      "syncStandings": {
+        "label": "Sync classement LNH",
+        "description": "Scrape le classement officiel Daikin StarLigue et snapshote la journée en cours"
+      }
     },
     "cron2024": {
-      "syncPlayers": { "label": "Sync joueurs 2024", "description": "Importe les vrais noms des joueurs 2024/25" },
-      "syncFixtures": { "label": "Sync fixtures 2024", "description": "Importe le calendrier 2024/25 depuis API-Sports" },
-      "syncResults": { "label": "Sync résultats 2024", "description": "Met à jour les scores de la saison 2024/25" }
+      "syncPlayers": {
+        "label": "Sync joueurs 2024",
+        "description": "Importe les vrais noms des joueurs 2024/25"
+      },
+      "syncFixtures": {
+        "label": "Sync fixtures 2024",
+        "description": "Importe le calendrier 2024/25 depuis API-Sports"
+      },
+      "syncResults": {
+        "label": "Sync résultats 2024",
+        "description": "Met à jour les scores de la saison 2024/25"
+      }
     },
     "csvImport": {
       "importButton": "Importer",
@@ -258,6 +291,14 @@
     "postponedButton": "Reporté",
     "cancelledButton": "Annulé",
     "undoButton": "Annuler la saisie",
-    "editButton": "Modifier"
+    "editButton": "Modifier",
+    "filterPending": "À traiter",
+    "filterAll": "Tous les matchs",
+    "searchPlaceholder": "Rechercher un club…",
+    "noSearchResults": "Aucun match ne correspond à la recherche.",
+    "editDateButton": "Modifier la date",
+    "deleteButton": "Supprimer définitivement",
+    "confirmDeleteQuestion": "Supprimer définitivement ce match ? Cette action est irréversible.",
+    "confirmCancelQuestion": "Annuler ce match ? Il sera définitivement supprimé de la base — cette action est irréversible."
   }
 }

@@ -1920,13 +1920,55 @@ rejoué/n'a jamais eu lieu) et marque `FriendlyMatch.source = MANUAL`.
 la `source` déjà en base pour chaque `dedupeKey` du batch scrapé. Si elle
 vaut `MANUAL` **et** que lnh.fr n'a lui-même toujours pas de résultat
 définitif (`status !== FINISHED` ou un des deux scores encore `null`), le
-`status`/`homeScore`/`awayScore`/`source` scrapés sont omis de l'`update`
-Prisma — tout le reste (logos, division, `groupLabel`, `kickoffAt`) continue
+`kickoffAt`/`status`/`homeScore`/`awayScore`/`source` scrapés sont omis de
+l'`update` Prisma — tout le reste (logos, division, `groupLabel`) continue
 d'être rafraîchi normalement. Dès que lnh.fr publie enfin son propre résultat
 définitif, la condition `keepManualOverride` devient fausse et le scraper
 reprend la main pour de bon (`source` repasse à `LNH_SCRAPER`/
 `EHF_SCRAPER`) — l'admin n'a jamais besoin de penser à annuler sa saisie
 manuelle une fois que la source officielle a rattrapé son retard.
+
+### 19.6 Correction de date et suppression de doublon (admin)
+
+Demande explicite du 2026-08-27 : certains matchs restaient visiblement
+"figés" (toujours `SCHEDULED`, coup d'envoi passé, jamais de score) sans que
+la saisie manuelle de résultat (§19.5) soit la bonne réponse. Deux causes
+racines distinctes trouvées en creusant les données prod :
+
+1. **Doublon orphelin** : lnh.fr republie parfois un match sous un nouveau
+   `calendars_id` (donc un nouveau `dedupeKey`) sans retirer l'ancien —
+   `syncFriendlyMatches` upserte alors deux lignes `FriendlyMatch` pour la
+   même rencontre réelle. L'une reçoit le vrai résultat, l'autre reste
+   `SCHEDULED` sans score pour toujours (constaté : Chambéry–Wetzlar,
+   14/08, deux lignes à 16h/18h, une seule avec un score).
+2. **Bug de date figée** : avant ce fix, `kickoffAt` était réécrit
+   inconditionnellement à chaque sync, **y compris** quand `source ===
+   MANUAL` — une correction de date faite à la main dans l'admin se faisait
+   donc systématiquement écraser par le cron du lendemain, avec la date
+   scrapée (erronée) qui "revenait toute seule" sans raison apparente.
+   Corrigé en déplaçant `kickoffAt` dans le même groupe protégé par
+   `keepManualOverride` que `status`/`homeScore`/`awayScore` (voir §19.5).
+
+**`/admin/friendly-matches` étendu** (au-delà de la saisie de résultat) :
+
+- `GET /api/admin/friendly-matches` liste désormais **tous** les
+  `FriendlyMatch` de la saison active (plus seulement ceux au coup d'envoi
+  passé), jusqu'à 300 — sinon impossible de retrouver un match mal daté
+  dans le futur pour le corriger. Toggle client "À traiter"/"Tous les
+  matchs" (+ recherche par nom de club) pour naviguer la liste complète
+  sans perdre la vue "à traiter" par défaut.
+- `PATCH /api/admin/friendly-matches/[id]` accepte maintenant `kickoffAt`
+  seul (indépendamment d'un changement de statut/score) — marque quand
+  même `source = MANUAL` pour bénéficier de la protection anti-écrasement
+  ci-dessus.
+- `DELETE /api/admin/friendly-matches/[id]?hard=1` supprime **définitivement**
+  la ligne (`prisma.friendlyMatch.delete`, différent du `DELETE` sans
+  paramètre qui annule seulement une saisie manuelle et remet `SCHEDULED`) —
+  pour un doublon orphelin comme le cas ci-dessus. ⚠️ Si lnh.fr liste encore
+  l'ancien `calendars_id` au prochain sync (rare mais possible), la ligne
+  supprimée réapparaît via le chemin `create` de l'upsert — pas une garantie
+  absolue de suppression permanente si la source elle-même n'a pas
+  vraiment abandonné cet identifiant.
 
 ## 20. Application mobile (iOS/Android)
 

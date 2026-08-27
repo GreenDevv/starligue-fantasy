@@ -62,19 +62,52 @@
     "testSeasonNote": "Nota: exige uma época \"2024-2025\" na base de dados e que os clubes existam com os seus shortNames corretos. Os jogos serão criados na época correspondente se esta existir.",
     "csvFormatsNote": "Formatos CSV: ver ARCHITECTURE.md §7.",
     "cron": {
-      "syncPlayersLnh": { "label": "Sincronizar jogadores LNH", "description": "Faz scraping de nomes + posições + clubes a partir de lnh.fr (exige clubes com slug LNH configurado)" },
-      "syncPlayersApiSports": { "label": "Sincronizar jogadores API-Sports", "description": "Importa nomes/apelidos a partir da API-Sports (época ativa)" },
-      "syncFixtures": { "label": "Sincronizar calendário", "description": "Importa jogos + resultados a partir da API-Sports (época ativa)" },
-      "syncResults": { "label": "Sincronizar resultados", "description": "Atualiza os resultados dos jogos terminados" },
-      "syncRatings": { "label": "Sincronizar notas LNH", "description": "Faz scraping das notas LNH dos jogos de ontem (experimental)" },
-      "snapshotLineups": { "label": "Snapshot dos alinhamentos", "description": "Congela os alinhamentos cujo prazo já passou" },
-      "computeScores": { "label": "Calcular os pontos", "description": "Calcula os pontos das jornadas com todas as notas" },
-      "syncStandings": { "label": "Sincronizar classificação LNH", "description": "Faz scraping da classificação oficial da Daikin StarLigue e regista a jornada em curso" }
+      "syncPlayersLnh": {
+        "label": "Sincronizar jogadores LNH",
+        "description": "Faz scraping de nomes + posições + clubes a partir de lnh.fr (exige clubes com slug LNH configurado)"
+      },
+      "syncPlayersApiSports": {
+        "label": "Sincronizar jogadores API-Sports",
+        "description": "Importa nomes/apelidos a partir da API-Sports (época ativa)"
+      },
+      "syncFixtures": {
+        "label": "Sincronizar calendário",
+        "description": "Importa jogos + resultados a partir da API-Sports (época ativa)"
+      },
+      "syncResults": {
+        "label": "Sincronizar resultados",
+        "description": "Atualiza os resultados dos jogos terminados"
+      },
+      "syncRatings": {
+        "label": "Sincronizar notas LNH",
+        "description": "Faz scraping das notas LNH dos jogos de ontem (experimental)"
+      },
+      "snapshotLineups": {
+        "label": "Snapshot dos alinhamentos",
+        "description": "Congela os alinhamentos cujo prazo já passou"
+      },
+      "computeScores": {
+        "label": "Calcular os pontos",
+        "description": "Calcula os pontos das jornadas com todas as notas"
+      },
+      "syncStandings": {
+        "label": "Sincronizar classificação LNH",
+        "description": "Faz scraping da classificação oficial da Daikin StarLigue e regista a jornada em curso"
+      }
     },
     "cron2024": {
-      "syncPlayers": { "label": "Sincronizar jogadores 2024", "description": "Importa os nomes reais dos jogadores de 2024/25" },
-      "syncFixtures": { "label": "Sincronizar jogos 2024", "description": "Importa o calendário 2024/25 a partir da API-Sports" },
-      "syncResults": { "label": "Sincronizar resultados 2024", "description": "Atualiza os resultados da época 2024/25" }
+      "syncPlayers": {
+        "label": "Sincronizar jogadores 2024",
+        "description": "Importa os nomes reais dos jogadores de 2024/25"
+      },
+      "syncFixtures": {
+        "label": "Sincronizar jogos 2024",
+        "description": "Importa o calendário 2024/25 a partir da API-Sports"
+      },
+      "syncResults": {
+        "label": "Sincronizar resultados 2024",
+        "description": "Atualiza os resultados da época 2024/25"
+      }
     },
     "csvImport": {
       "importButton": "Importar",
@@ -258,6 +291,14 @@
     "postponedButton": "Adiado",
     "cancelledButton": "Cancelado",
     "undoButton": "Desfazer",
-    "editButton": "Editar"
+    "editButton": "Editar",
+    "filterPending": "Por resolver",
+    "filterAll": "Todos os jogos",
+    "searchPlaceholder": "Procurar um clube…",
+    "noSearchResults": "Nenhum jogo corresponde à pesquisa.",
+    "editDateButton": "Editar data",
+    "deleteButton": "Eliminar definitivamente",
+    "confirmDeleteQuestion": "Eliminar definitivamente este jogo? Esta ação não pode ser desfeita.",
+    "confirmCancelQuestion": "Cancelar este jogo? Será eliminado definitivamente da base de dados — esta ação não pode ser desfeita."
   }
 }

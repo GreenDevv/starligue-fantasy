@@ -62,19 +62,52 @@
     "testSeasonNote": "Bemærk: kræver en sæson \"2024-2025\" i databasen, og at klubberne findes med korrekte shortNames. Kampene oprettes i den tilsvarende sæson, hvis den findes.",
     "csvFormatsNote": "CSV-formater: se ARCHITECTURE.md §7.",
     "cron": {
-      "syncPlayersLnh": { "label": "Sync spillere LNH", "description": "Scraper navne + positioner + klubber fra lnh.fr (kræver klubber med konfigureret LNH-slug)" },
-      "syncPlayersApiSports": { "label": "Sync spillere API-Sports", "description": "Importerer for- og efternavne fra API-Sports (aktiv sæson)" },
-      "syncFixtures": { "label": "Sync kampprogram", "description": "Importerer kampe + resultater fra API-Sports (aktiv sæson)" },
-      "syncResults": { "label": "Sync resultater", "description": "Opdaterer resultaterne for afsluttede kampe" },
-      "syncRatings": { "label": "Sync LNH-noteringer", "description": "Scraper LNH-noteringerne fra gårsdagens kampe (eksperimentelt)" },
-      "snapshotLineups": { "label": "Snapshot af opstillinger", "description": "Fryser opstillinger, hvor deadline er overskredet" },
-      "computeScores": { "label": "Beregn point", "description": "Beregner point for runder med alle noteringer" },
-      "syncStandings": { "label": "Sync LNH-stilling", "description": "Scraper den officielle Daikin StarLigue-stilling og gemmer et snapshot af den igangværende runde" }
+      "syncPlayersLnh": {
+        "label": "Sync spillere LNH",
+        "description": "Scraper navne + positioner + klubber fra lnh.fr (kræver klubber med konfigureret LNH-slug)"
+      },
+      "syncPlayersApiSports": {
+        "label": "Sync spillere API-Sports",
+        "description": "Importerer for- og efternavne fra API-Sports (aktiv sæson)"
+      },
+      "syncFixtures": {
+        "label": "Sync kampprogram",
+        "description": "Importerer kampe + resultater fra API-Sports (aktiv sæson)"
+      },
+      "syncResults": {
+        "label": "Sync resultater",
+        "description": "Opdaterer resultaterne for afsluttede kampe"
+      },
+      "syncRatings": {
+        "label": "Sync LNH-noteringer",
+        "description": "Scraper LNH-noteringerne fra gårsdagens kampe (eksperimentelt)"
+      },
+      "snapshotLineups": {
+        "label": "Snapshot af opstillinger",
+        "description": "Fryser opstillinger, hvor deadline er overskredet"
+      },
+      "computeScores": {
+        "label": "Beregn point",
+        "description": "Beregner point for runder med alle noteringer"
+      },
+      "syncStandings": {
+        "label": "Sync LNH-stilling",
+        "description": "Scraper den officielle Daikin StarLigue-stilling og gemmer et snapshot af den igangværende runde"
+      }
     },
     "cron2024": {
-      "syncPlayers": { "label": "Sync spillere 2024", "description": "Importerer de rigtige spillernavne for 2024/25" },
-      "syncFixtures": { "label": "Sync kampprogram 2024", "description": "Importerer kampprogrammet for 2024/25 fra API-Sports" },
-      "syncResults": { "label": "Sync resultater 2024", "description": "Opdaterer resultaterne for sæson 2024/25" }
+      "syncPlayers": {
+        "label": "Sync spillere 2024",
+        "description": "Importerer de rigtige spillernavne for 2024/25"
+      },
+      "syncFixtures": {
+        "label": "Sync kampprogram 2024",
+        "description": "Importerer kampprogrammet for 2024/25 fra API-Sports"
+      },
+      "syncResults": {
+        "label": "Sync resultater 2024",
+        "description": "Opdaterer resultaterne for sæson 2024/25"
+      }
     },
     "csvImport": {
       "importButton": "Importer",
@@ -258,6 +291,14 @@
     "postponedButton": "Udsat",
     "cancelledButton": "Aflyst",
     "undoButton": "Fortryd",
-    "editButton": "Rediger"
+    "editButton": "Rediger",
+    "filterPending": "Kræver handling",
+    "filterAll": "Alle kampe",
+    "searchPlaceholder": "Søg en klub…",
+    "noSearchResults": "Ingen kampe matcher søgningen.",
+    "editDateButton": "Rediger dato",
+    "deleteButton": "Slet permanent",
+    "confirmDeleteQuestion": "Slet denne kamp permanent? Dette kan ikke fortrydes.",
+    "confirmCancelQuestion": "Aflys denne kamp? Den slettes permanent fra databasen — dette kan ikke fortrydes."
   }
 }

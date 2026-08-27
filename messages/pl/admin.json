@@ -62,19 +62,52 @@
     "testSeasonNote": "Uwaga: wymaga sezonu \"2024-2025\" w bazie oraz klubów z poprawnymi shortNames. Mecze zostaną utworzone w odpowiednim sezonie, jeśli istnieje.",
     "csvFormatsNote": "Formaty CSV: patrz ARCHITECTURE.md §7.",
     "cron": {
-      "syncPlayersLnh": { "label": "Synchro zawodników LNH", "description": "Pobiera imiona, nazwiska, pozycje i kluby z lnh.fr (wymaga klubów ze skonfigurowanym slug LNH)" },
-      "syncPlayersApiSports": { "label": "Synchro zawodników API-Sports", "description": "Importuje imiona/nazwiska z API-Sports (aktywny sezon)" },
-      "syncFixtures": { "label": "Synchro terminarza", "description": "Importuje terminarz i wyniki z API-Sports (aktywny sezon)" },
-      "syncResults": { "label": "Synchro wyników", "description": "Aktualizuje wyniki zakończonych meczów" },
-      "syncRatings": { "label": "Synchro ocen LNH", "description": "Pobiera oceny LNH z wczorajszych meczów (eksperymentalne)" },
-      "snapshotLineups": { "label": "Snapshot składów", "description": "Zamraża ustawienia, których termin już minął" },
-      "computeScores": { "label": "Oblicz punkty", "description": "Oblicza punkty kolejek dla wszystkich dostępnych ocen" },
-      "syncStandings": { "label": "Synchro tabeli LNH", "description": "Pobiera oficjalną tabelę Daikin StarLigue i zapisuje stan bieżącej kolejki" }
+      "syncPlayersLnh": {
+        "label": "Synchro zawodników LNH",
+        "description": "Pobiera imiona, nazwiska, pozycje i kluby z lnh.fr (wymaga klubów ze skonfigurowanym slug LNH)"
+      },
+      "syncPlayersApiSports": {
+        "label": "Synchro zawodników API-Sports",
+        "description": "Importuje imiona/nazwiska z API-Sports (aktywny sezon)"
+      },
+      "syncFixtures": {
+        "label": "Synchro terminarza",
+        "description": "Importuje terminarz i wyniki z API-Sports (aktywny sezon)"
+      },
+      "syncResults": {
+        "label": "Synchro wyników",
+        "description": "Aktualizuje wyniki zakończonych meczów"
+      },
+      "syncRatings": {
+        "label": "Synchro ocen LNH",
+        "description": "Pobiera oceny LNH z wczorajszych meczów (eksperymentalne)"
+      },
+      "snapshotLineups": {
+        "label": "Snapshot składów",
+        "description": "Zamraża ustawienia, których termin już minął"
+      },
+      "computeScores": {
+        "label": "Oblicz punkty",
+        "description": "Oblicza punkty kolejek dla wszystkich dostępnych ocen"
+      },
+      "syncStandings": {
+        "label": "Synchro tabeli LNH",
+        "description": "Pobiera oficjalną tabelę Daikin StarLigue i zapisuje stan bieżącej kolejki"
+      }
     },
     "cron2024": {
-      "syncPlayers": { "label": "Synchro zawodników 2024", "description": "Importuje prawdziwe nazwiska zawodników 2024/25" },
-      "syncFixtures": { "label": "Synchro terminarza 2024", "description": "Importuje terminarz 2024/25 z API-Sports" },
-      "syncResults": { "label": "Synchro wyników 2024", "description": "Aktualizuje wyniki sezonu 2024/25" }
+      "syncPlayers": {
+        "label": "Synchro zawodników 2024",
+        "description": "Importuje prawdziwe nazwiska zawodników 2024/25"
+      },
+      "syncFixtures": {
+        "label": "Synchro terminarza 2024",
+        "description": "Importuje terminarz 2024/25 z API-Sports"
+      },
+      "syncResults": {
+        "label": "Synchro wyników 2024",
+        "description": "Aktualizuje wyniki sezonu 2024/25"
+      }
     },
     "csvImport": {
       "importButton": "Importuj",
@@ -258,6 +291,14 @@
     "postponedButton": "Odłożony",
     "cancelledButton": "Odwołany",
     "undoButton": "Cofnij wpis",
-    "editButton": "Edytuj"
+    "editButton": "Edytuj",
+    "filterPending": "Do uzupełnienia",
+    "filterAll": "Wszystkie mecze",
+    "searchPlaceholder": "Szukaj klubu…",
+    "noSearchResults": "Brak meczów pasujących do wyszukiwania.",
+    "editDateButton": "Edytuj datę",
+    "deleteButton": "Usuń trwale",
+    "confirmDeleteQuestion": "Trwale usunąć ten mecz? Tej operacji nie można cofnąć.",
+    "confirmCancelQuestion": "Odwołać ten mecz? Zostanie trwale usunięty z bazy danych — tej operacji nie można cofnąć."
   }
 }

@@ -62,19 +62,52 @@
     "testSeasonNote": "Note: requires a \"2024-2025\" season in the database and clubs with correct shortNames. Matches will be created in the matching season if it exists.",
     "csvFormatsNote": "CSV formats: see ARCHITECTURE.md §7.",
     "cron": {
-      "syncPlayersLnh": { "label": "Sync LNH players", "description": "Scrapes names + positions + clubs from lnh.fr (requires clubs with an LNH slug configured)" },
-      "syncPlayersApiSports": { "label": "Sync API-Sports players", "description": "Imports first/last names from API-Sports (active season)" },
-      "syncFixtures": { "label": "Sync fixtures", "description": "Imports fixtures + results from API-Sports (active season)" },
-      "syncResults": { "label": "Sync results", "description": "Updates the scores of completed matches" },
-      "syncRatings": { "label": "Sync LNH ratings", "description": "Scrapes yesterday's LNH match ratings (experimental)" },
-      "snapshotLineups": { "label": "Snapshot lineups", "description": "Freezes lineups whose deadline has passed" },
-      "computeScores": { "label": "Compute points", "description": "Computes points for matchdays with all ratings in" },
-      "syncStandings": { "label": "Sync LNH standings", "description": "Scrapes the official Daikin StarLigue standings and snapshots the current matchday" }
+      "syncPlayersLnh": {
+        "label": "Sync LNH players",
+        "description": "Scrapes names + positions + clubs from lnh.fr (requires clubs with an LNH slug configured)"
+      },
+      "syncPlayersApiSports": {
+        "label": "Sync API-Sports players",
+        "description": "Imports first/last names from API-Sports (active season)"
+      },
+      "syncFixtures": {
+        "label": "Sync fixtures",
+        "description": "Imports fixtures + results from API-Sports (active season)"
+      },
+      "syncResults": {
+        "label": "Sync results",
+        "description": "Updates the scores of completed matches"
+      },
+      "syncRatings": {
+        "label": "Sync LNH ratings",
+        "description": "Scrapes yesterday's LNH match ratings (experimental)"
+      },
+      "snapshotLineups": {
+        "label": "Snapshot lineups",
+        "description": "Freezes lineups whose deadline has passed"
+      },
+      "computeScores": {
+        "label": "Compute points",
+        "description": "Computes points for matchdays with all ratings in"
+      },
+      "syncStandings": {
+        "label": "Sync LNH standings",
+        "description": "Scrapes the official Daikin StarLigue standings and snapshots the current matchday"
+      }
     },
     "cron2024": {
-      "syncPlayers": { "label": "Sync 2024 players", "description": "Imports real player names for 2024/25" },
-      "syncFixtures": { "label": "Sync 2024 fixtures", "description": "Imports the 2024/25 calendar from API-Sports" },
-      "syncResults": { "label": "Sync 2024 results", "description": "Updates scores for the 2024/25 season" }
+      "syncPlayers": {
+        "label": "Sync 2024 players",
+        "description": "Imports real player names for 2024/25"
+      },
+      "syncFixtures": {
+        "label": "Sync 2024 fixtures",
+        "description": "Imports the 2024/25 calendar from API-Sports"
+      },
+      "syncResults": {
+        "label": "Sync 2024 results",
+        "description": "Updates scores for the 2024/25 season"
+      }
     },
     "csvImport": {
       "importButton": "Import",
@@ -258,6 +291,14 @@
     "postponedButton": "Postponed",
     "cancelledButton": "Cancelled",
     "undoButton": "Undo entry",
-    "editButton": "Edit"
+    "editButton": "Edit",
+    "filterPending": "Needs action",
+    "filterAll": "All matches",
+    "searchPlaceholder": "Search a club…",
+    "noSearchResults": "No match found.",
+    "editDateButton": "Edit date",
+    "deleteButton": "Delete permanently",
+    "confirmDeleteQuestion": "Permanently delete this match? This cannot be undone.",
+    "confirmCancelQuestion": "Cancel this match? It will be permanently deleted from the database — this cannot be undone."
   }
 }

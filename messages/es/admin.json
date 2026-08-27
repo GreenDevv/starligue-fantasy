@@ -62,19 +62,52 @@
     "testSeasonNote": "Nota: requiere una temporada \"2024-2025\" en la base de datos y que los clubes existan con sus shortNames correctos. Los partidos se crearán en la temporada correspondiente si existe.",
     "csvFormatsNote": "Formatos CSV: ver ARCHITECTURE.md §7.",
     "cron": {
-      "syncPlayersLnh": { "label": "Sincronizar jugadores LNH", "description": "Extrae nombres + posiciones + clubes desde lnh.fr (requiere clubes con slug LNH configurado)" },
-      "syncPlayersApiSports": { "label": "Sincronizar jugadores API-Sports", "description": "Importa nombres/apellidos desde API-Sports (temporada activa)" },
-      "syncFixtures": { "label": "Sincronizar calendario", "description": "Importa partidos + resultados desde API-Sports (temporada activa)" },
-      "syncResults": { "label": "Sincronizar resultados", "description": "Actualiza los resultados de los partidos terminados" },
-      "syncRatings": { "label": "Sincronizar notas LNH", "description": "Extrae las notas LNH de los partidos de ayer (experimental)" },
-      "snapshotLineups": { "label": "Snapshot alineaciones", "description": "Congela las alineaciones cuya fecha límite ya ha pasado" },
-      "computeScores": { "label": "Calcular puntos", "description": "Calcula los puntos de las jornadas con todas las notas" },
-      "syncStandings": { "label": "Sincronizar clasificación LNH", "description": "Extrae la clasificación oficial de la Daikin StarLigue y guarda la jornada en curso" }
+      "syncPlayersLnh": {
+        "label": "Sincronizar jugadores LNH",
+        "description": "Extrae nombres + posiciones + clubes desde lnh.fr (requiere clubes con slug LNH configurado)"
+      },
+      "syncPlayersApiSports": {
+        "label": "Sincronizar jugadores API-Sports",
+        "description": "Importa nombres/apellidos desde API-Sports (temporada activa)"
+      },
+      "syncFixtures": {
+        "label": "Sincronizar calendario",
+        "description": "Importa partidos + resultados desde API-Sports (temporada activa)"
+      },
+      "syncResults": {
+        "label": "Sincronizar resultados",
+        "description": "Actualiza los resultados de los partidos terminados"
+      },
+      "syncRatings": {
+        "label": "Sincronizar notas LNH",
+        "description": "Extrae las notas LNH de los partidos de ayer (experimental)"
+      },
+      "snapshotLineups": {
+        "label": "Snapshot alineaciones",
+        "description": "Congela las alineaciones cuya fecha límite ya ha pasado"
+      },
+      "computeScores": {
+        "label": "Calcular puntos",
+        "description": "Calcula los puntos de las jornadas con todas las notas"
+      },
+      "syncStandings": {
+        "label": "Sincronizar clasificación LNH",
+        "description": "Extrae la clasificación oficial de la Daikin StarLigue y guarda la jornada en curso"
+      }
     },
     "cron2024": {
-      "syncPlayers": { "label": "Sincronizar jugadores 2024", "description": "Importa los nombres reales de los jugadores 2024/25" },
-      "syncFixtures": { "label": "Sincronizar calendario 2024", "description": "Importa el calendario 2024/25 desde API-Sports" },
-      "syncResults": { "label": "Sincronizar resultados 2024", "description": "Actualiza los resultados de la temporada 2024/25" }
+      "syncPlayers": {
+        "label": "Sincronizar jugadores 2024",
+        "description": "Importa los nombres reales de los jugadores 2024/25"
+      },
+      "syncFixtures": {
+        "label": "Sincronizar calendario 2024",
+        "description": "Importa el calendario 2024/25 desde API-Sports"
+      },
+      "syncResults": {
+        "label": "Sincronizar resultados 2024",
+        "description": "Actualiza los resultados de la temporada 2024/25"
+      }
     },
     "csvImport": {
       "importButton": "Importar",
@@ -258,6 +291,14 @@
     "postponedButton": "Aplazado",
     "cancelledButton": "Cancelado",
     "undoButton": "Deshacer",
-    "editButton": "Editar"
+    "editButton": "Editar",
+    "filterPending": "Pendientes",
+    "filterAll": "Todos los partidos",
+    "searchPlaceholder": "Buscar un club…",
+    "noSearchResults": "Ningún partido coincide con la búsqueda.",
+    "editDateButton": "Editar fecha",
+    "deleteButton": "Eliminar definitivamente",
+    "confirmDeleteQuestion": "¿Eliminar definitivamente este partido? Esta acción no se puede deshacer.",
+    "confirmCancelQuestion": "¿Cancelar este partido? Se eliminará definitivamente de la base de datos — esta acción no se puede deshacer."
   }
 }
