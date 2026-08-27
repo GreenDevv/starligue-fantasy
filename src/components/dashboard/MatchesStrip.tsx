@@ -278,7 +278,10 @@ export function MatchesStrip({
       <div className={isOpen ? "mb-2" : ""}>
         <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-1.5">
-            <p className="truncate text-[10px] uppercase tracking-widest text-text-muted">{title}</p>
+            {/* tracking-wide (pas -widest) : "UPCOMING MATCHES" est nettement plus
+                long que "PROCHAINS MATCHS" et l'espacement maximal aggravait le
+                débordement en anglais dans ce widget étroit (feedback utilisateur). */}
+            <p className="truncate text-[10px] uppercase tracking-wide text-text-muted">{title}</p>
             {collapsible && !isOpen && matches.length > 0 && (
               <span className="shrink-0 text-[10px] text-text-muted/60">({matches.length})</span>
             )}
@@ -313,7 +316,7 @@ export function MatchesStrip({
                 label={t("matchesStrip.gameweek", { number: gameweekNumber })}
               />
             ) : (
-              <p className="whitespace-nowrap text-[10px] uppercase tracking-widest text-text-muted">
+              <p className="whitespace-nowrap text-[10px] uppercase tracking-wide text-text-muted">
                 {t("matchesStrip.gameweek", { number: gameweekNumber })}
               </p>
             )}
