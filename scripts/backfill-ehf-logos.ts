@@ -37,6 +37,17 @@
 // Si un de ces 6 clubs disparaît puis réapparaît un jour (fichier supprimé entre
 // temps), vérifier à la main la transparence du logo re-téléchargé avant de le
 // commiter — ne pas supposer que la source EHF s'est améliorée entre-temps.
+//
+// **Même piège reconstaté le 2026-08-27, côté European League cette fois** (CSM
+// Bucuresti, Hammarby Handboll, HC Izvidac, RK Nexe — repéré par l'utilisateur).
+// Corrigés différemment des 6 ci-dessus : au lieu de chercher une source de
+// remplacement, fond blanc retiré directement sur le fichier existant (flood fill
+// depuis les bords, seuil ~25/255, RGB conservé — script ponctuel, pas commité).
+// Kadetten Schaffhausen inspecté à la même occasion : PAS un cas de fond blanc
+// (carte orange/noire avec le blason, fond opaque assumé par le design officiel du
+// club) — laissé tel quel, seule une fine bordure blanche résiduelle a été nettoyée.
+// Même protection qu'au-dessus : ces 4 fichiers ne seront jamais vus comme
+// "manquants" par ce script, donc jamais réécrasés par un futur run.
 import { PrismaClient } from "@prisma/client";
 import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
