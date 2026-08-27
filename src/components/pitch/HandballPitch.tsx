@@ -311,13 +311,13 @@ export function HandballPitch({
           />
 
           {/* Postes joueurs. Sans photo : anneau + initiales + nom, tout en SVG
-              (inchangé). Avec photo : juste une ombre au sol (ancre visuelle,
-              remplace la pastille) + le nom — le joueur "debout" lui-même est posé
-              en HTML par-dessus (voir la boucle juste après ce <svg>), qui porte
-              alors son propre clic (pointer-events actif sur ce calque-là plutôt
-              qu'ici, cf. commentaire de PitchStarterPhoto) : un <g> SVG ne réagit au
-              clic que sur les formes qu'il contient réellement, pas sur toute la
-              silhouette debout qui vit hors du SVG. */}
+              (inchangé). Avec photo : juste le nom (pas d'ombre au sol — retirée,
+              demande explicite de l'utilisateur) — le joueur "debout" lui-même est
+              posé en HTML par-dessus (voir la boucle juste après ce <svg>), qui
+              porte alors son propre clic (pointer-events actif sur ce calque-là
+              plutôt qu'ici, cf. commentaire de PitchStarterPhoto) : un <g> SVG ne
+              réagit au clic que sur les formes qu'il contient réellement, pas sur
+              toute la silhouette debout qui vit hors du SVG. */}
           {POSITIONS.map((pos) => {
             const coords = SLOT_COORDS[pos];
             const player = starterByPos.get(pos);
@@ -342,11 +342,6 @@ export function HandballPitch({
                 {player ? (
                   standing ? (
                     <>
-                      <ellipse
-                        cx={coords.x} cy={coords.y + 3}
-                        rx={PHOTO_WIDTH * 0.32} ry={PHOTO_WIDTH * 0.1}
-                        fill={RING_HEX[pos]} opacity="0.25"
-                      />
                       <text
                         x={coords.x} y={coords.y + 12}
                         textAnchor="middle" fill="#F1F5F9" fontSize={nameFontSize(lastName ?? "")} fontWeight="600"
