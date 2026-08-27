@@ -120,6 +120,8 @@ export async function setupSimulationSeason(opts: {
         status: row.status,
         homeScore: row.homeScore,
         awayScore: row.awayScore,
+        broadcasterName: row.broadcasterName,
+        broadcasterUrl: row.broadcasterUrl,
         externalIds: { lnh_calendars_id: row.calendarsId },
       };
       if (existing) {

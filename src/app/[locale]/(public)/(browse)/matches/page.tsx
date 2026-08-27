@@ -154,25 +154,37 @@ export default async function MatchesPage({ searchParams }: Props) {
                   </Link>
 
                   {/* Score or date */}
-                  <Link
-                    href={centerHref}
-                    className="w-24 shrink-0 rounded-md text-center transition-colors hover:bg-border/20"
-                  >
-                    {played ? (
-                      <p className="font-arcade text-lg tabular-nums text-text">
-                        {m.homeScore} — {m.awayScore}
-                      </p>
-                    ) : (
-                      <p className="text-[10px] leading-tight text-text-muted">
-                        {formatKickoff(m.kickoffAt)}
-                      </p>
+                  <div className="w-24 shrink-0 text-center">
+                    <Link href={centerHref} className="block rounded-md transition-colors hover:bg-border/20">
+                      {played ? (
+                        <p className="font-arcade text-lg tabular-nums text-text">
+                          {m.homeScore} — {m.awayScore}
+                        </p>
+                      ) : (
+                        <p className="text-[10px] leading-tight text-text-muted">
+                          {formatKickoff(m.kickoffAt)}
+                        </p>
+                      )}
+                      {m.status === "LIVE" && (
+                        <span className="pixel-corners-sm mt-0.5 inline-block bg-points-neg/20 px-1.5 py-0.5 text-[9px] font-bold uppercase text-points-neg shadow-glow-red">
+                          {t("list.live")}
+                        </span>
+                      )}
+                    </Link>
+                    {/* Lien frère (pas imbriqué dans le Link ci-dessus, un <a> dans
+                        un <a> serait invalide) — vers le diffuseur, indépendant du
+                        lien vers le head-to-head. */}
+                    {!played && m.broadcasterName && m.broadcasterUrl && (
+                      <a
+                        href={m.broadcasterUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-0.5 block text-[9px] uppercase tracking-wide text-text-muted/70 hover:text-accent"
+                      >
+                        📺 {m.broadcasterName}
+                      </a>
                     )}
-                    {m.status === "LIVE" && (
-                      <span className="pixel-corners-sm mt-0.5 inline-block bg-points-neg/20 px-1.5 py-0.5 text-[9px] font-bold uppercase text-points-neg shadow-glow-red">
-                        {t("list.live")}
-                      </span>
-                    )}
-                  </Link>
+                  </div>
 
                   {/* Away club */}
                   <Link

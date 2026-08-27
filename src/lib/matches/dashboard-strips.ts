@@ -13,6 +13,10 @@ export interface DashboardStripMatch {
   homeScore: number | null;
   awayScore: number | null;
   kickoffAt: Date;
+  // Diffuseur TV officiel (ARCHITECTURE.md §4.2) — null tant que non (re)synchronisé
+  // depuis lnh.fr (syncCalendarsIdsForSeason) ou pour un match sans diffuseur connu.
+  broadcasterName: string | null;
+  broadcasterUrl: string | null;
 }
 
 export interface DashboardStrips {

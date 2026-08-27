@@ -185,6 +185,47 @@ J+1   matin : notes LNH publiées → cron `sync-ratings` (scraper) OU import CS
 
 Le calcul des scores est **rejouable** : `compute-scores(gameweekId)` efface et recalcule. Indispensable quand la LNH corrige une note a posteriori.
 
+### 4.2 Ajustement des dates officielles + diffuseur TV
+
+Ajouté le 2026-08-27, demande explicite de l'utilisateur : lnh.fr publie
+d'abord une date **générique** par journée (ex: J1 → "4 septembre" pour
+tous les matchs), avant d'ajuster **chaque match individuellement** (±2
+jours) une fois les horaires TV confirmés — exemple constaté : Caen–Dunkerque
+J1, initialement 4 septembre, confirmé dimanche 6 septembre 17h00. Le
+calendrier de la saison en direct n'étant importé **qu'une fois** par CSV
+(`prisma/fixtures_starligue_2026.csv`, §4 ci-dessus), rien ne corrigeait
+`Match.kickoffAt` une fois cette date générique figée en base.
+
+- `Match.kickoffAt`/`broadcasterName`/`broadcasterUrl` sont désormais
+  resynchronisés depuis lnh.fr par `syncCalendarsIdsForSeason`
+  (`src/lib/ingestion/boxscore.ts`) — la même fonction qui résolvait déjà
+  `lnh_calendars_id` et mettait à jour `status`/`homeScore`/`awayScore`.
+  Automatique via le cron `sync-ratings` (quotidien) ou le déclencheur
+  manuel équivalent sur `/admin` (section "Déclencheurs manuels").
+- **Diffuseur TV** : scrapé depuis le bloc `col-tv` du calendrier lnh.fr
+  (`parseCalendarFromHtml`, `src/lib/data-providers/lnh-scraper.provider.ts`)
+  — deux diffuseurs observés à ce jour, beIN Sport et Handball TV
+  (`BROADCASTER_NAMES`, mapping par préfixe de fichier logo). Le lien
+  fourni par lnh.fr est **générique par diffuseur** (page
+  abonnement/calendrier), pas un lien direct vers un match précis — c'est
+  la seule donnée que lnh.fr expose. Affiché en badge cliquable (icône TV)
+  sur `MatchesStrip` (home/team/simulation) et sur `/matches` (liste par
+  journée) pour un match pas encore joué.
+- **`Gameweek.deadlineAt` recalculée en conséquence** (`recomputeGameweekDeadlines`,
+  même fichier) : 1h avant le match le plus tôt de la journée, même règle
+  qu'à l'import CSV initial (`src/lib/ingestion/sync.ts`). Deux garde-fous
+  volontaires pour ne jamais impacter un utilisateur sans préavis :
+  journée déjà notée (`isScored`) jamais touchée, et nouvelle deadline
+  appliquée **seulement si elle reste dans le futur** — si le recalcul
+  donnait une deadline déjà passée, l'ancienne valeur reste en place
+  plutôt que de faire apparaître d'un coup une deadline désormais
+  derrière le joueur.
+- Mode Simulation (`src/lib/simulation/setup.ts`) : bénéficie de la même
+  donnée `broadcasterName`/`broadcasterUrl` dès l'import initial (déjà
+  présente dans `ScrapedFixture`, pas de nouveau scrape), par cohérence —
+  la saison 2025/26 étant terminée, son `kickoffAt` n'a en revanche plus
+  de raison de bouger.
+
 ---
 
 ## 5. Modèle de données (Prisma)
