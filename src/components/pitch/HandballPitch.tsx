@@ -47,8 +47,19 @@ const VIEW_TOP = 62; // recadrage : commence juste au-dessus du demi-centre
 const BOTTOM_PAD = 4; // marge sous le gardien pour que son nom ne touche pas le bord
 const VIEW_HEIGHT = COURT + GOAL_DEPTH - VIEW_TOP + BOTTOM_PAD;
 
-const R = 12; // rayon de l'avatar joueur
-const RING_R = 13.5; // rayon du halo coloré derrière l'avatar
+const R = 12; // rayon de l'avatar joueur (fallback initiales, pas de photo)
+const RING_R = 13.5; // rayon du halo coloré derrière l'avatar (fallback initiales)
+
+// Joueur "debout" sur le terrain (PNG détouré lnh.fr, ARCHITECTURE.md §8.1/§4.2,
+// demande explicite de l'utilisateur) — remplace la pastille ronde uniquement
+// quand une vraie photo existe (le fallback initiales garde l'ancien rendu en
+// pastille, cf. plus bas). Pied ancré sur SLOT_COORDS, le corps s'étend vers le
+// haut. Largeur choisie pour rester dans l'espacement le plus serré de la
+// formation (CB au-dessus de PV, ~45 unités de marge verticale) une fois la
+// hauteur dérivée du ratio des photos lnh.fr (~350×525, 2:3) : 22×33 tient sans
+// chevaucher le voisin du dessus, vérifié en navigateur sur les 7 postes.
+const PHOTO_WIDTH = 22;
+const PHOTO_HEIGHT = PHOTO_WIDTH * 1.5;
 
 // Coordonnées calibrées à la main via l'éditeur interactif (glisser-déposer +
 // détection de chevauchement en direct, cf. session) — formation resserrée
@@ -104,9 +115,13 @@ function pctPosition(coords: { x: number; y: number }, dx = 0, dy = 0) {
 function PitchClubBadge({
   coords,
   club,
+  dx = 9.5,
+  dy = 9.5,
 }: {
   coords: { x: number; y: number };
   club: { shortName: string; logoUrl?: string | null };
+  dx?: number;
+  dy?: number;
 }) {
   const [errored, setErrored] = useState(false);
   const showLogo = Boolean(club.logoUrl) && !errored;
@@ -116,7 +131,7 @@ function PitchClubBadge({
   return (
     <div
       className={cnAbsoluteBadge(needsWhiteBg)}
-      style={{ ...pctPosition(coords, 9.5, 9.5), width: `${sizePct}%`, aspectRatio: "1 / 1" }}
+      style={{ ...pctPosition(coords, dx, dy), width: `${sizePct}%`, aspectRatio: "1 / 1" }}
     >
       {showLogo ? (
         // eslint-disable-next-line @next/next/no-img-element -- logos hébergés localement mais chemin dynamique par club
@@ -141,7 +156,17 @@ function cnAbsoluteBadge(withWhiteBg: boolean) {
 }
 
 // Pastille de points — coin haut-gauche, miroir de l'écusson de club.
-function PointsBadge({ coords, points }: { coords: { x: number; y: number }; points: number }) {
+function PointsBadge({
+  coords,
+  points,
+  dx = -9.5,
+  dy = -9.5,
+}: {
+  coords: { x: number; y: number };
+  points: number;
+  dx?: number;
+  dy?: number;
+}) {
   const positive = points >= 0;
   const color = positive ? "#34D399" : "#F87171";
   const sizePct = ((7 * 2) / COURT) * 100;
@@ -149,7 +174,7 @@ function PointsBadge({ coords, points }: { coords: { x: number; y: number }; poi
     <div
       className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border"
       style={{
-        ...pctPosition(coords, -9.5, -9.5),
+        ...pctPosition(coords, dx, dy),
         width: `${sizePct}%`,
         aspectRatio: "1 / 1",
         backgroundColor: "#0E1116",
@@ -164,13 +189,21 @@ function PointsBadge({ coords, points }: { coords: { x: number; y: number }; poi
 }
 
 // Brassard de capitaine — coin haut-droit, seul coin encore libre.
-function PitchCaptainBadge({ coords }: { coords: { x: number; y: number } }) {
+function PitchCaptainBadge({
+  coords,
+  dx = 9.5,
+  dy = -9.5,
+}: {
+  coords: { x: number; y: number };
+  dx?: number;
+  dy?: number;
+}) {
   const sizePct = ((7 * 2) / COURT) * 100;
   return (
     <div
       className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-bg"
       style={{
-        ...pctPosition(coords, 9.5, -9.5),
+        ...pctPosition(coords, dx, dy),
         width: `${sizePct}%`,
         aspectRatio: "1 / 1",
         backgroundColor: "#F59E0B",
@@ -181,40 +214,20 @@ function PitchCaptainBadge({ coords }: { coords: { x: number; y: number } }) {
   );
 }
 
-// Photo d'un titulaire, posée en HTML par-dessus le SVG (pas dans un <image>+
-// clipPath SVG) — même technique que PlayerAvatar (boîte de l'image agrandie au
-// zoom, object-fit:cover recalculé à cette taille, décalée en position absolue),
-// vérifiée fiable sur le banc (HTML) contrairement au rendu SVG précédent qui ne
-// donnait pas un résultat identique à l'aperçu admin malgré une formule pourtant
-// équivalente sur le papier — sans navigateur pour comparer pixel à pixel, la
-// version qui marche déjà (HTML) l'emporte sur la version SVG qu'on ne peut pas
-// vérifier ici.
-function PitchStarterPhoto({
-  photoUrl,
-  photoOffsetX = 50,
-  photoOffsetY = 50,
-  photoZoom = 1,
-  alt,
-}: {
-  photoUrl: string;
-  photoOffsetX?: number;
-  photoOffsetY?: number;
-  photoZoom?: number;
-  alt: string;
-}) {
+// Photo d'un titulaire "debout" sur le terrain, posée en HTML par-dessus le SVG
+// (pas dans un <image>+clipPath SVG — vérifiée fiable sur le banc, contrairement
+// au rendu SVG précédent qui ne donnait pas un résultat identique à l'aperçu admin
+// malgré une formule pourtant équivalente sur le papier). Contrairement à
+// PlayerAvatar (pastille ronde, recadrage/zoom admin), le PNG lnh.fr est déjà
+// détouré : object-contain, aucun recadrage — l'image entière, telle quelle.
+function PitchStarterPhoto({ photoUrl, alt }: { photoUrl: string; alt: string }) {
   const [errored, setErrored] = useState(false);
   if (errored) return null;
   return (
     <img
       src={photoUrl}
       alt={alt}
-      className="absolute object-cover"
-      style={{
-        width: `${photoZoom * 100}%`,
-        height: `${photoZoom * 100}%`,
-        left: `${(100 - photoZoom * 100) * (photoOffsetX / 100)}%`,
-        top: `${(100 - photoZoom * 100) * (photoOffsetY / 100)}%`,
-      }}
+      className="h-full w-full object-contain object-bottom"
       onError={() => setErrored(true)}
     />
   );
@@ -292,37 +305,58 @@ export function HandballPitch({
             fill="url(#goalNet)" stroke="#2DD4BF" strokeWidth="1.5" strokeOpacity="0.8"
           />
 
-          {/* Postes joueurs — anneaux + textes restent en SVG (pas de photo ici,
-              pas concernés par le recadrage) ; la photo elle-même est posée en HTML
-              par-dessus (voir la boucle juste après ce <svg>). */}
+          {/* Postes joueurs. Sans photo : anneau + initiales + nom, tout en SVG
+              (inchangé). Avec photo : juste une ombre au sol (ancre visuelle,
+              remplace la pastille) + le nom — le joueur "debout" lui-même est posé
+              en HTML par-dessus (voir la boucle juste après ce <svg>), qui porte
+              alors son propre clic (pointer-events actif sur ce calque-là plutôt
+              qu'ici, cf. commentaire de PitchStarterPhoto) : un <g> SVG ne réagit au
+              clic que sur les formes qu'il contient réellement, pas sur toute la
+              silhouette debout qui vit hors du SVG. */}
           {POSITIONS.map((pos) => {
             const coords = SLOT_COORDS[pos];
             const player = starterByPos.get(pos);
             const lastName = player?.lastName ?? null;
             const clickable = player ? true : Boolean(onEmptySlotClick);
+            const standing = Boolean(player?.photoUrl);
 
             return (
               <g
                 key={pos}
                 onClick={
-                  player
+                  player && !standing
                     ? onSwap
                       ? () => onSwap(player.playerId)
                       : () => router.push(`/players/${player.playerId}`)
-                    : onEmptySlotClick
+                    : onEmptySlotClick && !player
                       ? () => onEmptySlotClick(pos)
                       : undefined
                 }
-                style={{ cursor: clickable ? "pointer" : "default" }}
+                style={{ cursor: clickable && !standing ? "pointer" : "default" }}
               >
                 {player ? (
-                  <>
-                    <circle cx={coords.x} cy={coords.y} r={RING_R} fill={RING_HEX[pos]} opacity="0.16" />
-                    <circle
-                      cx={coords.x} cy={coords.y} r={R}
-                      fill="#171C24" stroke={RING_HEX[pos]} strokeWidth="1.75" strokeOpacity="0.95"
-                    />
-                    {!player.photoUrl && (
+                  standing ? (
+                    <>
+                      <ellipse
+                        cx={coords.x} cy={coords.y + 3}
+                        rx={PHOTO_WIDTH * 0.32} ry={PHOTO_WIDTH * 0.1}
+                        fill={RING_HEX[pos]} opacity="0.25"
+                      />
+                      <text
+                        x={coords.x} y={coords.y + 12}
+                        textAnchor="middle" fill="#F1F5F9" fontSize={nameFontSize(lastName ?? "")} fontWeight="600"
+                        style={{ fontFamily: "var(--font-sans), Inter, sans-serif" }}
+                      >
+                        {lastName}
+                      </text>
+                    </>
+                  ) : (
+                    <>
+                      <circle cx={coords.x} cy={coords.y} r={RING_R} fill={RING_HEX[pos]} opacity="0.16" />
+                      <circle
+                        cx={coords.x} cy={coords.y} r={R}
+                        fill="#171C24" stroke={RING_HEX[pos]} strokeWidth="1.75" strokeOpacity="0.95"
+                      />
                       <text
                         x={coords.x} y={coords.y + R * 0.32}
                         textAnchor="middle" fill="#F1F5F9" fontSize={R * 0.85} fontWeight="700"
@@ -330,15 +364,15 @@ export function HandballPitch({
                       >
                         {initials(player.firstName, player.lastName)}
                       </text>
-                    )}
-                    <text
-                      x={coords.x} y={coords.y + R + 8}
-                      textAnchor="middle" fill="#F1F5F9" fontSize={nameFontSize(lastName ?? "")} fontWeight="600"
-                      style={{ fontFamily: "var(--font-sans), Inter, sans-serif" }}
-                    >
-                      {lastName}
-                    </text>
-                  </>
+                      <text
+                        x={coords.x} y={coords.y + R + 8}
+                        textAnchor="middle" fill="#F1F5F9" fontSize={nameFontSize(lastName ?? "")} fontWeight="600"
+                        style={{ fontFamily: "var(--font-sans), Inter, sans-serif" }}
+                      >
+                        {lastName}
+                      </text>
+                    </>
+                  )
                 ) : (
                   <>
                     <circle
@@ -367,42 +401,49 @@ export function HandballPitch({
           })}
         </svg>
 
-        {/* Photos des titulaires — superposition HTML alignée sur les mêmes
-            coordonnées que le SVG (converties en %), au-dessus des anneaux SVG. */}
+        {/* Titulaires "debout" — superposition HTML alignée sur les mêmes
+            coordonnées que le SVG (converties en %), au-dessus du terrain. Pied
+            ancré sur SLOT_COORDS (translateX seul, pas translateY : le top calculé
+            par pctPosition(coords, 0, -PHOTO_HEIGHT) est déjà le bord haut de la
+            silhouette). Pointer-events actif ICI (pas pointer-events-none comme le
+            reste de la couche HTML) : c'est ce calque, pas le <g> SVG en dessous
+            (qui ne dessine plus qu'une ombre au pied), qui porte le clic pour un
+            joueur avec photo — voir le commentaire dans la boucle SVG plus haut. */}
         {POSITIONS.map((pos) => {
           const player = starterByPos.get(pos);
           if (!player?.photoUrl) return null;
           const coords = SLOT_COORDS[pos];
-          const sizePct = (((R - 1) * 2) / COURT) * 100;
+          const widthPct = (PHOTO_WIDTH / COURT) * 100;
           return (
             <div
               key={pos}
-              className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full"
-              style={{ ...pctPosition(coords), width: `${sizePct}%`, aspectRatio: "1 / 1" }}
+              onClick={onSwap ? () => onSwap(player.playerId) : () => router.push(`/players/${player.playerId}`)}
+              className="absolute -translate-x-1/2 cursor-pointer"
+              style={{ ...pctPosition(coords, 0, -PHOTO_HEIGHT), width: `${widthPct}%`, aspectRatio: "2 / 3" }}
             >
-              <PitchStarterPhoto
-                photoUrl={player.photoUrl}
-                photoOffsetX={player.photoOffsetX}
-                photoOffsetY={player.photoOffsetY}
-                photoZoom={player.photoZoom}
-                alt={`${player.firstName} ${player.lastName}`}
-              />
+              <PitchStarterPhoto photoUrl={player.photoUrl} alt={`${player.firstName} ${player.lastName}`} />
             </div>
           );
         })}
 
         {/* Badges (club/points/capitaine) — rendus APRÈS la couche photo ci-dessus
             pour toujours passer au-dessus d'elle (sinon les logos de club, par
-            exemple, se retrouvent recouverts par la photo du joueur). */}
+            exemple, se retrouvent recouverts par la photo du joueur). Ancrage
+            différent selon pastille (coins du cercle, inchangé) ou joueur debout
+            (coins de la silhouette : club/pied, points+capitaine/tête). */}
         {POSITIONS.map((pos) => {
           const player = starterByPos.get(pos);
           if (!player) return null;
           const coords = SLOT_COORDS[pos];
+          const standing = Boolean(player.photoUrl);
+          const clubOffset = standing ? { dx: PHOTO_WIDTH / 2 - 2, dy: -3 } : { dx: 9.5, dy: 9.5 };
+          const pointsOffset = standing ? { dx: -PHOTO_WIDTH / 2 + 2, dy: -PHOTO_HEIGHT + 5 } : { dx: -9.5, dy: -9.5 };
+          const captainOffset = standing ? { dx: PHOTO_WIDTH / 2 - 2, dy: -PHOTO_HEIGHT + 5 } : { dx: 9.5, dy: -9.5 };
           return (
             <Fragment key={pos}>
-              <PitchClubBadge coords={coords} club={player.club} />
-              {player.points !== undefined && <PointsBadge coords={coords} points={player.points} />}
-              {captainId && player.playerId === captainId && <PitchCaptainBadge coords={coords} />}
+              <PitchClubBadge coords={coords} club={player.club} {...clubOffset} />
+              {player.points !== undefined && <PointsBadge coords={coords} points={player.points} {...pointsOffset} />}
+              {captainId && player.playerId === captainId && <PitchCaptainBadge coords={coords} {...captainOffset} />}
             </Fragment>
           );
         })}

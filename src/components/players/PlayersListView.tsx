@@ -133,7 +133,7 @@ export function PlayersListView({ mode, clubs }: { mode: SeasonMode; clubs: Acti
                     href={`/players/${player.id}?from=players`}
                     className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-border/20 active:bg-border/30"
                   >
-                    <PlayerAvatar player={player} size="sm" />
+                    <PlayerAvatar player={player} size="sm" variant="photo" focus="head" />
                     <div className="flex min-w-0 flex-1 flex-col">
                       <span className="truncate text-sm font-medium text-text">
                         {player.firstName} {player.lastName}

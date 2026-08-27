@@ -148,7 +148,7 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
       {!compare ? (
         <div className="pixel-corners border border-border bg-surface p-4 shadow-[0_0_24px_rgba(245,158,11,0.08)]">
           <div className="flex items-start gap-4">
-            <PlayerAvatar player={{ ...primary, position: primary.position as Position }} size="xl" />
+            <PlayerAvatar player={{ ...primary, position: primary.position as Position }} size="xl" variant="photo" />
             <div className="flex flex-1 items-start justify-between gap-4">
               <div>
                 <div className="mb-2">
@@ -181,7 +181,7 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
               className="pixel-corners border border-border bg-surface p-3 shadow-[0_0_24px_rgba(245,158,11,0.08)]"
             >
               <div className="flex flex-col items-center gap-2 text-center">
-                <PlayerAvatar player={{ ...p, position: p.position as Position }} size="lg" />
+                <PlayerAvatar player={{ ...p, position: p.position as Position }} size="lg" variant="photo" />
                 <div>
                   <div className="mb-1 flex justify-center">
                     <PositionBadge position={p.position} />

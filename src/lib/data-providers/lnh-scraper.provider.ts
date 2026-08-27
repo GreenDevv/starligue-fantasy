@@ -10,7 +10,9 @@
 //      rosters sont publiés, avant même le premier match. Utilisée automatiquement
 //      quand (1) ne retourne aucun joueur.
 //
-// Photos joueurs : non disponibles (lnh.fr affiche uniquement des silhouettes)
+// Photos joueurs : disponibles depuis le 2026-08-27 sur /daikin-starligue/joueurs
+// (fetchPlayerPhotos ci-dessous) — auparavant lnh.fr n'affichait que des
+// silhouettes génériques, plus le cas pour la majorité des joueurs désormais.
 
 import { z } from "zod";
 import type {
@@ -28,6 +30,17 @@ export interface ScrapedPlayer {
   profileUrl: string; // ex: "daikin-starligue/joueurs/valentin-porte"
 }
 
+// Photo détourée fond transparent (~350×525), voir fetchPlayerPhotos. photoUrl
+// null si le joueur n'a encore que la silhouette générique lnh.fr — jamais un lien
+// vers cette silhouette elle-même (ScrapedPlayerPhoto.photoUrl absent = "rien de
+// mieux que ce qu'on a déjà", pas "remplacer par un placeholder").
+export interface ScrapedPlayerPhoto {
+  firstName: string;
+  lastName: string;
+  lnhClubSlug: string;
+  photoUrl: string | null;
+}
+
 const LNH_BASE = "https://www.lnh.fr";
 const STATS_URL = `${LNH_BASE}/daikin-starligue/stats/joueurs`;
 const CALENDAR_URL = `${LNH_BASE}/daikin-starligue/calendrier`;
@@ -42,6 +55,14 @@ const WARMUP_UNIVERS = "matchs-6892";
 const STANDINGS_URL = `${LNH_BASE}/daikin-starligue/classement`;
 const AJAX_URL = `${LNH_BASE}/ajaxpost1`;
 const CLUBS_URL = `${LNH_BASE}/daikin-starligue/clubs`;
+// Liste des joueurs (contents_controller=sportsPlayers, action=index_ajax) — page
+// DIFFÉRENTE de STATS_URL (stats/joueurs, utilisée par fetchPlayers pour le roster) :
+// c'est ici, et nulle part ailleurs, que lnh.fr publie désormais de vraies photos
+// détourées par joueur (fond transparent, ~350×525) au lieu des silhouettes
+// génériques constatées jusque-là (voir fetchPlayerPhotos ci-dessous, découvert le
+// 2026-08-27 suite à un signalement de l'utilisateur — la LNH les publie au fil de
+// la saison, encore ~19% de silhouettes au moment d'écrire ce commentaire).
+const PLAYERS_URL = `${LNH_BASE}/daikin-starligue/joueurs`;
 
 // lnh.fr écrit certains mois en toutes lettres (avril, mai, juin, mars, juillet) et
 // d'autres abrégés avec un point (déc., févr., nov., oct., sept.) — les deux formes
@@ -816,6 +837,38 @@ function parseRosterName(raw: string): { firstName: string; lastName: string } {
   };
 }
 
+// Parse la liste des joueurs (daikin-starligue/joueurs, contents_controller=
+// sportsPlayers) — chaque `players-listing-item` porte une photo détourée en fond
+// CSS (col-picture) plutôt qu'une balise <img>, contrairement à parseRosterFromHtml
+// ci-dessous (page club, structure différente malgré le même nom de classe). Un
+// joueur pas encore doté d'une vraie photo a `small_silhouette.png` — exclu (photoUrl
+// null) plutôt que remonté comme une "photo" utilisable.
+export function parsePlayerPhotosFromHtml(html: string): ScrapedPlayerPhoto[] {
+  const results: ScrapedPlayerPhoto[] = [];
+  const items = html.split('class="players-listing-item').slice(1);
+
+  for (const raw of items) {
+    const nameMatch = raw.match(/<div class="name">([^<]+)<\/div>/);
+    const teamLogoMatch = raw.match(/<img src="(https:\/\/[^"]*sports_teams[^"]*)"/);
+    if (!nameMatch || !teamLogoMatch) continue;
+
+    const { firstName, lastName } = parseRosterName(nameMatch[1]!.replace(/\s+/g, " ").trim());
+    if (!firstName || !lastName) continue;
+
+    const photoMatch = raw.match(/background:\s*url\(([^)]+)\)/);
+    const photoUrl = photoMatch && !photoMatch[1]!.includes("silhouette") ? photoMatch[1]! : null;
+
+    results.push({
+      firstName,
+      lastName,
+      lnhClubSlug: extractClubSlug(teamLogoMatch[1]!),
+      photoUrl,
+    });
+  }
+
+  return results;
+}
+
 // Parse l'effectif d'un club depuis le HTML statique de sa page
 // (section "Effectif", carousel de <a class="players-listing-item">)
 function parseRosterFromHtml(html: string): ScrapedPlayer[] {
@@ -978,6 +1031,58 @@ export class LnhScraperProvider implements StarligueDataProvider {
     }
 
     return allPlayers;
+  }
+
+  // Récupère les photos joueurs depuis /daikin-starligue/joueurs (contents_controller=
+  // sportsPlayers, action=index_ajax) — page/clé de formulaire propres à cette page,
+  // pas réutilisable depuis getFormContext (lié à STATS_URL). pagination-items=500
+  // suffit à tout récupérer en une seule requête (257 joueurs PRO constatés le
+  // 2026-08-27, jamais paginé côté LNH au-delà de ~24 par défaut sans ce paramètre).
+  async fetchPlayerPhotos(seasonsId: string): Promise<ScrapedPlayerPhoto[]> {
+    const res = await this.fetchWithTimeout(PLAYERS_URL, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; StarligueFantasyBot/1.0)" },
+    });
+    if (!res) {
+      throw new IngestionError(`LNH Scraper : impossible de récupérer ${PLAYERS_URL}`, this.name, true);
+    }
+    const pageHtml = await res.text();
+    const keyMatch = pageHtml.match(/name="key"\s+value="(\d+)"/);
+    const cookie = res.headers.get("set-cookie") ?? "";
+    if (!keyMatch) {
+      throw new IngestionError("LNH Scraper : clé de formulaire joueurs introuvable", this.name, true);
+    }
+
+    const body = new URLSearchParams({
+      contents_controller: "sportsPlayers",
+      contents_action: "index_ajax",
+      univers: "d1-26623",
+      seasons_id: seasonsId,
+      players_groups_slug: "PRO", // joueurs professionnels — pas centre de formation/réserve, même périmètre que le roster fantasy
+      "pagination-order": "players_lastname ASC, players_firstname ASC",
+      "pagination-items": "500",
+      teams_id: "all",
+      "pagination-current": "1",
+      letters: "all",
+      search: "",
+      key: keyMatch[1]!,
+    });
+
+    const ajaxRes = await this.fetchWithTimeout(AJAX_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-Requested-With": "XMLHttpRequest",
+        "User-Agent": "Mozilla/5.0 (compatible; StarligueFantasyBot/1.0)",
+        ...(cookie ? { Cookie: cookie } : {}),
+      },
+      body: body.toString(),
+    });
+    if (!ajaxRes) {
+      throw new IngestionError("LNH Scraper : impossible de récupérer la liste des joueurs (ajaxpost1)", this.name, true);
+    }
+
+    const html = await ajaxRes.text();
+    return parsePlayerPhotosFromHtml(html);
   }
 
   // Récupère le classement "Score LNH" (moyenne = totalScore/matchesPlayed) d'une

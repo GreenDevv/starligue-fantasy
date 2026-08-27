@@ -264,7 +264,13 @@
       "notFoundReason": "nie znaleziono zawodnika",
       "moreUnmatched": "… i {count} innych"
     },
-    "injuryReasonPlaceholder": "Powód (opcjonalnie) — np. koniec kontraktu, zawieszenie…"
+    "injuryReasonPlaceholder": "Powód (opcjonalnie) — np. koniec kontraktu, zawieszenie…",
+    "lnhPhotoImport": {
+      "title": "Zdjęcia zawodników (lnh.fr)",
+      "button": "Pobierz z lnh.fr",
+      "help": "prawdziwe wycięte zdjęcia publikowane przez LNH (daikin-starligue/joueurs) — stopniowo zastępuje domyślne sylwetki, nie tworzy ani nie usuwa żadnego zawodnika",
+      "scrapedResult": "{withPhoto}/{total} zawodników ze zdjęciem znalezionych na lnh.fr"
+    }
   },
   "transferWindows": {
     "title": "Okna transferowe",

@@ -865,6 +865,86 @@ function PhotoImportPanel({ onImported }: { onImported: () => void }) {
   );
 }
 
+interface LnhPhotoImportResult extends PhotoImportResult {
+  scrapedTotal: number;
+  scrapedWithPhoto: number;
+}
+
+// Scrape live daikin-starligue/joueurs (vraies photos détourées, remplace
+// progressivement les silhouettes génériques — cf. ARCHITECTURE.md §8.1) plutôt que
+// le dataset JSON figé de PhotoImportPanel ci-dessus. Les deux coexistent : celui-ci
+// est la source la plus complète désormais, à relancer au fil de la saison au fur
+// et à mesure que lnh.fr publie de nouvelles photos.
+function LnhPhotoImportPanel({ onImported }: { onImported: () => void }) {
+  const t = useTranslations("admin");
+  const tRoot = useTranslations();
+  const [importing, setImporting] = useState(false);
+  const [result, setResult] = useState<LnhPhotoImportResult | null>(null);
+  const [error, setError] = useState("");
+
+  async function handleImport() {
+    setImporting(true);
+    setError("");
+    setResult(null);
+    try {
+      const res = await fetch("/api/admin/import/lnh-player-photos", { method: "POST" });
+      const json = (await res.json()) as { data?: LnhPhotoImportResult; error?: { message?: string; code?: string } };
+      if (!res.ok || !json.data) throw new Error(resolveApiError(tRoot, "admin", json.error?.code));
+      setResult(json.data);
+      if (json.data.updated > 0) onImported();
+    } catch (e) {
+      setError(String(e).replace("Error: ", ""));
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface px-4 py-3">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-xs font-semibold uppercase tracking-widest text-text-muted">{t("players.lnhPhotoImport.title")}</span>
+        <button
+          onClick={handleImport}
+          disabled={importing}
+          className="rounded border border-accent/40 px-3 py-1.5 text-xs text-accent transition-colors hover:bg-accent/10 disabled:opacity-50"
+        >
+          {importing ? t("common.importing") : t("players.lnhPhotoImport.button")}
+        </button>
+        <span className="text-[11px] text-text-muted">{t("players.lnhPhotoImport.help")}</span>
+      </div>
+
+      {error && <p className="text-xs text-points-neg">{error}</p>}
+
+      {result && (
+        <div className="text-xs text-text-muted">
+          {t("players.lnhPhotoImport.scrapedResult", { withPhoto: result.scrapedWithPhoto, total: result.scrapedTotal })}
+          {" · "}
+          <span className="font-medium text-points-pos">{t("players.photoImport.updatedResult", { count: result.updated })}</span>
+          {" · "}
+          {t("players.photoImport.unchangedResult", { count: result.unchanged })}
+          {result.unmatched.length > 0 && (
+            <span className="text-points-neg">
+              {" · "}
+              {t("players.photoImport.unmatchedResult", { count: result.unmatched.length })}
+            </span>
+          )}
+          {result.unmatched.length > 0 && (
+            <ul className="mt-1 list-disc pl-4">
+              {result.unmatched.slice(0, 10).map((u, i) => (
+                <li key={i}>
+                  {u.prenom} {u.nom} ({u.club}) —{" "}
+                  {u.reason === "ambiguous_match" ? t("players.photoImport.ambiguousReason") : t("players.photoImport.notFoundReason")}
+                </li>
+              ))}
+              {result.unmatched.length > 10 && <li>{t("players.photoImport.moreUnmatched", { count: result.unmatched.length - 10 })}</li>}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ---- Main page ----
 
 export default function AdminPlayersPage() {
@@ -970,8 +1050,11 @@ export default function AdminPlayersPage() {
       {/* Export / import valorisation */}
       <ValuationImportExport onImported={() => load()} />
 
-      {/* Import photos joueurs */}
+      {/* Import photos joueurs (dataset JSON, sites club) */}
       <PhotoImportPanel onImported={() => load()} />
+
+      {/* Import photos joueurs (scrape live lnh.fr, source la plus complète) */}
+      <LnhPhotoImportPanel onImported={() => load()} />
 
       {/* Import scores LNH (historique, saisons passées) */}
       <LnhScoresImportPanel />

@@ -264,7 +264,13 @@
       "notFoundReason": "jogador não encontrado",
       "moreUnmatched": "… e mais {count}"
     },
-    "injuryReasonPlaceholder": "Motivo (opcional) — ex. fim de contrato, suspensão…"
+    "injuryReasonPlaceholder": "Motivo (opcional) — ex. fim de contrato, suspensão…",
+    "lnhPhotoImport": {
+      "title": "Fotos dos jogadores (lnh.fr)",
+      "button": "Extrair de lnh.fr",
+      "help": "fotos recortadas reais publicadas pela LNH (daikin-starligue/joueurs) — substitui progressivamente as silhuetas genéricas, não cria nem elimina nenhum jogador",
+      "scrapedResult": "{withPhoto}/{total} jogadores com foto encontrados no lnh.fr"
+    }
   },
   "transferWindows": {
     "title": "Janelas de transferências",
