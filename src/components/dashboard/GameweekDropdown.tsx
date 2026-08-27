@@ -70,7 +70,11 @@ export function GameweekDropdown({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={label}
-        className="flex items-center gap-0.5 text-[10px] uppercase tracking-widest text-text-muted transition-colors hover:text-text"
+        // tracking-wide (pas -widest, comme le reste des petites capitales du site) :
+        // "MATCHDAY" est nettement plus long que "JOURNÉE" et l'espacement maximal
+        // aggravait le débordement en anglais dans un widget étroit (feedback
+        // utilisateur, ARCHITECTURE.md contexte MatchesStrip).
+        className="flex shrink-0 items-center gap-0.5 whitespace-nowrap text-[10px] uppercase tracking-wide text-text-muted transition-colors hover:text-text"
       >
         {label}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3 w-3">

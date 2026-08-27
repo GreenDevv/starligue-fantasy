@@ -131,11 +131,13 @@ function formatGameweekRange(format: DateFormatter, dates: (string | Date)[]): s
   if (first.toDateString() === last.toDateString()) {
     return formatDayMonth(format, first);
   }
-  const sameMonth = first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear();
-  if (sameMonth) {
-    return `${first.getDate()}-${formatDayMonth(format, last)}`;
-  }
-  return `${formatDayMonth(format, first)} - ${formatDayMonth(format, last)}`;
+  // dateTimeRange (Intl.DateTimeFormat.formatRange) plutôt qu'une concaténation
+  // manuelle — l'ancienne version ("4-" + formatDayMonth(last)) supposait l'ordre
+  // jour-mois de l'affichage complet ("06 sept."), correct en français mais pas en
+  // anglais (mois-jour, "Sep 06") : le résultat devenait "4-Sep 06", un mélange
+  // d'ordres incohérent qui n'avait de sens dans aucune locale. formatRange gère
+  // l'ordre — et la fusion du mois en commun ("4-6 Sep") — pour chaque locale.
+  return format.dateTimeRange(first, last, { day: "2-digit", month: "short" });
 }
 
 // Bandeau compact "résultats dernière journée" / "prochains matchs" — logos club
@@ -145,6 +147,20 @@ function formatGameweekRange(format: DateFormatter, dates: (string | Date)[]): s
 function clubTooltip(club: StripClub): string | undefined {
   if (!club.division) return undefined;
   return `${club.name ?? club.shortName} (${club.division})`;
+}
+
+// Info-bulle native (attribut title, même mécanisme que clubTooltip ci-dessus) sur
+// l'encart entier — lieu, date et heure du match (demande explicite de
+// l'utilisateur, "upcoming matches"). Pas de notion d'enceinte/stade en base (Club
+// n'a que name/shortName/logoUrl) : le "lieu" d'un match est par construction le
+// club recevant, donc son nom sert de lieu plutôt que d'inventer une donnée qu'on
+// n'a pas. weekday inclus (contrairement à formatDayMonth) : une info-bulle a la
+// place, contrairement à l'espace très contraint de l'encart lui-même.
+function matchTooltip(m: StripMatch, format: DateFormatter): string {
+  const date = typeof m.kickoffAt === "string" ? new Date(m.kickoffAt) : m.kickoffAt;
+  const home = m.homeClub.name ?? m.homeClub.shortName;
+  const when = format.dateTime(date, { weekday: "short", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+  return `${home} · ${when}`;
 }
 
 export function MatchesStrip({
@@ -224,12 +240,13 @@ export function MatchesStrip({
               logosRow
             );
             const boxClassName = `relative flex items-center justify-center gap-0.5 rounded-md border border-border/60 bg-bg transition-colors hover:border-accent/50 ${boxPad}`;
+            const tooltip = matchTooltip(m, format);
             const box = href ? (
-              <Link key={m.id} href={href} className={boxClassName}>
+              <Link key={m.id} href={href} className={boxClassName} title={tooltip}>
                 {content}
               </Link>
             ) : (
-              <div key={m.id} className={boxClassName}>
+              <div key={m.id} className={boxClassName} title={tooltip}>
                 {content}
               </div>
             );
@@ -264,38 +281,33 @@ export function MatchesStrip({
 
   return (
     <div className={`pixel-corners border px-3 py-2.5 ${containerTone}`}>
-      <div className={isOpen ? "mb-2 flex items-center justify-between" : "flex items-center justify-between"}>
-        <div className="flex items-center gap-1.5">
-          <p className="text-[10px] uppercase tracking-widest text-text-muted">{title}</p>
-          {collapsible && !isOpen && matches.length > 0 && (
-            <span className="text-[10px] text-text-muted/60">({matches.length})</span>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          {gameweekNumber !== null &&
-            (gameweekNav ? (
-              <div className="flex items-center gap-1">
-                <GameweekDropdown
-                  current={gameweekNumber}
-                  total={gameweekNav.total}
-                  hrefBase={gameweekNav.hrefBase}
-                  label={t("matchesStrip.gameweek", { number: gameweekNumber })}
-                />
-                {dateRange && <span className="text-[10px] text-text-muted/70">· {dateRange}</span>}
-              </div>
-            ) : (
-              <p className="text-[10px] uppercase tracking-widest text-text-muted">
-                {t("matchesStrip.gameweek", { number: gameweekNumber })}
-                {dateRange && <span className="text-text-muted/70"> · {dateRange}</span>}
-              </p>
-            ))}
+      {/* En-tête sur 2 lignes plutôt qu'une seule "justify-between" : titre +
+          journée/dropdown + plage de dates + chevron se disputaient tous la même
+          ligne dans un widget étroit (colonne sidebar de la home) — ça retombait à
+          la ligne n'importe où, y compris au milieu d'un mot ("MATCHDAY" / "1" sur
+          deux lignes). Ligne 1 : titre (+ compteur replié) et chevron seuls, qui
+          tiennent toujours. Ligne 2, sur toute la largeur : journée + plage de
+          dates, avec repli en douceur (flex-wrap, jamais coupé au milieu d'un mot
+          grâce à whitespace-nowrap sur chaque étiquette) si jamais ça manque encore
+          de place plutôt qu'un chevauchement. */}
+      <div className={isOpen ? "mb-2" : ""}>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-1.5">
+            {/* tracking-wide (pas -widest) : "UPCOMING MATCHES" est nettement plus
+                long que "PROCHAINS MATCHS" et l'espacement maximal aggravait le
+                débordement en anglais dans ce widget étroit (feedback utilisateur). */}
+            <p className="truncate text-[10px] uppercase tracking-wide text-text-muted">{title}</p>
+            {collapsible && !isOpen && matches.length > 0 && (
+              <span className="shrink-0 text-[10px] text-text-muted/60">({matches.length})</span>
+            )}
+          </div>
           {collapsible && (
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
               aria-expanded={isOpen}
               aria-label={isOpen ? t("matchesStrip.collapse") : t("matchesStrip.expand")}
-              className="text-text-muted transition-colors hover:text-text"
+              className="shrink-0 text-text-muted transition-colors hover:text-text"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -309,6 +321,23 @@ export function MatchesStrip({
             </button>
           )}
         </div>
+        {gameweekNumber !== null && (
+          <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+            {gameweekNav ? (
+              <GameweekDropdown
+                current={gameweekNumber}
+                total={gameweekNav.total}
+                hrefBase={gameweekNav.hrefBase}
+                label={t("matchesStrip.gameweek", { number: gameweekNumber })}
+              />
+            ) : (
+              <p className="whitespace-nowrap text-[10px] uppercase tracking-wide text-text-muted">
+                {t("matchesStrip.gameweek", { number: gameweekNumber })}
+              </p>
+            )}
+            {dateRange && <span className="whitespace-nowrap text-[10px] text-text-muted/70">· {dateRange}</span>}
+          </div>
+        )}
       </div>
 
       {collapsible ? (
