@@ -558,6 +558,13 @@ model Match {
   status           MatchStatus       @default(SCHEDULED)
   homeScore        Int?
   awayScore        Int?
+  // Diffuseur TV officiel (lnh.fr/daikin-starligue/calendrier, bloc "col-tv" — voir
+  // ARCHITECTURE.md §4.2) : "beIN Sport" ou "Handball TV" au moment d'écrire ce
+  // commentaire, mais scrapé tel quel plutôt que codé en dur (peut évoluer).
+  // broadcasterUrl = lien "où regarder" fourni par lnh.fr — générique par diffuseur
+  // (page d'abonnement/calendrier), pas un lien direct vers CE match précis.
+  broadcasterName  String?
+  broadcasterUrl   String?
   externalIds      Json              @default("{}")
   playerStats      PlayerMatchStat[]
   predictionMarket PredictionMarket?

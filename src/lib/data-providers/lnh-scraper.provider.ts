@@ -61,6 +61,16 @@ const MONTH_MAP: Record<string, number> = {
   "déc": 12, "dec": 12, "décembre": 12, "decembre": 12,
 };
 
+// Diffuseur TV → nom d'affichage, déduit du préfixe de fichier logo lnh.fr
+// (medias/televisions/{prefix}_xxxxx.png, ex: "bein-web_655584996.png",
+// "htvsmall_886758244.png" — vérifié sur le calendrier 2026/27, seuls diffuseurs
+// observés à ce jour). Une image dont le préfixe n'est pas dans cette table est
+// ignorée (broadcasterName reste null) plutôt que d'afficher un slug brut.
+const BROADCASTER_NAMES: Record<string, string> = {
+  "bein-web": "beIN Sport",
+  "htvsmall": "Handball TV",
+};
+
 // Correspondance positions LNH → codes internes
 const POSITION_MAP: Record<string, string> = {
   "gardien": "GK",
@@ -100,6 +110,12 @@ export interface ScrapedFixture {
   status: "SCHEDULED" | "FINISHED";
   homeScore: number | null;
   awayScore: number | null;
+  // Diffuseur TV officiel (bloc "col-tv" du calendrier, ARCHITECTURE.md §4.2) — null
+  // si le bloc est absent (pas observé en pratique sur la saison en cours, mais pas
+  // garanti pour autant). broadcasterUrl est le lien "où regarder" fourni par
+  // lnh.fr lui-même (générique par diffuseur, pas un lien vers CE match précis).
+  broadcasterName: string | null;
+  broadcasterUrl: string | null;
 }
 
 // Match hors championnat ("Warm Up -"/"Trophée des Champions - WUP", ou
@@ -558,12 +574,23 @@ export function parseCalendarFromHtml(html: string, seasonStartYear: number): Sc
 
     const scoreMatch = raw.match(/class="scores is-finish">\s*(\d+)\s*-\s*(\d+)\s*</);
 
+    // Diffuseur TV (bloc "col-tv") — un seul lien tv-link par item, l'ordre
+    // href-puis-img dans le HTML permet de les capturer indépendamment plutôt que
+    // par un unique regex fragile sur tout le bloc.
+    const tvHrefMatch = raw.match(/<a href="([^"]+)" target="_blank" class="tv-link">/);
+    const tvImgMatch = raw.match(/medias\/televisions\/([^_"]+)_/);
+    const broadcasterPrefix = tvImgMatch?.[1];
+    const broadcasterName = broadcasterPrefix ? (BROADCASTER_NAMES[broadcasterPrefix] ?? null) : null;
+    const broadcasterUrl = broadcasterName ? (tvHrefMatch?.[1] ?? null) : null;
+
     results.push({
       gameweekNumber: parseInt(gwMatch[1]!, 10),
       calendarsId: idMatch[1]!,
       homeClubSlug,
       awayClubSlug,
       kickoffAt,
+      broadcasterName,
+      broadcasterUrl,
       status: scoreMatch ? "FINISHED" : "SCHEDULED",
       homeScore: scoreMatch ? parseInt(scoreMatch[1]!, 10) : null,
       awayScore: scoreMatch ? parseInt(scoreMatch[2]!, 10) : null,

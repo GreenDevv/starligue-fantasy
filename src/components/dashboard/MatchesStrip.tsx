@@ -34,6 +34,17 @@ interface StripMatch {
   // fonction) : ce composant est un Client Component, une fonction passée depuis
   // une page serveur ne serait pas sérialisable à travers la frontière RSC.
   href?: string;
+  // Diffuseur TV officiel (ARCHITECTURE.md §4.2, lnh.fr) — badge cliquable en coin
+  // de l'encart, en plus du lien principal (pas à sa place : deux liens différents,
+  // affichés comme deux éléments frères plutôt qu'imbriqués). Champs à plat (plutôt
+  // qu'un seul objet `{name,url}`) pour correspondre exactement à la forme de
+  // DashboardStripMatch (src/lib/matches/dashboard-strips.ts) et être passable telle
+  // quelle sans mapping, comme le fait déjà la home pour le strip championnat.
+  // Absents par défaut : n'affectent aucun strip existant (Warm Up/Coupe de
+  // France/EHF/résultats, où lnh.fr n'expose pas cette info ou n'a plus d'intérêt
+  // pour un match déjà joué).
+  broadcasterName?: string | null;
+  broadcasterUrl?: string | null;
 }
 
 interface MatchesStripProps {
@@ -212,15 +223,37 @@ export function MatchesStrip({
             ) : (
               logosRow
             );
-            const boxClassName = `flex items-center justify-center gap-0.5 rounded-md border border-border/60 bg-bg transition-colors hover:border-accent/50 ${boxPad}`;
-
-            return href ? (
+            const boxClassName = `relative flex items-center justify-center gap-0.5 rounded-md border border-border/60 bg-bg transition-colors hover:border-accent/50 ${boxPad}`;
+            const box = href ? (
               <Link key={m.id} href={href} className={boxClassName}>
                 {content}
               </Link>
             ) : (
               <div key={m.id} className={boxClassName}>
                 {content}
+              </div>
+            );
+
+            if (!m.broadcasterName || !m.broadcasterUrl) return box;
+            // Badge frère (pas imbriqué dans le Link ci-dessus, un <a> dans un <a>
+            // serait invalide) positionné en coin — lien indépendant vers le
+            // diffuseur, distinct du lien principal de l'encart.
+            return (
+              <div key={m.id} className="relative">
+                {box}
+                <a
+                  href={m.broadcasterUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={m.broadcasterName}
+                  onClick={(e) => e.stopPropagation()}
+                  className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border border-border bg-surface text-text-muted transition-colors hover:border-accent hover:text-accent"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="h-2 w-2">
+                    <rect x="3" y="7" width="18" height="13" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M8 7l4-4 4 4" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </a>
               </div>
             );
           })}

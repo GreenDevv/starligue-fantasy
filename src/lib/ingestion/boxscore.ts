@@ -14,6 +14,17 @@
 // §14 en ont besoin). fetchSeasonCalendar() renvoyait déjà ces champs
 // (ScrapedFixture.status/homeScore/awayScore, utilisés depuis le début pour le Mode
 // Simulation), seule l'écriture côté saison en direct manquait.
+//
+// Depuis le 2026-08-27 (ARCHITECTURE.md §4.2) : synchronise aussi Match.kickoffAt et
+// le diffuseur TV (broadcasterName/broadcasterUrl). lnh.fr publie d'abord une date
+// générique par journée (ex: J1 → 4 septembre pour tous les matchs), puis ajuste
+// chaque match individuellement (±2 jours) une fois les horaires TV confirmés — le
+// calendrier initial (import CSV unique, prisma/fixtures_starligue_2026.csv) fige
+// cette date générique tant que rien ne la corrige. Un kickoffAt qui change entraîne
+// aussi un recalcul de Gameweek.deadlineAt (1h avant le 1er match de la journée,
+// même règle qu'à l'import initial — voir sync.ts) : UNIQUEMENT si la journée n'est
+// pas encore notée ET que la nouvelle deadline calculée reste dans le futur, pour ne
+// jamais faire apparaître d'un coup, sans préavis, une deadline déjà passée.
 import { prisma } from "@/lib/db";
 import {
   createLnhScraperProvider,
@@ -27,14 +38,20 @@ export interface CalendarsIdSyncResult {
   unresolved: number;
   /** Matchs dont le statut et/ou le score ont été mis à jour depuis lnh.fr sur ce run. */
   resultsUpdated: number;
+  /** Matchs dont le coup d'envoi et/ou le diffuseur TV ont été mis à jour depuis lnh.fr. */
+  scheduleUpdated: number;
+  /** Journées dont la deadline a été recalculée suite à un changement de coup d'envoi. */
+  deadlinesUpdated: number;
 }
 
 /**
  * Résout `Match.externalIds.lnh_calendars_id` pour tous les matchs déjà en base
  * d'une saison, en les rapprochant du calendrier lnh.fr (journée + clubs domicile/
- * extérieur). Met aussi à jour `Match.status`/`homeScore`/`awayScore` depuis ce même
- * calendrier. Idempotent — ne réécrit rien pour un match dont le calendars_id est
- * déjà connu ET dont le statut/score correspond déjà à la dernière valeur scrapée.
+ * extérieur). Met aussi à jour `Match.status`/`homeScore`/`awayScore`/`kickoffAt`/
+ * diffuseur TV depuis ce même calendrier (et `Gameweek.deadlineAt` en conséquence,
+ * voir plus haut). Idempotent — ne réécrit rien pour un match dont le calendars_id
+ * est déjà connu ET dont statut/score/horaire/diffuseur correspondent déjà à la
+ * dernière valeur scrapée.
  */
 export async function syncCalendarsIdsForSeason(
   seasonId: string,
@@ -55,6 +72,8 @@ export async function syncCalendarsIdsForSeason(
   let alreadyKnown = 0;
   let unresolved = 0;
   let resultsUpdated = 0;
+  let scheduleUpdated = 0;
+  const gameweeksWithScheduleChange = new Set<string>();
 
   for (const fixture of fixtures) {
     const homeClubId = clubIdBySlug.get(fixture.homeClubSlug.toLowerCase());
@@ -75,7 +94,16 @@ export async function syncCalendarsIdsForSeason(
 
     const match = await prisma.match.findFirst({
       where: { gameweekId: gameweek.id, homeClubId, awayClubId },
-      select: { id: true, externalIds: true, status: true, homeScore: true, awayScore: true },
+      select: {
+        id: true,
+        externalIds: true,
+        status: true,
+        homeScore: true,
+        awayScore: true,
+        kickoffAt: true,
+        broadcasterName: true,
+        broadcasterUrl: true,
+      },
     });
     if (!match) {
       unresolved++;
@@ -88,10 +116,18 @@ export async function syncCalendarsIdsForSeason(
       match.status !== fixture.status ||
       match.homeScore !== fixture.homeScore ||
       match.awayScore !== fixture.awayScore;
+    const needsScheduleUpdate =
+      match.kickoffAt.getTime() !== fixture.kickoffAt.getTime() ||
+      match.broadcasterName !== fixture.broadcasterName ||
+      match.broadcasterUrl !== fixture.broadcasterUrl;
 
-    if (!needsCalendarsId && !needsResultUpdate) {
+    if (!needsCalendarsId && !needsResultUpdate && !needsScheduleUpdate) {
       alreadyKnown++;
       continue;
+    }
+
+    if (match.kickoffAt.getTime() !== fixture.kickoffAt.getTime()) {
+      gameweeksWithScheduleChange.add(gameweek.id);
     }
 
     await prisma.match.update({
@@ -105,13 +141,54 @@ export async function syncCalendarsIdsForSeason(
               awayScore: fixture.awayScore,
             }
           : {}),
+        ...(needsScheduleUpdate
+          ? {
+              kickoffAt: fixture.kickoffAt,
+              broadcasterName: fixture.broadcasterName,
+              broadcasterUrl: fixture.broadcasterUrl,
+            }
+          : {}),
       },
     });
     if (needsCalendarsId) resolved++;
     if (needsResultUpdate) resultsUpdated++;
+    if (needsScheduleUpdate) scheduleUpdated++;
   }
 
-  return { resolved, alreadyKnown, unresolved, resultsUpdated };
+  const deadlinesUpdated = await recomputeGameweekDeadlines(gameweeksWithScheduleChange);
+
+  return { resolved, alreadyKnown, unresolved, resultsUpdated, scheduleUpdated, deadlinesUpdated };
+}
+
+// Recalcule Gameweek.deadlineAt = 1h avant le match le plus tôt de la journée (même
+// règle qu'à l'import CSV initial, voir sync.ts) pour les journées dont au moins un
+// match a changé de kickoffAt. Ignore une journée déjà notée (isScored — terminée,
+// plus aucune raison de bouger sa deadline) et n'applique la nouvelle valeur QUE si
+// elle reste dans le futur : si le recalcul donnait une deadline déjà passée, mieux
+// vaut laisser l'ancienne valeur en place (déjà passée ou non) que de faire
+// apparaître d'un coup, sans aucun préavis pour les joueurs, une deadline désormais
+// derrière eux.
+async function recomputeGameweekDeadlines(gameweekIds: Set<string>): Promise<number> {
+  let updated = 0;
+  const now = new Date();
+
+  for (const gameweekId of gameweekIds) {
+    const gameweek = await prisma.gameweek.findUnique({
+      where: { id: gameweekId },
+      select: { deadlineAt: true, isScored: true, matches: { select: { kickoffAt: true } } },
+    });
+    if (!gameweek || gameweek.isScored || gameweek.matches.length === 0) continue;
+
+    const earliestKickoff = new Date(Math.min(...gameweek.matches.map((m) => m.kickoffAt.getTime())));
+    const newDeadline = new Date(earliestKickoff.getTime() - 60 * 60 * 1000);
+
+    if (newDeadline.getTime() === gameweek.deadlineAt.getTime() || newDeadline <= now) continue;
+
+    await prisma.gameweek.update({ where: { id: gameweekId }, data: { deadlineAt: newDeadline } });
+    updated++;
+  }
+
+  return updated;
 }
 
 export interface GameweekBoxscoreSyncResult {
