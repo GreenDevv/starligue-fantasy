@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { getTranslations, getFormatter } from "next-intl/server";
 import { prisma } from "@/lib/db";
@@ -9,6 +10,7 @@ import { getHeadToHead } from "@/lib/clubs/head-to-head";
 import { getClubPageData, getLastFiveForm } from "@/lib/clubs/club-page-data";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { ClubFormBadge } from "@/components/clubs/ClubFormBadge";
+import { getBroadcasterLogoUrl } from "@/lib/matches/broadcaster-logo";
 
 export default async function ClubCompareVsPage({ params }: { params: { id: string; opponentId: string } }) {
   const tClubs = await getTranslations("clubs");
@@ -158,6 +160,13 @@ export default async function ClubCompareVsPage({ params }: { params: { id: stri
                   const awayScore = m.clubAIsHome ? m.clubBScore : m.clubAScore;
                   const homeWon = homeScore > awayScore;
                   const awayWon = awayScore > homeScore;
+                  // Diffuseur TV officiel (ARCHITECTURE.md §4.2) — renseigné
+                  // seulement pour un match déjà en base (saison live/Simulation),
+                  // jamais pour le cache/backfill historique (voir head-to-head.ts).
+                  // Logo réel (pas juste un badge texte) : demande explicite de
+                  // l'utilisateur, "un peu plus gros", colonne symétrique à la date
+                  // à gauche pour équilibrer la ligne.
+                  const broadcasterLogo = getBroadcasterLogoUrl(m.broadcasterName);
                   return (
                     <div key={i} className="flex items-center gap-3 px-3 py-2.5">
                       <span className="w-16 shrink-0 text-[11px] text-text-muted">
@@ -179,6 +188,18 @@ export default async function ClubCompareVsPage({ params }: { params: { id: stri
                           {awayScore}
                         </span>
                         <ClubLogo club={away} size="sm" />
+                      </div>
+                      <div className="flex w-16 shrink-0 justify-end">
+                        {broadcasterLogo && (
+                          <Image
+                            src={broadcasterLogo}
+                            alt={m.broadcasterName!}
+                            title={m.broadcasterName!}
+                            width={130}
+                            height={60}
+                            className="h-6 w-auto object-contain opacity-90"
+                          />
+                        )}
                       </div>
                     </div>
                   );
