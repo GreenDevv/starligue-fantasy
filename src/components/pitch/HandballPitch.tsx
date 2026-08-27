@@ -342,8 +342,11 @@ export function HandballPitch({
                 {player ? (
                   standing ? (
                     <>
+                      {/* +9 (pas +12) : nom rapproché des pieds de la silhouette
+                          (coords.y) — demande explicite. Vérifié sans toucher les
+                          diacritiques (Ï etc.) à cette valeur, contrairement à +7. */}
                       <text
-                        x={coords.x} y={coords.y + 12}
+                        x={coords.x} y={coords.y + 9}
                         textAnchor="middle" fill="#F1F5F9" fontSize={nameFontSize(lastName ?? "")} fontWeight="600"
                         style={{ fontFamily: "var(--font-sans), Inter, sans-serif" }}
                       >
