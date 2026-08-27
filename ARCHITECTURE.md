@@ -712,7 +712,7 @@ Corps / data        Inter (tabular-nums pour les points et valeurs)
 ```
 
 Composants signature :
-- **Le terrain** : demi-terrain de handball stylisé en SVG (arc des 6m/9m), les 7 titulaires positionnés dessus, les 7 remplaçants en banc horizontal en dessous. Drag & drop (ou tap-swap mobile) entre titulaire/remplaçant du même poste. C'est LA vue centrale de l'app.
+- **Le terrain** : demi-terrain de handball stylisé en SVG (arc des 6m/9m), les 7 titulaires positionnés dessus, les 7 remplaçants en banc horizontal en dessous. Drag & drop (ou tap-swap mobile) entre titulaire/remplaçant du même poste. C'est LA vue centrale de l'app. **Bandeau nom (`PitchNamePlate`, `HandballPitch.tsx`)** : chaque joueur sur le terrain a son nom en Barlow Condensed majuscules sur une pastille sombre bord teal, calée juste sous les pieds de la silhouette (ou sous la pastille initiales). Rendu 100 % SVG → suit le viewBox, même échelle du widget dashboard (`BestXIWidget`, `StarligueBestXICard`) au plein écran `/team`. Traitement standardisé sur tous les PitchView (demande explicite, aligné sur le visuel Instagram « équipe type »). Points de la journée et brassard capitaine restent sur leurs pastilles séparées (coins de la silhouette).
 - **PlayerCard** : photo/initiales, poste (badge coloré par poste), club, valeur, forme (sparkline des 5 dernières notes), points de la journée avec +/− coloré.
 - **DeadlineBanner** : compte à rebours persistant vers la prochaine deadline, passe en ambre < 24h, rouge < 2h.
 - **Animations Framer Motion** : reveal des points journée par journée (compteur), swap de joueurs, montée/descente dans les classements.

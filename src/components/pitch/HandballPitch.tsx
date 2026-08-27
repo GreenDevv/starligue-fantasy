@@ -87,6 +87,51 @@ function nameFontSize(name: string): number {
   return 9;
 }
 
+// Bandeau nom "signature" — nom en Barlow Condensed majuscules sur une pastille
+// sombre bord teal, calée juste sous les pieds de la silhouette (ou sous la
+// pastille initiales). Rendu 100 % SVG pour suivre le viewBox : même échelle que
+// le terrain, lisible du widget dashboard au plein écran /team. Format aligné sur
+// le visuel Instagram "équipe type" (demande explicite de l'utilisateur : ce
+// traitement devient le standard de TOUS les PitchView). Largeur estimée depuis
+// la longueur du nom (police condensée ≈ 0.52 em/caractère) — on ne mesure pas le
+// texte, cohérent avec nameFontSize qui adapte déjà la taille aux noms longs.
+function PitchNamePlate({ cx, topY, name }: { cx: number; topY: number; name: string }) {
+  const label = name.toUpperCase();
+  const fs = nameFontSize(name);
+  const padX = 3.2;
+  const padY = 2.2;
+  const textW = label.length * fs * 0.52;
+  const w = textW + padX * 2;
+  const h = fs + padY * 2;
+  return (
+    <g style={{ pointerEvents: "none" }}>
+      <rect
+        x={cx - w / 2}
+        y={topY}
+        width={w}
+        height={h}
+        rx={h / 2}
+        fill="#060E0A"
+        fillOpacity="0.82"
+        stroke="#2DD4BF"
+        strokeOpacity="0.24"
+        strokeWidth="0.5"
+      />
+      <text
+        x={cx}
+        y={topY + h / 2 + fs * 0.34}
+        textAnchor="middle"
+        fill="#F1F5F9"
+        fontSize={fs}
+        fontWeight="700"
+        style={{ fontFamily: "var(--font-display), sans-serif", letterSpacing: "0.02em" }}
+      >
+        {label}
+      </text>
+    </g>
+  );
+}
+
 // Anneau coloré par poste — cohérent avec POSITION_THEME (ui/positionTheme.ts),
 // converti en hex car le SVG brut ne lit pas les classes Tailwind.
 const RING_HEX: Record<Position, string> = {
@@ -341,18 +386,10 @@ export function HandballPitch({
               >
                 {player ? (
                   standing ? (
-                    <>
-                      {/* +9 (pas +12) : nom rapproché des pieds de la silhouette
-                          (coords.y) — demande explicite. Vérifié sans toucher les
-                          diacritiques (Ï etc.) à cette valeur, contrairement à +7. */}
-                      <text
-                        x={coords.x} y={coords.y + 9}
-                        textAnchor="middle" fill="#F1F5F9" fontSize={nameFontSize(lastName ?? "")} fontWeight="600"
-                        style={{ fontFamily: "var(--font-sans), Inter, sans-serif" }}
-                      >
-                        {lastName}
-                      </text>
-                    </>
+                    // Bandeau nom calé juste sous les pieds de la silhouette
+                    // (coords.y) — la silhouette elle-même est posée en HTML
+                    // par-dessus le SVG (voir la boucle après ce <svg>).
+                    <PitchNamePlate cx={coords.x} topY={coords.y + 2} name={lastName ?? ""} />
                   ) : (
                     <>
                       <circle cx={coords.x} cy={coords.y} r={RING_R} fill={RING_HEX[pos]} opacity="0.16" />
@@ -367,13 +404,7 @@ export function HandballPitch({
                       >
                         {initials(player.firstName, player.lastName)}
                       </text>
-                      <text
-                        x={coords.x} y={coords.y + R + 8}
-                        textAnchor="middle" fill="#F1F5F9" fontSize={nameFontSize(lastName ?? "")} fontWeight="600"
-                        style={{ fontFamily: "var(--font-sans), Inter, sans-serif" }}
-                      >
-                        {lastName}
-                      </text>
+                      <PitchNamePlate cx={coords.x} topY={coords.y + R + 2.5} name={lastName ?? ""} />
                     </>
                   )
                 ) : (
