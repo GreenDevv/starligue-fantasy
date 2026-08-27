@@ -149,6 +149,20 @@ function clubTooltip(club: StripClub): string | undefined {
   return `${club.name ?? club.shortName} (${club.division})`;
 }
 
+// Info-bulle native (attribut title, même mécanisme que clubTooltip ci-dessus) sur
+// l'encart entier — lieu, date et heure du match (demande explicite de
+// l'utilisateur, "upcoming matches"). Pas de notion d'enceinte/stade en base (Club
+// n'a que name/shortName/logoUrl) : le "lieu" d'un match est par construction le
+// club recevant, donc son nom sert de lieu plutôt que d'inventer une donnée qu'on
+// n'a pas. weekday inclus (contrairement à formatDayMonth) : une info-bulle a la
+// place, contrairement à l'espace très contraint de l'encart lui-même.
+function matchTooltip(m: StripMatch, format: DateFormatter): string {
+  const date = typeof m.kickoffAt === "string" ? new Date(m.kickoffAt) : m.kickoffAt;
+  const home = m.homeClub.name ?? m.homeClub.shortName;
+  const when = format.dateTime(date, { weekday: "short", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+  return `${home} · ${when}`;
+}
+
 export function MatchesStrip({
   variant,
   gameweekNumber,
@@ -226,12 +240,13 @@ export function MatchesStrip({
               logosRow
             );
             const boxClassName = `relative flex items-center justify-center gap-0.5 rounded-md border border-border/60 bg-bg transition-colors hover:border-accent/50 ${boxPad}`;
+            const tooltip = matchTooltip(m, format);
             const box = href ? (
-              <Link key={m.id} href={href} className={boxClassName}>
+              <Link key={m.id} href={href} className={boxClassName} title={tooltip}>
                 {content}
               </Link>
             ) : (
-              <div key={m.id} className={boxClassName}>
+              <div key={m.id} className={boxClassName} title={tooltip}>
                 {content}
               </div>
             );
