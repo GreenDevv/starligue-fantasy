@@ -154,12 +154,20 @@ async function syncFriendlyMatches(
       // un ajout à WARMUP_FOREIGN_CLUB_DIVISIONS doit se répercuter sans tout
       // ré-upserter depuis zéro. groupLabel : ne change normalement jamais une fois
       // la phase de groupes fixée, mais re-écrit quand même par cohérence avec le
-      // reste (idempotent). status/homeScore/awayScore/source omis si
+      // reste (idempotent). kickoffAt/status/homeScore/awayScore/source omis si
       // keepManualOverride (voir plus haut) — tout le reste continue d'être
       // rafraîchi normalement.
+      //
+      // ⚠️ kickoffAt DOIT rester dans ce groupe protégé (bug trouvé le 2026-08-27,
+      // ARCHITECTURE.md §19.6) : avant, il était réécrit inconditionnellement à
+      // chaque sync même quand source===MANUAL — une correction de date faite dans
+      // /admin/friendly-matches se faisait donc systématiquement écraser par le
+      // cron du lendemain, avec la mauvaise date scrapée qui revenait "toute seule"
+      // sans raison apparente pour l'admin.
       update: {
-        kickoffAt: m.kickoffAt,
-        ...(keepManualOverride ? {} : { status: m.status, homeScore: m.homeScore, awayScore: m.awayScore, source: scrapedSource }),
+        ...(keepManualOverride
+          ? {}
+          : { kickoffAt: m.kickoffAt, status: m.status, homeScore: m.homeScore, awayScore: m.awayScore, source: scrapedSource }),
         homeClubLogoUrl,
         homeClubDivision,
         awayClubLogoUrl,

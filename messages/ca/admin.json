@@ -62,19 +62,52 @@
     "testSeasonNote": "Nota: cal una temporada \"2024-2025\" a la base de dades i que els clubs existeixin amb els seus shortNames correctes. Els partits es crearan a la temporada corresponent si existeix.",
     "csvFormatsNote": "Formats CSV: vegeu ARCHITECTURE.md §7.",
     "cron": {
-      "syncPlayersLnh": { "label": "Sincronitzar jugadors LNH", "description": "Extreu noms + posicions + clubs des de lnh.fr (requereix clubs amb slug LNH configurat)" },
-      "syncPlayersApiSports": { "label": "Sincronitzar jugadors API-Sports", "description": "Importa noms/cognoms des d'API-Sports (temporada activa)" },
-      "syncFixtures": { "label": "Sincronitzar calendari", "description": "Importa partits + resultats des d'API-Sports (temporada activa)" },
-      "syncResults": { "label": "Sincronitzar resultats", "description": "Actualitza els resultats dels partits acabats" },
-      "syncRatings": { "label": "Sincronitzar notes LNH", "description": "Extreu les notes LNH dels partits d'ahir (experimental)" },
-      "snapshotLineups": { "label": "Snapshot alineacions", "description": "Congela les alineacions la data límit de les quals ja ha passat" },
-      "computeScores": { "label": "Calcular punts", "description": "Calcula els punts de les jornades amb totes les notes" },
-      "syncStandings": { "label": "Sincronitzar classificació LNH", "description": "Extreu la classificació oficial de la Daikin StarLigue i desa la jornada en curs" }
+      "syncPlayersLnh": {
+        "label": "Sincronitzar jugadors LNH",
+        "description": "Extreu noms + posicions + clubs des de lnh.fr (requereix clubs amb slug LNH configurat)"
+      },
+      "syncPlayersApiSports": {
+        "label": "Sincronitzar jugadors API-Sports",
+        "description": "Importa noms/cognoms des d'API-Sports (temporada activa)"
+      },
+      "syncFixtures": {
+        "label": "Sincronitzar calendari",
+        "description": "Importa partits + resultats des d'API-Sports (temporada activa)"
+      },
+      "syncResults": {
+        "label": "Sincronitzar resultats",
+        "description": "Actualitza els resultats dels partits acabats"
+      },
+      "syncRatings": {
+        "label": "Sincronitzar notes LNH",
+        "description": "Extreu les notes LNH dels partits d'ahir (experimental)"
+      },
+      "snapshotLineups": {
+        "label": "Snapshot alineacions",
+        "description": "Congela les alineacions la data límit de les quals ja ha passat"
+      },
+      "computeScores": {
+        "label": "Calcular punts",
+        "description": "Calcula els punts de les jornades amb totes les notes"
+      },
+      "syncStandings": {
+        "label": "Sincronitzar classificació LNH",
+        "description": "Extreu la classificació oficial de la Daikin StarLigue i desa la jornada en curs"
+      }
     },
     "cron2024": {
-      "syncPlayers": { "label": "Sincronitzar jugadors 2024", "description": "Importa els noms reals dels jugadors 2024/25" },
-      "syncFixtures": { "label": "Sincronitzar calendari 2024", "description": "Importa el calendari 2024/25 des d'API-Sports" },
-      "syncResults": { "label": "Sincronitzar resultats 2024", "description": "Actualitza els resultats de la temporada 2024/25" }
+      "syncPlayers": {
+        "label": "Sincronitzar jugadors 2024",
+        "description": "Importa els noms reals dels jugadors 2024/25"
+      },
+      "syncFixtures": {
+        "label": "Sincronitzar calendari 2024",
+        "description": "Importa el calendari 2024/25 des d'API-Sports"
+      },
+      "syncResults": {
+        "label": "Sincronitzar resultats 2024",
+        "description": "Actualitza els resultats de la temporada 2024/25"
+      }
     },
     "csvImport": {
       "importButton": "Importar",
@@ -258,6 +291,14 @@
     "postponedButton": "Ajornat",
     "cancelledButton": "Cancel·lat",
     "undoButton": "Desfés",
-    "editButton": "Edita"
+    "editButton": "Edita",
+    "filterPending": "Pendents",
+    "filterAll": "Tots els partits",
+    "searchPlaceholder": "Cerca un club…",
+    "noSearchResults": "Cap partit coincideix amb la cerca.",
+    "editDateButton": "Edita la data",
+    "deleteButton": "Elimina definitivament",
+    "confirmDeleteQuestion": "Vols eliminar definitivament aquest partit? Aquesta acció no es pot desfer.",
+    "confirmCancelQuestion": "Vols cancel·lar aquest partit? S'eliminarà definitivament de la base de dades — aquesta acció no es pot desfer."
   }
 }

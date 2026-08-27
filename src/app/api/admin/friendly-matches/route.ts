@@ -1,10 +1,15 @@
 export const dynamic = "force-dynamic";
 
-// GET /api/admin/friendly-matches — liste les matchs FriendlyMatch (Warm Up, Coupe
-// de France, EHF CL/EL — ARCHITECTURE.md §19/§19.2) de la saison active dont le
-// coup d'envoi est passé, pour rentrer le score à la main quand lnh.fr traîne à le
+// GET /api/admin/friendly-matches — liste TOUS les matchs FriendlyMatch (Warm Up,
+// Coupe de France, EHF CL/EL — ARCHITECTURE.md §19/§19.2/§19.6) de la saison
+// active : à la fois pour rentrer le score à la main quand lnh.fr traîne à le
 // publier (aucune stat joueur n'existe de toute façon pour ces compétitions, cf.
-// §19 "Pas de stats joueurs pour les Warm Up" — un score suffit, pas de boxscore).
+// §19 "Pas de stats joueurs pour les Warm Up" — un score suffit, pas de boxscore),
+// et pour gérer les matchs eux-mêmes (corriger une date erronée, supprimer un
+// doublon) — plus limité au coup d'envoi déjà passé depuis §19.6, sinon
+// impossible de retrouver un match mal daté dans le futur pour le corriger.
+// `needsResult` reste calculé pour que le client puisse filtrer par défaut sur
+// les matchs "à traiter" sans redemander la liste complète.
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
@@ -27,9 +32,9 @@ export async function GET() {
   }
 
   const matches = await prisma.friendlyMatch.findMany({
-    where: { seasonId: season.id, kickoffAt: { lte: new Date() } },
+    where: { seasonId: season.id },
     orderBy: { kickoffAt: "desc" },
-    take: 100,
+    take: 300,
     select: {
       id: true,
       competitionLabel: true,
@@ -49,7 +54,7 @@ export async function GET() {
         ...m,
         // À rentrer à la main : coup d'envoi passé, pas encore de score, et pas
         // explicitement annulé (un CANCELLED n'a légitimement pas de score).
-        needsResult: m.status !== "CANCELLED" && (m.homeScore === null || m.awayScore === null),
+        needsResult: m.status !== "CANCELLED" && m.kickoffAt <= new Date() && (m.homeScore === null || m.awayScore === null),
       })),
     },
   });

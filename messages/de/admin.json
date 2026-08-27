@@ -62,19 +62,52 @@
     "testSeasonNote": "Hinweis: erfordert eine Saison \"2024-2025\" in der Datenbank und dass die Vereine mit ihren korrekten shortNames existieren. Die Spiele werden in der entsprechenden Saison erstellt, sofern diese existiert.",
     "csvFormatsNote": "CSV-Formate: siehe ARCHITECTURE.md §7.",
     "cron": {
-      "syncPlayersLnh": { "label": "LNH-Spieler synchronisieren", "description": "Scrapt Namen + Positionen + Vereine von lnh.fr (erfordert Vereine mit konfiguriertem LNH-Slug)" },
-      "syncPlayersApiSports": { "label": "API-Sports-Spieler synchronisieren", "description": "Importiert Vor-/Nachnamen von API-Sports (aktive Saison)" },
-      "syncFixtures": { "label": "Spielplan synchronisieren", "description": "Importiert Spielpaarungen + Ergebnisse von API-Sports (aktive Saison)" },
-      "syncResults": { "label": "Ergebnisse synchronisieren", "description": "Aktualisiert die Ergebnisse beendeter Spiele" },
-      "syncRatings": { "label": "LNH-Bewertungen synchronisieren", "description": "Scrapt die LNH-Bewertungen der gestrigen Spiele (experimentell)" },
-      "snapshotLineups": { "label": "Aufstellungen einfrieren", "description": "Friert Aufstellungen ein, deren Deadline abgelaufen ist" },
-      "computeScores": { "label": "Punkte berechnen", "description": "Berechnet die Punkte der Spieltage mit allen Bewertungen" },
-      "syncStandings": { "label": "LNH-Tabelle synchronisieren", "description": "Scrapt die offizielle Daikin-StarLigue-Tabelle und speichert den aktuellen Spieltag" }
+      "syncPlayersLnh": {
+        "label": "LNH-Spieler synchronisieren",
+        "description": "Scrapt Namen + Positionen + Vereine von lnh.fr (erfordert Vereine mit konfiguriertem LNH-Slug)"
+      },
+      "syncPlayersApiSports": {
+        "label": "API-Sports-Spieler synchronisieren",
+        "description": "Importiert Vor-/Nachnamen von API-Sports (aktive Saison)"
+      },
+      "syncFixtures": {
+        "label": "Spielplan synchronisieren",
+        "description": "Importiert Spielpaarungen + Ergebnisse von API-Sports (aktive Saison)"
+      },
+      "syncResults": {
+        "label": "Ergebnisse synchronisieren",
+        "description": "Aktualisiert die Ergebnisse beendeter Spiele"
+      },
+      "syncRatings": {
+        "label": "LNH-Bewertungen synchronisieren",
+        "description": "Scrapt die LNH-Bewertungen der gestrigen Spiele (experimentell)"
+      },
+      "snapshotLineups": {
+        "label": "Aufstellungen einfrieren",
+        "description": "Friert Aufstellungen ein, deren Deadline abgelaufen ist"
+      },
+      "computeScores": {
+        "label": "Punkte berechnen",
+        "description": "Berechnet die Punkte der Spieltage mit allen Bewertungen"
+      },
+      "syncStandings": {
+        "label": "LNH-Tabelle synchronisieren",
+        "description": "Scrapt die offizielle Daikin-StarLigue-Tabelle und speichert den aktuellen Spieltag"
+      }
     },
     "cron2024": {
-      "syncPlayers": { "label": "Spieler 2024 synchronisieren", "description": "Importiert die echten Spielernamen 2024/25" },
-      "syncFixtures": { "label": "Spielplan 2024 synchronisieren", "description": "Importiert den Spielplan 2024/25 von API-Sports" },
-      "syncResults": { "label": "Ergebnisse 2024 synchronisieren", "description": "Aktualisiert die Ergebnisse der Saison 2024/25" }
+      "syncPlayers": {
+        "label": "Spieler 2024 synchronisieren",
+        "description": "Importiert die echten Spielernamen 2024/25"
+      },
+      "syncFixtures": {
+        "label": "Spielplan 2024 synchronisieren",
+        "description": "Importiert den Spielplan 2024/25 von API-Sports"
+      },
+      "syncResults": {
+        "label": "Ergebnisse 2024 synchronisieren",
+        "description": "Aktualisiert die Ergebnisse der Saison 2024/25"
+      }
     },
     "csvImport": {
       "importButton": "Importieren",
@@ -258,6 +291,14 @@
     "postponedButton": "Verschoben",
     "cancelledButton": "Abgesagt",
     "undoButton": "Eintrag rückgängig machen",
-    "editButton": "Bearbeiten"
+    "editButton": "Bearbeiten",
+    "filterPending": "Zu bearbeiten",
+    "filterAll": "Alle Spiele",
+    "searchPlaceholder": "Verein suchen…",
+    "noSearchResults": "Kein Spiel entspricht der Suche.",
+    "editDateButton": "Datum bearbeiten",
+    "deleteButton": "Endgültig löschen",
+    "confirmDeleteQuestion": "Dieses Spiel endgültig löschen? Dies kann nicht rückgängig gemacht werden.",
+    "confirmCancelQuestion": "Dieses Spiel absagen? Es wird endgültig aus der Datenbank gelöscht — dies kann nicht rückgängig gemacht werden."
   }
 }
