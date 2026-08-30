@@ -2379,6 +2379,10 @@ ignoré silencieusement (on ne renvoie pas 422, à la différence de
 - `PATCH /api/admin/handball-clubs/[id]` : `{ action: "verify" }` ou
   `{ action: "merge", intoId }` (repointe les `User.homeClubId`, supprime le
   doublon, en **transaction**).
+- `DELETE /api/admin/handball-clubs/[id]` : **rejette** une saisie libre (bouton
+  « Rejeter » à confirmation en 2 temps). Refusé si `source ≠ MANUAL` ou
+  `verified` (409). Le FK `User.homeClubId → onDelete: SetNull` détache les
+  membres → ils se retrouvent sans club et peuvent en saisir un autre.
 - `verify` **géocode au passage** : si le club a une `city` mais pas de
   `latitude` (saisie libre sans choix dans l'autocomplétion), `geocodeCity` la
   renseigne dans la même écriture → le club apparaît sur la carte dès validation.

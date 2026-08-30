@@ -312,6 +312,8 @@
     "title": "Members' home clubs",
     "desc": "Verify or merge clubs entered free-hand by members (§23). The FFHandball directory (~2300 clubs) is imported separately.",
     "verify": "Verify",
+    "reject": "Reject",
+    "rejectHint": "Deletes the club and leaves the manager with no club (they can enter another one)",
     "merge": "Merge",
     "mergeInto": "Merge into (club ID)…",
     "members": "member(s)",

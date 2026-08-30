@@ -312,6 +312,8 @@
     "title": "Kluby macierzyste członków",
     "desc": "Zatwierdź lub scal kluby wpisane ręcznie przez członków (§23). Katalog FFHandball (~2300 klubów) jest importowany osobno.",
     "verify": "Zatwierdź",
+    "reject": "Odrzuć",
+    "rejectHint": "Usuwa klub i zostawia menedżera bez klubu (może podać inny)",
     "merge": "Scal",
     "mergeInto": "Scal z (ID klubu)…",
     "members": "członek(ów)",

@@ -312,6 +312,8 @@
     "title": "Heimatvereine der Mitglieder",
     "desc": "Von Mitgliedern frei eingegebene Vereine prüfen oder zusammenführen (§23). Das FFHandball-Verzeichnis (~2300 Vereine) wird separat importiert.",
     "verify": "Bestätigen",
+    "reject": "Ablehnen",
+    "rejectHint": "Löscht den Verein; der Manager bleibt ohne Verein (kann einen anderen angeben)",
     "merge": "Zusammenführen",
     "mergeInto": "Zusammenführen mit (Vereins-ID)…",
     "members": "Mitglied(er)",

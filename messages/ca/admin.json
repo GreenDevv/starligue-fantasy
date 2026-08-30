@@ -312,6 +312,8 @@
     "title": "Clubs d'origen dels membres",
     "desc": "Validar o fusionar els clubs introduïts manualment pels membres (§23). El directori FFHandball (~2300 clubs) s'importa a part.",
     "verify": "Valida",
+    "reject": "Rebutja",
+    "rejectHint": "Elimina el club i deixa el mànager sense club (en podrà indicar un altre)",
     "merge": "Fusiona",
     "mergeInto": "Fusiona amb (ID del club)…",
     "members": "membre(s)",

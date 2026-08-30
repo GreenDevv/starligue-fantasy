@@ -5,6 +5,10 @@ export const dynamic = "force-dynamic";
 //   { action: "merge", intoId }   → fusionne ce club dans `intoId` : repointe les
 //                                   User.homeClubId puis supprime la ligne. En
 //                                   transaction.
+// DELETE /api/admin/handball-clubs/[id] — rejette une saisie libre : supprime le
+//   club (MANUAL non vérifié uniquement). Le FK `onDelete: SetNull` détache
+//   automatiquement les membres → ils se retrouvent sans club et peuvent en
+//   saisir un autre.
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
@@ -82,4 +86,32 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   });
 
   return NextResponse.json({ data: { mergedInto: intoId, membersMoved: moved } });
+}
+
+export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+  if (!(await requireAdmin())) {
+    return NextResponse.json({ error: { code: "FORBIDDEN" } }, { status: 403 });
+  }
+
+  const club = await prisma.handballClub.findUnique({
+    where: { id: params.id },
+    select: { id: true, source: true, verified: true, _count: { select: { members: true } } },
+  });
+  if (!club) {
+    return NextResponse.json({ error: { code: "NOT_FOUND" } }, { status: 404 });
+  }
+  // Filet : on ne supprime qu'une saisie libre en attente. Un club de l'annuaire
+  // (FFHANDBALL) ou déjà validé ne se supprime pas ici — il serait recréé au
+  // prochain sync et/ou détacherait des membres légitimes.
+  if (club.source !== "MANUAL" || club.verified) {
+    return NextResponse.json(
+      { error: { code: "NOT_DELETABLE", message: "Seule une saisie libre non validée peut être rejetée" } },
+      { status: 409 },
+    );
+  }
+
+  // FK User.homeClubId → onDelete: SetNull : les membres sont détachés automatiquement.
+  await prisma.handballClub.delete({ where: { id: params.id } });
+
+  return NextResponse.json({ data: { deleted: true, membersUnlinked: club._count.members } });
 }

@@ -312,6 +312,8 @@
     "title": "Clubs d'origine des membres",
     "desc": "Valider ou fusionner les clubs saisis en clair par les membres (§23). L'annuaire FFHandball (~2300 clubs) est importé à part.",
     "verify": "Valider",
+    "reject": "Rejeter",
+    "rejectHint": "Supprime le club et laisse le manager sans club (il pourra en saisir un autre)",
     "merge": "Fusionner",
     "mergeInto": "Fusionner avec (ID du club)…",
     "members": "membre(s)",

@@ -312,6 +312,8 @@
     "title": "Medlemmernes hjemklubber",
     "desc": "Godkend eller flet klubber, som medlemmer har indtastet manuelt (§23). FFHandball-kataloget (~2300 klubber) importeres separat.",
     "verify": "Godkend",
+    "reject": "Afvis",
+    "rejectHint": "Sletter klubben og lader manageren stå uden klub (kan angive en anden)",
     "merge": "Flet",
     "mergeInto": "Flet med (klub-ID)…",
     "members": "medlem(mer)",

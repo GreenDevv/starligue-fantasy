@@ -18,12 +18,14 @@ interface AdminClub {
 
 export default function AdminHandballClubsPage() {
   const t = useTranslations("admin.homeClubs");
+  const tc = useTranslations("admin.common");
   const format = useFormatter();
   const [filter, setFilter] = useState<"unverified" | "all">("unverified");
   const [clubs, setClubs] = useState<AdminClub[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [mergeInto, setMergeInto] = useState<Record<string, string>>({});
+  const [confirmRejectId, setConfirmRejectId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -46,6 +48,19 @@ export default function AdminHandballClubsPage() {
         body: JSON.stringify(body),
       });
       if (res.ok) await load();
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function reject(id: string) {
+    setBusyId(id);
+    try {
+      const res = await fetch(`/api/admin/handball-clubs/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setConfirmRejectId(null);
+        await load();
+      }
     } finally {
       setBusyId(null);
     }
@@ -108,6 +123,35 @@ export default function AdminHandballClubsPage() {
                   {t("verify")}
                 </button>
               )}
+
+              {!c.verified &&
+                c.source === "MANUAL" &&
+                (confirmRejectId === c.id ? (
+                  <div className="flex shrink-0 items-center gap-1">
+                    <button
+                      onClick={() => reject(c.id)}
+                      disabled={busyId === c.id}
+                      className="rounded bg-points-neg px-3 py-1 text-xs font-semibold text-bg disabled:opacity-50"
+                    >
+                      {tc("confirmQuestion")}
+                    </button>
+                    <button
+                      onClick={() => setConfirmRejectId(null)}
+                      className="rounded border border-border px-2 py-1 text-xs text-text-muted hover:text-text"
+                    >
+                      {tc("cancel")}
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setConfirmRejectId(c.id)}
+                    disabled={busyId === c.id}
+                    className="shrink-0 rounded border border-points-neg/40 px-3 py-1 text-xs font-semibold text-points-neg hover:bg-points-neg/10 disabled:opacity-50"
+                    title={t("rejectHint")}
+                  >
+                    {t("reject")}
+                  </button>
+                ))}
 
               <div className="flex shrink-0 items-center gap-1">
                 <input
