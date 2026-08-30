@@ -12,6 +12,7 @@ import { prisma } from "@/lib/db";
 import { deleteTeamsCascade, deleteSimulationTeamsCascade } from "@/lib/leagues/standings";
 import { SIMULATION_SEASON_LABEL } from "@/lib/simulation/constants";
 import { homeClubInputSchema, resolveHomeClubId, HomeClubError } from "@/lib/clubs/home-club-input";
+import { notifyAdminsNewHomeClub } from "@/lib/notifications/notify-new-home-club";
 
 const homeClubSelect = {
   select: { id: true, name: true, city: true, country: true, verified: true },
@@ -68,9 +69,12 @@ export async function PUT(req: Request) {
   const { name, favoritePlayerId, homeClub } = parsed.data;
 
   let homeClubId: string | null | undefined;
+  let createdHomeClubId: string | null = null;
   if (homeClub !== undefined) {
     try {
-      homeClubId = await resolveHomeClubId(homeClub);
+      const resolved = await resolveHomeClubId(homeClub);
+      homeClubId = resolved.homeClubId;
+      createdHomeClubId = resolved.createdClubId;
     } catch (e) {
       if (e instanceof HomeClubError) {
         return NextResponse.json({ error: { code: e.code, message: e.message } }, { status: 422 });
@@ -118,6 +122,14 @@ export async function PUT(req: Request) {
       homeClub: homeClubSelect,
     },
   });
+
+  // Saisie libre d'un club hors annuaire → prévient les admins (best-effort).
+  if (createdHomeClubId) {
+    void notifyAdminsNewHomeClub({
+      clubId: createdHomeClubId,
+      memberName: user.name ?? session.user.name ?? "Un membre",
+    }).catch(() => {});
+  }
 
   return NextResponse.json({ data: user });
 }

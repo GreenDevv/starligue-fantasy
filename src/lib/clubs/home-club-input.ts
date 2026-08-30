@@ -61,12 +61,20 @@ async function uniqueSlug(base: string): Promise<string> {
   return `${root}-${Date.now().toString(36)}`;
 }
 
+export interface ResolvedHomeClub {
+  /** id à stocker dans `User.homeClubId` (null = retire le club). */
+  homeClubId: string | null;
+  /** id du `HandballClub` MANUAL `verified=false` créé à l'instant (sinon null) —
+   *  l'appelant s'en sert pour notifier l'admin (best-effort). */
+  createdClubId: string | null;
+}
+
 /**
- * Renvoie l'id de HandballClub à stocker dans `User.homeClubId` (ou null).
- * Lève `HomeClubError` si un `clubId` fourni ne correspond à rien.
+ * Résout l'entrée « club d'origine » d'un membre. Lève `HomeClubError` si un
+ * `clubId` fourni ne correspond à rien.
  */
-export async function resolveHomeClubId(input: HomeClubInput): Promise<string | null> {
-  if (input === null) return null;
+export async function resolveHomeClubId(input: HomeClubInput): Promise<ResolvedHomeClub> {
+  if (input === null) return { homeClubId: null, createdClubId: null };
 
   if ("clubId" in input) {
     const club = await prisma.handballClub.findUnique({
@@ -74,7 +82,7 @@ export async function resolveHomeClubId(input: HomeClubInput): Promise<string | 
       select: { id: true },
     });
     if (!club) throw new HomeClubError("HANDBALL_CLUB_NOT_FOUND", "Club introuvable");
-    return club.id;
+    return { homeClubId: club.id, createdClubId: null };
   }
 
   const { name, country, city } = input.newClub;
@@ -105,7 +113,7 @@ export async function resolveHomeClubId(input: HomeClubInput): Promise<string | 
     if (existing.latitude == null && coords) {
       await prisma.handballClub.update({ where: { id: existing.id }, data: coords });
     }
-    return existing.id;
+    return { homeClubId: existing.id, createdClubId: null };
   }
 
   const created = await prisma.handballClub.create({
@@ -121,5 +129,5 @@ export async function resolveHomeClubId(input: HomeClubInput): Promise<string | 
     },
     select: { id: true },
   });
-  return created.id;
+  return { homeClubId: created.id, createdClubId: created.id };
 }

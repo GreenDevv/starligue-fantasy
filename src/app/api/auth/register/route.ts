@@ -6,6 +6,7 @@ import { hash } from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { homeClubInputSchema, resolveHomeClubId } from "@/lib/clubs/home-club-input";
+import { notifyAdminsNewHomeClub } from "@/lib/notifications/notify-new-home-club";
 
 const schema = z.object({
   email: z.string().email(),
@@ -64,9 +65,12 @@ export async function POST(req: Request) {
   // Une erreur ici (clubId bidon, réseau) ne doit jamais empêcher l'inscription :
   // on ignore et le membre le renseignera depuis /account.
   let homeClubId: string | null = null;
+  let createdHomeClubId: string | null = null;
   if (homeClub !== undefined && homeClub !== null) {
     try {
-      homeClubId = await resolveHomeClubId(homeClub);
+      const resolved = await resolveHomeClubId(homeClub);
+      homeClubId = resolved.homeClubId;
+      createdHomeClubId = resolved.createdClubId;
     } catch {
       homeClubId = null;
     }
@@ -85,6 +89,11 @@ export async function POST(req: Request) {
       homeClubId,
     },
   });
+
+  // Saisie libre d'un club hors annuaire → prévient les admins (best-effort).
+  if (createdHomeClubId) {
+    void notifyAdminsNewHomeClub({ clubId: createdHomeClubId, memberName: name }).catch(() => {});
+  }
 
   return NextResponse.json(
     { data: { id: user.id, email: user.email, name: user.name } },

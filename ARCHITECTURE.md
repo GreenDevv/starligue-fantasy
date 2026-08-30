@@ -2386,6 +2386,13 @@ ignoré silencieusement (on ne renvoie pas 422, à la différence de
 - `verify` **géocode au passage** : si le club a une `city` mais pas de
   `latitude` (saisie libre sans choix dans l'autocomplétion), `geocodeCity` la
   renseigne dans la même écriture → le club apparaît sur la carte dès validation.
+- **Notification admin par email** : quand `resolveHomeClubId` crée un
+  `HandballClub` MANUAL non vérifié (saisie libre inédite), `PUT /api/account` et
+  `POST /api/auth/register` appellent `notifyAdminsNewHomeClub` en **best-effort**
+  (`src/lib/notifications/notify-new-home-club.ts`) : un email par `User` de rôle
+  `ADMIN` (Resend, gabarit `new-home-club-email.ts`, FR only comme l'email de
+  blessure) avec nom du club / ville / membre + lien vers `/admin/handball-clubs`.
+  Réutiliser un club existant ne déclenche rien.
 - `scripts/backfill-handball-club-coords.ts` : géocodage rétroactif des clubs
   `MANUAL` sans coords — **one-off**, lancé une fois après le déploiement de la
   vue monde (2026-08-31, 1 club) ; PAS branché sur les déploiements.
