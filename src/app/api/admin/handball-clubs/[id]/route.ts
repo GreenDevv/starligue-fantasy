@@ -9,6 +9,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { geocodeCity } from "@/lib/geo/cities";
 
 async function requireAdmin() {
   const session = await auth();
@@ -36,16 +37,24 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     );
   }
 
-  const club = await prisma.handballClub.findUnique({ where: { id: params.id }, select: { id: true } });
+  const club = await prisma.handballClub.findUnique({
+    where: { id: params.id },
+    select: { id: true, city: true, country: true, latitude: true, longitude: true },
+  });
   if (!club) {
     return NextResponse.json({ error: { code: "NOT_FOUND" } }, { status: 404 });
   }
 
   if (parsed.data.action === "verify") {
+    // Géocode au passage si le club a une ville mais pas encore de coordonnées
+    // (saisie libre où l'utilisateur n'a pas choisi la ville dans l'autocomplétion,
+    // ou ville corrigée par l'admin) → il apparaît sur la carte dès validation.
+    const coords =
+      club.latitude == null && club.city ? geocodeCity(club.city, club.country) : null;
     const updated = await prisma.handballClub.update({
       where: { id: params.id },
-      data: { verified: true },
-      select: { id: true, verified: true },
+      data: { verified: true, ...(coords ?? {}) },
+      select: { id: true, verified: true, latitude: true, longitude: true },
     });
     return NextResponse.json({ data: updated });
   }

@@ -2379,6 +2379,12 @@ ignoré silencieusement (on ne renvoie pas 422, à la différence de
 - `PATCH /api/admin/handball-clubs/[id]` : `{ action: "verify" }` ou
   `{ action: "merge", intoId }` (repointe les `User.homeClubId`, supprime le
   doublon, en **transaction**).
+- `verify` **géocode au passage** : si le club a une `city` mais pas de
+  `latitude` (saisie libre sans choix dans l'autocomplétion), `geocodeCity` la
+  renseigne dans la même écriture → le club apparaît sur la carte dès validation.
+- `scripts/backfill-handball-club-coords.ts` : géocodage rétroactif des clubs
+  `MANUAL` sans coords — **one-off**, lancé une fois après le déploiement de la
+  vue monde (2026-08-31, 1 club) ; PAS branché sur les déploiements.
 
 ### 23.6 Parcours : inscription & `/account`
 
