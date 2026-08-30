@@ -7,7 +7,8 @@
     "friendlyMatches": "Other matches",
     "news": "News",
     "dashboard": "Dashboard",
-    "backToGame": "← Game"
+    "backToGame": "← Game",
+    "homeClubs": "Home clubs"
   },
   "common": {
     "loading": "Loading…",
@@ -306,5 +307,16 @@
     "deleteButton": "Delete permanently",
     "confirmDeleteQuestion": "Permanently delete this match? This cannot be undone.",
     "confirmCancelQuestion": "Cancel this match? It will be permanently deleted from the database — this cannot be undone."
+  },
+  "homeClubs": {
+    "title": "Members' home clubs",
+    "desc": "Verify or merge clubs entered free-hand by members (§23). The FFHandball directory (~2300 clubs) is imported separately.",
+    "verify": "Verify",
+    "merge": "Merge",
+    "mergeInto": "Merge into (club ID)…",
+    "members": "member(s)",
+    "empty": "No club pending review.",
+    "filterUnverified": "Pending",
+    "filterAll": "All"
   }
 }

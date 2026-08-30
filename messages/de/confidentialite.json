@@ -10,7 +10,8 @@
         "email": "deine E-Mail-Adresse (Anmeldekennung, wird niemals weitergegeben)",
         "password": "dein Passwort, niemals im Klartext gespeichert (mit bcrypt gehasht)",
         "name": "dein in der App angezeigter Vorname bzw. Benutzername",
-        "favoritePlayer": "dein Lieblingsspieler, sofern du dich entscheidest, einen anzugeben (optional)"
+        "favoritePlayer": "dein Lieblingsspieler, sofern du dich entscheidest, einen anzugeben (optional)",
+        "homeClub": "der Handballverein, aus dem du kommst oder in dem du spielst, falls du einen angibst — optional, jederzeit änderbar, für die anderen Mitglieder deiner Ligen sichtbar"
       },
       "gameDataNote": "Beim Spielen erzeugst du außerdem Spieldaten: Kader, Aufstellungen, Ligen, Punkte, Verlauf — diese sind für den Betrieb des Spiels selbst notwendig und werden nie zu anderen Zwecken verwendet."
     },

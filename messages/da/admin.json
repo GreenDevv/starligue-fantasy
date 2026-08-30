@@ -7,7 +7,8 @@
     "friendlyMatches": "Andre kampe",
     "news": "Nyheder",
     "dashboard": "Dashboard",
-    "backToGame": "← Spil"
+    "backToGame": "← Spil",
+    "homeClubs": "Hjemklubber"
   },
   "common": {
     "loading": "Indlæser…",
@@ -306,5 +307,16 @@
     "deleteButton": "Slet permanent",
     "confirmDeleteQuestion": "Slet denne kamp permanent? Dette kan ikke fortrydes.",
     "confirmCancelQuestion": "Aflys denne kamp? Den slettes permanent fra databasen — dette kan ikke fortrydes."
+  },
+  "homeClubs": {
+    "title": "Medlemmernes hjemklubber",
+    "desc": "Godkend eller flet klubber, som medlemmer har indtastet manuelt (§23). FFHandball-kataloget (~2300 klubber) importeres separat.",
+    "verify": "Godkend",
+    "merge": "Flet",
+    "mergeInto": "Flet med (klub-ID)…",
+    "members": "medlem(mer)",
+    "empty": "Ingen klub afventer godkendelse.",
+    "filterUnverified": "Afventer",
+    "filterAll": "Alle"
   }
 }

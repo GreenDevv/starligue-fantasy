@@ -1,0 +1,27 @@
+{
+  "homeClub": {
+    "label": "O teu clube de andebol",
+    "hint": "O clube de onde vens ou onde jogas. Usamo-lo para destacar clubes fora da elite — podes mudá-lo a qualquer momento.",
+    "countryLabel": "País",
+    "searchPlaceholder": "Procurar um clube…",
+    "noResults": "Nenhum clube encontrado",
+    "notListed": "O meu clube não está na lista",
+    "backToSearch": "← Voltar à pesquisa",
+    "freeName": "Nome do clube",
+    "freeCity": "Cidade (opcional)",
+    "freeSubmit": "Confirmar",
+    "pendingReview": "A aguardar validação pela equipa",
+    "change": "mudar"
+  },
+  "leagueMembers": {
+    "playsAt": "joga no {club}"
+  },
+  "homeMap": {
+    "title": "De onde são os managers",
+    "summary": "{members, plural, one {# manager localizado} other {# managers localizados}} · {clubs, plural, one {# clube} other {# clubes}} · {departments, plural, one {# departamento} other {# departamentos}}",
+    "dotTitle": "{count, plural, one {# manager} other {# managers}}",
+    "alsoRepresented": "Também representados",
+    "overseas": "França ultramarina",
+    "unlocated": "Clube não localizado"
+  }
+}

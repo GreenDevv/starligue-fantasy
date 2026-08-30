@@ -1,0 +1,27 @@
+{
+  "homeClub": {
+    "label": "Din håndboldklub",
+    "hint": "Klubben du kommer fra eller spiller i. Vi bruger den til at fremhæve klubber uden for eliten — kan ændres når som helst.",
+    "countryLabel": "Land",
+    "searchPlaceholder": "Søg efter en klub…",
+    "noResults": "Ingen klub fundet",
+    "notListed": "Min klub er ikke på listen",
+    "backToSearch": "← Tilbage til søgning",
+    "freeName": "Klubnavn",
+    "freeCity": "By (valgfrit)",
+    "freeSubmit": "Bekræft",
+    "pendingReview": "Afventer godkendelse fra teamet",
+    "change": "skift"
+  },
+  "leagueMembers": {
+    "playsAt": "spiller i {club}"
+  },
+  "homeMap": {
+    "title": "Hvor managerne kommer fra",
+    "summary": "{members, plural, one {# placeret manager} other {# placerede managere}} · {clubs, plural, one {# klub} other {# klubber}} · {departments, plural, one {# departement} other {# departementer}}",
+    "dotTitle": "{count, plural, one {# manager} other {# managere}}",
+    "alsoRepresented": "Også repræsenteret",
+    "overseas": "Oversøisk Frankrig",
+    "unlocated": "Klub uden placering"
+  }
+}

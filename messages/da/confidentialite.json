@@ -10,7 +10,8 @@
         "email": "din emailadresse (login-id, deles aldrig med andre)",
         "password": "din adgangskode, som aldrig gemmes i klartekst (den hashes med bcrypt)",
         "name": "dit fornavn/brugernavn, som vises i appen",
-        "favoritePlayer": "din yndlingsspiller, hvis du vælger at angive en (valgfrit)"
+        "favoritePlayer": "din yndlingsspiller, hvis du vælger at angive en (valgfrit)",
+        "homeClub": "den håndboldklub du kommer fra eller spiller i, hvis du angiver en — valgfrit, kan altid ændres, synlig for de andre medlemmer af dine ligaer"
       },
       "gameDataNote": "Når du spiller, genererer du desuden spildata: trupper, opstillinger, ligaer, point, historik — nødvendige for selve spillets funktion og bruges aldrig til andre formål."
     },

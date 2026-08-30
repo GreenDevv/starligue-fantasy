@@ -37,6 +37,7 @@ export default async function ConfidentialitePage() {
             <li>{t("sections.data.items.password")}</li>
             <li>{t("sections.data.items.name")}</li>
             <li>{t("sections.data.items.favoritePlayer")}</li>
+            <li>{t("sections.data.items.homeClub")}</li>
           </ul>
           <p className="mt-2">{t("sections.data.gameDataNote")}</p>
         </section>

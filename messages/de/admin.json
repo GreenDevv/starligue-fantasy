@@ -7,7 +7,8 @@
     "friendlyMatches": "Andere Spiele",
     "news": "News",
     "dashboard": "Dashboard",
-    "backToGame": "← Spiel"
+    "backToGame": "← Spiel",
+    "homeClubs": "Heimatvereine"
   },
   "common": {
     "loading": "Wird geladen…",
@@ -306,5 +307,16 @@
     "deleteButton": "Endgültig löschen",
     "confirmDeleteQuestion": "Dieses Spiel endgültig löschen? Dies kann nicht rückgängig gemacht werden.",
     "confirmCancelQuestion": "Dieses Spiel absagen? Es wird endgültig aus der Datenbank gelöscht — dies kann nicht rückgängig gemacht werden."
+  },
+  "homeClubs": {
+    "title": "Heimatvereine der Mitglieder",
+    "desc": "Von Mitgliedern frei eingegebene Vereine prüfen oder zusammenführen (§23). Das FFHandball-Verzeichnis (~2300 Vereine) wird separat importiert.",
+    "verify": "Bestätigen",
+    "merge": "Zusammenführen",
+    "mergeInto": "Zusammenführen mit (Vereins-ID)…",
+    "members": "Mitglied(er)",
+    "empty": "Kein Verein zur Prüfung.",
+    "filterUnverified": "Ausstehend",
+    "filterAll": "Alle"
   }
 }

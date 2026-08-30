@@ -1,0 +1,27 @@
+{
+  "homeClub": {
+    "label": "Ton club de handball",
+    "hint": "Le club d'où tu viens ou dans lequel tu joues. On s'en sert pour mettre en avant d'autres clubs que ceux de l'élite — modifiable à tout moment.",
+    "countryLabel": "Pays",
+    "searchPlaceholder": "Rechercher un club…",
+    "noResults": "Aucun club trouvé",
+    "notListed": "Mon club n'est pas dans la liste",
+    "backToSearch": "← Revenir à la recherche",
+    "freeName": "Nom du club",
+    "freeCity": "Ville (facultatif)",
+    "freeSubmit": "Valider",
+    "pendingReview": "En cours de validation par l'équipe",
+    "change": "changer"
+  },
+  "leagueMembers": {
+    "playsAt": "joue à {club}"
+  },
+  "homeMap": {
+    "title": "D'où viennent les managers",
+    "summary": "{members, plural, one {# manager localisé} other {# managers localisés}} · {clubs, plural, one {# club} other {# clubs}} · {departments, plural, one {# département} other {# départements}}",
+    "dotTitle": "{count, plural, one {# manager} other {# managers}}",
+    "alsoRepresented": "Aussi représentés",
+    "overseas": "Outre-mer",
+    "unlocated": "Club non localisé"
+  }
+}

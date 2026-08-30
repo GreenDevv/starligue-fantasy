@@ -5,18 +5,21 @@ import { useTranslations, useLocale } from "next-intl";
 import { signOut } from "next-auth/react";
 import { resolveApiError } from "@/lib/api/error-messages";
 import { PlayerSearch, type PlayerSearchOption } from "@/components/players/PlayerSearch";
+import { HomeClubPicker, homeClubValueToPayload, type HomeClubValue } from "@/components/clubs/HomeClubPicker";
 
 interface AccountData {
   name: string;
   email: string;
   favoritePlayerId: string | null;
   favoritePlayer: { id: string; firstName: string; lastName: string; club: { shortName: string } } | null;
+  homeClub: { id: string; name: string; city: string | null; country: string; verified: boolean } | null;
 }
 
 export default function AccountPage() {
   const t = useTranslations();
   const tAccount = useTranslations("account");
   const tCommon = useTranslations("common");
+  const tCommunity = useTranslations("community");
   const locale = useLocale();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -25,6 +28,10 @@ export default function AccountPage() {
   // engageant, pas un champ qu'on retouche à chaque bonne/mauvaise perf (demande
   // explicite). Reste modifiable uniquement tant qu'aucun choix n'a jamais été fait.
   const [lockedFavoritePlayer, setLockedFavoritePlayer] = useState<AccountData["favoritePlayer"]>(null);
+  // Club d'origine — modifiable librement (pas de verrou, contrairement au joueur
+  // préféré). `homeClubDirty` : on ne renvoie le champ au serveur que s'il a bougé.
+  const [homeClub, setHomeClub] = useState<HomeClubValue>(null);
+  const [homeClubDirty, setHomeClubDirty] = useState(false);
   const [players, setPlayers] = useState<PlayerSearchOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -50,6 +57,11 @@ export default function AccountPage() {
           setEmail(accountJson.data.email);
           setFavoritePlayerId(accountJson.data.favoritePlayerId ?? "");
           setLockedFavoritePlayer(accountJson.data.favoritePlayer);
+          setHomeClub(
+            accountJson.data.homeClub
+              ? { kind: "existing", club: accountJson.data.homeClub }
+              : null,
+          );
         }
         setPlayers(playersJson.data?.players ?? []);
         setLoading(false);
@@ -66,15 +78,24 @@ export default function AccountPage() {
     const res = await fetch("/api/account", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      // Verrouillé : on ne renvoie pas favoritePlayerId, rien à modifier côté serveur.
-      body: JSON.stringify(lockedFavoritePlayer ? { name } : { name, favoritePlayerId: favoritePlayerId || null }),
+      body: JSON.stringify({
+        name,
+        // Joueur préféré verrouillé une fois déclaré : on ne renvoie rien dans ce cas.
+        ...(lockedFavoritePlayer ? {} : { favoritePlayerId: favoritePlayerId || null }),
+        // Club d'origine : envoyé seulement s'il a changé.
+        ...(homeClubDirty ? { homeClub: homeClub ? homeClubValueToPayload(homeClub) : null } : {}),
+      }),
     });
-    const json = (await res.json()) as { error?: { code?: string; message: string } };
+    const json = (await res.json()) as { error?: { code?: string; message: string }; data?: AccountData };
 
     if (!res.ok) {
       setError(resolveApiError(t, "account", json.error?.code));
     } else {
       setSaved(true);
+      setHomeClubDirty(false);
+      if (json.data?.homeClub) {
+        setHomeClub({ kind: "existing", club: json.data.homeClub });
+      }
     }
     setSaving(false);
   }
@@ -152,6 +173,22 @@ export default function AccountPage() {
               }}
             />
           )}
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs uppercase tracking-widest text-text-muted">
+            {tCommunity("homeClub.label")}{" "}
+            <span className="normal-case text-text-muted/70">{tAccount("optional")}</span>
+          </label>
+          <HomeClubPicker
+            value={homeClub}
+            onChange={(v) => {
+              setHomeClub(v);
+              setHomeClubDirty(true);
+              setSaved(false);
+            }}
+          />
+          <p className="mt-1 text-[11px] text-text-muted">{tCommunity("homeClub.hint")}</p>
         </div>
 
         {error && <p className="rounded-lg bg-points-neg/10 px-4 py-2 text-sm text-points-neg">{error}</p>}

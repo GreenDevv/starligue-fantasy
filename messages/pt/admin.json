@@ -7,7 +7,8 @@
     "friendlyMatches": "Outros jogos",
     "news": "Notícias",
     "dashboard": "Dashboard",
-    "backToGame": "← Jogo"
+    "backToGame": "← Jogo",
+    "homeClubs": "Clubes de origem"
   },
   "common": {
     "loading": "A carregar…",
@@ -306,5 +307,16 @@
     "deleteButton": "Eliminar definitivamente",
     "confirmDeleteQuestion": "Eliminar definitivamente este jogo? Esta ação não pode ser desfeita.",
     "confirmCancelQuestion": "Cancelar este jogo? Será eliminado definitivamente da base de dados — esta ação não pode ser desfeita."
+  },
+  "homeClubs": {
+    "title": "Clubes de origem dos membros",
+    "desc": "Validar ou fundir os clubes introduzidos manualmente pelos membros (§23). O diretório FFHandball (~2300 clubes) é importado à parte.",
+    "verify": "Validar",
+    "merge": "Fundir",
+    "mergeInto": "Fundir com (ID do clube)…",
+    "members": "membro(s)",
+    "empty": "Nenhum clube pendente de validação.",
+    "filterUnverified": "Pendentes",
+    "filterAll": "Todos"
   }
 }

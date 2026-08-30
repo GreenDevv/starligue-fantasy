@@ -1,0 +1,27 @@
+{
+  "homeClub": {
+    "label": "Your handball club",
+    "hint": "The club you're from or play for. We use it to spotlight clubs beyond the top flight — you can change it anytime.",
+    "countryLabel": "Country",
+    "searchPlaceholder": "Search for a club…",
+    "noResults": "No club found",
+    "notListed": "My club isn't in the list",
+    "backToSearch": "← Back to search",
+    "freeName": "Club name",
+    "freeCity": "City (optional)",
+    "freeSubmit": "Confirm",
+    "pendingReview": "Pending review by the team",
+    "change": "change"
+  },
+  "leagueMembers": {
+    "playsAt": "plays at {club}"
+  },
+  "homeMap": {
+    "title": "Where the managers are from",
+    "summary": "{members, plural, one {# manager located} other {# managers located}} · {clubs, plural, one {# club} other {# clubs}} · {departments, plural, one {# department} other {# departments}}",
+    "dotTitle": "{count, plural, one {# manager} other {# managers}}",
+    "alsoRepresented": "Also represented",
+    "overseas": "Overseas France",
+    "unlocated": "Club not located"
+  }
+}

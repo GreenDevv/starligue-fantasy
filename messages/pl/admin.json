@@ -7,7 +7,8 @@
     "friendlyMatches": "Inne mecze",
     "news": "Aktualności",
     "dashboard": "Panel",
-    "backToGame": "← Gra"
+    "backToGame": "← Gra",
+    "homeClubs": "Kluby macierzyste"
   },
   "common": {
     "loading": "Ładowanie…",
@@ -306,5 +307,16 @@
     "deleteButton": "Usuń trwale",
     "confirmDeleteQuestion": "Trwale usunąć ten mecz? Tej operacji nie można cofnąć.",
     "confirmCancelQuestion": "Odwołać ten mecz? Zostanie trwale usunięty z bazy danych — tej operacji nie można cofnąć."
+  },
+  "homeClubs": {
+    "title": "Kluby macierzyste członków",
+    "desc": "Zatwierdź lub scal kluby wpisane ręcznie przez członków (§23). Katalog FFHandball (~2300 klubów) jest importowany osobno.",
+    "verify": "Zatwierdź",
+    "merge": "Scal",
+    "mergeInto": "Scal z (ID klubu)…",
+    "members": "członek(ów)",
+    "empty": "Brak klubów oczekujących na weryfikację.",
+    "filterUnverified": "Oczekujące",
+    "filterAll": "Wszystkie"
   }
 }

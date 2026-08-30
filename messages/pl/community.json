@@ -1,0 +1,27 @@
+{
+  "homeClub": {
+    "label": "Twój klub piłki ręcznej",
+    "hint": "Klub, z którego pochodzisz lub w którym grasz. Używamy tego, by promować kluby spoza ekstraklasy — możesz to zmienić w każdej chwili.",
+    "countryLabel": "Kraj",
+    "searchPlaceholder": "Szukaj klubu…",
+    "noResults": "Nie znaleziono klubu",
+    "notListed": "Mojego klubu nie ma na liście",
+    "backToSearch": "← Powrót do wyszukiwania",
+    "freeName": "Nazwa klubu",
+    "freeCity": "Miasto (opcjonalnie)",
+    "freeSubmit": "Zatwierdź",
+    "pendingReview": "Oczekuje na weryfikację przez zespół",
+    "change": "zmień"
+  },
+  "leagueMembers": {
+    "playsAt": "gra w {club}"
+  },
+  "homeMap": {
+    "title": "Skąd są menedżerowie",
+    "summary": "{members, plural, one {# zlokalizowany menedżer} few {# zlokalizowanych menedżerów} many {# zlokalizowanych menedżerów} other {# zlokalizowanych menedżerów}} · {clubs, plural, one {# klub} few {# kluby} many {# klubów} other {# klubu}} · {departments, plural, one {# departament} few {# departamenty} many {# departamentów} other {# departamentu}}",
+    "dotTitle": "{count, plural, one {# menedżer} few {# menedżerów} many {# menedżerów} other {# menedżera}}",
+    "alsoRepresented": "Również reprezentowani",
+    "overseas": "Francja zamorska",
+    "unlocated": "Klub bez lokalizacji"
+  }
+}

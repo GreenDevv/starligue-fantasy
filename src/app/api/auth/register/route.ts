@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { homeClubInputSchema, resolveHomeClubId } from "@/lib/clubs/home-club-input";
 
 const schema = z.object({
   email: z.string().email(),
@@ -14,6 +15,10 @@ const schema = z.object({
   // jamais bloquant. Vérifié ci-dessous plutôt que fait confiance (l'id vient du
   // client) : doit référencer un joueur réel de la saison live.
   favoritePlayerId: z.string().min(1).optional(),
+  // Club d'origine (facultatif) — { clubId } | { newClub } — ARCHITECTURE.md §23.
+  // Résolu après la création du compte, jamais bloquant (une valeur invalide est
+  // ignorée en silence, contrairement à favoritePlayerId).
+  homeClub: homeClubInputSchema.optional(),
 });
 
 export async function POST(req: Request) {
@@ -35,7 +40,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const { email, password, name, favoritePlayerId } = parsed.data;
+  const { email, password, name, favoritePlayerId, homeClub } = parsed.data;
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
@@ -55,6 +60,18 @@ export async function POST(req: Request) {
     }
   }
 
+  // Club d'origine résolu avant la création pour le passer dans le même create().
+  // Une erreur ici (clubId bidon, réseau) ne doit jamais empêcher l'inscription :
+  // on ignore et le membre le renseignera depuis /account.
+  let homeClubId: string | null = null;
+  if (homeClub !== undefined && homeClub !== null) {
+    try {
+      homeClubId = await resolveHomeClubId(homeClub);
+    } catch {
+      homeClubId = null;
+    }
+  }
+
   // FantasyTeam n'est plus créée ici : chaque équipe est liée à une ligue
   // (créer/rejoindre une ligue crée l'équipe correspondante, voir
   // POST /api/leagues et /api/leagues/join). L'utilisateur passe par le verrou
@@ -65,6 +82,7 @@ export async function POST(req: Request) {
       passwordHash: await hash(password, 12),
       name,
       favoritePlayerId,
+      homeClubId,
     },
   });
 

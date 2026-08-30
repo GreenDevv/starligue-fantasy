@@ -1,0 +1,48 @@
+name: Cron mensuel (annuaire clubs FFHandball)
+
+# ARCHITECTURE.md §23.4 — rafraîchit la table HandballClub (club d'origine des
+# membres) depuis monclub.ffhandball.fr : ~2300 fiches scrapées, 8-12 min.
+#
+# Exécuté DIRECTEMENT sur le runner CI (pas via une route /api/cron/*) : 2300 fetch
+# séquencés dépasseraient le timeout serverless Railway. Même approche que le job
+# backfill-warmup-logos de cron-daily.yml. Contrairement à lui, aucun commit : le
+# script écrit en base (DATABASE_URL = prod), pas dans le repo.
+#
+# Mensuel et non quotidien : un annuaire de clubs bouge lentement (créations /
+# fusions rares), le mettre dans cron-daily.yml serait du gâchis de requêtes.
+
+on:
+  schedule:
+    - cron: "0 4 1 * *" # 1er du mois, 04:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  sync-handball-clubs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Installer pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          # Version fixée ici comme dans cron-daily.yml (corepack + pnpm@11.10.0 +
+          # Node 24 côté build Railway = plantage connu, cf. le commentaire là-bas).
+          version: 11.10.0
+
+      - name: Installer Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Installer les dépendances
+        run: pnpm install --frozen-lockfile
+
+      - name: Générer le client Prisma
+        run: pnpm prisma generate
+
+      - name: Importer l'annuaire FFHandball (écriture DB prod)
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+        run: pnpm tsx scripts/run-ffhandball-clubs-import.ts

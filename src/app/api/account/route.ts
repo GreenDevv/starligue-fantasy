@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
-// GET    /api/account — infos du compte connecté (pseudo, email, joueur préféré)
-// PUT    /api/account — modifie le pseudo et/ou le joueur préféré
+// GET    /api/account — infos du compte connecté (pseudo, email, joueur préféré, club d'origine)
+// PUT    /api/account — modifie le pseudo, le joueur préféré et/ou le club d'origine
 // DELETE /api/account — supprime le compte (App Store guideline 5.1.1(v))
 
 import { NextResponse } from "next/server";
@@ -11,6 +11,11 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { deleteTeamsCascade, deleteSimulationTeamsCascade } from "@/lib/leagues/standings";
 import { SIMULATION_SEASON_LABEL } from "@/lib/simulation/constants";
+import { homeClubInputSchema, resolveHomeClubId, HomeClubError } from "@/lib/clubs/home-club-input";
+
+const homeClubSelect = {
+  select: { id: true, name: true, city: true, country: true, verified: true },
+} as const;
 
 export async function GET() {
   const session = await auth();
@@ -25,6 +30,8 @@ export async function GET() {
       email: true,
       favoritePlayerId: true,
       favoritePlayer: { select: { id: true, firstName: true, lastName: true, club: { select: { shortName: true } } } },
+      homeClubId: true,
+      homeClub: homeClubSelect,
     },
   });
   if (!user) {
@@ -38,6 +45,9 @@ const updateSchema = z.object({
   name: z.string().min(1).max(50).optional(),
   // "" = retirer le joueur préféré, undefined = ne pas toucher au champ.
   favoritePlayerId: z.string().min(1).nullable().optional(),
+  // { clubId } | { newClub } | null (retire). undefined = ne pas toucher.
+  // Modifiable librement (pas de verrou, contrairement au joueur préféré) — §23.
+  homeClub: homeClubInputSchema.optional(),
 });
 
 export async function PUT(req: Request) {
@@ -55,7 +65,19 @@ export async function PUT(req: Request) {
     );
   }
 
-  const { name, favoritePlayerId } = parsed.data;
+  const { name, favoritePlayerId, homeClub } = parsed.data;
+
+  let homeClubId: string | null | undefined;
+  if (homeClub !== undefined) {
+    try {
+      homeClubId = await resolveHomeClubId(homeClub);
+    } catch (e) {
+      if (e instanceof HomeClubError) {
+        return NextResponse.json({ error: { code: e.code, message: e.message } }, { status: 422 });
+      }
+      throw e;
+    }
+  }
 
   if (favoritePlayerId !== undefined) {
     // Définitif une fois déclaré (à l'inscription ou ici la toute première fois) —
@@ -85,12 +107,15 @@ export async function PUT(req: Request) {
     data: {
       ...(name !== undefined ? { name } : {}),
       ...(favoritePlayerId !== undefined ? { favoritePlayerId: favoritePlayerId || null } : {}),
+      ...(homeClubId !== undefined ? { homeClubId } : {}),
     },
     select: {
       name: true,
       email: true,
       favoritePlayerId: true,
       favoritePlayer: { select: { id: true, firstName: true, lastName: true, club: { select: { shortName: true } } } },
+      homeClubId: true,
+      homeClub: homeClubSelect,
     },
   });
 
@@ -197,6 +222,7 @@ export async function DELETE(req: Request) {
         email: `deleted-${userId}@starliguefantasy.fr`,
         passwordHash: null,
         favoritePlayerId: null,
+        homeClubId: null,
       },
     });
   });

@@ -10,7 +10,8 @@
         "email": "Twój adres email (identyfikator logowania, nigdy nieudostępniany)",
         "password": "Twoje hasło, nigdy niezapisywane jawnym tekstem (haszowane algorytmem bcrypt)",
         "name": "Twoje imię/pseudonim wyświetlane w aplikacji",
-        "favoritePlayer": "Twój ulubiony zawodnik, jeśli zdecydujesz się go wskazać (opcjonalnie)"
+        "favoritePlayer": "Twój ulubiony zawodnik, jeśli zdecydujesz się go wskazać (opcjonalnie)",
+        "homeClub": "klub piłki ręcznej, z którego pochodzisz lub w którym grasz, jeśli go podasz — opcjonalnie, można zmienić w każdej chwili, widoczny dla innych członków twoich lig"
       },
       "gameDataNote": "Grając, generujesz też dane związane z rozgrywką: składy, ustawienia, ligi, punkty, historię — niezbędne do działania samej gry, nigdy niewykorzystywane w innych celach."
     },

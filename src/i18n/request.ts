@@ -31,6 +31,7 @@ const NAMESPACES = [
   "support",
   "auth",
   "admin",
+  "community",
 ] as const;
 
 async function loadMessages(locale: AppLocale) {
@@ -56,6 +57,7 @@ async function loadMessages(locale: AppLocale) {
     import(`../../messages/${locale}/support.json`),
     import(`../../messages/${locale}/auth.json`),
     import(`../../messages/${locale}/admin.json`),
+    import(`../../messages/${locale}/community.json`),
   ]);
 
   return Object.fromEntries(

@@ -7,7 +7,8 @@
     "friendlyMatches": "Altres partits",
     "news": "Notícies",
     "dashboard": "Dashboard",
-    "backToGame": "← Joc"
+    "backToGame": "← Joc",
+    "homeClubs": "Clubs d'origen"
   },
   "common": {
     "loading": "Carregant…",
@@ -306,5 +307,16 @@
     "deleteButton": "Elimina definitivament",
     "confirmDeleteQuestion": "Vols eliminar definitivament aquest partit? Aquesta acció no es pot desfer.",
     "confirmCancelQuestion": "Vols cancel·lar aquest partit? S'eliminarà definitivament de la base de dades — aquesta acció no es pot desfer."
+  },
+  "homeClubs": {
+    "title": "Clubs d'origen dels membres",
+    "desc": "Validar o fusionar els clubs introduïts manualment pels membres (§23). El directori FFHandball (~2300 clubs) s'importa a part.",
+    "verify": "Valida",
+    "merge": "Fusiona",
+    "mergeInto": "Fusiona amb (ID del club)…",
+    "members": "membre(s)",
+    "empty": "Cap club pendent de validació.",
+    "filterUnverified": "Pendents",
+    "filterAll": "Tots"
   }
 }

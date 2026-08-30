@@ -10,7 +10,8 @@
         "email": "tu dirección de email (identificador de acceso, nunca compartido)",
         "password": "tu contraseña, nunca almacenada en texto plano (cifrada con bcrypt)",
         "name": "tu nombre/apodo mostrado en la app",
-        "favoritePlayer": "tu jugador favorito, si eliges indicar uno (opcional)"
+        "favoritePlayer": "tu jugador favorito, si eliges indicar uno (opcional)",
+        "homeClub": "el club de balonmano del que vienes o en el que juegas, si lo indicas — opcional, editable en cualquier momento, visible para los demás miembros de tus ligas"
       },
       "gameDataNote": "Al jugar también generas datos de juego: plantillas, alineaciones, ligas, puntos, historial — necesarios para el funcionamiento del propio juego, nunca utilizados con otros fines."
     },

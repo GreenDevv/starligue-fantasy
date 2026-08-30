@@ -1,0 +1,27 @@
+{
+  "homeClub": {
+    "label": "El teu club d'handbol",
+    "hint": "El club d'on véns o on jugues. L'utilitzem per donar visibilitat a clubs fora de l'elit; el pots canviar quan vulguis.",
+    "countryLabel": "País",
+    "searchPlaceholder": "Cerca un club…",
+    "noResults": "No s'ha trobat cap club",
+    "notListed": "El meu club no és a la llista",
+    "backToSearch": "← Torna a la cerca",
+    "freeName": "Nom del club",
+    "freeCity": "Ciutat (opcional)",
+    "freeSubmit": "Confirma",
+    "pendingReview": "Pendent de validació per l'equip",
+    "change": "canvia"
+  },
+  "leagueMembers": {
+    "playsAt": "juga a {club}"
+  },
+  "homeMap": {
+    "title": "D'on són els mànagers",
+    "summary": "{members, plural, one {# mànager localitzat} other {# mànagers localitzats}} · {clubs, plural, one {# club} other {# clubs}} · {departments, plural, one {# departament} other {# departaments}}",
+    "dotTitle": "{count, plural, one {# mànager} other {# mànagers}}",
+    "alsoRepresented": "També representats",
+    "overseas": "França d'ultramar",
+    "unlocated": "Club sense localitzar"
+  }
+}

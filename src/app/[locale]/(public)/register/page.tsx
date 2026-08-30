@@ -5,15 +5,18 @@ import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useRouter, Link } from "@/i18n/navigation";
 import { PlayerSearch, type PlayerSearchOption } from "@/components/players/PlayerSearch";
+import { HomeClubPicker, homeClubValueToPayload, type HomeClubValue } from "@/components/clubs/HomeClubPicker";
 import { resolveApiError } from "@/lib/api/error-messages";
 
 export default function RegisterPage() {
   const router = useRouter();
   const t = useTranslations();
+  const tCommunity = useTranslations("community");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [favoritePlayerId, setFavoritePlayerId] = useState("");
+  const [homeClub, setHomeClub] = useState<HomeClubValue>(null);
   const [players, setPlayers] = useState<PlayerSearchOption[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -35,7 +38,13 @@ export default function RegisterPage() {
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, favoritePlayerId: favoritePlayerId || undefined }),
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+        favoritePlayerId: favoritePlayerId || undefined,
+        homeClub: homeClub ? homeClubValueToPayload(homeClub) : undefined,
+      }),
     });
 
     const json = (await res.json()) as { error?: { code?: string; message: string } };
@@ -127,6 +136,14 @@ export default function RegisterPage() {
               <span className="normal-case text-text-muted/70">{t("auth.register.optional")}</span>
             </label>
             <PlayerSearch players={players} value={favoritePlayerId} onChange={setFavoritePlayerId} />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs uppercase tracking-widest text-text-muted">
+              {tCommunity("homeClub.label")}{" "}
+              <span className="normal-case text-text-muted/70">{t("auth.register.optional")}</span>
+            </label>
+            <HomeClubPicker value={homeClub} onChange={setHomeClub} />
           </div>
 
           {error && (

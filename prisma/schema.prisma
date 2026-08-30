@@ -57,6 +57,14 @@ enum DataSource {
   MANUAL
 }
 
+// Provenance d'une ligne HandballClub (annuaire des clubs d'origine des membres,
+// ARCHITECTURE.md §23) — distinct de DataSource, qui concerne les données de jeu.
+enum HandballClubSource {
+  FFHANDBALL // importé de monclub.ffhandball.fr (scripts/run-ffhandball-clubs-import.ts)
+  MANUAL // saisi en clair par un membre, ou par l'admin
+  OSM // réservé — enrichissement OpenStreetMap éventuel plus tard
+}
+
 // Catégories du flux d'actus Starligue (page publique /starligue) — TRANSFER posée
 // par heuristique de mots-clés sur du contenu scrapé (best-effort, aucune source
 // structurée n'existe pour les transferts réels) ; INJURY/TEAM_OF_WEEK/PERFORMANCE
@@ -100,6 +108,11 @@ model User {
   canUseAuctionMode   Boolean              @default(false) // garde-fou bêta v1 du mode Enchères (§18) — 4 comptes de test en prod, voir scripts/grant-auction-access.ts
   favoritePlayerId    String? // choisi (facultatif) à l'inscription — src/app/(public)/register/page.tsx
   favoritePlayer      Player?              @relation("FavoritePlayer", fields: [favoritePlayerId], references: [id])
+  // Club de handball d'origine / où le membre joue (facultatif, modifiable
+  // librement) — ARCHITECTURE.md §23. Pointe vers l'annuaire HandballClub, jamais
+  // vers Club (les 16 Starligue).
+  homeClubId          String?
+  homeClub            HandballClub?        @relation("HomeClub", fields: [homeClubId], references: [id])
   createdAt           DateTime             @default(now())
   fantasyTeams        FantasyTeam[]
   leagueMembers       LeagueMember[]
@@ -1007,4 +1020,35 @@ model AuctionBid {
 model GameConfig {
   key   String @id // "INITIAL_BUDGET", "STARTER_MULTIPLIER", ...
   value String // stocké en string, parsé par Zod
+}
+
+// Annuaire des clubs de handball, tous pays confondus — ARCHITECTURE.md §23.
+// À NE PAS CONFONDRE avec le modèle Club (§5), qui ne contient que les 16 clubs
+// Daikin StarLigue et dont dépend tout le pipeline lnh.fr. Ici : le club d'origine
+// que chaque membre déclare (User.homeClub). Alimenté par
+// scripts/run-ffhandball-clubs-import.ts (France, ~2300 clubs FFHandball) et par
+// la saisie libre des membres (source = MANUAL, verified = false jusqu'à
+// validation admin).
+model HandballClub {
+  id          String             @id @default(cuid())
+  // { "ffhandball": "6249056", "ffhandball_hash": "f775..." } — nº d'affiliation
+  // FFHandball (extrait du champ email_club de la fiche) = clé d'upsert des clubs FR.
+  externalIds Json               @default("{}")
+  name        String
+  slug        String             @unique // slug monclub.ffhandball.fr, sinon slugifié à la création
+  country     String             @default("FR") // ISO 3166-1 alpha-2
+  city        String?
+  zipcode     String?
+  latitude    Float?
+  longitude   Float?
+  website     String?
+  logoUrl     String?
+  source      HandballClubSource @default(FFHANDBALL)
+  verified    Boolean            @default(true) // false = saisie membre en attente de validation admin
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  members     User[]             @relation("HomeClub")
+
+  @@index([country, verified])
+  @@index([name])
 }

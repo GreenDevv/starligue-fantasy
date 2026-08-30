@@ -1,0 +1,27 @@
+{
+  "homeClub": {
+    "label": "Tu club de balonmano",
+    "hint": "El club del que vienes o en el que juegas. Lo usamos para dar visibilidad a clubes fuera de la élite; puedes cambiarlo cuando quieras.",
+    "countryLabel": "País",
+    "searchPlaceholder": "Buscar un club…",
+    "noResults": "No se encontró ningún club",
+    "notListed": "Mi club no está en la lista",
+    "backToSearch": "← Volver a la búsqueda",
+    "freeName": "Nombre del club",
+    "freeCity": "Ciudad (opcional)",
+    "freeSubmit": "Confirmar",
+    "pendingReview": "Pendiente de validación por el equipo",
+    "change": "cambiar"
+  },
+  "leagueMembers": {
+    "playsAt": "juega en {club}"
+  },
+  "homeMap": {
+    "title": "De dónde son los mánagers",
+    "summary": "{members, plural, one {# mánager localizado} other {# mánagers localizados}} · {clubs, plural, one {# club} other {# clubes}} · {departments, plural, one {# departamento} other {# departamentos}}",
+    "dotTitle": "{count, plural, one {# mánager} other {# mánagers}}",
+    "alsoRepresented": "También representados",
+    "overseas": "Ultramar francés",
+    "unlocated": "Club sin localizar"
+  }
+}

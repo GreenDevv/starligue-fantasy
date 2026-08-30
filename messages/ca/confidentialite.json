@@ -10,7 +10,8 @@
         "email": "la teva adreça de correu (identificador d'accés, mai compartit)",
         "password": "la teva contrasenya, mai emmagatzemada en text pla (xifrada amb bcrypt)",
         "name": "el teu nom/àlies mostrat a l'app",
-        "favoritePlayer": "el teu jugador preferit, si tries indicar-ne un (opcional)"
+        "favoritePlayer": "el teu jugador preferit, si tries indicar-ne un (opcional)",
+        "homeClub": "el club d'handbol d'on véns o on jugues, si l'indiques — opcional, editable en qualsevol moment, visible per als altres membres de les teves lligues"
       },
       "gameDataNote": "En jugar, també generes dades de joc: plantilles, alineacions, lligues, punts, historial — necessàries pel funcionament del propi joc, mai utilitzades amb altres finalitats."
     },

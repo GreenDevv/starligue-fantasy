@@ -10,7 +10,8 @@
         "email": "o teu endereço de email (identificador de login, nunca partilhado)",
         "password": "a tua palavra-passe, nunca guardada em texto simples (encriptada com bcrypt)",
         "name": "o teu nome/alcunha exibido na aplicação",
-        "favoritePlayer": "o teu jogador preferido, caso escolhas indicar um (facultativo)"
+        "favoritePlayer": "o teu jogador preferido, caso escolhas indicar um (facultativo)",
+        "homeClub": "o clube de andebol de onde vens ou onde jogas, se indicares um — opcional, editável a qualquer momento, visível para os outros membros das tuas ligas"
       },
       "gameDataNote": "Ao jogares, também geras dados de jogo: plantéis, alinhamentos, ligas, pontos, histórico — necessários ao próprio funcionamento do jogo, nunca utilizados para outros fins."
     },
