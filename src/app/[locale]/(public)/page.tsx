@@ -1,5 +1,5 @@
 import { Link } from "@/i18n/navigation";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getClubStandings } from "@/lib/standings/get";
@@ -16,6 +16,8 @@ import {
 import { getTodayMatches } from "@/lib/matches/get-today-matches";
 import { ehfCompetitionSlug } from "@/lib/matches/ehf-competition-slugs";
 import { getActiveClubs } from "@/lib/clubs/get-active-clubs";
+import { getHomeClubsAggregate } from "@/lib/community/home-clubs";
+import { HomeClubsMap } from "@/components/community/HomeClubsMap";
 import { MatchesStrip } from "@/components/dashboard/MatchesStrip";
 import { TodayMatchCarousel } from "@/components/dashboard/TodayMatchCarousel";
 import { ClubLogoLink } from "@/components/starligue/ClubLogoLink";
@@ -67,6 +69,7 @@ export default async function HomePage({
   }
 
   const t = await getTranslations("dashboard");
+  const locale = await getLocale();
 
   const [session, season] = await Promise.all([auth(), prisma.season.findFirst({ where: { isActive: true } })]);
 
@@ -103,6 +106,7 @@ export default async function HomePage({
     europeanLeagueMatches,
     todayMatches,
     clubs,
+    homeClubsAggregate,
   ] = await Promise.all([
     getClubStandings(season.id),
     getDashboardMatchStrips(season.id, gwOverride),
@@ -117,6 +121,7 @@ export default async function HomePage({
     getEuropeanLeagueMatches(season.id),
     getTodayMatches(season.id),
     getActiveClubs(season.id),
+    getHomeClubsAggregate(),
   ]);
 
   // Position au classement Starligue de chaque club — affichée discrètement (entre
@@ -270,6 +275,10 @@ export default async function HomePage({
           <StandingsSection gameweekNumber={standings.gameweekNumber} rows={standings.rows} />
         </div>
       </div>
+
+      {/* Communauté : d'où viennent les managers (club d'origine, §23.7). Bande
+          pleine largeur sous la grille Starligue — méta, pas du contenu Starligue. */}
+      <HomeClubsMap aggregate={homeClubsAggregate} locale={locale} />
 
       <p className="pt-2 text-center text-[11px] text-text-muted/60">
         {t("home.footerDisclaimer")} ·{" "}

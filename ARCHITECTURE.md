@@ -2141,3 +2141,321 @@ utilisateur, en plus d'un contact publié (déjà en place,
   utilisé pour quitter/supprimer une ligue, `LeagueDetailActions.tsx`) mais
   signalement direct sans confirmation (action réversible en impact,
   n'affecte que soi).
+
+---
+
+> **Numérotation** — le §22 (« Reel Instagram programme de la journée ») vit
+> pour l'instant sur la branche `reel-programme-journee` non encore fusionnée ;
+> cette section est numérotée §23 pour ne pas entrer en collision à la fusion.
+
+## 23. « D'où viennent les managers » (club d'origine)
+
+Conçu le 2026-08-30 (recon de `monclub.ffhandball.fr` faite le même jour, voir
+plus bas). Chaque membre peut renseigner **le club de handball d'où il vient /
+où il joue** — un club amateur licencié, **pas** un club de Starligue qu'il
+supporterait. Objectif : animer la communauté et **mettre en avant d'autres
+clubs** que l'élite.
+
+### 23.1 Principe & décisions
+
+| Décision | Choix | Raison |
+|---|---|---|
+| Nature du champ | Un seul : `User.homeClubId` (+ pays porté par `HandballClub`) | L'utilisateur veut « d'où ils viennent », pas « qui ils supportent ». Indépendant de `favoritePlayerId`, qui reste inchangé. |
+| Modifiable | **Oui, librement**, sur `/account` | Donnée factuelle : on change de club, on déménage. Pas un choix d'attachement verrouillé comme le joueur préféré (§6.4 / `FAVORITE_PLAYER_LOCKED`). |
+| Périmètre données | France exhaustive via l'annuaire FFHandball ; **saisie libre** pour tout le reste du monde | Aucun jeu de données mondial propre n'existe. FFHandball couvre la quasi‑totalité des membres actuels. |
+| Club hors annuaire | Crée quand même un `HandballClub` **non vérifié** (`verified=false`, `source=MANUAL`), rattaché à l'utilisateur | Ne bloque personne ; l'admin normalise / fusionne ensuite. |
+| Visibilité | Clubs **vérifiés** → agrégats publics + carte d'accueil. Clubs **non vérifiés** → visibles seulement sur le profil du membre et dans ses ligues, jamais dans un agrégat public | Évite qu'une saisie fantaisiste apparaisse sur la page d'accueil. |
+| Obligatoire | Non, jamais bloquant (comme `favoritePlayerId`, §8.3) | Cohérent avec le parcours d'inscription. |
+
+**Découpage livraison :**
+- **Lot 1 (v1) — FAIT** (branche `feat/home-club`, non déployé) : §23.2 → §23.6
+  + §23.7 « v1 » + §23.8/9/10.
+- **Lot 2 — FAIT** (même branche) : carte de France sur la page d'accueil
+  (§23.7).
+- **Lot 3** (option, à faire) : « club à l'honneur » hebdo (§23.7).
+
+### 23.2 Modèle de données (Prisma)
+
+```prisma
+enum HandballClubSource {
+  FFHANDBALL   // importé de monclub.ffhandball.fr
+  MANUAL       // saisi par un membre (free text) ou par l'admin
+  OSM          // réservé — enrichissement OpenStreetMap plus tard
+}
+
+/// Annuaire des clubs de handball, tous pays. DISTINCT du modèle `Club` (§5),
+/// qui ne contient que les 16 clubs Daikin StarLigue et dont dépend tout le
+/// pipeline lnh.fr — ne jamais mélanger les deux. Alimenté par
+/// scripts/run-ffhandball-clubs-import.ts (§23.4).
+model HandballClub {
+  id          String             @id @default(cuid())
+  /// { "ffhandball": "6249056", "ffhandball_hash": "f775..." }. Le nº d'affiliation
+  /// FFHandball vient du champ `email_club` de la fiche (ex "6249056@ffhandball.net").
+  externalIds Json               @default("{}")
+  name        String
+  slug        String             @unique          // slug monclub.ffhandball.fr, sinon slugifié
+  country     String             @default("FR")   // ISO 3166-1 alpha-2
+  city        String?
+  zipcode     String?
+  latitude    Float?
+  longitude   Float?
+  website     String?
+  logoUrl     String?
+  source      HandballClubSource @default(FFHANDBALL)
+  verified    Boolean            @default(true)   // false = saisie membre pas encore validée
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  members     User[]             @relation("HomeClub")
+
+  @@index([country, verified])
+  @@index([name])
+}
+```
+
+```prisma
+model User {
+  // … existant …
+  homeClubId String?
+  homeClub   HandballClub? @relation("HomeClub", fields: [homeClubId], references: [id])
+}
+```
+
+- Migration **additive**, colonne nullable → **aucun backfill**.
+- Suppression de compte (`DELETE /api/account`, §6.4) : ajouter `homeClubId: null`
+  au scrub final de la ligne `User`.
+- Dédoublonnage : clubs FR sur `externalIds.ffhandball` ; clubs étrangers /
+  manuels sur `(name, country, city)` normalisés (trim, espaces collapsés, casse
+  et accents ignorés).
+- On **ne supprime jamais** un `HandballClub` disparu de l'annuaire (un membre
+  peut y être lié). `syncFfhandballClubs` ne fait qu'`upsert`.
+
+### 23.3 Annuaire FFHandball : provider + ingestion
+
+Règle §3.2 : toute donnée externe passe par `src/lib/data-providers`, parsing
+Zod, upsert idempotent par `externalIds`.
+
+**Recon `monclub.ffhandball.fr` (2026-08-30) — ce qui a été établi :**
+- Pas d'API REST publique pour les clubs (`/wp-json/wp/v2/smartfire-clubs` → 404 ;
+  namespace `smartfire-blocks/v1` sans sous-routes exposées). La carte d'accueil
+  du site charge ses données depuis un bundle JS, pas d'XHR exploitable.
+- **Liste complète** = sitemaps XML : `/sitemap.xml` (index) référence
+  `smartfire-clubs-sitemap.xml`, `-sitemap2.xml`, `-sitemap3.xml` — **~2 305
+  clubs** au total, URLs `https://monclub.ffhandball.fr/clubs/<slug>/`.
+- **Données par club** : chaque fiche est rendue côté serveur (un simple `fetch`
+  suffit, pas de headless) et embarque un blob JSON dans un attribut HTML
+  `attributes="{…}"` du bloc smartfire, **encodé en entités HTML** (`&quot;`
+  etc.). Après décodage + `JSON.parse` : `.post.post_title` = nom en clair,
+  `.post.post_name` = slug, `.post.acf.{address_club, address_club_2,
+  zipcode_club, city_club, latitude_club, longitude_club, url_club, email_club,
+  facebook_club, instagram_club, club_hash, nb_licence_*, labels}`.
+- **ID stable** : le nombre dans `email_club` (ex. `6249056@ffhandball.net`) =
+  numéro d'affiliation FFHandball du club. Repli : `club_hash` (md5).
+
+**`src/lib/data-providers/ffhandball-clubs.provider.ts`**
+
+```ts
+export interface ExternalHandballClub {
+  ffhandballId: string | null;   // nº d'affiliation (depuis email_club), null si absent
+  ffhandballHash: string;        // acf.club_hash
+  name: string;                  // post.post_title
+  slug: string;                  // post.post_name
+  address: string | null;
+  zipcode: string | null;
+  city: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  website: string | null;
+  facebook: string | null;
+  instagram: string | null;
+}
+
+export interface FfhandballClubsProvider {
+  name: "ffhandball-monclub";
+  fetchClubSlugs(): Promise<string[]>;                        // parse les 3 sitemaps
+  fetchClub(slug: string): Promise<ExternalHandballClub | null>; // fiche → blob JSON
+}
+```
+
+- `fetchClub` isole l'attribut `attributes="…"` qui contient
+  `&quot;club_hash&quot;`, décode les entités HTML (réutiliser / étendre le
+  helper `src/lib/news/html-to-text.ts`), `JSON.parse`, lit les champs ci-dessus.
+- `User-Agent: "Mozilla/5.0 (compatible; StarligueFantasyBot/1.0)"`,
+  `AbortSignal.timeout(15000)`, pool de concurrence maison (4 en parallèle, pas
+  de dépendance `p-limit`) + petite pause. ~2 300 pages ≈ 8-12 min.
+- Schéma **Zod** sur le blob décodé (donnée non fiable par nature). Échec
+  réseau / HTTP → `IngestionError(msg, source, recoverable=true)` (classe
+  existante, `lnh-scraper.provider.ts`).
+
+**`src/lib/ingestion/handball-clubs.ts`**
+
+```ts
+export async function syncFfhandballClubs(opts?: { limit?: number }): Promise<{
+  scanned: number; created: number; updated: number; failed: number;
+  failures: { slug: string; reason: string }[];
+}>
+```
+
+- Pour chaque slug : `fetchClub` → `prisma.handballClub.upsert` par
+  `externalIds.ffhandball` (ou `slug` si nº absent). **Jamais de `create` nu.**
+- Mappe `source: FFHANDBALL`, `verified: true`, `country: "FR"`.
+- `Promise.allSettled` par lot : l'échec d'une fiche n'interrompt pas le run.
+- Ne repasse pas `verified`/`source` d'un club déjà `MANUAL` que l'admin aurait
+  promu et qui se retrouverait dans l'annuaire.
+
+### 23.4 Script & cron
+
+**Seed initial (manuel, one-shot) — `scripts/run-ffhandball-clubs-import.ts`.**
+Tourne sur la base **prod Railway** (voir la procédure `railway variables` +
+`sslmode=require`, cf. §10). Modèle : `scripts/run-lnh-roster-import.ts`. Affiche
+le résumé `created / updated / failed`.
+
+**Refresh récurrent — nouveau `.github/workflows/cron-monthly.yml`
+(`0 4 1 * *`, + `workflow_dispatch`).**
+- Un job `sync-handball-clubs` qui **exécute le script directement sur le runner
+  CI** (`pnpm tsx scripts/run-ffhandball-clubs-import.ts`,
+  `DATABASE_URL: secrets.PROD_DATABASE_URL`) — **pas** une route `/api/cron/*` :
+  2 300 fetch séquencés dépasseraient le timeout serverless. Même précédent que
+  le job `backfill-warmup-logos` de `cron-daily.yml`.
+- **Pas** ajouté à `cron-daily.yml` : un annuaire de clubs bouge lentement, le
+  quotidien serait du gâchis (cf. le principe déjà retenu : un cron générique
+  n'est pas une spec, on ne le remplit pas avec tout ce que la doc mentionne).
+
+### 23.5 API
+
+**`GET /api/handball-clubs?q=<str>&country=<ISO2>&limit=10`** — public (comme
+`/api/players`, §6.2), hors `PROTECTED_PREFIXES`, cache court.
+Recherche **côté serveur** (~2 300+ lignes, trop pour un chargement client façon
+`PlayerSearch`) : `country = ? AND verified = true AND name ILIKE ?` (accents
+ignorés), tri `(city IS NULL), name`, `LIMIT`.
+Réponse `{ data: { clubs: [{ id, name, city, zipcode, country }] } }`.
+
+**`PUT /api/account`** (§6.4) — étendre le schéma Zod existant :
+
+```ts
+homeClub: z.union([
+  z.object({ clubId: z.string().min(1) }),
+  z.object({ newClub: z.object({
+    name: z.string().trim().min(2).max(120),
+    country: z.enum(COUNTRY_CODES),          // src/lib/geo/countries.ts
+    city: z.string().trim().max(120).optional(),
+  }) }),
+  z.null(),                                   // retire le club
+]).optional()
+```
+
+- `clubId` → vérifié en base.
+- `newClub` → `findFirst` insensible casse/accents sur `(name, country, city)` ;
+  si absent, `create` `HandballClub { source: MANUAL, verified: false }`, puis
+  lie. **Pas de verrou** : contrairement au joueur préféré, on autorise autant de
+  changements que voulu.
+- `GET /api/account` renvoie en plus `homeClub { id, name, city, country,
+  verified }`.
+
+**`POST /api/auth/register`** (§6.1) — même clé `homeClub?` (même union), résolue
+après la création du `User`, **jamais bloquante** : un `newClub` invalide est
+ignoré silencieusement (on ne renvoie pas 422, à la différence de
+`favoritePlayerId` — le champ est facultatif par principe).
+
+**Admin — `src/app/[locale]/(admin)/admin/handball-clubs/`**
+- `GET /api/admin/handball-clubs?filter=unverified` : liste les clubs `MANUAL`
+  `verified=false` + nombre de membres rattachés.
+- `PATCH /api/admin/handball-clubs/[id]` : `{ action: "verify" }` ou
+  `{ action: "merge", intoId }` (repointe les `User.homeClubId`, supprime le
+  doublon, en **transaction**).
+
+### 23.6 Parcours : inscription & `/account`
+
+**Composant `HomeClubPicker`** (`src/components/clubs/HomeClubPicker.tsx`),
+mobile-first, réutilisé aux deux endroits :
+1. `<select>` **pays** (défaut `FR`), libellés localisés via
+   `Intl.DisplayNames([locale], { type: "region" })` + drapeau emoji dérivé du
+   code ISO (helper pur `regionalIndicator(code)`). **Zéro dépendance.**
+2. Champ **club** avec autocomplétion : `fetch("/api/handball-clubs?q=…&country=…")`
+   débouncé (~250 ms), même rendu visuel que `PlayerSearch` (chip sélectionné +
+   bouton « changer »).
+3. Lien discret « **Mon club n'est pas dans la liste** » → bascule en saisie
+   libre (`name` + `city` optionnelle) → envoyé comme `newClub`.
+
+- **Inscription** (`register/page.tsx`) : nouveau bloc sous « joueur préféré »,
+  marqué `(facultatif)`.
+- **`/account`** : nouveau bloc, **toujours éditable**. Si
+  `homeClub.verified === false`, afficher un petit tag « en cours de validation ».
+
+### 23.7 Affichage
+
+**v1 — dans les ligues.** Liste des membres d'une ligue : sous le pseudo,
+`🤾 <Club> · <Ville> <drapeau>` (club non vérifié inclus ici — on est entre
+membres d'une même ligue). Éventuellement un tooltip sur le pseudo dans le chat
+de ligue (optionnel).
+
+**Lot 2 — page d'accueil : carte de France (FAIT).** Bloc « D'où viennent les
+managers », bande pleine largeur sous la grille Starligue (§16),
+`HomeClubsMap` (`src/components/community/HomeClubsMap.tsx`, server component) :
+- **En-tête chiffré** : `N managers localisés · M clubs · P départements`
+  (pluriel ICU, 8 locales, namespace `community.homeMap.*`).
+- **Carte** : **SVG inline, aucune lib carto** (décision tranchée : pas de
+  Mapbox/Leaflet). `src/lib/geo/france-map.ts` — contour métropole + Corse en
+  `[lon, lat]` (~50 pts, grossier, repère visuel) + `makeFranceProjector(w, h)`
+  (équirectangulaire corrigé par `cos(lat médiane)`, pur, testé) : **le contour
+  ET les points sont projetés par la même fonction**, seule façon de garantir
+  l'alignement. Un point par département (2 chiffres du code postal), position =
+  moyenne des clubs du département, rayon ∝ √count, teinte `accent`, `<title>`
+  au survol.
+- **Hors métropole** : `isInMetropolitanFrance(lon, lat)` écarte DROM/étranger →
+  liste « Aussi représentés » (pays localisés via `Intl.DisplayNames` +
+  drapeau, « Outre-mer » groupé) + compteur « club non localisé » (FR sans
+  coordonnées).
+- Agrégat = `src/lib/community/home-clubs.ts::getHomeClubsAggregate()`, **appelé
+  directement dans la page (SSR)**, pas de route `/api/*` (pas de cache dédié
+  nécessaire, la home n'est pas cachée). Partie pure `aggregateHomeClubs(rows)`
+  testée. **Clubs vérifiés uniquement**, **comptes seuls** (jamais « X joue à Y »).
+
+**Lot 3 (option) — « Club à l'honneur ».** Rotation hebdo déterministe
+(seed = nº de semaine ISO) parmi les clubs vérifiés ayant ≥ 1 membre : nom,
+ville, logo, site, « N manager(s) de Starligue Fantasy jouent ici ». Réutilise
+potentiellement le pipeline Instagram §17 plus tard.
+
+### 23.8 Confidentialité (`/confidentialite`)
+
+- Ajouter à `sections.data.items` : « le club de handball que tu indiques
+  (facultatif, modifiable à tout moment) ».
+- Préciser : visible par les autres membres de tes ligues ; utilisé de façon
+  **agrégée et anonyme** (comptes par club / département) sur la page d'accueil.
+  Aucune adresse personnelle stockée sur ton compte — l'adresse du club provient
+  de l'annuaire public FFHandball.
+- La ligne « aucun tracking / analytics / publicité » reste vraie, inchangée.
+
+### 23.9 i18n
+
+Nouveau namespace `messages/<locale>/community.json` pour les 8 locales (fr, en,
+es, ca, de, pt, da, pl) : libellés du picker, étape d'inscription, section
+`/account`, tag « non vérifié », widget d'accueil. Les noms de pays viennent de
+`Intl.DisplayNames` — **pas** de table de traduction à maintenir.
+
+### 23.10 Tests (vitest, `src/lib/**`)
+
+- `ffhandball-clubs.provider.test.ts` : 2-3 fixtures HTML de fiches club réelles
+  → `ExternalHandballClub` attendu ; fixture XML de sitemap → liste de slugs ;
+  fiche malformée → `IngestionError`.
+- `src/lib/geo/countries.test.ts` : `regionalIndicator("FR") === "🇫🇷"`, rejet
+  d'un code invalide.
+- `src/lib/geo/france-map.test.ts` : contour dans le cadre, cohérence relative
+  des villes (Lille au N de Marseille, etc.), `isInMetropolitanFrance` (Corse
+  oui, DROM/étranger non).
+- `src/lib/community/home-clubs.test.ts` : `aggregateHomeClubs` (groupement par
+  département + position moyenne, membres ≠ clubs, étranger/outre-mer,
+  non-localisés), `departmentFromZipcode`.
+- Normalisation de la saisie libre (dédoublonnage) : trim, espaces multiples,
+  casse, accents.
+
+### 23.11 Rollout
+
+1. `pnpm prisma migrate dev` (`HandballClub` + `HandballClubSource` +
+   `User.homeClubId`).
+2. Merge + déploiement Railway (migration prod).
+3. `pnpm tsx scripts/run-ffhandball-clubs-import.ts` sur la prod → ~2 300 clubs.
+4. Déploiement UI (picker inscription + `/account` + affichage en ligue).
+5. `cron-monthly.yml` activé.
+6. Lot 2 (carte) puis lot 3 (club à l'honneur) livrés séparément.
+7. Option non retenue en v1 : prompt doux « D'où viens-tu ? » sur le dashboard à
+   la prochaine visite (même pattern que la modal de récap de journée).
