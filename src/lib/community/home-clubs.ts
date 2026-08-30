@@ -3,10 +3,9 @@
 // VÉRIFIÉS. Consommé par le widget « Carte des managers » du dashboard
 // (src/components/dashboard/widgets/HomeClubsMapWidget.tsx).
 //
-// ⚠️ Ce module est importé par un composant client (`abroadLabel`) : PAS d'import
-// Prisma ici. La requête vit dans `home-clubs-query.ts` (serveur uniquement).
+// ⚠️ Ce module est importé par un composant client : PAS d'import Prisma ici.
+// La requête vit dans `home-clubs-query.ts` (serveur uniquement).
 import { isInMetropolitanFrance } from "@/lib/geo/france-map";
-import { countryName } from "@/lib/geo/countries";
 
 export interface HomeClubMemberRow {
   clubId: string;
@@ -34,19 +33,24 @@ export interface DepartmentPoint {
   clubs: DepartmentClub[];
 }
 
-export interface AbroadGroup {
-  key: string;
-  count: number;
+// Club hors métropole (DROM ou étranger) qui a des coordonnées → point placé
+// individuellement sur la vue monde de la carte.
+export interface OverseasPoint {
+  clubId: string;
+  name: string;
+  city: string | null;
+  country: string; // ISO 3166-1 alpha-2
+  lon: number;
+  lat: number;
+  count: number; // nombre de managers
 }
 
 export interface HomeClubsAggregate {
   totals: { members: number; clubs: number; departments: number };
   metropolitan: DepartmentPoint[];
-  abroad: AbroadGroup[]; // pays étrangers + "OUTRE_MER", triés par count décroissant
-  unlocated: number; // membres FR sans coordonnées exploitables
+  overseas: OverseasPoint[]; // clubs hors métropole avec coordonnées
+  unlocated: number; // membres dont le club n'a aucune coordonnée (tout pays)
 }
-
-const OVERSEAS_KEY = "OUTRE_MER";
 
 /** Département métropolitain à 2 chiffres depuis un code postal, ou null. */
 export function departmentFromZipcode(zipcode: string | null): string | null {
@@ -65,22 +69,24 @@ export function aggregateHomeClubs(rows: HomeClubMemberRow[]): HomeClubsAggregat
     string,
     { count: number; sumLon: number; sumLat: number; clubs: Map<string, DepartmentClub> }
   >();
-  const abroad = new Map<string, number>();
+  const overseasByClub = new Map<string, OverseasPoint>();
   let unlocated = 0;
 
   for (const r of rows) {
-    const inMetro =
-      r.latitude != null &&
-      r.longitude != null &&
-      r.country === "FR" &&
-      isInMetropolitanFrance(r.longitude, r.latitude);
+    const hasCoords = r.latitude != null && r.longitude != null;
+    if (!hasCoords) {
+      unlocated += 1;
+      continue;
+    }
+    const lon = r.longitude as number;
+    const lat = r.latitude as number;
 
-    if (inMetro) {
+    if (r.country === "FR" && isInMetropolitanFrance(lon, lat)) {
       const dept = departmentFromZipcode(r.zipcode) ?? "??";
       const cur = byDept.get(dept) ?? { count: 0, sumLon: 0, sumLat: 0, clubs: new Map<string, DepartmentClub>() };
       cur.count += 1;
-      cur.sumLon += r.longitude as number;
-      cur.sumLat += r.latitude as number;
+      cur.sumLon += lon;
+      cur.sumLat += lat;
       const club = cur.clubs.get(r.clubId) ?? { name: r.clubName, city: r.clubCity, count: 0 };
       club.count += 1;
       cur.clubs.set(r.clubId, club);
@@ -88,17 +94,11 @@ export function aggregateHomeClubs(rows: HomeClubMemberRow[]): HomeClubsAggregat
       continue;
     }
 
-    if (r.country === "FR") {
-      const dept2 = (r.zipcode ?? "").trim().slice(0, 2);
-      if (dept2 === "97" || dept2 === "98") {
-        abroad.set(OVERSEAS_KEY, (abroad.get(OVERSEAS_KEY) ?? 0) + 1);
-      } else {
-        unlocated += 1;
-      }
-      continue;
-    }
-
-    abroad.set(r.country, (abroad.get(r.country) ?? 0) + 1);
+    const cur =
+      overseasByClub.get(r.clubId) ??
+      { clubId: r.clubId, name: r.clubName, city: r.clubCity, country: r.country, lon, lat, count: 0 };
+    cur.count += 1;
+    overseasByClub.set(r.clubId, cur);
   }
 
   const metropolitan: DepartmentPoint[] = [...byDept.entries()]
@@ -111,9 +111,9 @@ export function aggregateHomeClubs(rows: HomeClubMemberRow[]): HomeClubsAggregat
     }))
     .sort((a, b) => b.count - a.count);
 
-  const abroadGroups: AbroadGroup[] = [...abroad.entries()]
-    .map(([key, count]) => ({ key, count }))
-    .sort((a, b) => b.count - a.count);
+  const overseas: OverseasPoint[] = [...overseasByClub.values()].sort(
+    (a, b) => b.count - a.count || a.name.localeCompare(b.name),
+  );
 
   return {
     totals: {
@@ -122,12 +122,16 @@ export function aggregateHomeClubs(rows: HomeClubMemberRow[]): HomeClubsAggregat
       departments: metropolitan.filter((d) => d.dept !== "??").length,
     },
     metropolitan,
-    abroad: abroadGroups,
+    overseas,
     unlocated,
   };
 }
 
-/** Libellé affichable d'un groupe "abroad" (pays localisé, ou « Outre-mer »). */
-export function abroadLabel(key: string, locale: string, overseasLabel: string): string {
-  return key === OVERSEAS_KEY ? overseasLabel : countryName(key, locale);
+/** Regroupe les points hors métropole par pays (pour la légende du widget). */
+export function groupOverseasByCountry(overseas: OverseasPoint[]): { country: string; count: number }[] {
+  const byCountry = new Map<string, number>();
+  for (const p of overseas) byCountry.set(p.country, (byCountry.get(p.country) ?? 0) + p.count);
+  return [...byCountry.entries()]
+    .map(([country, count]) => ({ country, count }))
+    .sort((a, b) => b.count - a.count || a.country.localeCompare(b.country));
 }

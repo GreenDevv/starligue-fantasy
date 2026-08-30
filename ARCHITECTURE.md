@@ -2170,10 +2170,12 @@ clubs** que l'élite.
 **Découpage livraison :**
 - **Lot 1 (v1) — FAIT** (branche `feat/home-club`, non déployé) : §23.2 → §23.6
   + §23.7 « v1 » + §23.8/9/10.
-- **Lot 2 — FAIT** : carte de France + classement des clubs, deux widgets du
-  dashboard `/dashboard` (§23.7). Note : la carte a d'abord été livrée en bande
-  sur la page d'accueil, puis déplacée dans le dashboard le 2026-08-30 en même
-  temps que l'ajout du classement des clubs et du survol (noms de clubs).
+- **Lot 2 — FAIT** : carte + classement des clubs, deux widgets du dashboard
+  `/dashboard` (§23.7). Historique : carte livrée d'abord en bande sur la page
+  d'accueil ; déplacée dans le dashboard le 2026-08-30 (+ classement des clubs,
+  + survol = noms de clubs) ; 2026-08-31 : géocodage d'une ville saisie librement
+  (annuaire GeoNames embarqué, `/api/geo/cities`) + **vue monde auto-cadrée** dès
+  qu'un club est hors métropole.
 - **Lot 3** (option, à faire) : « club à l'honneur » hebdo (§23.7).
 
 ### 23.2 Modèle de données (Prisma)
@@ -2331,6 +2333,13 @@ Recherche **côté serveur** (~2 300+ lignes, trop pour un chargement client fa�
 ignorés), tri `(city IS NULL), name`, `LIMIT`.
 Réponse `{ data: { clubs: [{ id, name, city, zipcode, country }] } }`.
 
+**`GET /api/geo/cities?q=<str>&country=<ISO2>&limit=8`** — public, même profil.
+Autocomplétion de **ville** pour géolocaliser un club saisi librement : snapshot
+GeoNames `cities15000` embarqué (`src/lib/geo/cities.ts` + `data/world-cities.tsv.gz`,
+~34 k villes, régénérable via `scripts/build-world-cities.ts`). Recherche préfixe
+puis sous-chaîne, accents ignorés, ordre = population décroissante.
+Réponse `{ data: { cities: [{ name, admin1, country, latitude, longitude }] } }`.
+
 **`PUT /api/account`** (§6.4) — étendre le schéma Zod existant :
 
 ```ts
@@ -2340,6 +2349,8 @@ homeClub: z.union([
     name: z.string().trim().min(2).max(120),
     country: z.enum(COUNTRY_CODES),          // src/lib/geo/countries.ts
     city: z.string().trim().max(120).optional(),
+    latitude: z.number().min(-90).max(90).optional(),   // ville choisie dans
+    longitude: z.number().min(-180).max(180).optional(),// l'autocomplétion
   }) }),
   z.null(),                                   // retire le club
 ]).optional()
@@ -2350,6 +2361,10 @@ homeClub: z.union([
   si absent, `create` `HandballClub { source: MANUAL, verified: false }`, puis
   lie. **Pas de verrou** : contrairement au joueur préféré, on autorise autant de
   changements que voulu.
+- **Coordonnées** : celles de la ville choisie dans l'autocomplétion, sinon
+  géocodage local (`geocodeCity`, `src/lib/geo/cities.ts`) depuis le nom de ville
+  saisi. Un club sans coordonnées reste « non localisé » (compté, pas sur la
+  carte). Un club existant sans coords est complété au passage.
 - `GET /api/account` renvoie en plus `homeClub { id, name, city, country,
   verified }`.
 
@@ -2376,7 +2391,10 @@ mobile-first, réutilisé aux deux endroits :
    débouncé (~250 ms), même rendu visuel que `PlayerSearch` (chip sélectionné +
    bouton « changer »).
 3. Lien discret « **Mon club n'est pas dans la liste** » → bascule en saisie
-   libre (`name` + `city` optionnelle) → envoyé comme `newClub`.
+   libre : `name` + **autocomplétion de ville** (`/api/geo/cities`, débouncée,
+   filtrée par pays ; sélectionner une ville fixe `latitude`/`longitude` et
+   affiche « 📍 <ville> »). Envoyé comme `newClub`. Ville tapée à la main sans
+   sélection → pas de coordonnées (club « non localisé »).
 
 - **Inscription** (`register/page.tsx`) : nouveau bloc sous « joueur préféré »,
   marqué `(facultatif)`.
@@ -2397,28 +2415,34 @@ place est derrière le login parmi les autres cartes réarrangeables. Deux widge
 singletons distincts (`src/lib/dashboard/layout.ts`), tous deux dans
 `DEFAULT_LAYOUT` :
 
-1. **`home-clubs-map` → `HomeClubsMapWidget`** (client) : carte de France.
+1. **`home-clubs-map` → `HomeClubsMapWidget`** (client) : carte **France par
+   défaut, monde dès qu'un point est hors métropole** (2026-08-31).
    - **En-tête chiffré** : `N managers localisés · M clubs · P départements`
      (pluriel ICU, 8 locales, namespace `community.homeMap.*`).
-   - **Carte** : **SVG inline, aucune lib carto** (décision tranchée : pas de
-     Mapbox/Leaflet). `src/lib/geo/france-map.ts` — contour métropole + Corse en
-     `[lon, lat]` (~50 pts, grossier, repère visuel) + `makeFranceProjector(w, h)`
-     (équirectangulaire corrigé par `cos(lat médiane)`, pur, testé) : **le contour
-     ET les points sont projetés par la même fonction**, seule façon de garantir
-     l'alignement. Un point par département (2 chiffres du code postal), position =
-     moyenne des clubs du département, rayon ∝ √count, teinte `accent`.
+   - **SVG inline, aucune lib carto** (décision tranchée : pas de Mapbox/Leaflet).
+     Projection partagée `src/lib/geo/map-projection.ts` (`makeEquirectProjector`,
+     équirectangulaire corrigé par `cos(lat médiane)`, pur/testé) : **le contour ET
+     les points sont projetés par la même fonction**.
+     - **Mode France** : `src/lib/geo/france-map.ts` — contour métropole + Corse
+       (~50 pts). Un point par **département** (2 chiffres du code postal),
+       position = moyenne des clubs du département, rayon ∝ √count.
+     - **Mode monde** : `src/lib/geo/world-map.ts` (`WORLD_LAND_RINGS`, contour
+       Natural Earth 1:110m simplifié, ~48 anneaux, régénérable via
+       `scripts/build-world-map.ts`). Cadrage auto sur tous les points ∪ fenêtre
+       France (identité du jeu), marge 15 %, min ~20°×15°, clamp monde. Un point
+       par **club** hors métropole (DROM + étranger).
    - **Survol / focus / tap d'un point** : tooltip HTML (positionné en % des
-     coords projetées) listant les **noms de clubs** derrière le point (+ ville,
-     + `×n` si plusieurs managers). `DepartmentPoint.clubs` porté par
-     `aggregateHomeClubs`.
-   - **Hors métropole** : `isInMetropolitanFrance(lon, lat)` écarte DROM/étranger →
-     liste « Aussi représentés » (pays localisés via `Intl.DisplayNames` +
-     drapeau, « Outre-mer » groupé) + compteur « club non localisé » (FR sans
-     coordonnées).
-   - Agrégat = `src/lib/community/home-clubs.ts::getHomeClubsAggregate()`, **appelé
-     en SSR dans `dashboard/page.tsx`**, pas de route `/api/*`. Partie pure
-     `aggregateHomeClubs(rows)` testée. **Clubs vérifiés uniquement**, **comptes
-     seuls** (jamais « X joue à Y »).
+     coords projetées, bascule haut/bas + gauche/droite) listant les **noms de
+     clubs** (+ ville, + `×n` si plusieurs managers). `DepartmentPoint.clubs` /
+     `OverseasPoint` portés par `aggregateHomeClubs`.
+   - **Légende « Aussi représentés »** : pays hors métropole (via
+     `Intl.DisplayNames` + drapeau, « Outre-mer » pour la France d'outre-mer) +
+     compteur « club non localisé » (aucune coordonnée, tout pays).
+   - Agrégat = `src/lib/community/home-clubs-query.ts::getHomeClubsAggregate()`
+     (Prisma, serveur), **appelé en SSR dans `dashboard/page.tsx`**, pas de route
+     `/api/*`. Parties pures `aggregateHomeClubs` / `groupOverseasByCountry`
+     (`home-clubs.ts`, sans Prisma car importé côté client) testées. **Clubs
+     vérifiés uniquement**, **comptes seuls**.
 
 2. **`club-fantasy-ranking` → `ClubFantasyRankingWidget`** (client) : classement
    des **clubs d'origine par points fantasy cumulés**. Chaque manager ayant
@@ -2463,6 +2487,11 @@ es, ca, de, pt, da, pl) : libellés du picker, étape d'inscription, section
 - `src/lib/geo/france-map.test.ts` : contour dans le cadre, cohérence relative
   des villes (Lille au N de Marseille, etc.), `isInMetropolitanFrance` (Corse
   oui, DROM/étranger non).
+- `src/lib/geo/map-projection.test.ts` : `makeEquirectProjector` (coins dans le
+  cadre, N en haut / O à gauche), `boundsOfPoints`, `padBounds` (taille mini +
+  marge), `unionBounds`, `clampBounds` (jamais hors monde).
+- `src/lib/geo/cities.test.ts` : `searchCities` / `geocodeCity` contre le snapshot
+  GeoNames réel (New York City, Montréal accents, filtre pays, limite).
 - `src/lib/community/home-clubs.test.ts` : `aggregateHomeClubs` (groupement par
   département + position moyenne, membres ≠ clubs, étranger/outre-mer,
   non-localisés), `departmentFromZipcode`.

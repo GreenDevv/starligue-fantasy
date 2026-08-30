@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { aggregateHomeClubs, departmentFromZipcode, type HomeClubMemberRow } from "./home-clubs";
+import {
+  aggregateHomeClubs,
+  departmentFromZipcode,
+  groupOverseasByCountry,
+  type HomeClubMemberRow,
+} from "./home-clubs";
 
 const row = (o: Partial<HomeClubMemberRow>): HomeClubMemberRow => ({
   clubId: "c",
@@ -56,23 +61,42 @@ describe("aggregateHomeClubs", () => {
     expect(agg.totals.clubs).toBe(2);
   });
 
-  it("range l'étranger et l'outre-mer dans abroad, trié par count", () => {
+  it("place les clubs hors métropole (étranger, DROM) comme points individuels", () => {
     const agg = aggregateHomeClubs([
-      row({ clubId: "d", country: "DE", zipcode: null, latitude: 52.5, longitude: 13.4 }),
-      row({ clubId: "e", country: "DE", zipcode: null, latitude: 50.9, longitude: 6.9 }),
-      row({ clubId: "g", country: "FR", zipcode: "97110", latitude: 16.24, longitude: -61.53 }),
-    ]);
-    expect(agg.abroad).toEqual([
-      { key: "DE", count: 2 },
-      { key: "OUTRE_MER", count: 1 },
+      row({ clubId: "nyc", clubName: "NYC THC", clubCity: "New York City", country: "US", zipcode: null, latitude: 40.71, longitude: -74.01 }),
+      row({ clubId: "nyc", clubName: "NYC THC", clubCity: "New York City", country: "US", zipcode: null, latitude: 40.71, longitude: -74.01 }),
+      row({ clubId: "gp", clubName: "Gosier HB", clubCity: "Le Gosier", country: "FR", zipcode: "97190", latitude: 16.2, longitude: -61.5 }),
     ]);
     expect(agg.metropolitan).toHaveLength(0);
+    expect(agg.overseas).toEqual([
+      { clubId: "nyc", name: "NYC THC", city: "New York City", country: "US", lon: -74.01, lat: 40.71, count: 2 },
+      { clubId: "gp", name: "Gosier HB", city: "Le Gosier", country: "FR", lon: -61.5, lat: 16.2, count: 1 },
+    ]);
+    expect(agg.totals).toEqual({ members: 3, clubs: 2, departments: 0 });
   });
 
-  it("compte les membres FR sans coordonnées comme non localisés", () => {
-    const agg = aggregateHomeClubs([row({ clubId: "z", latitude: null, longitude: null, zipcode: "31000" })]);
-    expect(agg.unlocated).toBe(1);
+  it("compte les membres dont le club n'a aucune coordonnée comme non localisés", () => {
+    const agg = aggregateHomeClubs([
+      row({ clubId: "z", latitude: null, longitude: null, zipcode: "31000" }),
+      row({ clubId: "w", country: "BE", latitude: null, longitude: null, zipcode: null }),
+    ]);
+    expect(agg.unlocated).toBe(2);
     expect(agg.metropolitan).toHaveLength(0);
-    expect(agg.totals.members).toBe(1);
+    expect(agg.overseas).toHaveLength(0);
+    expect(agg.totals.members).toBe(2);
+  });
+});
+
+describe("groupOverseasByCountry", () => {
+  it("regroupe et trie les points hors métropole par pays", () => {
+    const agg = aggregateHomeClubs([
+      row({ clubId: "a", country: "DE", zipcode: null, latitude: 52.5, longitude: 13.4 }),
+      row({ clubId: "b", country: "DE", zipcode: null, latitude: 50.9, longitude: 6.9 }),
+      row({ clubId: "c", country: "CH", zipcode: null, latitude: 46.2, longitude: 6.1 }),
+    ]);
+    expect(groupOverseasByCountry(agg.overseas)).toEqual([
+      { country: "DE", count: 2 },
+      { country: "CH", count: 1 },
+    ]);
   });
 });

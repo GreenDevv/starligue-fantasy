@@ -7,18 +7,25 @@
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { isCountryCode } from "@/lib/geo/countries";
+import { geocodeCity } from "@/lib/geo/cities";
 
 export const homeClubInputSchema = z.union([
   z.object({ clubId: z.string().min(1) }),
   z.object({
-    newClub: z.object({
-      name: z.string().trim().min(2).max(120),
-      country: z
-        .string()
-        .transform((c) => c.toUpperCase())
-        .refine(isCountryCode, "Code pays inconnu"),
-      city: z.string().trim().max(120).optional(),
-    }),
+    newClub: z
+      .object({
+        name: z.string().trim().min(2).max(120),
+        country: z
+          .string()
+          .transform((c) => c.toUpperCase())
+          .refine(isCountryCode, "Code pays inconnu"),
+        city: z.string().trim().max(120).optional(),
+        // Coordonnées de la ville, quand elle vient de l'autocomplétion
+        // (src/lib/geo/cities.ts). Les deux ensemble ou aucune.
+        latitude: z.number().min(-90).max(90).optional(),
+        longitude: z.number().min(-180).max(180).optional(),
+      })
+      .refine((v) => (v.latitude == null) === (v.longitude == null), "latitude et longitude vont ensemble"),
   }),
   z.null(),
 ]);
@@ -72,6 +79,16 @@ export async function resolveHomeClubId(input: HomeClubInput): Promise<string | 
 
   const { name, country, city } = input.newClub;
 
+  // Coordonnées : celles fournies par l'autocomplétion de ville, sinon on tente
+  // un géocodage local depuis le nom de ville saisi. Un club sans coordonnées
+  // reste comptabilisé mais n'apparaît pas sur la carte (« non localisé »).
+  const coords =
+    input.newClub.latitude != null && input.newClub.longitude != null
+      ? { latitude: input.newClub.latitude, longitude: input.newClub.longitude }
+      : city
+        ? geocodeCity(city, country)
+        : null;
+
   // Réutilise un club identique (nom + pays + ville, casse ignorée) plutôt que
   // d'empiler des doublons. Les variantes d'accents/orthographe restantes sont
   // fusionnées par l'admin (/admin/handball-clubs).
@@ -81,15 +98,23 @@ export async function resolveHomeClubId(input: HomeClubInput): Promise<string | 
       name: { equals: name, mode: "insensitive" },
       ...(city ? { city: { equals: city, mode: "insensitive" } } : {}),
     },
-    select: { id: true },
+    select: { id: true, latitude: true },
   });
-  if (existing) return existing.id;
+  if (existing) {
+    // Renseigne les coordonnées si le club existant n'en avait pas encore.
+    if (existing.latitude == null && coords) {
+      await prisma.handballClub.update({ where: { id: existing.id }, data: coords });
+    }
+    return existing.id;
+  }
 
   const created = await prisma.handballClub.create({
     data: {
       name,
       country,
       city: city ?? null,
+      latitude: coords?.latitude ?? null,
+      longitude: coords?.longitude ?? null,
       slug: await uniqueSlug(`${slugify(name)}-${country.toLowerCase()}`),
       source: "MANUAL",
       verified: false,

@@ -1,19 +1,25 @@
 // Carte de France métropolitaine (+ Corse) pour le widget « D'où viennent les
-// managers » — ARCHITECTURE.md §23.7 (lot 2). SVG inline, aucune dépendance
-// cartographique : on projette nous-mêmes des coordonnées (lon, lat) vers le
-// repère SVG, et on dessine le contour ET les points avec LA MÊME projection —
-// c'est la seule façon de garantir qu'ils s'alignent.
+// managers » — ARCHITECTURE.md §23.7. SVG inline, aucune dépendance
+// cartographique : la projection est partagée avec la vue monde
+// (map-projection.ts) — le contour ET les points sont dessinés avec la MÊME
+// projection, seule façon de garantir qu'ils s'alignent.
 //
-// Contour volontairement grossier (~50 points) : il sert de repère visuel, pas de
-// fond de carte précis. Corse incluse comme anneau séparé.
+// Contour volontairement grossier (~50 points) : repère visuel, pas un fond de
+// carte précis. Corse incluse comme anneau séparé.
+import {
+  makeEquirectProjector,
+  type LonLatBounds,
+  type MapProjector,
+} from "@/lib/geo/map-projection";
 
-// Bornes géographiques (métropole + Corse) — figées, servent au calage.
-const LON_MIN = -5.2;
-const LON_MAX = 9.7;
-const LAT_MIN = 41.3;
-const LAT_MAX = 51.1;
-const LAT_MID_RAD = ((LAT_MIN + LAT_MAX) / 2) * (Math.PI / 180);
-const COS_LAT_MID = Math.cos(LAT_MID_RAD);
+// Fenêtre géographique métropole + Corse — figée, sert au calage ET de zoom
+// minimum de la vue monde (on ne dézoome jamais plus serré que ça).
+export const METRO_FRANCE_BOUNDS: LonLatBounds = {
+  lonMin: -5.2,
+  lonMax: 9.7,
+  latMin: 41.3,
+  latMax: 51.1,
+};
 
 // Contour métropole, sens horaire depuis Dunkerque. [lon, lat].
 export const METRO_FRANCE_RING: [number, number][] = [
@@ -36,46 +42,17 @@ export const CORSICA_RING: [number, number][] = [
   [9.36, 43.0],
 ];
 
-export interface FranceProjector {
-  width: number;
-  height: number;
-  project: (lon: number, lat: number) => { x: number; y: number };
-  ringPath: (ring: [number, number][]) => string;
+/** Projecteur calé sur métropole + Corse. */
+export function makeFranceProjector(width: number, height: number, pad = 4): MapProjector {
+  return makeEquirectProjector(METRO_FRANCE_BOUNDS, width, height, pad);
 }
 
-/**
- * Construit un projecteur équirectangulaire (avec correction de longitude par
- * cos(latitude médiane)) calé sur les bornes métropole+Corse, centré dans un
- * cadre `width`×`height` avec une marge `pad`.
- */
-export function makeFranceProjector(width: number, height: number, pad = 4): FranceProjector {
-  const uSpan = (LON_MAX - LON_MIN) * COS_LAT_MID; // largeur "monde" corrigée
-  const vSpan = LAT_MAX - LAT_MIN;
-  const scale = Math.min((width - 2 * pad) / uSpan, (height - 2 * pad) / vSpan);
-  const offsetX = (width - uSpan * scale) / 2;
-  const offsetY = (height - vSpan * scale) / 2;
-
-  function project(lon: number, lat: number) {
-    const u = (lon - LON_MIN) * COS_LAT_MID;
-    const v = LAT_MAX - lat; // latitude vers le bas
-    return { x: offsetX + u * scale, y: offsetY + v * scale };
-  }
-
-  function ringPath(ring: [number, number][]) {
-    return (
-      ring
-        .map(([lon, lat], i) => {
-          const { x, y } = project(lon, lat);
-          return `${i === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`;
-        })
-        .join(" ") + " Z"
-    );
-  }
-
-  return { width, height, project, ringPath };
-}
-
-/** Vrai si (lon, lat) tombe dans la fenêtre métropole+Corse (points hors-cadre = DROM/étranger). */
+/** Vrai si (lon, lat) tombe dans la fenêtre métropole+Corse (hors-cadre = DROM/étranger). */
 export function isInMetropolitanFrance(lon: number, lat: number): boolean {
-  return lon >= LON_MIN && lon <= LON_MAX && lat >= LAT_MIN && lat <= LAT_MAX;
+  return (
+    lon >= METRO_FRANCE_BOUNDS.lonMin &&
+    lon <= METRO_FRANCE_BOUNDS.lonMax &&
+    lat >= METRO_FRANCE_BOUNDS.latMin &&
+    lat <= METRO_FRANCE_BOUNDS.latMax
+  );
 }

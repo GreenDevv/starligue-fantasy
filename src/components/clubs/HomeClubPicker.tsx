@@ -14,7 +14,7 @@ export type HomeClubValue =
       kind: "existing";
       club: { id: string; name: string; city: string | null; country: string; verified?: boolean };
     }
-  | { kind: "new"; name: string; country: string; city?: string }
+  | { kind: "new"; name: string; country: string; city?: string; latitude?: number; longitude?: number }
   | null;
 
 interface ClubHit {
@@ -23,6 +23,14 @@ interface ClubHit {
   city: string | null;
   zipcode: string | null;
   country: string;
+}
+
+interface CityHit {
+  name: string;
+  admin1: string;
+  country: string;
+  latitude: number;
+  longitude: number;
 }
 
 function valueCountry(v: HomeClubValue): string | null {
@@ -47,6 +55,11 @@ export function HomeClubPicker({
   const [freeMode, setFreeMode] = useState(false);
   const [freeName, setFreeName] = useState("");
   const [freeCity, setFreeCity] = useState("");
+  // Coordonnées quand la ville vient de l'autocomplétion — null si l'utilisateur
+  // a tapé un nom libre (le club sera « non localisé » jusqu'à validation admin).
+  const [freeCityCoords, setFreeCityCoords] = useState<{ lat: number; lon: number } | null>(null);
+  const [cityHits, setCityHits] = useState<CityHit[]>([]);
+  const [cityOpen, setCityOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Liste des pays construite côté client uniquement : `Intl.DisplayNames` ne rend
@@ -59,7 +72,10 @@ export function HomeClubPicker({
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false);
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+        setCityOpen(false);
+      }
     }
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
@@ -89,12 +105,37 @@ export function HomeClubPicker({
     };
   }, [query, country]);
 
+  // Autocomplétion de ville (géocodage local, cf. /api/geo/cities) — n'affiche
+  // des suggestions qu'en saisie libre.
+  useEffect(() => {
+    const q = freeCity.trim();
+    if (!freeMode || q.length < 2) {
+      setCityHits([]);
+      return;
+    }
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => {
+      fetch(`/api/geo/cities?q=${encodeURIComponent(q)}&country=${country}&limit=8`, { signal: ctrl.signal })
+        .then((r) => r.json())
+        .then((j: { data?: { cities: CityHit[] } }) => setCityHits(j.data?.cities ?? []))
+        .catch(() => {
+          /* abort / réseau */
+        });
+    }, 250);
+    return () => {
+      clearTimeout(timer);
+      ctrl.abort();
+    };
+  }, [freeCity, country, freeMode]);
+
   const clear = useCallback(() => {
     onChange(null);
     setQuery("");
     setFreeMode(false);
     setFreeName("");
     setFreeCity("");
+    setFreeCityCoords(null);
+    setCityHits([]);
   }, [onChange]);
 
   // --- Club déjà choisi : chip + bouton changer -------------------------------
@@ -123,7 +164,7 @@ export function HomeClubPicker({
   if (freeMode) {
     const canSubmit = freeName.trim().length >= 2;
     return (
-      <div className="flex flex-col gap-2">
+      <div ref={containerRef} className="flex flex-col gap-2">
         <CountrySelect countries={countries} value={country} onChange={setCountry} label={t("homeClub.countryLabel")} />
         <input
           type="text"
@@ -133,14 +174,43 @@ export function HomeClubPicker({
           placeholder={t("homeClub.freeName")}
           className="w-full rounded-lg border border-border bg-bg px-4 py-2.5 text-text placeholder-text-muted outline-none focus:border-accent"
         />
-        <input
-          type="text"
-          value={freeCity}
-          onChange={(e) => setFreeCity(e.target.value)}
-          maxLength={120}
-          placeholder={t("homeClub.freeCity")}
-          className="w-full rounded-lg border border-border bg-bg px-4 py-2.5 text-text placeholder-text-muted outline-none focus:border-accent"
-        />
+        <div className="relative">
+          <input
+            type="text"
+            value={freeCity}
+            onChange={(e) => {
+              setFreeCity(e.target.value);
+              setFreeCityCoords(null); // saisie manuelle → plus de coordonnées
+              setCityOpen(true);
+            }}
+            onFocus={() => setCityOpen(true)}
+            maxLength={120}
+            placeholder={t("homeClub.freeCity")}
+            className="w-full rounded-lg border border-border bg-bg px-4 py-2.5 text-text placeholder-text-muted outline-none focus:border-accent"
+          />
+          {cityOpen && !freeCityCoords && freeCity.trim().length >= 2 && cityHits.length > 0 && (
+            <div className="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border border-border bg-surface shadow-lg">
+              {cityHits.map((c, i) => (
+                <button
+                  key={`${c.name}-${c.admin1}-${i}`}
+                  type="button"
+                  onClick={() => {
+                    setFreeCity(c.name);
+                    setFreeCityCoords({ lat: c.latitude, lon: c.longitude });
+                    setCityOpen(false);
+                  }}
+                  className="flex w-full items-center justify-between gap-2 px-4 py-2 text-left text-sm text-text transition-colors hover:bg-accent/10"
+                >
+                  <span>{c.name}</span>
+                  <span className="shrink-0 text-xs text-text-muted">
+                    {[c.admin1, countryFlag(c.country)].filter(Boolean).join(" ")}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        {freeCityCoords && <p className="text-[11px] text-accent">📍 {freeCity}</p>}
         <div className="flex gap-2">
           <button
             type="button"
@@ -158,6 +228,8 @@ export function HomeClubPicker({
                 name: freeName.trim(),
                 country,
                 city: freeCity.trim() || undefined,
+                latitude: freeCityCoords?.lat,
+                longitude: freeCityCoords?.lon,
               })
             }
             className="ml-auto rounded-lg bg-accent px-4 py-1.5 text-xs font-semibold text-bg disabled:opacity-50"
@@ -259,8 +331,19 @@ function CountrySelect({
 // (PUT /api/account, POST /api/auth/register). `undefined` = ne pas toucher.
 export function homeClubValueToPayload(
   value: HomeClubValue,
-): { clubId: string } | { newClub: { name: string; country: string; city?: string } } | null {
+):
+  | { clubId: string }
+  | { newClub: { name: string; country: string; city?: string; latitude?: number; longitude?: number } }
+  | null {
   if (value === null) return null;
   if (value.kind === "existing") return { clubId: value.club.id };
-  return { newClub: { name: value.name, country: value.country, city: value.city } };
+  return {
+    newClub: {
+      name: value.name,
+      country: value.country,
+      city: value.city,
+      latitude: value.latitude,
+      longitude: value.longitude,
+    },
+  };
 }
