@@ -6,6 +6,8 @@ import { DashboardView } from "@/components/DashboardView";
 import { getDashboardMatchStrips, getSimulationDashboardMatchStrips } from "@/lib/matches/dashboard-strips";
 import { computeBestXI } from "@/lib/players/compute-best-xi";
 import { getClubStandings } from "@/lib/standings/get";
+import { getHomeClubsAggregate } from "@/lib/community/home-clubs-query";
+import { getClubFantasyRanking } from "@/lib/community/club-fantasy-ranking";
 import { resolveSeasonMode } from "@/lib/team/active-team-context";
 import { getPendingGameweekRecaps } from "@/lib/team/pending-gameweek-recap";
 import { SIMULATION_SEASON_LABEL } from "@/lib/simulation/constants";
@@ -40,7 +42,16 @@ export default async function DashboardPage({ params }: { params: { locale: stri
     );
   }
 
-  const [teams, memberships, dashboardStrips, bestXI, clubStandings, pendingRecaps] = await Promise.all([
+  const [
+    teams,
+    memberships,
+    dashboardStrips,
+    bestXI,
+    clubStandings,
+    pendingRecaps,
+    homeClubsAggregate,
+    clubFantasyRanking,
+  ] = await Promise.all([
     mode === "simulation"
       ? prisma.simulationTeam.findMany({
           where: { isValidated: true, seasonId: season.id },
@@ -65,6 +76,8 @@ export default async function DashboardPage({ params }: { params: { locale: stri
     computeBestXI(season.id),
     getClubStandings(season.id),
     getPendingGameweekRecaps(userId, mode, season.id),
+    getHomeClubsAggregate(),
+    getClubFantasyRanking({ seasonId: season.id, mode }),
   ]);
 
   const standings: GlobalStandingRow[] = teams.map((t, i) => ({
@@ -132,6 +145,9 @@ export default async function DashboardPage({ params }: { params: { locale: stri
       dashboardStrips={dashboardStrips}
       bestXI={bestXI}
       clubStandings={clubStandings}
+      homeClubsAggregate={homeClubsAggregate}
+      clubFantasyRanking={clubFantasyRanking}
+      locale={params.locale}
       simulationAdmin={simulationAdmin}
       pendingRecaps={pendingRecaps}
     />

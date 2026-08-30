@@ -22,6 +22,14 @@
     "dotTitle": "{count, plural, one {# mànager} other {# mànagers}}",
     "alsoRepresented": "També representats",
     "overseas": "França d'ultramar",
-    "unlocated": "Club sense localitzar"
+    "unlocated": "Club sense localitzar",
+    "empty": "Encara ningú no ha indicat el seu club d'handbol."
+  },
+  "clubRanking": {
+    "title": "Classificació de clubs",
+    "seasonNotStarted": "Temporada per començar",
+    "empty": "Encara ningú no ha indicat el seu club d'handbol.",
+    "managers": "{count, plural, one {# mànager} other {# mànagers}}",
+    "more": "+{count, plural, one {# club més} other {# clubs més}}"
   }
 }

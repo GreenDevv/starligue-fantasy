@@ -22,6 +22,14 @@
     "dotTitle": "{count, plural, one {# manager} other {# managers}}",
     "alsoRepresented": "Também representados",
     "overseas": "França ultramarina",
-    "unlocated": "Clube não localizado"
+    "unlocated": "Clube não localizado",
+    "empty": "Ainda ninguém indicou o seu clube de andebol."
+  },
+  "clubRanking": {
+    "title": "Classificação dos clubes",
+    "seasonNotStarted": "Época por começar",
+    "empty": "Ainda ninguém indicou o seu clube de andebol.",
+    "managers": "{count, plural, one {# manager} other {# managers}}",
+    "more": "+{count, plural, one {# outro clube} other {# outros clubes}}"
   }
 }

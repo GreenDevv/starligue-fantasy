@@ -1,17 +1,29 @@
-// Agrégation « D'où viennent les managers » — ARCHITECTURE.md §23.7 (lot 2).
+// Agrégation « D'où viennent les managers » — ARCHITECTURE.md §23.7.
 // Ne renvoie QUE des comptes (jamais « X joue à Y »), et seulement pour les clubs
-// VÉRIFIÉS. Rendu directement dans la page d'accueil (server component), pas via
-// une route API.
-import { prisma } from "@/lib/db";
+// VÉRIFIÉS. Consommé par le widget « Carte des managers » du dashboard
+// (src/components/dashboard/widgets/HomeClubsMapWidget.tsx).
+//
+// ⚠️ Ce module est importé par un composant client (`abroadLabel`) : PAS d'import
+// Prisma ici. La requête vit dans `home-clubs-query.ts` (serveur uniquement).
 import { isInMetropolitanFrance } from "@/lib/geo/france-map";
 import { countryName } from "@/lib/geo/countries";
 
 export interface HomeClubMemberRow {
   clubId: string;
+  clubName: string;
+  clubCity: string | null;
   country: string;
   zipcode: string | null;
   latitude: number | null;
   longitude: number | null;
+}
+
+// Répartition par club à l'intérieur d'un département — sert le survol de la
+// carte (« quels clubs derrière ce point ? »), trié par nb de managers puis nom.
+export interface DepartmentClub {
+  name: string;
+  city: string | null;
+  count: number;
 }
 
 export interface DepartmentPoint {
@@ -19,6 +31,7 @@ export interface DepartmentPoint {
   count: number; // nombre de managers
   lon: number; // moyenne des clubs du département
   lat: number;
+  clubs: DepartmentClub[];
 }
 
 export interface AbroadGroup {
@@ -48,7 +61,10 @@ export function departmentFromZipcode(zipcode: string | null): string | null {
 export function aggregateHomeClubs(rows: HomeClubMemberRow[]): HomeClubsAggregate {
   const distinctClubs = new Set(rows.map((r) => r.clubId));
 
-  const byDept = new Map<string, { count: number; sumLon: number; sumLat: number }>();
+  const byDept = new Map<
+    string,
+    { count: number; sumLon: number; sumLat: number; clubs: Map<string, DepartmentClub> }
+  >();
   const abroad = new Map<string, number>();
   let unlocated = 0;
 
@@ -61,10 +77,13 @@ export function aggregateHomeClubs(rows: HomeClubMemberRow[]): HomeClubsAggregat
 
     if (inMetro) {
       const dept = departmentFromZipcode(r.zipcode) ?? "??";
-      const cur = byDept.get(dept) ?? { count: 0, sumLon: 0, sumLat: 0 };
+      const cur = byDept.get(dept) ?? { count: 0, sumLon: 0, sumLat: 0, clubs: new Map<string, DepartmentClub>() };
       cur.count += 1;
       cur.sumLon += r.longitude as number;
       cur.sumLat += r.latitude as number;
+      const club = cur.clubs.get(r.clubId) ?? { name: r.clubName, city: r.clubCity, count: 0 };
+      club.count += 1;
+      cur.clubs.set(r.clubId, club);
       byDept.set(dept, cur);
       continue;
     }
@@ -88,6 +107,7 @@ export function aggregateHomeClubs(rows: HomeClubMemberRow[]): HomeClubsAggregat
       count: v.count,
       lon: v.sumLon / v.count,
       lat: v.sumLat / v.count,
+      clubs: [...v.clubs.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)),
     }))
     .sort((a, b) => b.count - a.count);
 
@@ -110,27 +130,4 @@ export function aggregateHomeClubs(rows: HomeClubMemberRow[]): HomeClubsAggregat
 /** Libellé affichable d'un groupe "abroad" (pays localisé, ou « Outre-mer »). */
 export function abroadLabel(key: string, locale: string, overseasLabel: string): string {
   return key === OVERSEAS_KEY ? overseasLabel : countryName(key, locale);
-}
-
-export async function getHomeClubsAggregate(): Promise<HomeClubsAggregate> {
-  const members = await prisma.user.findMany({
-    where: { homeClub: { is: { verified: true } } },
-    select: {
-      homeClub: {
-        select: { id: true, country: true, zipcode: true, latitude: true, longitude: true },
-      },
-    },
-  });
-
-  const rows: HomeClubMemberRow[] = members
-    .filter((m): m is { homeClub: NonNullable<typeof m.homeClub> } => m.homeClub != null)
-    .map((m) => ({
-      clubId: m.homeClub.id,
-      country: m.homeClub.country,
-      zipcode: m.homeClub.zipcode,
-      latitude: m.homeClub.latitude,
-      longitude: m.homeClub.longitude,
-    }));
-
-  return aggregateHomeClubs(rows);
 }

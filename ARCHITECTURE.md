@@ -2164,14 +2164,16 @@ clubs** que l'élite.
 | Modifiable | **Oui, librement**, sur `/account` | Donnée factuelle : on change de club, on déménage. Pas un choix d'attachement verrouillé comme le joueur préféré (§6.4 / `FAVORITE_PLAYER_LOCKED`). |
 | Périmètre données | France exhaustive via l'annuaire FFHandball ; **saisie libre** pour tout le reste du monde | Aucun jeu de données mondial propre n'existe. FFHandball couvre la quasi‑totalité des membres actuels. |
 | Club hors annuaire | Crée quand même un `HandballClub` **non vérifié** (`verified=false`, `source=MANUAL`), rattaché à l'utilisateur | Ne bloque personne ; l'admin normalise / fusionne ensuite. |
-| Visibilité | Clubs **vérifiés** → agrégats publics + carte d'accueil. Clubs **non vérifiés** → visibles seulement sur le profil du membre et dans ses ligues, jamais dans un agrégat public | Évite qu'une saisie fantaisiste apparaisse sur la page d'accueil. |
+| Visibilité | Clubs **vérifiés** → agrégats (widgets dashboard : carte + classement clubs). Clubs **non vérifiés** → visibles seulement sur le profil du membre et dans ses ligues, jamais dans un agrégat | Évite qu'une saisie fantaisiste apparaisse dans un agrégat. |
 | Obligatoire | Non, jamais bloquant (comme `favoritePlayerId`, §8.3) | Cohérent avec le parcours d'inscription. |
 
 **Découpage livraison :**
 - **Lot 1 (v1) — FAIT** (branche `feat/home-club`, non déployé) : §23.2 → §23.6
   + §23.7 « v1 » + §23.8/9/10.
-- **Lot 2 — FAIT** (même branche) : carte de France sur la page d'accueil
-  (§23.7).
+- **Lot 2 — FAIT** : carte de France + classement des clubs, deux widgets du
+  dashboard `/dashboard` (§23.7). Note : la carte a d'abord été livrée en bande
+  sur la page d'accueil, puis déplacée dans le dashboard le 2026-08-30 en même
+  temps que l'ajout du classement des clubs et du survol (noms de clubs).
 - **Lot 3** (option, à faire) : « club à l'honneur » hebdo (§23.7).
 
 ### 23.2 Modèle de données (Prisma)
@@ -2388,27 +2390,45 @@ mobile-first, réutilisé aux deux endroits :
 membres d'une même ligue). Éventuellement un tooltip sur le pseudo dans le chat
 de ligue (optionnel).
 
-**Lot 2 — page d'accueil : carte de France (FAIT).** Bloc « D'où viennent les
-managers », bande pleine largeur sous la grille Starligue (§16),
-`HomeClubsMap` (`src/components/community/HomeClubsMap.tsx`, server component) :
-- **En-tête chiffré** : `N managers localisés · M clubs · P départements`
-  (pluriel ICU, 8 locales, namespace `community.homeMap.*`).
-- **Carte** : **SVG inline, aucune lib carto** (décision tranchée : pas de
-  Mapbox/Leaflet). `src/lib/geo/france-map.ts` — contour métropole + Corse en
-  `[lon, lat]` (~50 pts, grossier, repère visuel) + `makeFranceProjector(w, h)`
-  (équirectangulaire corrigé par `cos(lat médiane)`, pur, testé) : **le contour
-  ET les points sont projetés par la même fonction**, seule façon de garantir
-  l'alignement. Un point par département (2 chiffres du code postal), position =
-  moyenne des clubs du département, rayon ∝ √count, teinte `accent`, `<title>`
-  au survol.
-- **Hors métropole** : `isInMetropolitanFrance(lon, lat)` écarte DROM/étranger →
-  liste « Aussi représentés » (pays localisés via `Intl.DisplayNames` +
-  drapeau, « Outre-mer » groupé) + compteur « club non localisé » (FR sans
-  coordonnées).
-- Agrégat = `src/lib/community/home-clubs.ts::getHomeClubsAggregate()`, **appelé
-  directement dans la page (SSR)**, pas de route `/api/*` (pas de cache dédié
-  nécessaire, la home n'est pas cachée). Partie pure `aggregateHomeClubs(rows)`
-  testée. **Clubs vérifiés uniquement**, **comptes seuls** (jamais « X joue à Y »).
+**Lot 2 — deux widgets du dashboard `/dashboard` (FAIT).** Initialement une bande
+sur la page d'accueil ; **déplacé dans le dashboard personnalisable** (§ widgets)
+le 2026-08-30 — c'est de la méta communautaire, pas du contenu Starligue, et sa
+place est derrière le login parmi les autres cartes réarrangeables. Deux widgets
+singletons distincts (`src/lib/dashboard/layout.ts`), tous deux dans
+`DEFAULT_LAYOUT` :
+
+1. **`home-clubs-map` → `HomeClubsMapWidget`** (client) : carte de France.
+   - **En-tête chiffré** : `N managers localisés · M clubs · P départements`
+     (pluriel ICU, 8 locales, namespace `community.homeMap.*`).
+   - **Carte** : **SVG inline, aucune lib carto** (décision tranchée : pas de
+     Mapbox/Leaflet). `src/lib/geo/france-map.ts` — contour métropole + Corse en
+     `[lon, lat]` (~50 pts, grossier, repère visuel) + `makeFranceProjector(w, h)`
+     (équirectangulaire corrigé par `cos(lat médiane)`, pur, testé) : **le contour
+     ET les points sont projetés par la même fonction**, seule façon de garantir
+     l'alignement. Un point par département (2 chiffres du code postal), position =
+     moyenne des clubs du département, rayon ∝ √count, teinte `accent`.
+   - **Survol / focus / tap d'un point** : tooltip HTML (positionné en % des
+     coords projetées) listant les **noms de clubs** derrière le point (+ ville,
+     + `×n` si plusieurs managers). `DepartmentPoint.clubs` porté par
+     `aggregateHomeClubs`.
+   - **Hors métropole** : `isInMetropolitanFrance(lon, lat)` écarte DROM/étranger →
+     liste « Aussi représentés » (pays localisés via `Intl.DisplayNames` +
+     drapeau, « Outre-mer » groupé) + compteur « club non localisé » (FR sans
+     coordonnées).
+   - Agrégat = `src/lib/community/home-clubs.ts::getHomeClubsAggregate()`, **appelé
+     en SSR dans `dashboard/page.tsx`**, pas de route `/api/*`. Partie pure
+     `aggregateHomeClubs(rows)` testée. **Clubs vérifiés uniquement**, **comptes
+     seuls** (jamais « X joue à Y »).
+
+2. **`club-fantasy-ranking` → `ClubFantasyRankingWidget`** (client) : classement
+   des **clubs d'origine par points fantasy cumulés**. Chaque manager ayant
+   déclaré un club vérifié apporte à ce club le **meilleur total de ses effectifs
+   validés** (0 s'il n'en a pas encore), mode-aware (`FantasyTeam` filtrés par
+   `league.seasonId` en live / `SimulationTeam` par `seasonId` en simulation).
+   Tri : points desc, puis nb de managers desc, puis nom. En tout début de saison
+   tous les clubs sont à 0 → badge « Saison à venir », tri sur nb de managers.
+   `src/lib/community/club-fantasy-ranking.ts` : `getClubFantasyRanking()` (SSR
+   dans `dashboard/page.tsx`) + `aggregateClubFantasyRanking(rows)` pur testé.
 
 **Lot 3 (option) — « Club à l'honneur ».** Rotation hebdo déterministe
 (seed = nº de semaine ISO) parmi les clubs vérifiés ayant ≥ 1 membre : nom,
@@ -2420,7 +2440,8 @@ potentiellement le pipeline Instagram §17 plus tard.
 - Ajouter à `sections.data.items` : « le club de handball que tu indiques
   (facultatif, modifiable à tout moment) ».
 - Préciser : visible par les autres membres de tes ligues ; utilisé de façon
-  **agrégée et anonyme** (comptes par club / département) sur la page d'accueil.
+  **agrégée et anonyme** (comptes par club / département) dans les widgets du
+  dashboard (carte des managers, classement des clubs).
   Aucune adresse personnelle stockée sur ton compte — l'adresse du club provient
   de l'annuaire public FFHandball.
 - La ligne « aucun tracking / analytics / publicité » reste vraie, inchangée.
@@ -2456,6 +2477,6 @@ es, ca, de, pt, da, pl) : libellés du picker, étape d'inscription, section
 3. `pnpm tsx scripts/run-ffhandball-clubs-import.ts` sur la prod → ~2 300 clubs.
 4. Déploiement UI (picker inscription + `/account` + affichage en ligue).
 5. `cron-monthly.yml` activé.
-6. Lot 2 (carte) puis lot 3 (club à l'honneur) livrés séparément.
+6. Lot 2 (widgets carte + classement clubs sur le dashboard) puis lot 3 (club à l'honneur) livrés séparément.
 7. Option non retenue en v1 : prompt doux « D'où viens-tu ? » sur le dashboard à
    la prochaine visite (même pattern que la modal de récap de journée).

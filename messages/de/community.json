@@ -22,6 +22,14 @@
     "dotTitle": "{count, plural, one {# Manager} other {# Manager}}",
     "alsoRepresented": "Ebenfalls vertreten",
     "overseas": "Übersee-Frankreich",
-    "unlocated": "Verein ohne Standort"
+    "unlocated": "Verein ohne Standort",
+    "empty": "Noch niemand hat seinen Handballverein angegeben."
+  },
+  "clubRanking": {
+    "title": "Vereinswertung",
+    "seasonNotStarted": "Saison steht bevor",
+    "empty": "Noch niemand hat seinen Handballverein angegeben.",
+    "managers": "{count, plural, one {# Manager} other {# Manager}}",
+    "more": "+{count, plural, one {# weiterer Verein} other {# weitere Vereine}}"
   }
 }

@@ -22,6 +22,14 @@
     "dotTitle": "{count, plural, one {# menedżer} few {# menedżerów} many {# menedżerów} other {# menedżera}}",
     "alsoRepresented": "Również reprezentowani",
     "overseas": "Francja zamorska",
-    "unlocated": "Klub bez lokalizacji"
+    "unlocated": "Klub bez lokalizacji",
+    "empty": "Nikt jeszcze nie wskazał swojego klubu piłki ręcznej."
+  },
+  "clubRanking": {
+    "title": "Klasyfikacja klubów",
+    "seasonNotStarted": "Sezon przed nami",
+    "empty": "Nikt jeszcze nie wskazał swojego klubu piłki ręcznej.",
+    "managers": "{count, plural, one {# menedżer} few {# menedżerów} many {# menedżerów} other {# menedżera}}",
+    "more": "+{count, plural, one {# kolejny klub} few {# kolejne kluby} many {# kolejnych klubów} other {# kolejnego klubu}}"
   }
 }

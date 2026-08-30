@@ -3,6 +3,8 @@ import { aggregateHomeClubs, departmentFromZipcode, type HomeClubMemberRow } fro
 
 const row = (o: Partial<HomeClubMemberRow>): HomeClubMemberRow => ({
   clubId: "c",
+  clubName: "Club C",
+  clubCity: "Ville C",
   country: "FR",
   zipcode: "75001",
   latitude: 48.86,
@@ -33,6 +35,19 @@ describe("aggregateHomeClubs", () => {
     expect(dept49?.lon).toBeCloseTo(-0.56, 2);
     // trié par count décroissant
     expect(agg.metropolitan[0]?.dept).toBe("49");
+  });
+
+  it("détaille les clubs derrière chaque point de département (survol de la carte)", () => {
+    const agg = aggregateHomeClubs([
+      row({ clubId: "a", clubName: "Angers SCO HB", zipcode: "49000", latitude: 47.47, longitude: -0.55 }),
+      row({ clubId: "a", clubName: "Angers SCO HB", zipcode: "49000", latitude: 47.47, longitude: -0.55 }),
+      row({ clubId: "b", clubName: "Cholet HB", zipcode: "49300", latitude: 47.06, longitude: -0.88 }),
+    ]);
+    const dept49 = agg.metropolitan.find((d) => d.dept === "49");
+    expect(dept49?.clubs).toEqual([
+      { name: "Angers SCO HB", city: "Ville C", count: 2 },
+      { name: "Cholet HB", city: "Ville C", count: 1 },
+    ]);
   });
 
   it("compte plusieurs membres d'un même club (clubs distincts != membres)", () => {

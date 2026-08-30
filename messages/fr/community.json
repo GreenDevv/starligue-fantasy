@@ -22,6 +22,14 @@
     "dotTitle": "{count, plural, one {# manager} other {# managers}}",
     "alsoRepresented": "Aussi représentés",
     "overseas": "Outre-mer",
-    "unlocated": "Club non localisé"
+    "unlocated": "Club non localisé",
+    "empty": "Personne n'a encore indiqué son club de handball."
+  },
+  "clubRanking": {
+    "title": "Classement des clubs",
+    "seasonNotStarted": "Saison à venir",
+    "empty": "Personne n'a encore indiqué son club de handball.",
+    "managers": "{count, plural, one {# manager} other {# managers}}",
+    "more": "+{count, plural, one {# autre club} other {# autres clubs}}"
   }
 }

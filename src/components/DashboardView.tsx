@@ -30,9 +30,13 @@ import { LeaderboardGlobalWidget, type GlobalStandingRow } from "@/components/da
 import { LeaderboardLeaguesWidget, type MyLeagueRow } from "@/components/dashboard/widgets/LeaderboardLeaguesWidget";
 import { BestXIWidget } from "@/components/dashboard/widgets/BestXIWidget";
 import { ClubStandingsWidget } from "@/components/dashboard/widgets/ClubStandingsWidget";
+import { HomeClubsMapWidget } from "@/components/dashboard/widgets/HomeClubsMapWidget";
+import { ClubFantasyRankingWidget } from "@/components/dashboard/widgets/ClubFantasyRankingWidget";
 import type { DashboardStrips } from "@/lib/matches/dashboard-strips";
 import type { BestXIEntry } from "@/lib/players/compute-best-xi";
 import type { ClubStandingsResult } from "@/lib/standings/get";
+import type { HomeClubsAggregate } from "@/lib/community/home-clubs";
+import type { ClubFantasyRankingRow } from "@/lib/community/club-fantasy-ranking";
 import { SimulationGameweekControls, type SimulationAdminControls } from "@/components/dashboard/SimulationGameweekControls";
 import { GameweekRecapModal } from "@/components/dashboard/GameweekRecapModal";
 import type { PendingGameweekRecap } from "@/lib/team/pending-gameweek-recap";
@@ -48,6 +52,9 @@ interface DashboardViewProps {
   dashboardStrips: DashboardStrips;
   bestXI: BestXIEntry[];
   clubStandings: ClubStandingsResult;
+  homeClubsAggregate: HomeClubsAggregate;
+  clubFantasyRanking: ClubFantasyRankingRow[];
+  locale: string;
   simulationAdmin: SimulationAdminControls | null;
   pendingRecaps: PendingGameweekRecap[];
 }
@@ -71,6 +78,9 @@ export function DashboardView({
   dashboardStrips,
   bestXI,
   clubStandings,
+  homeClubsAggregate,
+  clubFantasyRanking,
+  locale,
   simulationAdmin,
   pendingRecaps,
 }: DashboardViewProps) {
@@ -201,7 +211,18 @@ export function DashboardView({
                 showRemove={w.type !== "player-stats"}
                 className={SIZE_SPAN_CLASS[w.size]}
               >
-                {renderWidget(w, { seasonId, standings, leagues, dashboardStrips, bestXI, clubStandings, removeWidget })}
+                {renderWidget(w, {
+                  seasonId,
+                  standings,
+                  leagues,
+                  dashboardStrips,
+                  bestXI,
+                  clubStandings,
+                  homeClubsAggregate,
+                  clubFantasyRanking,
+                  locale,
+                  removeWidget,
+                })}
               </DashboardWidgetShell>
             ))}
           </div>
@@ -314,6 +335,9 @@ function renderWidget(
     dashboardStrips: DashboardStrips;
     bestXI: BestXIEntry[];
     clubStandings: ClubStandingsResult;
+    homeClubsAggregate: HomeClubsAggregate;
+    clubFantasyRanking: ClubFantasyRankingRow[];
+    locale: string;
     removeWidget: (id: string) => void;
   }
 ) {
@@ -350,6 +374,10 @@ function renderWidget(
           size={widget.size}
         />
       );
+    case "home-clubs-map":
+      return <HomeClubsMapWidget aggregate={ctx.homeClubsAggregate} locale={ctx.locale} size={widget.size} />;
+    case "club-fantasy-ranking":
+      return <ClubFantasyRankingWidget ranking={ctx.clubFantasyRanking} size={widget.size} />;
     case "player-stats":
       return (
         <StatLeaderCard

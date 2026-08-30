@@ -10,6 +10,8 @@ export type WidgetType =
   | "last-results"
   | "upcoming-matches"
   | "club-standings"
+  | "home-clubs-map"
+  | "club-fantasy-ranking"
   | "player-stats";
 
 // mini = compact (1 colonne), square = grand carré (2x2), wide = bande longue
@@ -34,6 +36,8 @@ export const SINGLETON_WIDGETS: { type: Exclude<WidgetType, "player-stats">; lab
   { type: "upcoming-matches", label: "Prochains matchs" },
   { type: "club-standings", label: "Classement Starligue" },
   { type: "best-xi", label: "Équipe type de la saison" },
+  { type: "club-fantasy-ranking", label: "Classement des clubs" },
+  { type: "home-clubs-map", label: "Carte des managers" },
 ];
 
 // Taille de départ raisonnable par type — l'utilisateur peut la changer ensuite,
@@ -46,6 +50,8 @@ const DEFAULT_SIZE_BY_TYPE: Record<WidgetType, WidgetSize> = {
   "last-results": "wide",
   "upcoming-matches": "wide",
   "club-standings": "wide",
+  "home-clubs-map": "square",
+  "club-fantasy-ranking": "square",
   "player-stats": "mini",
 };
 

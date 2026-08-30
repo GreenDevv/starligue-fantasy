@@ -22,6 +22,14 @@
     "dotTitle": "{count, plural, one {# mánager} other {# mánagers}}",
     "alsoRepresented": "También representados",
     "overseas": "Ultramar francés",
-    "unlocated": "Club sin localizar"
+    "unlocated": "Club sin localizar",
+    "empty": "Nadie ha indicado todavía su club de balonmano."
+  },
+  "clubRanking": {
+    "title": "Clasificación de clubes",
+    "seasonNotStarted": "Temporada por empezar",
+    "empty": "Nadie ha indicado todavía su club de balonmano.",
+    "managers": "{count, plural, one {# mánager} other {# mánagers}}",
+    "more": "+{count, plural, one {# club más} other {# clubes más}}"
   }
 }

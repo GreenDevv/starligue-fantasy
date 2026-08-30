@@ -22,6 +22,14 @@
     "dotTitle": "{count, plural, one {# manager} other {# managere}}",
     "alsoRepresented": "Også repræsenteret",
     "overseas": "Oversøisk Frankrig",
-    "unlocated": "Klub uden placering"
+    "unlocated": "Klub uden placering",
+    "empty": "Ingen har endnu angivet deres håndboldklub."
+  },
+  "clubRanking": {
+    "title": "Klubstilling",
+    "seasonNotStarted": "Sæson på vej",
+    "empty": "Ingen har endnu angivet deres håndboldklub.",
+    "managers": "{count, plural, one {# manager} other {# managere}}",
+    "more": "+{count, plural, one {# klub mere} other {# klubber mere}}"
   }
 }
