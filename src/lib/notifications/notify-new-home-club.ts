@@ -7,6 +7,7 @@
 // doit jamais faire échouer l'inscription ou la mise à jour du compte.
 import { prisma } from "@/lib/db";
 import { sendNewHomeClubEmail } from "@/lib/email/send-new-home-club-email";
+import { signClubActionToken } from "@/lib/admin/club-action-token";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://starliguefantasy.fr";
 
@@ -32,11 +33,16 @@ export async function notifyAdminsNewHomeClub(opts: {
   if (!club || club.verified || club.source !== "MANUAL") return { notified: 0, failed: 0 };
   if (admins.length === 0) return { notified: 0, failed: 0 };
 
+  const actionUrl = (action: "verify" | "reject") =>
+    `${APP_URL}/api/admin/handball-clubs/action?token=${encodeURIComponent(signClubActionToken(opts.clubId, action))}`;
+
   const params = {
     clubName: club.name,
     city: club.city,
     country: club.country,
     memberName: opts.memberName,
+    verifyUrl: actionUrl("verify"),
+    rejectUrl: actionUrl("reject"),
     adminUrl: `${APP_URL}/fr/admin/handball-clubs`,
   };
 

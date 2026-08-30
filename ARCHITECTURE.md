@@ -2391,8 +2391,16 @@ ignoré silencieusement (on ne renvoie pas 422, à la différence de
   `POST /api/auth/register` appellent `notifyAdminsNewHomeClub` en **best-effort**
   (`src/lib/notifications/notify-new-home-club.ts`) : un email par `User` de rôle
   `ADMIN` (Resend, gabarit `new-home-club-email.ts`, FR only comme l'email de
-  blessure) avec nom du club / ville / membre + lien vers `/admin/handball-clubs`.
-  Réutiliser un club existant ne déclenche rien.
+  blessure) avec nom du club / ville / membre. Réutiliser un club existant ne
+  déclenche rien.
+- `GET /api/admin/handball-clubs/action?token=…` : liens **one-click** « Valider »
+  / « Rejeter » de cet email. Auth = le jeton signé lui-même (HMAC-SHA256 sur
+  `AUTH_SECRET`, TTL 7 j, `src/lib/admin/club-action-token.ts`), pas de session —
+  la route est hors du matcher middleware (`(?!api…)`). Répond une page HTML.
+  Effet de bord sur GET assumé : actions **idempotentes** (revérifier un club déjà
+  validé / rejeter un club déjà parti → message neutre), dégât d'un clic
+  accidentel faible et réversible. Le rejet garde le même filet que `DELETE`
+  (MANUAL non vérifié uniquement).
 - `scripts/backfill-handball-club-coords.ts` : géocodage rétroactif des clubs
   `MANUAL` sans coords — **one-off**, lancé une fois après le déploiement de la
   vue monde (2026-08-31, 1 club) ; PAS branché sur les déploiements.

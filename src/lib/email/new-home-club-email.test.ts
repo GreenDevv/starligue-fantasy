@@ -7,13 +7,17 @@ describe("buildNewHomeClubEmail", () => {
     city: "New York City",
     country: "US",
     memberName: "Martin",
+    verifyUrl: "https://starliguefantasy.fr/api/admin/handball-clubs/action?token=VVV",
+    rejectUrl: "https://starliguefantasy.fr/api/admin/handball-clubs/action?token=RRR",
     adminUrl: "https://starliguefantasy.fr/fr/admin/handball-clubs",
   };
 
-  it("met le club dans le sujet et le lien admin dans le CTA", () => {
+  it("met le club dans le sujet et les 3 liens dans le corps", () => {
     const { subject, html } = buildNewHomeClubEmail(base);
     expect(subject).toBe("Nouveau club à valider : NYCTHC The World's Handball Club");
-    expect(html).toContain("https://starliguefantasy.fr/fr/admin/handball-clubs");
+    expect(html).toContain("token=VVV");
+    expect(html).toContain("token=RRR");
+    expect(html).toContain("/fr/admin/handball-clubs");
     expect(html).toContain("New York City");
     expect(html).toContain("Martin");
   });
@@ -27,8 +31,7 @@ describe("buildNewHomeClubEmail", () => {
     expect(html).not.toContain("<script>x</script>");
     expect(html).toContain("&lt;script&gt;");
     expect(html).toContain("&lt;b&gt;bob&lt;/b&gt;");
-    // le sujet est du texte brut (pas de HTML) → non échappé, c'est voulu
-    expect(subject).toContain("<script>x</script> & Co");
+    expect(subject).toContain("<script>x</script> & Co"); // sujet = texte brut, voulu
   });
 
   it("gère une ville absente", () => {
