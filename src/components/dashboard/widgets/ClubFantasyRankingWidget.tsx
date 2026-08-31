@@ -8,7 +8,11 @@ import type { WidgetSize } from "@/lib/dashboard/layout";
 
 // Pastille club : logo si on en a un (voir src/lib/clubs/handball-club-logo.ts —
 // récupéré dès qu'un club a un premier manager), sinon initiale sur fond neutre.
-// Slot de taille fixe dans les deux cas pour garder les lignes alignées.
+// Slot de taille fixe dans les deux cas pour garder les lignes alignées. Fond
+// clair fixe (pas le thème sombre) sous le logo : les écussons FFHandball sont
+// détourés (transparents) mais un logo hors annuaire (club étranger, trouvé à
+// la main sur son site) peut être un simple wordmark sur fond blanc — le fond
+// clair absorbe les deux cas sans coin moche visible.
 function ClubBadge({ name, logoUrl }: { name: string; logoUrl: string | null }) {
   const [broken, setBroken] = useState(false);
   if (logoUrl && !broken) {
@@ -17,13 +21,13 @@ function ClubBadge({ name, logoUrl }: { name: string; logoUrl: string | null }) 
       <img
         src={logoUrl}
         alt=""
-        className="h-7 w-7 shrink-0 rounded-full bg-bg object-contain"
+        className="h-7 w-7 shrink-0 rounded-md bg-white object-contain p-0.5"
         onError={() => setBroken(true)}
       />
     );
   }
   return (
-    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-bg text-[11px] font-semibold text-text-muted">
+    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-bg text-[11px] font-semibold text-text-muted">
       {name.charAt(0).toUpperCase()}
     </span>
   );
