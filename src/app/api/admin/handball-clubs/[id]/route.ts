@@ -14,6 +14,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { geocodeCity } from "@/lib/geo/cities";
+import { ensureHandballClubLogo } from "@/lib/clubs/handball-club-logo";
 
 async function requireAdmin() {
   const session = await auth();
@@ -84,6 +85,12 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     await tx.handballClub.delete({ where: { id: params.id } });
     return count;
   });
+
+  // Le club cible peut passer de 0 à N managers via cette fusion → va chercher
+  // son logo s'il n'en a pas encore (best-effort).
+  if (moved > 0) {
+    void ensureHandballClubLogo(intoId).catch(() => {});
+  }
 
   return NextResponse.json({ data: { mergedInto: intoId, membersMoved: moved } });
 }

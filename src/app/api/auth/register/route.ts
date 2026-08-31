@@ -6,6 +6,7 @@ import { hash } from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { homeClubInputSchema, resolveHomeClubId } from "@/lib/clubs/home-club-input";
+import { ensureHandballClubLogo } from "@/lib/clubs/handball-club-logo";
 import { notifyAdminsNewHomeClub } from "@/lib/notifications/notify-new-home-club";
 
 const schema = z.object({
@@ -93,6 +94,12 @@ export async function POST(req: Request) {
   // Saisie libre d'un club hors annuaire → prévient les admins (best-effort).
   if (createdHomeClubId) {
     void notifyAdminsNewHomeClub({ clubId: createdHomeClubId, memberName: name }).catch(() => {});
+  }
+
+  // Club de l'annuaire choisi → va chercher son logo s'il n'en a pas encore
+  // (best-effort, voir handball-club-logo.ts).
+  if (homeClubId) {
+    void ensureHandballClubLogo(homeClubId).catch(() => {});
   }
 
   return NextResponse.json(

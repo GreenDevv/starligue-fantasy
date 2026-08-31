@@ -7,6 +7,7 @@ import {
   parseClubSlugs,
   decodeHtmlAttribute,
   mapWithConcurrency,
+  ffhandballLogoUrl,
 } from "./ffhandball-clubs.provider";
 import { IngestionError } from "./lnh-scraper.provider";
 
@@ -30,6 +31,7 @@ describe("parseClubFromHtml", () => {
       website: "https://www.angerslacdemaine-handball.fr",
       facebook: "https://www.facebook.com/angerslacdemainehandball",
       instagram: "alm_handball",
+      logoFilename: "2026-07-31-2def760b-5282-4e83-882f-e49faa57561f.jpg",
     });
   });
 
@@ -41,6 +43,7 @@ describe("parseClubFromHtml", () => {
     expect(club.zipcode).toBe("75020");
     expect(club.latitude).toBeCloseTo(48.8625, 4);
     expect(club.instagram).toBe("https://www.instagram.com/paris_sport_club/");
+    expect(club.logoFilename).toBe("2015-06-09-ea61e0fd-e595-4a89-98ca-ef1ccc9c0810.jpg");
   });
 
   it("lève une IngestionError récupérable si le bloc club est absent", () => {
@@ -85,6 +88,18 @@ describe("parseClubSlugs", () => {
       <url><loc>https://monclub.ffhandball.fr/comites/comite-33/</loc></url>
     </urlset>`;
     expect(parseClubSlugs(xml)).toEqual(["hbc-bazadais", "angers-lac-de-maine-handball"]);
+  });
+});
+
+describe("ffhandballLogoUrl", () => {
+  it("construit l'URL CDN 256px, extension d'origine remplacée par .webp", () => {
+    expect(ffhandballLogoUrl("2015-06-09-ea61e0fd-e595-4a89-98ca-ef1ccc9c0810.jpg")).toBe(
+      "https://media-logos-clubs.ffhandball.fr/256/2015-06-09-ea61e0fd-e595-4a89-98ca-ef1ccc9c0810.webp",
+    );
+  });
+
+  it("accepte une autre taille", () => {
+    expect(ffhandballLogoUrl("foo.png", 128)).toBe("https://media-logos-clubs.ffhandball.fr/128/foo.webp");
   });
 });
 

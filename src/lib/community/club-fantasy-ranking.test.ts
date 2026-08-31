@@ -6,6 +6,7 @@ const row = (o: Partial<ClubFantasyManagerRow>): ClubFantasyManagerRow => ({
   clubName: "Club A",
   clubCity: "Ville A",
   clubCountry: "FR",
+  clubLogoUrl: null,
   points: 0,
   ...o,
 });
@@ -18,8 +19,8 @@ describe("aggregateClubFantasyRanking", () => {
       row({ clubId: "b", clubName: "Club B", points: 50 }),
     ]);
     expect(ranking).toEqual([
-      { rank: 1, clubId: "b", clubName: "Club B", clubCity: "Ville A", clubCountry: "FR", managers: 1, points: 50 },
-      { rank: 2, clubId: "a", clubName: "Club A", clubCity: "Ville A", clubCountry: "FR", managers: 2, points: 42 },
+      { rank: 1, clubId: "b", clubName: "Club B", clubCity: "Ville A", clubCountry: "FR", clubLogoUrl: null, managers: 1, points: 50 },
+      { rank: 2, clubId: "a", clubName: "Club A", clubCity: "Ville A", clubCountry: "FR", clubLogoUrl: null, managers: 2, points: 42 },
     ]);
   });
 
@@ -31,6 +32,11 @@ describe("aggregateClubFantasyRanking", () => {
       row({ clubId: "a", clubName: "Alpha HB", points: 0 }),
     ]);
     expect(ranking.map((r) => r.clubName)).toEqual(["Beta HB", "Alpha HB", "Zorro HB"]);
+  });
+
+  it("porte le logo du club", () => {
+    const ranking = aggregateClubFantasyRanking([row({ clubId: "a", clubLogoUrl: "https://example.com/a.webp" })]);
+    expect(ranking[0]?.clubLogoUrl).toBe("https://example.com/a.webp");
   });
 
   it("garde les clubs sans aucun point (tous à 0 en début de saison)", () => {

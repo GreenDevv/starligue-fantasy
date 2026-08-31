@@ -12,6 +12,7 @@ import { prisma } from "@/lib/db";
 import { verifyClubActionToken } from "@/lib/admin/club-action-token";
 import { geocodeCity } from "@/lib/geo/cities";
 import { countryFlag, countryName } from "@/lib/geo/countries";
+import { ensureHandballClubLogo } from "@/lib/clubs/handball-club-logo";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://starliguefantasy.fr";
 
@@ -69,6 +70,11 @@ export async function GET(req: Request) {
     }
     const coords = club.latitude == null && club.city ? geocodeCity(club.city, club.country) : null;
     await prisma.handballClub.update({ where: { id: club.id }, data: { verified: true, ...(coords ?? {}) } });
+    // Best-effort, typiquement un no-op ici : un club validé par ce lien est
+    // presque toujours une saisie libre (MANUAL), donc sans fiche FFHandball à
+    // relire (voir handball-club-logo.ts) — câblé quand même pour rester
+    // cohérent avec les autres façons de valider un club (UI admin, fusion).
+    void ensureHandballClubLogo(club.id).catch(() => {});
     return page(
       "Club validé ✅",
       `${label}<br /><br />apparaît maintenant sur la carte des managers et le classement des clubs.`,

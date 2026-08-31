@@ -12,6 +12,7 @@ import { prisma } from "@/lib/db";
 import { deleteTeamsCascade, deleteSimulationTeamsCascade } from "@/lib/leagues/standings";
 import { SIMULATION_SEASON_LABEL } from "@/lib/simulation/constants";
 import { homeClubInputSchema, resolveHomeClubId, HomeClubError } from "@/lib/clubs/home-club-input";
+import { ensureHandballClubLogo } from "@/lib/clubs/handball-club-logo";
 import { notifyAdminsNewHomeClub } from "@/lib/notifications/notify-new-home-club";
 
 const homeClubSelect = {
@@ -129,6 +130,12 @@ export async function PUT(req: Request) {
       clubId: createdHomeClubId,
       memberName: user.name ?? session.user.name ?? "Un membre",
     }).catch(() => {});
+  }
+
+  // Club de l'annuaire choisi (pas retiré, pas une saisie libre) → va chercher
+  // son logo s'il n'en a pas encore (best-effort, voir handball-club-logo.ts).
+  if (homeClubId) {
+    void ensureHandballClubLogo(homeClubId).catch(() => {});
   }
 
   return NextResponse.json({ data: user });

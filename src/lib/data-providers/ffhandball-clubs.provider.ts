@@ -34,6 +34,11 @@ export interface ExternalHandballClub {
   website: string | null;
   facebook: string | null;
   instagram: string | null;
+  // acf.logo_club : nom de fichier (pas une URL) — null si le club n'a rien
+  // uploadé. Voir ffhandballLogoUrl() pour le résoudre en image affichable ;
+  // même un club qui renseigne ce champ peut ne pas avoir de fichier valide
+  // côté CDN (503 constaté en prod), à vérifier avant d'enregistrer.
+  logoFilename: string | null;
 }
 
 export interface FfhandballClubsProvider {
@@ -73,6 +78,7 @@ const acfSchema = z
     email_club: z.string().nullish(),
     facebook_club: z.string().nullish(),
     instagram_club: z.string().nullish(),
+    logo_club: z.string().nullish(),
   })
   .passthrough();
 
@@ -160,7 +166,20 @@ export function parseClubFromHtml(html: string, slug: string): ExternalHandballC
     website: cleanStr(acf.url_club),
     facebook: cleanStr(acf.facebook_club),
     instagram: cleanStr(acf.instagram_club),
+    logoFilename: cleanStr(acf.logo_club),
   };
+}
+
+// --- Logo -----------------------------------------------------------------
+// Le CDN média officiel des logos club ignore l'extension demandée et sert
+// toujours du WebP (constaté en prod : `?...jpg` répond `content-type:
+// image/webp`) — donc peu importe l'extension d'origine, on demande du .webp.
+// Tailles connues : 128 / 256 / 512 / "original".
+const LOGO_CDN_BASE = "https://media-logos-clubs.ffhandball.fr";
+
+export function ffhandballLogoUrl(logoFilename: string, size: 128 | 256 | 512 = 256): string {
+  const stem = logoFilename.replace(/\.[a-zA-Z0-9]+$/, "");
+  return `${LOGO_CDN_BASE}/${size}/${stem}.webp`;
 }
 
 // --- Parsing des sitemaps -----------------------------------------------------

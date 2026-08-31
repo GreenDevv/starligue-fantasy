@@ -11,6 +11,7 @@ export interface ClubFantasyManagerRow {
   clubName: string;
   clubCity: string | null;
   clubCountry: string;
+  clubLogoUrl: string | null;
   points: number; // meilleur total validé du manager, 0 si aucun effectif
 }
 
@@ -20,6 +21,7 @@ export interface ClubFantasyRankingRow {
   clubName: string;
   clubCity: string | null;
   clubCountry: string;
+  clubLogoUrl: string | null;
   managers: number;
   points: number;
 }
@@ -28,13 +30,13 @@ export interface ClubFantasyRankingRow {
 export function aggregateClubFantasyRanking(rows: ClubFantasyManagerRow[]): ClubFantasyRankingRow[] {
   const byClub = new Map<
     string,
-    { name: string; city: string | null; country: string; managers: number; points: number }
+    { name: string; city: string | null; country: string; logoUrl: string | null; managers: number; points: number }
   >();
 
   for (const r of rows) {
     const cur =
       byClub.get(r.clubId) ??
-      { name: r.clubName, city: r.clubCity, country: r.clubCountry, managers: 0, points: 0 };
+      { name: r.clubName, city: r.clubCity, country: r.clubCountry, logoUrl: r.clubLogoUrl, managers: 0, points: 0 };
     cur.managers += 1;
     cur.points += r.points;
     byClub.set(r.clubId, cur);
@@ -46,6 +48,7 @@ export function aggregateClubFantasyRanking(rows: ClubFantasyManagerRow[]): Club
       clubName: v.name,
       clubCity: v.city,
       clubCountry: v.country,
+      clubLogoUrl: v.logoUrl,
       managers: v.managers,
       points: v.points,
     }))
@@ -66,7 +69,7 @@ export async function getClubFantasyRanking({
   const managers = await prisma.user.findMany({
     where: { homeClub: { is: { verified: true } } },
     select: {
-      homeClub: { select: { id: true, name: true, city: true, country: true } },
+      homeClub: { select: { id: true, name: true, city: true, country: true, logoUrl: true } },
       fantasyTeams:
         mode === "simulation"
           ? false
@@ -88,6 +91,7 @@ export async function getClubFantasyRanking({
       clubName: m.homeClub.name,
       clubCity: m.homeClub.city,
       clubCountry: m.homeClub.country,
+      clubLogoUrl: m.homeClub.logoUrl,
       points: best,
     });
   }

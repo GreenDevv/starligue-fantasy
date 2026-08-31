@@ -1,9 +1,33 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { countryFlag } from "@/lib/geo/countries";
 import type { ClubFantasyRankingRow } from "@/lib/community/club-fantasy-ranking";
 import type { WidgetSize } from "@/lib/dashboard/layout";
+
+// Pastille club : logo si on en a un (voir src/lib/clubs/handball-club-logo.ts —
+// récupéré dès qu'un club a un premier manager), sinon initiale sur fond neutre.
+// Slot de taille fixe dans les deux cas pour garder les lignes alignées.
+function ClubBadge({ name, logoUrl }: { name: string; logoUrl: string | null }) {
+  const [broken, setBroken] = useState(false);
+  if (logoUrl && !broken) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- logo hotlinké (CDN externe), domaine non prévisible à l'avance pour next/image
+      <img
+        src={logoUrl}
+        alt=""
+        className="h-7 w-7 shrink-0 rounded-full bg-bg object-contain"
+        onError={() => setBroken(true)}
+      />
+    );
+  }
+  return (
+    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-bg text-[11px] font-semibold text-text-muted">
+      {name.charAt(0).toUpperCase()}
+    </span>
+  );
+}
 
 // Classement des clubs d'origine des managers par points fantasy cumulés. En tout
 // début de saison tous les clubs sont à 0 — on l'affiche quand même (le tri se
@@ -39,10 +63,10 @@ export function ClubFantasyRankingWidget({
           {rows.map((r) => (
             <li key={r.clubId} className="flex items-center gap-2">
               <span className="w-4 shrink-0 text-center text-[11px] tabular-nums text-text-muted">{r.rank}</span>
+              <ClubBadge name={r.clubName} logoUrl={r.clubLogoUrl} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-text">
-                  {r.clubCountry !== "FR" && `${countryFlag(r.clubCountry)} `}
-                  {r.clubName}
+                <p className="truncate text-sm font-medium uppercase text-text">
+                  {countryFlag(r.clubCountry)} {r.clubName}
                 </p>
                 <p className="truncate text-[10px] text-text-muted">
                   {[r.clubCity, t("clubRanking.managers", { count: r.managers })].filter(Boolean).join(" · ")}
