@@ -17,38 +17,22 @@ export interface HomeClubMemberRow {
   longitude: number | null;
 }
 
-// Répartition par club à l'intérieur d'un département — sert le survol de la
-// carte (« quels clubs derrière ce point ? »), trié par nb de managers puis nom.
-export interface DepartmentClub {
-  name: string;
-  city: string | null;
-  count: number;
-}
-
-export interface DepartmentPoint {
-  dept: string; // code à 2 chiffres
-  count: number; // nombre de managers
-  lon: number; // moyenne des clubs du département
-  lat: number;
-  clubs: DepartmentClub[];
-}
-
-// Club hors métropole (DROM ou étranger) qui a des coordonnées → point placé
-// individuellement sur la vue monde de la carte.
-export interface OverseasPoint {
+// Un point par club (coordonnées exactes du club, pas de moyenne) — la carte
+// Leaflet regroupe elle-même les points proches selon le niveau de zoom, donc
+// pas besoin de pré-agréger par département comme avant.
+export interface ClubPoint {
   clubId: string;
   name: string;
   city: string | null;
   country: string; // ISO 3166-1 alpha-2
   lon: number;
   lat: number;
-  count: number; // nombre de managers
+  count: number; // nombre de managers pour ce club
 }
 
 export interface HomeClubsAggregate {
   totals: { members: number; clubs: number; departments: number };
-  metropolitan: DepartmentPoint[];
-  overseas: OverseasPoint[]; // clubs hors métropole avec coordonnées
+  points: ClubPoint[]; // tous les clubs avec coordonnées (métropole + hors métropole)
   unlocated: number; // membres dont le club n'a aucune coordonnée (tout pays)
 }
 
@@ -62,14 +46,14 @@ export function departmentFromZipcode(zipcode: string | null): string | null {
   return dd;
 }
 
-export function aggregateHomeClubs(rows: HomeClubMemberRow[]): HomeClubsAggregate {
-  const distinctClubs = new Set(rows.map((r) => r.clubId));
+/** Un point est « hors métropole » (DROM ou étranger) — sert à la légende sous la carte. */
+export function isOverseasPoint(p: Pick<ClubPoint, "country" | "lon" | "lat">): boolean {
+  return !(p.country === "FR" && isInMetropolitanFrance(p.lon, p.lat));
+}
 
-  const byDept = new Map<
-    string,
-    { count: number; sumLon: number; sumLat: number; clubs: Map<string, DepartmentClub> }
-  >();
-  const overseasByClub = new Map<string, OverseasPoint>();
+export function aggregateHomeClubs(rows: HomeClubMemberRow[]): HomeClubsAggregate {
+  const byClub = new Map<string, ClubPoint>();
+  const departments = new Set<string>();
   let unlocated = 0;
 
   for (const r of rows) {
@@ -82,55 +66,33 @@ export function aggregateHomeClubs(rows: HomeClubMemberRow[]): HomeClubsAggregat
     const lat = r.latitude as number;
 
     if (r.country === "FR" && isInMetropolitanFrance(lon, lat)) {
-      const dept = departmentFromZipcode(r.zipcode) ?? "??";
-      const cur = byDept.get(dept) ?? { count: 0, sumLon: 0, sumLat: 0, clubs: new Map<string, DepartmentClub>() };
-      cur.count += 1;
-      cur.sumLon += lon;
-      cur.sumLat += lat;
-      const club = cur.clubs.get(r.clubId) ?? { name: r.clubName, city: r.clubCity, count: 0 };
-      club.count += 1;
-      cur.clubs.set(r.clubId, club);
-      byDept.set(dept, cur);
-      continue;
+      const dept = departmentFromZipcode(r.zipcode);
+      if (dept) departments.add(dept);
     }
 
-    const cur =
-      overseasByClub.get(r.clubId) ??
-      { clubId: r.clubId, name: r.clubName, city: r.clubCity, country: r.country, lon, lat, count: 0 };
+    const cur = byClub.get(r.clubId) ?? { clubId: r.clubId, name: r.clubName, city: r.clubCity, country: r.country, lon, lat, count: 0 };
     cur.count += 1;
-    overseasByClub.set(r.clubId, cur);
+    byClub.set(r.clubId, cur);
   }
 
-  const metropolitan: DepartmentPoint[] = [...byDept.entries()]
-    .map(([dept, v]) => ({
-      dept,
-      count: v.count,
-      lon: v.sumLon / v.count,
-      lat: v.sumLat / v.count,
-      clubs: [...v.clubs.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)),
-    }))
-    .sort((a, b) => b.count - a.count);
-
-  const overseas: OverseasPoint[] = [...overseasByClub.values()].sort(
+  const points: ClubPoint[] = [...byClub.values()].sort(
     (a, b) => b.count - a.count || a.name.localeCompare(b.name),
   );
 
   return {
-    totals: {
-      members: rows.length,
-      clubs: distinctClubs.size,
-      departments: metropolitan.filter((d) => d.dept !== "??").length,
-    },
-    metropolitan,
-    overseas,
+    totals: { members: rows.length, clubs: byClub.size, departments: departments.size },
+    points,
     unlocated,
   };
 }
 
 /** Regroupe les points hors métropole par pays (pour la légende du widget). */
-export function groupOverseasByCountry(overseas: OverseasPoint[]): { country: string; count: number }[] {
+export function groupOverseasByCountry(points: ClubPoint[]): { country: string; count: number }[] {
   const byCountry = new Map<string, number>();
-  for (const p of overseas) byCountry.set(p.country, (byCountry.get(p.country) ?? 0) + p.count);
+  for (const p of points) {
+    if (!isOverseasPoint(p)) continue;
+    byCountry.set(p.country, (byCountry.get(p.country) ?? 0) + p.count);
+  }
   return [...byCountry.entries()]
     .map(([country, count]) => ({ country, count }))
     .sort((a, b) => b.count - a.count || a.country.localeCompare(b.country));

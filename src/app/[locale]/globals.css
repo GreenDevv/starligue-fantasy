@@ -73,6 +73,79 @@
     display: none !important;
   }
 
+  /* Carte Leaflet du widget « D'où viennent les managers »
+     (HomeClubsLeafletMap.tsx) — thème sombre + accent teal cohérents avec le
+     reste du site, par-dessus les styles blancs par défaut de Leaflet. */
+  .sf-club-map .leaflet-container {
+    background: theme(colors.bg);
+    font-family: theme(fontFamily.sans);
+  }
+  .sf-club-map .leaflet-control-zoom a {
+    background: theme(colors.surface);
+    color: theme(colors.text.DEFAULT);
+    border-color: theme(colors.border) !important;
+  }
+  .sf-club-map .leaflet-control-zoom a:hover {
+    background: theme(colors.border);
+  }
+  .sf-club-map .leaflet-control-attribution {
+    background: rgba(14, 17, 22, 0.72);
+    color: theme(colors.text.muted);
+  }
+  .sf-club-map .leaflet-control-attribution a {
+    color: theme(colors.text.muted);
+  }
+  .sf-club-map .leaflet-popup-content-wrapper,
+  .sf-club-map .leaflet-popup-tip {
+    background: theme(colors.surface);
+    color: theme(colors.text.DEFAULT);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  }
+  .sf-club-map .leaflet-popup-close-button {
+    color: theme(colors.text.muted) !important;
+  }
+  .sf-club-map .leaflet-popup-content {
+    margin: 0.6rem 0.8rem;
+  }
+  /* leaflet-gesture-handling : bulle d'invite ("ctrl+molette" / "deux doigts")
+     redimensionnée pour un petit widget dashboard (conçue à l'origine pour une
+     carte plein écran). */
+  .sf-club-map .leaflet-container:after {
+    font-size: 0.8rem;
+    font-family: theme(fontFamily.sans);
+    padding: 0.75rem;
+    text-align: center;
+  }
+
+  .sf-club-dot {
+    display: block;
+    border-radius: 9999px;
+    background: rgba(45, 212, 191, 0.55);
+    border: 1.5px solid theme(colors.accent.DEFAULT);
+    box-shadow: 0 0 8px rgba(45, 212, 191, 0.45);
+  }
+  .sf-cluster-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: rgba(45, 212, 191, 0.85);
+    border: 2px solid theme(colors.bg);
+    color: theme(colors.bg);
+    font-family: theme(fontFamily.display);
+    font-weight: 600;
+    box-shadow: 0 0 10px rgba(45, 212, 191, 0.5);
+  }
+  .sf-club-popup-name {
+    font-weight: 600;
+    font-size: 0.75rem;
+  }
+  .sf-club-popup-count {
+    margin-top: 0.15rem;
+    font-size: 0.7rem;
+    color: theme(colors.text.muted);
+  }
+
   /* Shimmer de chargement — utilisé par Skeleton.tsx (pixel-corners-sm). */
   .shimmer {
     background: linear-gradient(
