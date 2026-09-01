@@ -115,7 +115,8 @@
   "globalLeaderboardWidget": {
     "title": "Samlet stilling",
     "seeAll": "Se alle →",
-    "noTeams": "Ingen hold placeret endnu."
+    "noTeams": "Ingen hold placeret endnu.",
+    "lastGameweekPreview": "R{number} · hold {squad} · pronosticering {predictions}"
   },
   "newsFeed": {
     "title": "Starligue-nyheder",

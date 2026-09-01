@@ -14,5 +14,16 @@
   "notScoredYet": "Matchday not scored yet",
   "list": {
     "empty": "No teams in this leaderboard yet."
+  },
+  "team": {
+    "rank": "#{rank} overall",
+    "subtitle": "Each matchday's total, broken down into squad points and the net contribution of predictions.",
+    "noHistory": "No scored matchday yet.",
+    "col": {
+      "gameweek": "Matchday",
+      "squad": "Squad",
+      "predictions": "Predictions",
+      "total": "Total"
+    }
   }
 }

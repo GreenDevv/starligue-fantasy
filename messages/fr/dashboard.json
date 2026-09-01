@@ -115,7 +115,8 @@
   "globalLeaderboardWidget": {
     "title": "Classement général",
     "seeAll": "Voir tout →",
-    "noTeams": "Aucune équipe classée pour l'instant."
+    "noTeams": "Aucune équipe classée pour l'instant.",
+    "lastGameweekPreview": "J{number} · effectif {squad} · pronos {predictions}"
   },
   "newsFeed": {
     "title": "Actus Starligue",

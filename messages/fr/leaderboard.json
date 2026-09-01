@@ -14,5 +14,16 @@
   "notScoredYet": "Journée non encore scorée",
   "list": {
     "empty": "Aucune équipe dans ce classement pour l'instant."
+  },
+  "team": {
+    "rank": "#{rank} au général",
+    "subtitle": "Le total de chaque journée, décomposé entre les points apportés par l'effectif et l'apport net des pronostics.",
+    "noHistory": "Aucune journée notée pour l'instant.",
+    "col": {
+      "gameweek": "Journée",
+      "squad": "Effectif",
+      "predictions": "Pronostics",
+      "total": "Total"
+    }
   }
 }

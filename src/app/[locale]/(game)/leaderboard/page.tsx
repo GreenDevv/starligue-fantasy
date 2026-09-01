@@ -114,6 +114,7 @@ export default function LeaderboardPage() {
                     entries={globalData.standings}
                     currentUserId={currentUserId}
                     pointsKey="totalPoints"
+                    linkToTeam
                   />
                   {/* Pagination */}
                   {totalPages > 1 && (
@@ -182,6 +183,7 @@ export default function LeaderboardPage() {
                 entries={gwData.standings}
                 currentUserId={currentUserId}
                 pointsKey="points"
+                linkToTeam
               />
             </>
           ) : null}

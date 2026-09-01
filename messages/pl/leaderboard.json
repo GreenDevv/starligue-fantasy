@@ -14,5 +14,16 @@
   "notScoredYet": "Kolejka jeszcze nierozliczona",
   "list": {
     "empty": "Brak drużyn w tej klasyfikacji na razie."
+  },
+  "team": {
+    "rank": "#{rank} w generalnej",
+    "subtitle": "Suma punktów każdej kolejki, podzielona na punkty drużyny i wynik netto z typowania.",
+    "noHistory": "Brak rozliczonej kolejki na razie.",
+    "col": {
+      "gameweek": "Kolejka",
+      "squad": "Drużyna",
+      "predictions": "Typowanie",
+      "total": "Suma"
+    }
   }
 }

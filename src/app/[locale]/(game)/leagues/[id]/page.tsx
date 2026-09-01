@@ -129,7 +129,12 @@ export default async function LeagueDetailPage({ params }: { params: { id: strin
       {/* Classement de la ligue */}
       <div>
         <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">{t("detail.leagueLeaderboardTitle")}</p>
-        <LeaderboardList entries={league.standings} currentUserId={userId} pointsKey="totalPoints" />
+        <LeaderboardList
+          entries={league.standings}
+          currentUserId={userId}
+          pointsKey="totalPoints"
+          linkToTeam={mode === "live"}
+        />
       </div>
 
       {/* Chat de ligue */}

@@ -115,7 +115,8 @@
   "globalLeaderboardWidget": {
     "title": "Global leaderboard",
     "seeAll": "See all →",
-    "noTeams": "No ranked teams yet."
+    "noTeams": "No ranked teams yet.",
+    "lastGameweekPreview": "MD{number} · squad {squad} · predictions {predictions}"
   },
   "newsFeed": {
     "title": "Starligue news",

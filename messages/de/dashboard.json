@@ -115,7 +115,8 @@
   "globalLeaderboardWidget": {
     "title": "Gesamtrangliste",
     "seeAll": "Alle ansehen →",
-    "noTeams": "Bisher kein eingestuftes Team."
+    "noTeams": "Bisher kein eingestuftes Team.",
+    "lastGameweekPreview": "ST{number} · Kader {squad} · Tipps {predictions}"
   },
   "newsFeed": {
     "title": "Starligue-News",

@@ -14,5 +14,16 @@
   "notScoredYet": "Runden er ikke bedømt endnu",
   "list": {
     "empty": "Ingen hold i denne stilling endnu."
+  },
+  "team": {
+    "rank": "#{rank} samlet",
+    "subtitle": "Hver rundes samlede point, fordelt på holdpoint og pronosticernes nettobidrag.",
+    "noHistory": "Ingen bedømt runde endnu.",
+    "col": {
+      "gameweek": "Runde",
+      "squad": "Hold",
+      "predictions": "Pronosticering",
+      "total": "I alt"
+    }
   }
 }

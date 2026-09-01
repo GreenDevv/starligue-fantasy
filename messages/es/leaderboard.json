@@ -14,5 +14,16 @@
   "notScoredYet": "Jornada aún sin puntuar",
   "list": {
     "empty": "Todavía no hay equipos en esta clasificación."
+  },
+  "team": {
+    "rank": "#{rank} en la general",
+    "subtitle": "El total de cada jornada, desglosado entre los puntos del equipo y la aportación neta de los pronósticos.",
+    "noHistory": "Todavía no hay ninguna jornada puntuada.",
+    "col": {
+      "gameweek": "Jornada",
+      "squad": "Equipo",
+      "predictions": "Pronósticos",
+      "total": "Total"
+    }
   }
 }

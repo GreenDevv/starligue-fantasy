@@ -14,5 +14,16 @@
   "notScoredYet": "Spieltag noch nicht ausgewertet",
   "list": {
     "empty": "Bisher kein Team in dieser Rangliste."
+  },
+  "team": {
+    "rank": "#{rank} gesamt",
+    "subtitle": "Die Gesamtpunkte jedes Spieltags, aufgeteilt in Kaderpunkte und den Nettobeitrag der Tipps.",
+    "noHistory": "Noch kein ausgewerteter Spieltag.",
+    "col": {
+      "gameweek": "Spieltag",
+      "squad": "Kader",
+      "predictions": "Tipps",
+      "total": "Gesamt"
+    }
   }
 }

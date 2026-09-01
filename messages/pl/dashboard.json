@@ -115,7 +115,8 @@
   "globalLeaderboardWidget": {
     "title": "Klasyfikacja generalna",
     "seeAll": "Zobacz wszystko →",
-    "noTeams": "Brak sklasyfikowanych drużyn na razie."
+    "noTeams": "Brak sklasyfikowanych drużyn na razie.",
+    "lastGameweekPreview": "K{number} · drużyna {squad} · typowanie {predictions}"
   },
   "newsFeed": {
     "title": "Aktualności Starligue",

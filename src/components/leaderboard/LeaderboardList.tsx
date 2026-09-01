@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { JerseyBadge } from "@/components/jersey/JerseyBadge";
 
 interface StandingEntry {
@@ -20,6 +21,10 @@ interface LeaderboardListProps {
   entries: StandingEntry[];
   currentUserId?: string;
   pointsKey?: "totalPoints" | "points";
+  // Détail par journée (effectif vs pronostics) — uniquement pertinent en LIVE,
+  // voir /leaderboard/team/[teamId]. Jamais activé pour des entrées de simulation
+  // (SimulationTeam n'a pas d'équivalent côté breakdown).
+  linkToTeam?: boolean;
 }
 
 const item = {
@@ -27,10 +32,13 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.25 } },
 };
 
+const MotionLink = motion.create(Link);
+
 export function LeaderboardList({
   entries,
   currentUserId,
   pointsKey = "totalPoints",
+  linkToTeam = false,
 }: LeaderboardListProps) {
   const t = useTranslations("leaderboard");
 
@@ -62,15 +70,19 @@ export function LeaderboardList({
                   ? "drop-shadow-[0_0_6px_rgba(180,83,9,0.7)]"
                   : "";
 
+          const rowClassName = [
+            "flex items-center gap-3 border-l-2 px-4 py-3",
+            isMe ? "border-accent bg-accent/5 shadow-[inset_0_0_16px_rgba(45,212,191,0.08)]" : "border-transparent",
+            linkToTeam && "transition-colors hover:bg-border/20",
+          ]
+            .filter(Boolean)
+            .join(" ");
+
+          const Row = linkToTeam ? MotionLink : motion.div;
+          const rowProps = linkToTeam ? { href: `/leaderboard/team/${entry.teamId}` } : {};
+
           return (
-            <motion.div
-              key={entry.teamId}
-              variants={item}
-              className={[
-                "flex items-center gap-3 border-l-2 px-4 py-3",
-                isMe ? "border-accent bg-accent/5 shadow-[inset_0_0_16px_rgba(45,212,191,0.08)]" : "border-transparent",
-              ].join(" ")}
-            >
+            <Row key={entry.teamId} variants={item} className={rowClassName} {...rowProps}>
               {/* Rank */}
               <span
                 className={[
@@ -114,7 +126,7 @@ export function LeaderboardList({
               >
                 {pts > 0 ? `+${pts}` : pts}
               </span>
-            </motion.div>
+            </Row>
           );
         })}
       </div>

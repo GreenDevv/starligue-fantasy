@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeGameweekMultiplier, applyMultiplier, DEFAULT_MULTIPLIER_CONFIG } from "./multiplier";
+import { computeGameweekMultiplier, applyMultiplier, predictionDeltaPoints, DEFAULT_MULTIPLIER_CONFIG } from "./multiplier";
 
 describe("computeGameweekMultiplier", () => {
   it("aucun pronostic tenté → 1 (neutre, jamais pénalisant)", () => {
@@ -71,5 +71,27 @@ describe("applyMultiplier", () => {
 describe("DEFAULT_MULTIPLIER_CONFIG", () => {
   it("min 0, max 2.0", () => {
     expect(DEFAULT_MULTIPLIER_CONFIG).toEqual({ min: 0, max: 2.0 });
+  });
+});
+
+describe("predictionDeltaPoints", () => {
+  it("bons pronostics → delta positif", () => {
+    expect(predictionDeltaPoints(10, 15)).toBe(5);
+  });
+
+  it("mauvais pronostics (multiplicateur < 1) → delta négatif", () => {
+    expect(predictionDeltaPoints(10, 5)).toBe(-5);
+  });
+
+  it("aucun pronostic tenté (multiplicateur neutre) → delta nul", () => {
+    expect(predictionDeltaPoints(10, 10)).toBe(0);
+  });
+
+  it("points d'effectif négatifs, jamais amplifiés → delta nul", () => {
+    expect(predictionDeltaPoints(-8, -8)).toBe(0);
+  });
+
+  it("arrondi à 1 décimale", () => {
+    expect(predictionDeltaPoints(7, 8.8)).toBe(1.8);
   });
 });

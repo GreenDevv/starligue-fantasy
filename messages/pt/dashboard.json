@@ -115,7 +115,8 @@
   "globalLeaderboardWidget": {
     "title": "Classificação geral",
     "seeAll": "Ver tudo →",
-    "noTeams": "Ainda não há nenhuma equipa classificada."
+    "noTeams": "Ainda não há nenhuma equipa classificada.",
+    "lastGameweekPreview": "J{number} · equipa {squad} · prognósticos {predictions}"
   },
   "newsFeed": {
     "title": "Notícias Starligue",

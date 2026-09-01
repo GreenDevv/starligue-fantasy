@@ -183,9 +183,16 @@ export async function computeGameweekScores(gameweekId: string): Promise<{ lineu
     const multiplier = computeGameweekMultiplier(attempts, multiplierConfig);
     const points = applyMultiplier(rawPoints, multiplier);
 
+    // rawPoints/predictionMultiplier persistés pour le détail du classement général
+    // (points d'effectif vs apport des pronostics, par journée) — voir
+    // /leaderboard/team/[teamId].
     await prisma.fantasyLineup.update({
       where: { id: lineup.id },
-      data: { points: new Decimal(points) },
+      data: {
+        points: new Decimal(points),
+        rawPoints: new Decimal(rawPoints),
+        predictionMultiplier: new Decimal(multiplier),
+      },
     });
 
     // Met à jour totalPoints de l'équipe

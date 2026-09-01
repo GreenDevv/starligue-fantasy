@@ -40,6 +40,7 @@ import type { ClubFantasyRankingRow } from "@/lib/community/club-fantasy-ranking
 import { SimulationGameweekControls, type SimulationAdminControls } from "@/components/dashboard/SimulationGameweekControls";
 import { GameweekRecapModal } from "@/components/dashboard/GameweekRecapModal";
 import type { PendingGameweekRecap } from "@/lib/team/pending-gameweek-recap";
+import type { SeasonMode } from "@/lib/team/active-team-context";
 import { cn } from "@/lib/utils";
 
 interface DashboardViewProps {
@@ -55,6 +56,9 @@ interface DashboardViewProps {
   homeClubsAggregate: HomeClubsAggregate;
   clubFantasyRanking: ClubFantasyRankingRow[];
   locale: string;
+  // Détail par journée (effectif vs pronostics) du classement général — LIVE
+  // uniquement, voir /leaderboard/team/[teamId].
+  mode: SeasonMode;
   simulationAdmin: SimulationAdminControls | null;
   pendingRecaps: PendingGameweekRecap[];
 }
@@ -81,6 +85,7 @@ export function DashboardView({
   homeClubsAggregate,
   clubFantasyRanking,
   locale,
+  mode,
   simulationAdmin,
   pendingRecaps,
 }: DashboardViewProps) {
@@ -221,6 +226,7 @@ export function DashboardView({
                   homeClubsAggregate,
                   clubFantasyRanking,
                   locale,
+                  mode,
                   removeWidget,
                 })}
               </DashboardWidgetShell>
@@ -338,6 +344,7 @@ function renderWidget(
     homeClubsAggregate: HomeClubsAggregate;
     clubFantasyRanking: ClubFantasyRankingRow[];
     locale: string;
+    mode: SeasonMode;
     removeWidget: (id: string) => void;
   }
 ) {
@@ -345,7 +352,7 @@ function renderWidget(
     case "best-xi":
       return <BestXIWidget entries={ctx.bestXI} />;
     case "leaderboard-global":
-      return <LeaderboardGlobalWidget standings={ctx.standings} />;
+      return <LeaderboardGlobalWidget standings={ctx.standings} linkToTeam={ctx.mode === "live"} />;
     case "leaderboard-leagues":
       return <LeaderboardLeaguesWidget leagues={ctx.leagues} />;
     case "last-results":

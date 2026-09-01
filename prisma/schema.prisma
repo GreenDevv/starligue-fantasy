@@ -829,7 +829,15 @@ model FantasyLineup {
   gameweek      Gameweek    @relation(fields: [gameweekId], references: [id])
   entries       Json // [{ playerId, position, role, purchasePrice }]
   bonus         BonusType? // bonus de saison actif ce jour-là (snapshoté depuis FantasyTeam.pendingBonus), null = aucun
-  points        Decimal?    @db.Decimal(7, 1) // null tant que non calculé
+  points        Decimal?    @db.Decimal(7, 1) // null tant que non calculé — total final, APRÈS multiplicateur de pronostics
+  // Détail du classement général (ARCHITECTURE.md §14) : points d'effectif avant
+  // multiplicateur, et multiplicateur de pronostics appliqué cette journée-là.
+  // `points - rawPoints` = ce que les pronostics ont rapporté/coûté. Persistés
+  // depuis computeGameweekScores (src/lib/scoring/compute.ts) ; null pour les
+  // lineups scorés avant l'introduction de ce détail (voir script de backfill) ou
+  // tant que non calculé.
+  rawPoints            Decimal? @db.Decimal(7, 1)
+  predictionMultiplier Decimal? @db.Decimal(4, 3)
   createdAt     DateTime    @default(now())
 
   @@unique([fantasyTeamId, gameweekId])

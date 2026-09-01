@@ -39,6 +39,16 @@ export function applyMultiplier(points: number, multiplier: number): number {
   return Math.round(points * multiplier * 10) / 10;
 }
 
+/**
+ * Écart entre le total final d'une journée et ses points d'effectif bruts — ce que
+ * les pronostics ont concrètement rapporté (positif) ou coûté (négatif, multiplicateur
+ * < 1) ce jour-là. Utilisé pour le détail du classement général (§14) : chaque
+ * journée y est décomposée en "effectif" (rawPoints) + "pronostics" (ce delta).
+ */
+export function predictionDeltaPoints(rawPoints: number, points: number): number {
+  return Math.round((points - rawPoints) * 10) / 10;
+}
+
 /** Convertit les valeurs GameConfig (string) en MultiplierConfig typé. */
 export function parseMultiplierConfig(
   raw: Record<string, string>,
