@@ -354,7 +354,7 @@ function renderWidget(
     case "leaderboard-global":
       return <LeaderboardGlobalWidget standings={ctx.standings} linkToTeam={ctx.mode === "live"} />;
     case "leaderboard-leagues":
-      return <LeaderboardLeaguesWidget leagues={ctx.leagues} />;
+      return <LeaderboardLeaguesWidget leagues={ctx.leagues} linkToTeam={ctx.mode === "live"} />;
     case "last-results":
       return (
         <MatchesStrip

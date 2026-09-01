@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { getLastGameweekBreakdownByTeam } from "@/lib/leaderboard/team-breakdown";
 
 const querySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -36,6 +37,10 @@ export async function GET(request: Request) {
     }),
   ]);
 
+  // Aperçu "sans clic" (dernière journée notée) directement dans la liste — voir
+  // /leaderboard/team/[teamId] pour le détail complet saison.
+  const breakdownByTeam = await getLastGameweekBreakdownByTeam(teams.map((t) => t.id));
+
   return NextResponse.json({
     data: {
       standings: teams.map((t, i) => ({
@@ -48,6 +53,7 @@ export async function GET(request: Request) {
         leagueId: t.league.id,
         leagueName: t.league.name,
         jerseyConfig: t.jerseyConfig,
+        breakdown: breakdownByTeam.get(t.id) ?? null,
       })),
       total,
       page,

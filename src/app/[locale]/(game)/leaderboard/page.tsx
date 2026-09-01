@@ -15,6 +15,7 @@ interface StandingEntry {
   points?: number;
   jerseyConfig?: unknown;
   leagueName?: string;
+  breakdown?: { gameweekNumber: number; rawPoints: number; predictionDelta: number } | null;
 }
 
 interface GlobalData {

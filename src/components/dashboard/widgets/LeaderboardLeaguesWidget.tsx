@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { JerseyBadge } from "@/components/jersey/JerseyBadge";
@@ -14,6 +15,10 @@ export interface LeagueStandingRow {
   totalPoints: number;
   jerseyConfig: unknown;
   isMe: boolean;
+  // Aperçu "sans clic" de la dernière journée notée — LIVE uniquement, voir
+  // /leaderboard/team/[teamId]. null en simulation ou tant qu'aucune journée n'a
+  // de détail persisté.
+  breakdown: { gameweekNumber: number; rawPoints: number; predictionDelta: number } | null;
 }
 
 export interface MyLeagueRow {
@@ -24,12 +29,19 @@ export interface MyLeagueRow {
 }
 
 const VISIBLE_ROWS = 8;
+const MotionLink = motion.create(Link);
 
 // Une seule ligue à la fois, plutôt qu'une div empilant toutes les ligues du
 // joueur : au-delà d'une ligue, un switcher (onglets) permet de passer de l'une
 // à l'autre — le classement affiché est le vrai classement de la ligue active,
 // comme LeaderboardGlobalWidget mais scopé.
-export function LeaderboardLeaguesWidget({ leagues }: { leagues: MyLeagueRow[] }) {
+export function LeaderboardLeaguesWidget({
+  leagues,
+  linkToTeam = false,
+}: {
+  leagues: MyLeagueRow[];
+  linkToTeam?: boolean;
+}) {
   const t = useTranslations("dashboard");
   const [activeId, setActiveId] = useState<string | undefined>(leagues[0]?.id);
   const active = leagues.find((l) => l.id === activeId) ?? leagues[0];
@@ -91,23 +103,39 @@ export function LeaderboardLeaguesWidget({ leagues }: { leagues: MyLeagueRow[] }
             <p className="py-4 text-center text-xs text-text-muted">{t("globalLeaderboardWidget.noTeams")}</p>
           ) : (
             <div className="flex flex-col gap-1.5">
-              {visibleRows.map((s) => (
-                <div
-                  key={s.teamId}
-                  className={cn(
-                    "flex items-center gap-2 rounded-md px-1 py-0.5",
-                    s.isMe && "bg-accent/5 text-accent"
-                  )}
-                >
-                  <span className="w-5 shrink-0 text-center text-xs text-text-muted">{s.rank}</span>
-                  <JerseyBadge jerseyConfig={s.jerseyConfig} size="sm" />
-                  <div className="min-w-0 flex-1">
-                    <p className={cn("truncate text-sm font-medium", s.isMe ? "text-accent" : "text-text")}>{s.teamName}</p>
-                    <p className="truncate text-[10px] text-text-muted">{s.userName}</p>
-                  </div>
-                  <span className="shrink-0 text-sm font-semibold tabular-nums text-accent">{s.totalPoints}</span>
-                </div>
-              ))}
+              {visibleRows.map((s) => {
+                const Row = linkToTeam ? MotionLink : "div";
+                const rowProps = linkToTeam ? { href: `/leaderboard/team/${s.teamId}` } : {};
+                return (
+                  <Row
+                    key={s.teamId}
+                    {...rowProps}
+                    className={cn(
+                      "flex items-center gap-2 rounded-md px-1 py-0.5",
+                      s.isMe && "bg-accent/5 text-accent",
+                      linkToTeam && "transition-colors hover:bg-border/20"
+                    )}
+                  >
+                    <span className="w-5 shrink-0 text-center text-xs text-text-muted">{s.rank}</span>
+                    <JerseyBadge jerseyConfig={s.jerseyConfig} size="sm" />
+                    <div className="min-w-0 flex-1">
+                      <p className={cn("truncate text-sm font-medium", s.isMe ? "text-accent" : "text-text")}>{s.teamName}</p>
+                      <p className="truncate text-[10px] text-text-muted">{s.userName}</p>
+                      {s.breakdown && (
+                        <p className="truncate text-[10px] text-text-muted/70">
+                          {t("globalLeaderboardWidget.lastGameweekPreview", {
+                            number: s.breakdown.gameweekNumber,
+                            squad: s.breakdown.rawPoints > 0 ? `+${s.breakdown.rawPoints}` : s.breakdown.rawPoints,
+                            predictions:
+                              s.breakdown.predictionDelta > 0 ? `+${s.breakdown.predictionDelta}` : s.breakdown.predictionDelta,
+                          })}
+                        </p>
+                      )}
+                    </div>
+                    <span className="shrink-0 text-sm font-semibold tabular-nums text-accent">{s.totalPoints}</span>
+                  </Row>
+                );
+              })}
             </div>
           )}
         </>

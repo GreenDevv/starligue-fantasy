@@ -13,12 +13,15 @@
   "gameweekLabel": "Spieltag {number}",
   "notScoredYet": "Spieltag noch nicht ausgewertet",
   "list": {
-    "empty": "Bisher kein Team in dieser Rangliste."
+    "empty": "Bisher kein Team in dieser Rangliste.",
+    "breakdown": "ST{number} · Kader {squad} · Tipps {predictions}"
   },
   "team": {
     "rank": "#{rank} gesamt",
     "subtitle": "Die Gesamtpunkte jedes Spieltags, aufgeteilt in Kaderpunkte und den Nettobeitrag der Tipps.",
     "noHistory": "Noch kein ausgewerteter Spieltag.",
+    "expandHint": "Auf einen Spieltag klicken für das Detail pro Spieler.",
+    "playersError": "Spielerdetails konnten nicht geladen werden.",
     "col": {
       "gameweek": "Spieltag",
       "squad": "Kader",

@@ -13,12 +13,15 @@
   "gameweekLabel": "Runde {number}",
   "notScoredYet": "Runden er ikke bedømt endnu",
   "list": {
-    "empty": "Ingen hold i denne stilling endnu."
+    "empty": "Ingen hold i denne stilling endnu.",
+    "breakdown": "R{number} · hold {squad} · pronosticering {predictions}"
   },
   "team": {
     "rank": "#{rank} samlet",
     "subtitle": "Hver rundes samlede point, fordelt på holdpoint og pronosticernes nettobidrag.",
     "noHistory": "Ingen bedømt runde endnu.",
+    "expandHint": "Klik på en runde for at se detaljer spiller for spiller.",
+    "playersError": "Kunne ikke indlæse spillerdetaljerne.",
     "col": {
       "gameweek": "Runde",
       "squad": "Hold",

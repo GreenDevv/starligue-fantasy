@@ -7,6 +7,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { SIMULATION_SEASON_LABEL } from "@/lib/simulation/constants";
 import type { SeasonMode } from "@/lib/team/active-team-context";
+import { getLastGameweekBreakdownByTeam, type LastGameweekBreakdown } from "@/lib/leaderboard/team-breakdown";
 
 export interface LeagueStandingEntry {
   teamId: string;
@@ -16,6 +17,10 @@ export interface LeagueStandingEntry {
   totalPoints: number;
   jerseyConfig: unknown;
   rank: number;
+  // Aperçu "sans clic" de la dernière journée notée (effectif vs pronostics) —
+  // LIVE uniquement, voir /leaderboard/team/[teamId]. null en simulation (pas de
+  // pronostics) ou tant qu'aucune journée n'a de détail persisté.
+  breakdown: LastGameweekBreakdown | null;
 }
 
 export interface LeagueDetail {
@@ -75,6 +80,9 @@ export async function getLeagueDetail(leagueId: string): Promise<LeagueDetail | 
     prisma.leagueMember.count({ where: { leagueId } }),
   ]);
 
+  const breakdownByTeam =
+    mode === "live" ? await getLastGameweekBreakdownByTeam(teams.map((t) => t.id)) : new Map();
+
   const standings: LeagueStandingEntry[] = teams.map((t, i) => ({
     teamId: t.id,
     userId: t.userId,
@@ -83,6 +91,7 @@ export async function getLeagueDetail(leagueId: string): Promise<LeagueDetail | 
     totalPoints: Number(t.totalPoints),
     jerseyConfig: "jerseyConfig" in t ? t.jerseyConfig : null,
     rank: i + 1,
+    breakdown: breakdownByTeam.get(t.id) ?? null,
   }));
 
   return {

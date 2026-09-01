@@ -15,6 +15,11 @@ interface StandingEntry {
   points?: number;
   jerseyConfig?: unknown;
   leagueName?: string;
+  // Détail effectif vs pronostics d'une journée (la journée elle-même en mode
+  // "points", la dernière notée en mode "totalPoints") — LIVE uniquement, voir
+  // /leaderboard/team/[teamId] pour le détail complet saison. undefined en
+  // simulation ou tant qu'aucune journée n'est notée.
+  breakdown?: { gameweekNumber: number; rawPoints: number; predictionDelta: number } | null;
 }
 
 interface LeaderboardListProps {
@@ -111,6 +116,18 @@ export function LeaderboardList({
                   {entry.userName}
                   {entry.leagueName && <span className="text-text-muted/60"> · {entry.leagueName}</span>}
                 </p>
+                {entry.breakdown && (
+                  <p className="truncate text-[11px] text-text-muted/70">
+                    {t("list.breakdown", {
+                      number: entry.breakdown.gameweekNumber,
+                      squad: entry.breakdown.rawPoints > 0 ? `+${entry.breakdown.rawPoints}` : entry.breakdown.rawPoints,
+                      predictions:
+                        entry.breakdown.predictionDelta > 0
+                          ? `+${entry.breakdown.predictionDelta}`
+                          : entry.breakdown.predictionDelta,
+                    })}
+                  </p>
+                )}
               </div>
 
               {/* Points */}

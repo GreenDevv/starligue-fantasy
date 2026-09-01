@@ -13,12 +13,15 @@
   "gameweekLabel": "Matchday {number}",
   "notScoredYet": "Matchday not scored yet",
   "list": {
-    "empty": "No teams in this leaderboard yet."
+    "empty": "No teams in this leaderboard yet.",
+    "breakdown": "MD{number} · squad {squad} · predictions {predictions}"
   },
   "team": {
     "rank": "#{rank} overall",
     "subtitle": "Each matchday's total, broken down into squad points and the net contribution of predictions.",
     "noHistory": "No scored matchday yet.",
+    "expandHint": "Click a matchday to see the player-by-player breakdown.",
+    "playersError": "Couldn't load the player breakdown.",
     "col": {
       "gameweek": "Matchday",
       "squad": "Squad",

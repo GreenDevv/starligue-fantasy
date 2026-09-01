@@ -96,19 +96,22 @@ export function MultiSeriesLineChart({
   const activeLines = series.filter((l) => activeKeys.includes(l.key));
 
   const datasets = compareEntries ? [entries, compareEntries] : [entries];
-  const maxValue = Math.max(
-    1,
-    ...datasets.flatMap((ds) => ds.flatMap((e) => activeLines.map((l) => e.values[l.key] ?? 0)))
-  );
+  const allValues = datasets.flatMap((ds) => ds.flatMap((e) => activeLines.map((l) => e.values[l.key] ?? 0)));
+  // minValue plafonné à 0 : les séries habituelles (buts, stats) restent 0-based
+  // comme avant ; une série qui descend sous 0 (ex. apport des pronostics) étend
+  // le domaine plutôt que d'être coupée en bas du graphique.
+  const maxValue = Math.max(1, ...allValues);
+  const minValue = Math.min(0, ...allValues);
+  const valueRange = maxValue - minValue || 1;
 
   const x = (gw: number) => {
     if (allGameweeks.length === 1) return PAD_LEFT + PLOT_W / 2;
     const idx = allGameweeks.indexOf(gw);
     return PAD_LEFT + (idx / (allGameweeks.length - 1)) * PLOT_W;
   };
-  const y = (v: number) => PAD_TOP + (1 - v / maxValue) * PLOT_H;
+  const y = (v: number) => PAD_TOP + (1 - (v - minValue) / valueRange) * PLOT_H;
 
-  const gridLines = [0, Math.round(maxValue / 2), maxValue];
+  const gridLines = Array.from(new Set([minValue, Math.round((minValue + maxValue) / 2), maxValue]));
   const labelEvery = Math.max(1, Math.ceil(allGameweeks.length / 10));
 
   function handleMove(e: React.PointerEvent<SVGSVGElement>) {

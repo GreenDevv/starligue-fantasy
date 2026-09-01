@@ -11,7 +11,7 @@ import { getClubFantasyRanking } from "@/lib/community/club-fantasy-ranking";
 import { resolveSeasonMode } from "@/lib/team/active-team-context";
 import { getPendingGameweekRecaps } from "@/lib/team/pending-gameweek-recap";
 import { getLeagueDetail } from "@/lib/leagues/standings";
-import { predictionDeltaPoints } from "@/lib/predictions/multiplier";
+import { getLastGameweekBreakdownByTeam } from "@/lib/leaderboard/team-breakdown";
 import { SIMULATION_SEASON_LABEL } from "@/lib/simulation/constants";
 import type { GlobalStandingRow } from "@/components/dashboard/widgets/LeaderboardGlobalWidget";
 import type { MyLeagueRow } from "@/components/dashboard/widgets/LeaderboardLeaguesWidget";
@@ -84,34 +84,21 @@ export default async function DashboardPage({ params }: { params: { locale: stri
 
   // Aperçu "dernière journée" (effectif vs pronostics) sur le widget dashboard —
   // LIVE uniquement, voir /leaderboard/team/[teamId] pour le détail complet saison.
-  const lastGameweekByTeam = new Map<string, { number: number; rawPoints: number; predictionDelta: number }>();
-  if (mode === "live" && teams.length > 0) {
-    const latestLineups = await prisma.fantasyLineup.findMany({
-      where: { fantasyTeamId: { in: teams.map((t) => t.id) }, points: { not: null } },
-      orderBy: { gameweek: { number: "desc" } },
-      distinct: ["fantasyTeamId"],
-      select: { fantasyTeamId: true, points: true, rawPoints: true, gameweek: { select: { number: true } } },
-    });
-    for (const l of latestLineups) {
-      if (l.rawPoints === null) continue;
-      const rawPoints = Number(l.rawPoints);
-      lastGameweekByTeam.set(l.fantasyTeamId, {
-        number: l.gameweek.number,
-        rawPoints,
-        predictionDelta: predictionDeltaPoints(rawPoints, Number(l.points)),
-      });
-    }
-  }
+  const lastGameweekByTeam =
+    mode === "live" ? await getLastGameweekBreakdownByTeam(teams.map((t) => t.id)) : new Map();
 
-  const standings: GlobalStandingRow[] = teams.map((t, i) => ({
-    rank: i + 1,
-    teamId: t.id,
-    teamName: t.name,
-    userName: t.user.name,
-    totalPoints: Number(t.totalPoints),
-    jerseyConfig: "jerseyConfig" in t ? t.jerseyConfig : null,
-    lastGameweek: lastGameweekByTeam.get(t.id) ?? null,
-  }));
+  const standings: GlobalStandingRow[] = teams.map((t, i) => {
+    const breakdown = lastGameweekByTeam.get(t.id);
+    return {
+      rank: i + 1,
+      teamId: t.id,
+      teamName: t.name,
+      userName: t.user.name,
+      totalPoints: Number(t.totalPoints),
+      jerseyConfig: "jerseyConfig" in t ? t.jerseyConfig : null,
+      lastGameweek: breakdown ? { number: breakdown.gameweekNumber, ...breakdown } : null,
+    };
+  });
 
   const simulationAdmin =
     mode === "simulation" && isAdmin
@@ -162,6 +149,7 @@ export default async function DashboardPage({ params }: { params: { locale: stri
         totalPoints: s.totalPoints,
         jerseyConfig: s.jerseyConfig,
         isMe: s.userId === userId,
+        breakdown: s.breakdown,
       })),
     }));
 

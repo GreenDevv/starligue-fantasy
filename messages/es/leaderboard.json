@@ -13,12 +13,15 @@
   "gameweekLabel": "Jornada {number}",
   "notScoredYet": "Jornada aún sin puntuar",
   "list": {
-    "empty": "Todavía no hay equipos en esta clasificación."
+    "empty": "Todavía no hay equipos en esta clasificación.",
+    "breakdown": "J{number} · equipo {squad} · pronósticos {predictions}"
   },
   "team": {
     "rank": "#{rank} en la general",
     "subtitle": "El total de cada jornada, desglosado entre los puntos del equipo y la aportación neta de los pronósticos.",
     "noHistory": "Todavía no hay ninguna jornada puntuada.",
+    "expandHint": "Haz clic en una jornada para ver el detalle jugador por jugador.",
+    "playersError": "No se ha podido cargar el detalle de los jugadores.",
     "col": {
       "gameweek": "Jornada",
       "squad": "Equipo",
