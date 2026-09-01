@@ -10,6 +10,7 @@ import { getHomeClubsAggregate } from "@/lib/community/home-clubs-query";
 import { getClubFantasyRanking } from "@/lib/community/club-fantasy-ranking";
 import { resolveSeasonMode } from "@/lib/team/active-team-context";
 import { getPendingGameweekRecaps } from "@/lib/team/pending-gameweek-recap";
+import { getLeagueDetail } from "@/lib/leagues/standings";
 import { SIMULATION_SEASON_LABEL } from "@/lib/simulation/constants";
 import type { GlobalStandingRow } from "@/components/dashboard/widgets/LeaderboardGlobalWidget";
 import type { MyLeagueRow } from "@/components/dashboard/widgets/LeaderboardLeaguesWidget";
@@ -67,7 +68,7 @@ export default async function DashboardPage({ params }: { params: { locale: stri
         }),
     prisma.leagueMember.findMany({
       where: { userId, league: { seasonId: season.id } },
-      include: { league: { include: { _count: { select: { members: true } } } } },
+      include: { league: { select: { id: true } } },
       orderBy: { joinedAt: "asc" },
     }),
     mode === "simulation"
@@ -99,40 +100,47 @@ export default async function DashboardPage({ params }: { params: { locale: stri
 
   let setupLeagueId: string | null = null;
 
-  const leagues: MyLeagueRow[] = await Promise.all(
-    memberships.map(async (m) => {
-      const team =
+  // Un switcher (onglets) laisse passer d'une ligue à l'autre dans le widget —
+  // il faut donc le classement complet de chaque ligue, pas juste mon rang.
+  const [leagueDetails, validations] = await Promise.all([
+    Promise.all(memberships.map((m) => getLeagueDetail(m.leagueId))),
+    Promise.all(
+      memberships.map((m) =>
         mode === "simulation"
-          ? await prisma.simulationTeam.findFirst({
+          ? prisma.simulationTeam.findFirst({
               where: { userId, leagueId: m.leagueId },
-              select: { totalPoints: true, isValidated: true },
+              select: { isValidated: true },
             })
-          : await prisma.fantasyTeam.findUnique({
+          : prisma.fantasyTeam.findUnique({
               where: { userId_leagueId: { userId, leagueId: m.leagueId } },
-              select: { totalPoints: true, isValidated: true },
-            });
-      // Retient la première ligue où l'effectif n'est pas encore validé — sert de
-      // cible au CTA "Construire mon effectif" du bandeau de statut.
-      if (!setupLeagueId && !team?.isValidated) setupLeagueId = m.league.id;
-
-      const myPoints = Number(team?.totalPoints ?? 0);
-      const higherCount =
-        mode === "simulation"
-          ? await prisma.simulationTeam.count({
-              where: { leagueId: m.leagueId, totalPoints: { gt: myPoints } },
+              select: { isValidated: true },
             })
-          : await prisma.fantasyTeam.count({
-              where: { leagueId: m.leagueId, totalPoints: { gt: myPoints } },
-            });
-      return {
-        id: m.league.id,
-        name: m.league.name,
-        myRank: higherCount + 1,
-        myPoints,
-        memberCount: m.league._count.members,
-      };
-    })
-  );
+      )
+    ),
+  ]);
+
+  // Retient la première ligue où l'effectif n'est pas encore validé — sert de
+  // cible au CTA "Construire mon effectif" du bandeau de statut.
+  memberships.forEach((m, i) => {
+    if (!setupLeagueId && !validations[i]?.isValidated) setupLeagueId = m.league.id;
+  });
+
+  const leagues: MyLeagueRow[] = leagueDetails
+    .filter((d): d is NonNullable<typeof d> => d !== null)
+    .map((d) => ({
+      id: d.id,
+      name: d.name,
+      memberCount: d.memberCount,
+      standings: d.standings.map((s) => ({
+        rank: s.rank,
+        teamId: s.teamId,
+        teamName: s.teamName,
+        userName: s.userName,
+        totalPoints: s.totalPoints,
+        jerseyConfig: s.jerseyConfig,
+        isMe: s.userId === userId,
+      })),
+    }));
 
   return (
     <DashboardView

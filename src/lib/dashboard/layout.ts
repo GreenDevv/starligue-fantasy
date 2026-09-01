@@ -45,7 +45,9 @@ export const SINGLETON_WIDGETS: { type: Exclude<WidgetType, "player-stats">; lab
 // l'équipe type a besoin de place, une bande de matchs est déjà horizontale, etc.)
 const DEFAULT_SIZE_BY_TYPE: Record<WidgetType, WidgetSize> = {
   "best-xi": "wide",
-  "leaderboard-global": "square",
+  // Le classement général prime sur les classements de ligue : pleine largeur,
+  // en premier — voir SINGLETON_WIDGETS ci-dessus pour l'ordre par défaut.
+  "leaderboard-global": "wide",
   "leaderboard-leagues": "square",
   "last-results": "wide",
   "upcoming-matches": "wide",

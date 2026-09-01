@@ -16,9 +16,6 @@ export interface LeagueStandingEntry {
   totalPoints: number;
   jerseyConfig: unknown;
   rank: number;
-  // Club d'origine du membre (ARCHITECTURE.md §23) — affiché entre membres d'une
-  // même ligue seulement. null si non renseigné.
-  homeClub: { name: string; city: string | null; country: string } | null;
 }
 
 export interface LeagueDetail {
@@ -60,7 +57,7 @@ export async function getLeagueDetail(leagueId: string): Promise<LeagueDetail | 
             name: true,
             totalPoints: true,
             userId: true,
-            user: { select: { name: true, homeClub: { select: { name: true, city: true, country: true } } } },
+            user: { select: { name: true } },
           },
         })
       : prisma.fantasyTeam.findMany({
@@ -72,7 +69,7 @@ export async function getLeagueDetail(leagueId: string): Promise<LeagueDetail | 
             totalPoints: true,
             jerseyConfig: true,
             userId: true,
-            user: { select: { name: true, homeClub: { select: { name: true, city: true, country: true } } } },
+            user: { select: { name: true } },
           },
         }),
     prisma.leagueMember.count({ where: { leagueId } }),
@@ -86,7 +83,6 @@ export async function getLeagueDetail(leagueId: string): Promise<LeagueDetail | 
     totalPoints: Number(t.totalPoints),
     jerseyConfig: "jerseyConfig" in t ? t.jerseyConfig : null,
     rank: i + 1,
-    homeClub: t.user.homeClub,
   }));
 
   return {

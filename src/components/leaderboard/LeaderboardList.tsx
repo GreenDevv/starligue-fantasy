@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { JerseyBadge } from "@/components/jersey/JerseyBadge";
-import { countryFlag } from "@/lib/geo/countries";
 
 interface StandingEntry {
   rank: number;
@@ -15,9 +14,6 @@ interface StandingEntry {
   points?: number;
   jerseyConfig?: unknown;
   leagueName?: string;
-  // Club d'origine — présent seulement en contexte ligue (§23), jamais sur le
-  // classement global.
-  homeClub?: { name: string; city: string | null; country: string } | null;
 }
 
 interface LeaderboardListProps {
@@ -103,12 +99,6 @@ export function LeaderboardList({
                   {entry.userName}
                   {entry.leagueName && <span className="text-text-muted/60"> · {entry.leagueName}</span>}
                 </p>
-                {entry.homeClub && (
-                  <p className="truncate text-[11px] text-text-muted/70">
-                    🤾 {countryFlag(entry.homeClub.country)} {entry.homeClub.name}
-                    {entry.homeClub.city && ` · ${entry.homeClub.city}`}
-                  </p>
-                )}
               </div>
 
               {/* Points */}
