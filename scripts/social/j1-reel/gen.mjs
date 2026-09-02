@@ -5,38 +5,42 @@ const REPO = "/Users/tish/Projects/starligue-fantasy/";
 
 const d = JSON.parse(readFileSync(DIR + "data.json", "utf-8"));
 const b64 = (p) => "data:image/png;base64," + readFileSync(p).toString("base64");
-
 const clubLogo = (sn) => b64(REPO + "public/clubs/" + sn.toLowerCase() + ".png");
 const playerImg = (sn) => b64(DIR + "players/" + sn + ".png");
 const tvLogo = (name) => b64(REPO + "public/broadcasters/" + (name === "beIN Sport" ? "bein-sport" : "handball-tv") + ".png");
-
 const dayShort = (day) => day.replace("Vendredi", "VEN").replace("Samedi", "SAM").replace("Dimanche", "DIM").replace(" sept.", " SEPT");
 
-// ---- match cards markup ----
+// ---- match cards ----
 const cards = d.fixtures.map((f, i) => {
   const H = d.club[f.home], A = d.club[f.away];
   const ph = d.picks[f.home], pa = d.picks[f.away];
   return `<div class="mc" id="M${i}">
-    <div class="mc-bg" style="background:linear-gradient(104deg, ${H.color} 0%, ${H.color} 42%, ${A.color} 58%, ${A.color} 100%)"></div>
+    <div class="mc-ground"></div>
+    <div class="mc-glow gh" style="background:radial-gradient(circle, ${H.color}66, transparent 60%)"></div>
+    <div class="mc-glow ga" style="background:radial-gradient(circle, ${A.color}66, transparent 60%)"></div>
+    <img class="mc-wm wh" src="${clubLogo(f.home)}"/>
+    <img class="mc-wm wa" src="${clubLogo(f.away)}"/>
     <div class="mc-seam"></div>
-    <div class="mc-dark"></div>
-    <img class="mc-pl ph" id="M${i}ph" src="${playerImg(f.home)}"/>
-    <img class="mc-pl pa" id="M${i}pa" src="${playerImg(f.away)}"/>
-    <div class="mc-top">
-      <span class="mc-no">MATCH ${i + 1}<b> / 8</b></span>
-      <span class="mc-day">${dayShort(f.day)} · ${f.time}</span>
-    </div>
-    <div class="mc-crests">
-      <span class="mc-tile"><img src="${clubLogo(f.home)}"/></span>
+    <div class="mc-sweep"></div>
+    <div class="mc-edge eh" style="background:${H.color}"></div>
+    <div class="mc-edge ea" style="background:${A.color}"></div>
+    <img class="mc-pl ph" src="${playerImg(f.home)}"/>
+    <img class="mc-pl pa" src="${playerImg(f.away)}"/>
+    <div class="mc-vign"></div>
+    <div class="mc-no">Match <b>${i + 1}</b> / 8</div>
+    <div class="mc-head">
+      <img class="mc-crest ch" src="${clubLogo(f.home)}"/>
       <span class="mc-vs">VS</span>
-      <span class="mc-tile"><img src="${clubLogo(f.away)}"/></span>
+      <img class="mc-crest ca" src="${clubLogo(f.away)}"/>
     </div>
-    <div class="mc-names"><span>${H.ville}</span><span>${A.ville}</span></div>
-    <div class="mc-tag ph" id="M${i}th"><i>${ph.first}</i><b>${ph.last}</b></div>
-    <div class="mc-tag pa" id="M${i}ta"><i>${pa.first}</i><b>${pa.last}</b></div>
-    <div class="mc-band" id="M${i}b">
-      <div class="mc-b-l"><i>Lieu</i><b>${H.salle}</b><span>${H.ville}</span></div>
-      <div class="mc-b-r"><i>Diffusion</i><span class="mc-tv"><img src="${tvLogo(f.tv)}"/></span></div>
+    <div class="mc-nm ph"><i>${ph.first}</i><b>${ph.last}</b></div>
+    <div class="mc-nm pa"><i>${pa.first}</i><b>${pa.last}</b></div>
+    <div class="mc-info">
+      <span class="mc-i-dt">${dayShort(f.day)} · ${f.time}</span>
+      <span class="mc-i-sep"></span>
+      <span class="mc-i-pl">${H.salle} · ${H.ville}</span>
+      <span class="mc-i-sep"></span>
+      <img class="mc-i-tv" src="${tvLogo(f.tv)}"/>
     </div>
   </div>`;
 }).join("\n  ");
@@ -58,104 +62,105 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@500;600;700&display=swap">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:1080px;height:1920px;overflow:hidden;background:#06090F}
-#stage{position:absolute;inset:0;font-family:"Inter",system-ui,sans-serif;color:#F4F7FB;background:#06090F}
-.B{font-family:"Barlow Condensed","Inter",sans-serif;font-weight:700}
-.layer{position:absolute;inset:0;overflow:hidden}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#05070C}
+#stage{position:absolute;inset:0;font-family:"Inter",system-ui,sans-serif;color:#F4F7FB;background:#05070C}
+.BC{font-family:"Barlow Condensed","Inter",sans-serif}
 
 /* ---------- intro ---------- */
 #intro{position:absolute;inset:0;z-index:80;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;text-align:center;
-  background:radial-gradient(circle at 50% 34%, rgba(45,212,191,.16), transparent 55%),
-    radial-gradient(circle at 82% 92%, rgba(245,158,11,.12), transparent 46%), #080C13}
-#intro .k{font-family:"Barlow Condensed";font-weight:700;font-size:30px;letter-spacing:.4em;
+  align-items:center;justify-content:center;text-align:center;overflow:hidden;
+  background:radial-gradient(circle at 50% 32%, rgba(45,212,191,.18), transparent 54%),
+    radial-gradient(circle at 84% 92%, rgba(245,158,11,.13), transparent 46%), #070B12}
+#intro .k{font-family:"Barlow Condensed";font-weight:700;font-size:30px;letter-spacing:.42em;
   text-transform:uppercase;color:#2DD4BF}
-#intro .j{font-family:"Barlow Condensed";font-weight:800;font-size:340px;line-height:.82;
-  letter-spacing:-.02em;margin:18px 0 0;text-transform:uppercase}
+#intro .j{font-family:"Barlow Condensed";font-weight:800;font-size:392px;line-height:.8;
+  letter-spacing:-.03em;margin:14px 0 0;text-transform:uppercase;will-change:transform,opacity}
 #intro .j b{color:#F59E0B}
-#intro .s{font-family:"Barlow Condensed";font-weight:700;font-size:44px;letter-spacing:.14em;
-  text-transform:uppercase;color:#EAF0F6;margin-top:6px}
-#intro .dt{margin-top:26px;font-size:26px;letter-spacing:.08em;color:#94A3B8;text-transform:uppercase}
+#intro .s{font-family:"Barlow Condensed";font-weight:700;font-size:46px;letter-spacing:.16em;
+  text-transform:uppercase;color:#EAF0F6;margin-top:2px}
+#intro .dt{margin-top:24px;font-family:"Barlow Condensed";font-weight:700;font-size:27px;letter-spacing:.14em;
+  color:#94A3B8;text-transform:uppercase}
+#intro .bar{position:absolute;left:0;right:0;top:50%;height:3px;background:linear-gradient(90deg,transparent,#2DD4BF,transparent);
+  transform:scaleX(0);opacity:.0}
 
-/* ---------- match card ---------- */
-.mc{position:absolute;inset:0;overflow:hidden}
-.mc-bg{position:absolute;inset:0}
-.mc-seam{position:absolute;inset:0;background:linear-gradient(104deg,
-  transparent 44%, rgba(4,6,10,.5) 48.4%, rgba(255,255,255,.14) 50%, rgba(4,6,10,.5) 51.6%, transparent 56%)}
-.mc-dark{position:absolute;inset:0;background:
-  linear-gradient(180deg, rgba(5,8,13,.30) 0%, rgba(5,8,13,.12) 24%, rgba(5,8,13,.45) 64%, rgba(5,8,13,.94) 100%),
-  radial-gradient(130% 54% at 50% 34%, transparent 34%, rgba(5,8,13,.46) 100%)}
-.mc-pl{position:absolute;bottom:150px;height:1250px;width:588px;object-fit:cover;object-position:50% 4%;
-  filter:drop-shadow(0 26px 40px rgba(0,0,0,.6));
-  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 15%,#000 85%,transparent 100%)}
-.mc-pl.ph{left:-34px}
-.mc-pl.pa{right:-34px}
-.mc-top{position:absolute;top:74px;left:60px;right:60px;display:flex;justify-content:space-between;align-items:center;z-index:5}
-.mc-top .mc-no{font-family:"Barlow Condensed";font-weight:700;font-size:29px;letter-spacing:.16em;color:rgba(255,255,255,.8)}
-.mc-top .mc-no b{color:rgba(255,255,255,.45)}
-.mc-top .mc-day{font-family:"Barlow Condensed";font-weight:700;font-size:30px;letter-spacing:.1em;color:#fff;
-  background:rgba(6,9,14,.55);padding:8px 18px;border-radius:999px}
-.mc-crests{position:absolute;top:150px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:52px;z-index:5}
-.mc-tile{width:256px;height:256px;border-radius:30px;background:rgba(255,255,255,.97);
-  display:flex;align-items:center;justify-content:center;box-shadow:0 20px 44px rgba(0,0,0,.45)}
-.mc-tile img{width:80%;height:80%;object-fit:contain}
-.mc-vs{font-family:"Barlow Condensed";font-weight:800;font-size:100px;line-height:1;color:#fff;
-  width:148px;height:148px;border-radius:50%;background:#0A0D13;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 12px 34px rgba(0,0,0,.55), inset 0 0 0 2px rgba(255,255,255,.1);flex:none}
-.mc-names{position:absolute;top:452px;left:0;right:0;display:flex;justify-content:center;gap:96px;z-index:5;
-  font-family:"Barlow Condensed";font-weight:800;font-size:44px;letter-spacing:.04em;text-transform:uppercase}
-.mc-names span{width:400px;text-align:center;text-shadow:0 4px 22px rgba(0,0,0,.9)}
-.mc-tag{position:absolute;bottom:296px;z-index:6;display:flex;flex-direction:column;padding:10px 26px 12px;
-  font-family:"Barlow Condensed";text-transform:uppercase;color:#fff}
-.mc-tag i{font-weight:700;font-size:23px;letter-spacing:.14em;font-style:normal;color:rgba(255,255,255,.9);
-  text-shadow:0 2px 6px #000,0 0 14px rgba(0,0,0,.95)}
-.mc-tag b{font-weight:800;font-size:56px;line-height:.92;letter-spacing:.005em;
-  text-shadow:0 3px 10px #000,0 0 26px rgba(0,0,0,.98);-webkit-text-stroke:1px rgba(0,0,0,.35)}
-.mc-tag.ph{left:50px;align-items:flex-start;background:linear-gradient(90deg,rgba(4,6,10,.62) 30%,transparent);border-radius:8px}
-.mc-tag.pa{right:50px;align-items:flex-end;text-align:right;background:linear-gradient(270deg,rgba(4,6,10,.62) 30%,transparent);border-radius:8px}
-.mc-band{position:absolute;left:0;right:0;bottom:0;height:250px;background:linear-gradient(0deg,#05080D 54%,rgba(5,8,13,.55) 80%,rgba(5,8,13,0));
-  display:flex;align-items:flex-end;justify-content:space-between;padding:0 64px 30px;z-index:7}
-.mc-band .mc-b-l{display:flex;flex-direction:column;gap:3px;max-width:640px}
-.mc-band .mc-b-l i{font-family:"Barlow Condensed";font-weight:700;font-size:20px;letter-spacing:.22em;
-  text-transform:uppercase;color:#8A97A8;font-style:normal}
-.mc-band .mc-b-l b{font-family:"Barlow Condensed";font-weight:700;font-size:42px;text-transform:uppercase;letter-spacing:.01em;line-height:1}
-.mc-band .mc-b-l span{font-size:22px;color:#94A3B8;letter-spacing:.04em;margin-top:2px}
-.mc-band .mc-b-r{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
-.mc-band .mc-b-r i{font-family:"Barlow Condensed";font-weight:700;font-size:20px;letter-spacing:.22em;
-  text-transform:uppercase;color:#8A97A8;font-style:normal}
-.mc-band .mc-tv{background:rgba(255,255,255,.96);border-radius:12px;padding:8px 14px;display:flex}
-.mc-band .mc-tv img{height:40px;object-fit:contain;display:block}
+/* ---------- match card (face-à-face premium) ---------- */
+.mc{position:absolute;inset:0;overflow:hidden;background:#05070C}
+.mc-ground{position:absolute;inset:0;background:radial-gradient(120% 82% at 50% 24%, #131922 0%, #080B11 58%, #04060A 100%)}
+.mc-glow{position:absolute;top:-16%;width:1180px;height:1180px;border-radius:50%;filter:blur(6px);opacity:.5;will-change:opacity,transform}
+.mc-glow.gh{left:-320px}
+.mc-glow.ga{right:-320px}
+.mc-wm{position:absolute;top:60px;width:900px;height:900px;object-fit:contain;opacity:.09;will-change:opacity}
+.mc-wm.wh{left:-300px}
+.mc-wm.wa{right:-300px}
+.mc-seam{position:absolute;inset:0;background:linear-gradient(103deg,
+  transparent 45%, rgba(3,5,9,.62) 48.6%, rgba(255,255,255,.16) 50%, rgba(3,5,9,.62) 51.4%, transparent 55%);will-change:opacity}
+.mc-sweep{position:absolute;inset:-10% -40%;background:linear-gradient(103deg, transparent 46%, rgba(255,255,255,.5) 50%, transparent 54%);
+  transform:translateX(-120%);will-change:transform,opacity;opacity:0;mix-blend-mode:screen}
+.mc-edge{position:absolute;top:230px;bottom:290px;width:6px;border-radius:4px;will-change:opacity,transform}
+.mc-edge.eh{left:46px}
+.mc-edge.ea{right:46px}
+.mc-pl{position:absolute;bottom:214px;height:1300px;width:660px;object-fit:contain;
+  filter:drop-shadow(0 34px 46px rgba(0,0,0,.62));will-change:transform,opacity}
+.mc-pl.ph{left:-70px;object-position:bottom left}
+.mc-pl.pa{right:-70px;object-position:bottom right}
+.mc-vign{position:absolute;inset:0;pointer-events:none;background:
+  linear-gradient(180deg, rgba(5,7,12,.34) 0%, transparent 22%, transparent 58%, rgba(4,6,11,.72) 82%, #04060A 100%),
+  radial-gradient(135% 60% at 50% 32%, transparent 40%, rgba(4,6,11,.4) 100%)}
+.mc-no{position:absolute;top:76px;left:60px;z-index:6;font-family:"Barlow Condensed";font-weight:700;
+  font-size:27px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.62);will-change:opacity}
+.mc-no b{color:#F59E0B}
+.mc-head{position:absolute;top:150px;left:0;right:0;z-index:6;display:flex;align-items:center;justify-content:center;gap:70px}
+.mc-crest{width:230px;height:230px;object-fit:contain;will-change:opacity,transform;
+  filter:drop-shadow(0 0 3px rgba(255,255,255,.95)) drop-shadow(0 0 2px rgba(255,255,255,.9)) drop-shadow(0 16px 30px rgba(0,0,0,.6))}
+.mc-vs{font-family:"Barlow Condensed";font-weight:800;font-size:82px;line-height:1;color:#F4F7FB;flex:none;
+  width:132px;height:132px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  border:2px solid rgba(255,255,255,.28);background:rgba(6,9,14,.5);backdrop-filter:blur(2px);
+  box-shadow:0 14px 34px rgba(0,0,0,.5);will-change:opacity,transform}
+.mc-nm{position:absolute;bottom:300px;z-index:7;display:flex;flex-direction:column;padding:8px 4px;will-change:opacity,transform}
+.mc-nm i{font-family:"Barlow Condensed";font-weight:700;font-size:24px;letter-spacing:.16em;font-style:normal;
+  text-transform:uppercase;color:rgba(255,255,255,.78);text-shadow:0 2px 8px #000}
+.mc-nm b{font-family:"Barlow Condensed";font-weight:800;font-size:66px;line-height:.9;letter-spacing:.005em;
+  text-transform:uppercase;color:#fff;text-shadow:0 4px 14px #000, 0 0 30px rgba(0,0,0,.9)}
+.mc-nm.ph{left:60px;align-items:flex-start}
+.mc-nm.pa{right:60px;align-items:flex-end;text-align:right}
+.mc-info{position:absolute;left:0;right:0;bottom:96px;z-index:8;display:flex;align-items:center;justify-content:center;gap:20px;
+  padding:0 56px;font-family:"Barlow Condensed";font-weight:700;text-transform:uppercase;
+  color:#CBD5E1;font-size:26px;letter-spacing:.12em;will-change:opacity,transform}
+.mc-info .mc-i-dt{color:#fff}
+.mc-info .mc-i-sep{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.35);flex:none}
+.mc-info .mc-i-tv{height:34px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(255,255,255,.6))}
 
 /* ---------- final plan ---------- */
 #finale{position:absolute;inset:0;z-index:90;overflow:hidden;background:
-  radial-gradient(circle at 50% 16%, rgba(45,212,191,.18), transparent 52%),
-  radial-gradient(circle at 84% 94%, rgba(245,158,11,.13), transparent 44%), #080C13}
-#finale .fk{position:absolute;top:120px;left:0;right:0;text-align:center;font-family:"Barlow Condensed";
-  font-weight:700;font-size:28px;letter-spacing:.38em;text-transform:uppercase;color:#2DD4BF}
-#finale .ft{position:absolute;top:150px;left:0;right:0;text-align:center;font-family:"Barlow Condensed";
-  font-weight:800;font-size:150px;line-height:.9;text-transform:uppercase}
+  radial-gradient(circle at 50% 14%, rgba(45,212,191,.18), transparent 50%),
+  radial-gradient(circle at 84% 94%, rgba(245,158,11,.13), transparent 44%), #070B12}
+#finale .fk{position:absolute;top:112px;left:0;right:0;text-align:center;font-family:"Barlow Condensed";
+  font-weight:700;font-size:27px;letter-spacing:.4em;text-transform:uppercase;color:#2DD4BF;will-change:opacity,transform}
+#finale .ft{position:absolute;top:142px;left:0;right:0;text-align:center;font-family:"Barlow Condensed";
+  font-weight:800;font-size:154px;line-height:.9;text-transform:uppercase;will-change:opacity,transform}
 #finale .ft b{color:#F59E0B}
-#finale .fsub{position:absolute;top:322px;left:0;right:0;text-align:center;font-family:"Barlow Condensed";
-  font-weight:700;font-size:32px;letter-spacing:.2em;text-transform:uppercase;color:#94A3B8}
-#finale .list{position:absolute;left:56px;right:56px;top:404px;display:flex;flex-direction:column;gap:11px}
+#finale .fsub{position:absolute;top:318px;left:0;right:0;text-align:center;font-family:"Barlow Condensed";
+  font-weight:700;font-size:30px;letter-spacing:.22em;text-transform:uppercase;color:#94A3B8;will-change:opacity,transform}
+#finale .list{position:absolute;left:54px;right:54px;top:398px;display:flex;flex-direction:column;gap:11px}
 #finale .fr{display:grid;grid-template-columns:150px 1fr 150px;align-items:center;
-  background:linear-gradient(120deg,#141A23,#0B0F16);border-radius:18px;
+  background:linear-gradient(120deg,#151B24,#0B0F16);border-radius:18px;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);padding:13px 34px;will-change:transform,opacity}
-#finale .fr-c{width:118px;height:118px;border-radius:16px;background:rgba(255,255,255,.96);
+#finale .fr-c{width:118px;height:118px;border-radius:16px;background:rgba(255,255,255,.97);
   display:flex;align-items:center;justify-content:center;justify-self:center;box-shadow:0 8px 18px rgba(0,0,0,.4)}
 #finale .fr-c img{width:78%;height:78%;object-fit:contain}
 #finale .fr-m{display:flex;flex-direction:column;align-items:center;gap:1px}
 #finale .fr-m .fr-d{font-family:"Barlow Condensed";font-weight:700;font-size:23px;letter-spacing:.16em;color:#8A97A8}
 #finale .fr-m .fr-t{font-family:"Barlow Condensed";font-weight:800;font-size:52px;line-height:.92;letter-spacing:.01em;color:#fff}
-#finale .fr-m .fr-tv{background:rgba(255,255,255,.96);border-radius:9px;padding:5px 10px;margin-top:6px;display:flex}
+#finale .fr-m .fr-tv{background:rgba(255,255,255,.97);border-radius:9px;padding:5px 10px;margin-top:6px;display:flex}
 #finale .fr-m .fr-tv img{height:24px;object-fit:contain;display:block}
-#finale .fcta{position:absolute;left:0;right:0;bottom:74px;text-align:center}
+#finale .fcta{position:absolute;left:0;right:0;bottom:72px;text-align:center;will-change:opacity,transform}
 #finale .fcta .w{font-family:"Barlow Condensed";font-weight:800;text-transform:uppercase;font-size:58px;letter-spacing:.02em}
 #finale .fcta .w b{color:#2DD4BF}
 #finale .fcta .u{margin-top:8px;font-size:23px;color:#94A3B8;letter-spacing:.06em}
 </style></head><body>
 <div id="stage">
   <div id="intro">
+    <div class="bar"></div>
     <div class="k">Daikin StarLigue 2026 · 27</div>
     <div class="j">J<b>1</b></div>
     <div class="s">le programme</div>
@@ -176,98 +181,120 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#06090F}
       <div class="u">compose ton équipe sur starliguefantasy.fr</div>
     </div>
   </div>
-
 </div>
 <script>
-const N=8, INTRO_END=2600, MCLIP=3400, CARDS_END=INTRO_END+N*MCLIP, OUTRO=5000, TOTAL=CARDS_END+OUTRO;
+const N=8, INTRO_END=2500, MCLIP=3100, CARDS_END=INTRO_END+N*MCLIP, OUTRO=5200, TOTAL=CARDS_END+OUTRO;
 window.TOTAL=TOTAL;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const lerp=(a,b,t)=>a+(b-a)*t;
 const ph=(t,s,e)=>clamp((t-s)/(e-s),0,1);
 const eOut=t=>1-Math.pow(1-t,3);
-const eInOut=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
-const back=t=>{const c=1.7,c3=c+1;return 1+c3*Math.pow(t-1,3)+c*Math.pow(t-1,2);};
+const eOut4=t=>1-Math.pow(1-t,4);
+const back=t=>{const c=2.0,c3=c+1;return 1+c3*Math.pow(t-1,3)+c*Math.pow(t-1,2);};
 const $=id=>document.getElementById(id);
 const set=(el,o,disp)=>{el.style.opacity=o;el.style.display=o<=.001?'none':(disp||'block');};
 
 window.seek=function(t){
   t=clamp(t,0,TOTAL-1);
 
-  // intro
+  // ---------- intro ----------
   const iv=t<INTRO_END+20;
   set($('intro'),iv?1:0,'flex');
   if(iv){
-    const box=$('intro');
-    const jIn=eOut(ph(t,120,760)), kIn=eOut(ph(t,40,520)), sIn=eOut(ph(t,420,900)), dIn=eOut(ph(t,700,1150));
-    const out=ph(t,INTRO_END-360,INTRO_END+10);
-    box.querySelector('.k').style.opacity=(kIn*(1-out)).toFixed(3);
-    const j=box.querySelector('.j');
+    const b=$('intro');
+    const out=ph(t,INTRO_END-320,INTRO_END+10);
+    const kIn=eOut(ph(t,60,460)), jIn=eOut4(ph(t,120,620)), sIn=eOut(ph(t,460,860)), dIn=eOut(ph(t,720,1120));
+    const barIn=ph(t,40,520);
+    const bar=b.querySelector('.bar');
+    bar.style.transform='scaleX('+eOut(barIn)+')'; bar.style.opacity=(eOut(barIn)*(1-eOut(ph(t,620,1000)))).toFixed(3);
+    b.querySelector('.k').style.opacity=(kIn*(1-out)).toFixed(3);
+    const j=b.querySelector('.j');
     j.style.opacity=(jIn*(1-out)).toFixed(3);
-    j.style.transform='scale('+lerp(.78,1,back(clamp(jIn,0,1)))*lerp(1,1.08,out)+')';
-    box.querySelector('.s').style.opacity=(sIn*(1-out)).toFixed(3);
-    box.querySelector('.dt').style.opacity=(dIn*(1-out)).toFixed(3);
-    box.style.transform='translateY('+(out*-40)+'px)';
+    j.style.transform='scale('+lerp(1.5,1,jIn)*lerp(1,1.12,out)+') translateY('+lerp(0,-30,out)+'px)';
+    b.querySelector('.s').style.opacity=(sIn*(1-out)).toFixed(3);
+    b.querySelector('.s').style.transform='translateY('+lerp(14,0,sIn)+'px)';
+    b.querySelector('.dt').style.opacity=(dIn*(1-out)).toFixed(3);
   }
 
-  // match cards
+  // ---------- match cards ----------
   for(let i=0;i<N;i++){
     const M=$('M'+i), st=INTRO_END+i*MCLIP, lt=t-st;
-    const active = t>=st-30 && t<st+MCLIP+ (i===N-1?30:-30);
+    const active = t>=st-24 && t<st+MCLIP+(i===N-1?24:-24);
     if(!active){ M.style.display='none'; continue; }
     M.style.display='block';
-    const wipe=eOut(ph(t,st,st+320));
-    const clip='inset(0 '+((1-wipe)*100).toFixed(2)+'% 0 0)';
-    M.querySelector('.mc-bg').style.clipPath=clip;
-    M.querySelector('.mc-seam').style.clipPath=clip;
-    M.querySelector('.mc-dark').style.opacity=wipe.toFixed(3);
-    const top=eOut(ph(lt,180,540));
-    M.querySelector('.mc-top').style.opacity=top.toFixed(3);
-    M.querySelector('.mc-top').style.transform='translateY('+lerp(-18,0,top)+'px)';
-    const cr=ph(lt,220,660);
-    const crest=M.querySelectorAll('.mc-tile');
-    crest[0].style.opacity=eOut(cr).toFixed(3);
-    crest[0].style.transform='translateX('+lerp(-56,0,eOut(cr))+'px) scale('+lerp(.72,1,back(clamp(cr,0,1)))+')';
-    crest[1].style.opacity=eOut(cr).toFixed(3);
-    crest[1].style.transform='translateX('+lerp(56,0,eOut(cr))+'px) scale('+lerp(.72,1,back(clamp(cr,0,1)))+')';
-    const vs=ph(lt,420,760);
+    const outp=ph(lt,MCLIP-300,MCLIP);
+    const wipe=eOut4(ph(lt,0,300));
+    M.querySelector('.mc-ground').style.clipPath='inset(0 '+((1-wipe)*100).toFixed(2)+'% 0 0)';
+
+    // diagonal light sweep on entry
+    const sw=ph(lt,40,520);
+    const sweep=M.querySelector('.mc-sweep');
+    sweep.style.transform='translateX('+lerp(-120,120,eOut(sw))+'%)';
+    sweep.style.opacity=(Math.sin(sw*Math.PI)*0.9).toFixed(3);
+
+    const glowIn=eOut(ph(lt,80,460))*(1-outp);
+    M.querySelector('.mc-glow.gh').style.opacity=(glowIn*0.5).toFixed(3);
+    M.querySelector('.mc-glow.ga').style.opacity=(glowIn*0.5).toFixed(3);
+    M.querySelector('.mc-wm.wh').style.opacity=(eOut(ph(lt,120,560))*0.09*(1-outp)).toFixed(3);
+    M.querySelector('.mc-wm.wa').style.opacity=(eOut(ph(lt,120,560))*0.09*(1-outp)).toFixed(3);
+    M.querySelector('.mc-seam').style.opacity=(eOut(ph(lt,120,420))*(1-outp)).toFixed(3);
+    M.querySelector('.mc-vign').style.opacity=(eOut(ph(lt,0,300))).toFixed(3);
+
+    const eg=ph(lt,180,520);
+    for(const e of M.querySelectorAll('.mc-edge')){ e.style.opacity=(eOut(eg)*(1-outp)).toFixed(3);
+      e.style.transform='scaleY('+lerp(.3,1,eOut(eg))+')'; e.style.transformOrigin='top'; }
+
+    // players slide in fast from the sides, overshoot
+    const pin=ph(lt,140,560);
+    const pl=M.querySelectorAll('.mc-pl');
+    const px=lerp(460,0,back(clamp(pin,0,1)));
+    pl[0].style.transform='translateX('+(-px)+'px)'; pl[0].style.opacity=(clamp(lt/150,0,1)*(1-outp)).toFixed(3);
+    pl[1].style.transform='translateX('+px+'px)'; pl[1].style.opacity=(clamp(lt/150,0,1)*(1-outp)).toFixed(3);
+
+    M.querySelector('.mc-no').style.opacity=(eOut(ph(lt,220,560))*(1-outp)).toFixed(3);
+
+    const cr=ph(lt,180,520);
+    const cs=M.querySelectorAll('.mc-crest');
+    cs[0].style.opacity=(eOut(cr)*(1-outp)).toFixed(3);
+    cs[0].style.transform='translateX('+lerp(70,0,back(clamp(cr,0,1)))+'px) scale('+lerp(.6,1,back(clamp(cr,0,1)))+')';
+    cs[1].style.opacity=(eOut(cr)*(1-outp)).toFixed(3);
+    cs[1].style.transform='translateX('+lerp(-70,0,back(clamp(cr,0,1)))+'px) scale('+lerp(.6,1,back(clamp(cr,0,1)))+')';
+    const vs=ph(lt,260,520);
     const vsEl=M.querySelector('.mc-vs');
-    vsEl.style.opacity=eOut(vs).toFixed(3);
-    vsEl.style.transform='scale('+lerp(1.9,1,back(clamp(vs,0,1)))+') rotate('+lerp(-14,0,eOut(vs))+'deg)';
-    M.querySelector('.mc-names').style.opacity=eOut(ph(lt,560,900)).toFixed(3);
-    const pin=ph(lt,300,780), pout=ph(lt,MCLIP-320,MCLIP);
-    const pl=M.querySelectorAll('.mc-pl'), tg=M.querySelectorAll('.mc-tag');
-    pl[0].style.transform='translateX('+lerp(-180,0,eOut(pin))+'px)'; pl[0].style.opacity=(eOut(pin)*(1-pout)).toFixed(3);
-    pl[1].style.transform='translateX('+lerp(180,0,eOut(pin))+'px)'; pl[1].style.opacity=(eOut(pin)*(1-pout)).toFixed(3);
-    const tgin=eOut(ph(lt,620,980));
-    tg[0].style.opacity=(tgin*(1-pout)).toFixed(3); tg[0].style.transform='translateY('+lerp(16,0,tgin)+'px)';
-    tg[1].style.opacity=(tgin*(1-pout)).toFixed(3); tg[1].style.transform='translateY('+lerp(16,0,tgin)+'px)';
-    const bin=eOut(ph(lt,700,1050));
-    const bd=M.querySelector('.mc-band');
-    bd.style.opacity=bin.toFixed(3); bd.style.transform='translateY('+lerp(70,0,bin)+'px)';
+    vsEl.style.opacity=(eOut(vs)*(1-outp)).toFixed(3);
+    vsEl.style.transform='scale('+lerp(2.3,1,back(clamp(vs,0,1)))+') rotate('+lerp(-24,0,eOut(vs))+'deg)';
+
+    const nmin=ph(lt,460,760);
+    const nm=M.querySelectorAll('.mc-nm');
+    nm[0].style.opacity=(eOut(nmin)*(1-outp)).toFixed(3); nm[0].style.transform='translateX('+lerp(-40,0,eOut(nmin))+'px)';
+    nm[1].style.opacity=(eOut(nmin)*(1-outp)).toFixed(3); nm[1].style.transform='translateX('+lerp(40,0,eOut(nmin))+'px)';
+
+    const inin=ph(lt,560,860);
+    const inf=M.querySelector('.mc-info');
+    inf.style.opacity=(eOut(inin)*(1-outp)).toFixed(3); inf.style.transform='translateY('+lerp(38,0,eOut(inin))+'px)';
   }
 
-  // finale
-  const fv=t>=CARDS_END-20;
+  // ---------- finale ----------
+  const fv=t>=CARDS_END-16;
   set($('finale'),fv?1:0);
   if(fv){
     const ft=t-CARDS_END;
-    $('finale').style.clipPath='inset(0 '+((1-eOut(ph(t,CARDS_END-20,CARDS_END+340)))*100).toFixed(2)+'% 0 0)';
-    const hin=eOut(ph(ft,160,540));
+    $('finale').style.clipPath='inset(0 '+((1-eOut4(ph(ft,-16,320)))*100).toFixed(2)+'% 0 0)';
+    const hin=eOut(ph(ft,120,480));
     for(const c of ['.fk','.ft','.fsub']){ const e=$('finale').querySelector(c);
-      e.style.opacity=hin.toFixed(3); e.style.transform='translateY('+lerp(-16,0,hin)+'px)'; }
+      e.style.opacity=hin.toFixed(3); e.style.transform='translateY('+lerp(-18,0,hin)+'px)'; }
     for(let i=0;i<N;i++){ const r=$('FR'+i);
-      const a=eOut(ph(ft,360+i*90,360+i*90+420));
+      const a=eOut(ph(ft,300+i*72,300+i*72+380));
       r.style.opacity=a.toFixed(3);
-      r.style.transform='translateX('+lerp(i%2?60:-60,0,a)+'px) scale('+lerp(.92,1,back(clamp(a,0,1)))+')'; }
-    const cin=eOut(ph(ft,1500,1950));
+      r.style.transform='translateX('+lerp(i%2?54:-54,0,back(clamp(a,0,1)))+'px)'; }
+    const cin=eOut(ph(ft,1350,1800));
     const cta=$('finale').querySelector('.fcta');
-    cta.style.opacity=cin.toFixed(3); cta.style.transform='translateY('+lerp(20,0,cin)+'px)';
+    cta.style.opacity=cin.toFixed(3); cta.style.transform='translateY('+lerp(22,0,cin)+'px)';
   }
-
 };
 window.seek(0);
 </script>
 </body></html>`;
 
 writeFileSync(DIR + "reel.html", html);
-console.log("reel.html écrit :", (html.length / 1024 / 1024).toFixed(2), "Mo");
+console.log("reel.html écrit :", (html.length / 1024 / 1024).toFixed(2), "Mo", "| TOTAL", TOTAL);
