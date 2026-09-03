@@ -10,6 +10,11 @@ const playerImg = (sn) => b64(DIR + "players/" + sn + ".png");
 const tvLogo = (name) => b64(REPO + "public/broadcasters/" + (name === "beIN Sport" ? "bein-sport" : "handball-tv") + ".png");
 const dayShort = (day) => day.replace("Vendredi", "VEN").replace("Samedi", "SAM").replace("Dimanche", "DIM").replace(" sept.", " SEPT");
 
+// ---- intro : 16 logos en spirale (consistency avec le reel 16-maillots) ----
+const INTRO_CLUBS = ["MHB", "USAM", "LIMOGES", "CCMHB", "SAHB", "TREMBLAY", "CRMHB", "HBCN",
+  "SARAN", "PAUC", "CSMBH", "SRVH", "CAEN", "FENIX", "USDK", "PSG"];
+const introLogos = INTRO_CLUBS.map((sn) => `<div class="ic"><img src="${clubLogo(sn)}"/></div>`).join("");
+
 // ---- match cards ----
 const cards = d.fixtures.map((f, i) => {
   const H = d.club[f.home], A = d.club[f.away];
@@ -71,17 +76,17 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#05070C}
   align-items:center;justify-content:center;text-align:center;overflow:hidden;
   background:radial-gradient(circle at 50% 32%, rgba(45,212,191,.18), transparent 54%),
     radial-gradient(circle at 84% 92%, rgba(245,158,11,.13), transparent 46%), #070B12}
-#intro .k{font-family:"Barlow Condensed";font-weight:700;font-size:30px;letter-spacing:.42em;
+#intro .ic{position:absolute;left:50%;top:42%;width:150px;height:150px;margin:-75px 0 0 -75px;will-change:transform,opacity}
+#intro .ic img{width:100%;height:100%;object-fit:contain;
+  filter:drop-shadow(0 0 3px rgba(255,255,255,.9)) drop-shadow(0 0 2px rgba(255,255,255,.85)) drop-shadow(0 10px 20px rgba(0,0,0,.6))}
+#intro .ttl{position:absolute;left:0;right:0;top:42%;text-align:center;transform:translateY(-50%);will-change:transform,opacity}
+#intro .ttl .k{font-family:"Barlow Condensed";font-weight:700;font-size:29px;letter-spacing:.42em;
   text-transform:uppercase;color:#2DD4BF}
-#intro .j{font-family:"Barlow Condensed";font-weight:800;font-size:392px;line-height:.8;
-  letter-spacing:-.03em;margin:14px 0 0;text-transform:uppercase;will-change:transform,opacity}
-#intro .j b{color:#F59E0B}
-#intro .s{font-family:"Barlow Condensed";font-weight:700;font-size:46px;letter-spacing:.16em;
-  text-transform:uppercase;color:#EAF0F6;margin-top:2px}
-#intro .dt{margin-top:24px;font-family:"Barlow Condensed";font-weight:700;font-size:27px;letter-spacing:.14em;
-  color:#94A3B8;text-transform:uppercase}
-#intro .bar{position:absolute;left:0;right:0;top:50%;height:3px;background:linear-gradient(90deg,transparent,#2DD4BF,transparent);
-  transform:scaleX(0);opacity:.0}
+#intro .ttl .m{font-family:"Barlow Condensed";font-weight:800;font-size:184px;line-height:.86;
+  text-transform:uppercase;margin-top:18px;letter-spacing:-.01em}
+#intro .ttl .m b{color:#F59E0B}
+#intro .ttl .s{margin-top:18px;font-family:"Barlow Condensed";font-weight:700;font-size:34px;
+  letter-spacing:.16em;text-transform:uppercase;color:#94A3B8}
 
 /* ---------- match card (face-à-face premium) ---------- */
 .mc{position:absolute;inset:0;overflow:hidden;background:#05070C}
@@ -160,11 +165,12 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#05070C}
 </style></head><body>
 <div id="stage">
   <div id="intro">
-    <div class="bar"></div>
-    <div class="k">Daikin StarLigue 2026 · 27</div>
-    <div class="j">J<b>1</b></div>
-    <div class="s">le programme</div>
-    <div class="dt">8 matchs · 4 – 6 septembre</div>
+    ${introLogos}
+    <div class="ttl">
+      <div class="k">Daikin StarLigue 2026 · 27</div>
+      <div class="m">Journée <b>1</b></div>
+      <div class="s">le programme · 8 matchs</div>
+    </div>
   </div>
 
   ${cards}
@@ -183,13 +189,14 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#05070C}
   </div>
 </div>
 <script>
-const N=8, INTRO_END=2500, MCLIP=3100, CARDS_END=INTRO_END+N*MCLIP, OUTRO=5200, TOTAL=CARDS_END+OUTRO;
+const N=8, INTRO_END=3000, MCLIP=3100, CARDS_END=INTRO_END+N*MCLIP, OUTRO=5200, TOTAL=CARDS_END+OUTRO;
 window.TOTAL=TOTAL;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const lerp=(a,b,t)=>a+(b-a)*t;
 const ph=(t,s,e)=>clamp((t-s)/(e-s),0,1);
 const eOut=t=>1-Math.pow(1-t,3);
 const eOut4=t=>1-Math.pow(1-t,4);
+const eInOut=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
 const back=t=>{const c=2.0,c3=c+1;return 1+c3*Math.pow(t-1,3)+c*Math.pow(t-1,2);};
 const $=id=>document.getElementById(id);
 const set=(el,o,disp)=>{el.style.opacity=o;el.style.display=o<=.001?'none':(disp||'block');};
@@ -197,23 +204,33 @@ const set=(el,o,disp)=>{el.style.opacity=o;el.style.display=o<=.001?'none':(disp
 window.seek=function(t){
   t=clamp(t,0,TOTAL-1);
 
-  // ---------- intro ----------
+  // ---------- intro : 16 logos en spirale → titre J1 ----------
   const iv=t<INTRO_END+20;
-  set($('intro'),iv?1:0,'flex');
+  set($('intro'),iv?1:0,'block');
   if(iv){
-    const b=$('intro');
-    const out=ph(t,INTRO_END-320,INTRO_END+10);
-    const kIn=eOut(ph(t,60,460)), jIn=eOut4(ph(t,120,620)), sIn=eOut(ph(t,460,860)), dIn=eOut(ph(t,720,1120));
-    const barIn=ph(t,40,520);
-    const bar=b.querySelector('.bar');
-    bar.style.transform='scaleX('+eOut(barIn)+')'; bar.style.opacity=(eOut(barIn)*(1-eOut(ph(t,620,1000)))).toFixed(3);
-    b.querySelector('.k').style.opacity=(kIn*(1-out)).toFixed(3);
-    const j=b.querySelector('.j');
-    j.style.opacity=(jIn*(1-out)).toFixed(3);
-    j.style.transform='scale('+lerp(1.5,1,jIn)*lerp(1,1.12,out)+') translateY('+lerp(0,-30,out)+'px)';
-    b.querySelector('.s').style.opacity=(sIn*(1-out)).toFixed(3);
-    b.querySelector('.s').style.transform='translateY('+lerp(14,0,sIn)+'px)';
-    b.querySelector('.dt').style.opacity=(dIn*(1-out)).toFixed(3);
+    const box=$('intro');
+    const ics=box.querySelectorAll('.ic');
+    const ttl=box.querySelector('.ttl');
+    const M=ics.length, cy=1920*0.42;
+    const gather=eInOut(ph(t,720,1360));
+    const spin=ph(t,220,1260)*Math.PI*0.5;
+    const gridOut=ph(t,1680,2080);
+    const tIn=ph(t,2060,2520), tOut=ph(t,INTRO_END-300,INTRO_END+10);
+    ics.forEach((el,i)=>{
+      const col=i%4, row=(i/4|0);
+      const gx=(col-1.5)*198, gy=(row-1.5)*198;
+      const a=(i/M)*Math.PI*2 - Math.PI/2 + spin;
+      const inT=eOut(ph(t,20+i*22,20+i*22+360));
+      const rr=lerp(620,160,inT);
+      const sx=lerp(Math.cos(a)*rr, gx, gather);
+      const sy=lerp(Math.sin(a)*rr, gy, gather);
+      el.style.left='50%'; el.style.top=cy+'px';
+      el.style.transform='translate('+sx.toFixed(1)+'px,'+(sy+gridOut*-280).toFixed(1)+'px) scale('+(lerp(.14,1,inT)*lerp(1,.48,gridOut)).toFixed(3)+')';
+      el.style.opacity=(inT*(1-gridOut)).toFixed(3);
+    });
+    ttl.style.top=cy+'px';
+    ttl.style.opacity=(eOut(tIn)*(1-tOut)).toFixed(3);
+    ttl.style.transform='translateY(-50%) scale('+(lerp(.82,1,back(clamp(tIn,0,1)))*lerp(1,1.06,tOut)).toFixed(3)+')';
   }
 
   // ---------- match cards ----------
@@ -297,4 +314,4 @@ window.seek(0);
 </body></html>`;
 
 writeFileSync(DIR + "reel.html", html);
-console.log("reel.html écrit :", (html.length / 1024 / 1024).toFixed(2), "Mo", "| TOTAL", TOTAL);
+console.log("reel.html écrit :", (html.length / 1024 / 1024).toFixed(2), "Mo");
