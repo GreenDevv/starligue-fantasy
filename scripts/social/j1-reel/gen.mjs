@@ -114,36 +114,39 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#05070C}
   transparent 45%, rgba(3,5,9,.62) 48.6%, rgba(255,255,255,.16) 50%, rgba(3,5,9,.62) 51.4%, transparent 55%);will-change:opacity}
 .mc-sweep{position:absolute;inset:-10% -40%;background:linear-gradient(103deg, transparent 46%, rgba(255,255,255,.5) 50%, transparent 54%);
   transform:translateX(-120%);will-change:transform,opacity;opacity:0;mix-blend-mode:screen}
-.mc-edge{position:absolute;top:230px;bottom:290px;width:6px;border-radius:4px;will-change:opacity,transform}
+.mc-edge{position:absolute;top:288px;bottom:430px;width:6px;border-radius:4px;will-change:opacity,transform}
 .mc-edge.eh{left:46px}
 .mc-edge.ea{right:46px}
-.mc-pl{position:absolute;bottom:214px;height:1300px;width:660px;object-fit:contain;
+.mc-pl{position:absolute;bottom:372px;height:1300px;width:660px;object-fit:contain;
   filter:drop-shadow(0 34px 46px rgba(0,0,0,.62));will-change:transform,opacity}
 .mc-pl.ph{left:-70px;object-position:bottom left}
 .mc-pl.pa{right:-70px;object-position:bottom right}
 .mc-vign{position:absolute;inset:0;pointer-events:none;background:
-  linear-gradient(180deg, rgba(5,7,12,.34) 0%, transparent 22%, transparent 58%, rgba(4,6,11,.72) 82%, #04060A 100%),
+  linear-gradient(180deg, rgba(5,7,12,.40) 0%, transparent 18%, transparent 50%, rgba(4,6,11,.74) 74%, #04060A 100%),
   radial-gradient(135% 60% at 50% 32%, transparent 40%, rgba(4,6,11,.4) 100%)}
-.mc-no{position:absolute;top:76px;left:60px;z-index:6;font-family:"Barlow Condensed";font-weight:700;
+/* Zone haute repositionnée pour la « safe area » Instagram (l'UI mange ~200px en
+   haut et ~320px en bas) : n° de match + écussons descendus, infos match remontées
+   sous le face-à-face plutôt qu'en pied de card où elles étaient rognées. */
+.mc-no{position:absolute;top:150px;left:60px;z-index:6;font-family:"Barlow Condensed";font-weight:700;
   font-size:27px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.62);will-change:opacity}
 .mc-no b{color:#F59E0B}
-.mc-head{position:absolute;top:150px;left:0;right:0;z-index:6;display:flex;align-items:center;justify-content:center;gap:70px}
+.mc-head{position:absolute;top:200px;left:0;right:0;z-index:6;display:flex;align-items:center;justify-content:center;gap:70px}
 .mc-crest{width:230px;height:230px;object-fit:contain;will-change:opacity,transform;
   filter:drop-shadow(0 0 3px rgba(255,255,255,.95)) drop-shadow(0 0 2px rgba(255,255,255,.9)) drop-shadow(0 16px 30px rgba(0,0,0,.6))}
 .mc-vs{font-family:"Barlow Condensed";font-weight:800;font-size:82px;line-height:1;color:#F4F7FB;flex:none;
   width:132px;height:132px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   border:2px solid rgba(255,255,255,.28);background:rgba(6,9,14,.5);backdrop-filter:blur(2px);
   box-shadow:0 14px 34px rgba(0,0,0,.5);will-change:opacity,transform}
-.mc-nm{position:absolute;bottom:300px;z-index:7;display:flex;flex-direction:column;padding:8px 4px;will-change:opacity,transform}
+.mc-nm{position:absolute;bottom:500px;z-index:7;display:flex;flex-direction:column;padding:8px 4px;will-change:opacity,transform}
 .mc-nm i{font-family:"Barlow Condensed";font-weight:700;font-size:24px;letter-spacing:.16em;font-style:normal;
   text-transform:uppercase;color:rgba(255,255,255,.78);text-shadow:0 2px 8px #000}
 .mc-nm b{font-family:"Barlow Condensed";font-weight:800;font-size:66px;line-height:.9;letter-spacing:.005em;
   text-transform:uppercase;color:#fff;text-shadow:0 4px 14px #000, 0 0 30px rgba(0,0,0,.9)}
 .mc-nm.ph{left:60px;align-items:flex-start}
 .mc-nm.pa{right:60px;align-items:flex-end;text-align:right}
-.mc-info{position:absolute;left:0;right:0;bottom:96px;z-index:8;display:flex;align-items:center;justify-content:center;gap:20px;
-  padding:0 56px;font-family:"Barlow Condensed";font-weight:700;text-transform:uppercase;
-  color:#CBD5E1;font-size:26px;letter-spacing:.12em;will-change:opacity,transform}
+.mc-info{position:absolute;left:0;right:0;bottom:356px;z-index:8;display:flex;align-items:center;justify-content:center;gap:18px;
+  padding:0 70px;font-family:"Barlow Condensed";font-weight:700;text-transform:uppercase;
+  color:#CBD5E1;font-size:26px;letter-spacing:.1em;will-change:opacity,transform}
 .mc-info .mc-i-dt{color:#fff}
 .mc-info .mc-i-sep{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.35);flex:none}
 .mc-info .mc-i-tv{height:34px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(255,255,255,.6))}
