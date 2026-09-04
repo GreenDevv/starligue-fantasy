@@ -1,11 +1,18 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
 
 const DIR = "/private/tmp/claude-501/-Users-tish-Projects-starligue-fantasy/47887ec3-5ee4-4513-ad7b-f4545bc385dc/scratchpad/reelj1/";
 const REPO = "/Users/tish/Projects/starligue-fantasy/";
+const OVERRIDES = REPO + "scripts/social/j1-reel/logo-overrides/";
 
 const d = JSON.parse(readFileSync(DIR + "data.json", "utf-8"));
 const b64 = (p) => "data:image/png;base64," + readFileSync(p).toString("base64");
 const clubLogo = (sn) => b64(REPO + "public/clubs/" + sn.toLowerCase() + ".png");
+// Sur le plan final, les écussons sont posés sur fond sombre sans pastille blanche.
+// Ceux dont l'encre est trop sombre/fine pour un simple liseré blanc (USAM/Nîmes,
+// « nîmes gard » écrit en noir) ont une version recolorée (encre sombre → clair)
+// dans logo-overrides/ — repli sur le logo normal si absent.
+const hasOverride = (sn) => existsSync(OVERRIDES + sn.toLowerCase() + ".png");
+const finaleLogo = (sn) => (hasOverride(sn) ? b64(OVERRIDES + sn.toLowerCase() + ".png") : clubLogo(sn));
 const playerImg = (sn) => b64(DIR + "players/" + sn + ".png");
 const tvLogo = (name) => b64(REPO + "public/broadcasters/" + (name === "beIN Sport" ? "bein-sport" : "handball-tv") + ".png");
 const dayShort = (day) => day.replace("Vendredi", "VEN").replace("Samedi", "SAM").replace("Dimanche", "DIM").replace(" sept.", " SEPT");
@@ -13,7 +20,11 @@ const dayShort = (day) => day.replace("Vendredi", "VEN").replace("Samedi", "SAM"
 // ---- intro : 16 logos en spirale (consistency avec le reel 16-maillots) ----
 const INTRO_CLUBS = ["MHB", "USAM", "LIMOGES", "CCMHB", "SAHB", "TREMBLAY", "CRMHB", "HBCN",
   "SARAN", "PAUC", "CSMBH", "SRVH", "CAEN", "FENIX", "USDK", "PSG"];
-const introLogos = INTRO_CLUBS.map((sn) => `<div class="ic"><img src="${clubLogo(sn)}"/></div>`).join("");
+// Mêmes overrides qu'au plan final : logos en encre sombre recolorés pour rester
+// lisibles sur fond sombre (USAM/Nîmes, CRMHB) — sinon ils disparaissent aussi ici.
+const introLogos = INTRO_CLUBS.map((sn) =>
+  `<div class="ic${hasOverride(sn) ? " ov" : ""}"><img src="${finaleLogo(sn)}"/></div>`
+).join("");
 
 // ---- match cards ----
 const cards = d.fixtures.map((f, i) => {
@@ -51,14 +62,15 @@ const cards = d.fixtures.map((f, i) => {
 }).join("\n  ");
 
 // ---- final plan rows ----
+const frC = (sn) => `<span class="fr-c${hasOverride(sn) ? " ov" : ""}"><img src="${finaleLogo(sn)}"/></span>`;
 const rows = d.fixtures.map((f, i) => `<div class="fr" id="FR${i}">
-      <span class="fr-c"><img src="${clubLogo(f.home)}"/></span>
+      ${frC(f.home)}
       <div class="fr-m">
         <span class="fr-d">${dayShort(f.day)}</span>
         <span class="fr-t">${f.time}</span>
         <span class="fr-tv"><img src="${tvLogo(f.tv)}"/></span>
       </div>
-      <span class="fr-c"><img src="${clubLogo(f.away)}"/></span>
+      ${frC(f.away)}
     </div>`).join("\n      ");
 
 const html = `<!doctype html><html><head><meta charset="utf-8">
@@ -79,6 +91,7 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#05070C}
 #intro .ic{position:absolute;left:50%;top:42%;width:150px;height:150px;margin:-75px 0 0 -75px;will-change:transform,opacity}
 #intro .ic img{width:100%;height:100%;object-fit:contain;
   filter:drop-shadow(0 0 3px rgba(255,255,255,.9)) drop-shadow(0 0 2px rgba(255,255,255,.85)) drop-shadow(0 10px 20px rgba(0,0,0,.6))}
+#intro .ic.ov img{filter:drop-shadow(0 0 2px rgba(0,0,0,.4)) drop-shadow(0 10px 20px rgba(0,0,0,.6))}
 #intro .ttl{position:absolute;left:0;right:0;top:42%;text-align:center;transform:translateY(-50%);will-change:transform,opacity}
 #intro .ttl .k{font-family:"Barlow Condensed";font-weight:700;font-size:29px;letter-spacing:.42em;
   text-transform:uppercase;color:#2DD4BF}
@@ -146,13 +159,22 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#05070C}
 #finale .ft b{color:#F59E0B}
 #finale .fsub{position:absolute;top:318px;left:0;right:0;text-align:center;font-family:"Barlow Condensed";
   font-weight:700;font-size:30px;letter-spacing:.22em;text-transform:uppercase;color:#94A3B8;will-change:opacity,transform}
-#finale .list{position:absolute;left:54px;right:54px;top:398px;display:flex;flex-direction:column;gap:11px}
-#finale .fr{display:grid;grid-template-columns:150px 1fr 150px;align-items:center;
+#finale .list{position:absolute;left:54px;right:54px;top:392px;display:flex;flex-direction:column;gap:10px}
+#finale .fr{display:grid;grid-template-columns:172px 1fr 172px;align-items:center;
   background:linear-gradient(120deg,#151B24,#0B0F16);border-radius:18px;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);padding:13px 34px;will-change:transform,opacity}
-#finale .fr-c{width:118px;height:118px;border-radius:16px;background:rgba(255,255,255,.97);
-  display:flex;align-items:center;justify-content:center;justify-self:center;box-shadow:0 8px 18px rgba(0,0,0,.4)}
-#finale .fr-c img{width:78%;height:78%;object-fit:contain}
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);padding:10px 30px;will-change:transform,opacity}
+/* Écusson posé directement sur la ligne — plus de pastille blanche. Contour blanc
+   serré (drop-shadows 1px empilés = un liseré) + foyer lumineux radial doux :
+   les logos en trait fin sombre (USAM/Nîmes écrit en noir, PAUC, CRMHB) prennent
+   un cerne blanc qui les détache du fond, sans carré blanc derrière. */
+#finale .fr-c{width:138px;height:138px;display:flex;align-items:center;justify-content:center;
+  justify-self:center;
+  background:radial-gradient(circle at 50% 47%, rgba(255,255,255,.20) 0%, rgba(255,255,255,.07) 40%, transparent 66%)}
+#finale .fr-c img{width:88%;height:88%;object-fit:contain;
+  filter:drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff) drop-shadow(0 0 4px rgba(255,255,255,.4))
+    drop-shadow(0 5px 12px rgba(0,0,0,.5))}
+/* logos recolorés (encre déjà claire) : liseré plus léger, pas de bloom sur le trait fin */
+#finale .fr-c.ov img{filter:drop-shadow(0 0 2px rgba(0,0,0,.35)) drop-shadow(0 5px 12px rgba(0,0,0,.5))}
 #finale .fr-m{display:flex;flex-direction:column;align-items:center;gap:1px}
 #finale .fr-m .fr-d{font-family:"Barlow Condensed";font-weight:700;font-size:23px;letter-spacing:.16em;color:#8A97A8}
 #finale .fr-m .fr-t{font-family:"Barlow Condensed";font-weight:800;font-size:52px;line-height:.92;letter-spacing:.01em;color:#fff}
