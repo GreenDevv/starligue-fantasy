@@ -40,6 +40,15 @@ export async function POST(request: Request) {
 
   for (const gameweek of gameweeks) {
     for (const team of teams) {
+      // Garde-fou anti-rattrapage : une équipe dont l'effectif a été confirmé
+      // APRÈS la deadline d'une journée ne doit jamais être snapshotée sur cette
+      // journée (sinon elle marquerait des points sur une journée déjà jouée, en
+      // partie avec les résultats connus). `validatedAt` = dernière validation de
+      // l'effectif ; fallback sur `createdAt` pour les équipes antérieures au
+      // backfill (scripts/backfill-team-validated-at.ts).
+      const confirmedAt = team.validatedAt ?? team.createdAt;
+      if (confirmedAt > gameweek.deadlineAt) continue;
+
       const existing = await prisma.fantasyLineup.findUnique({
         where: {
           fantasyTeamId_gameweekId: {
