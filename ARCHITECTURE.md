@@ -176,6 +176,12 @@ Règle d'or de l'ingestion : **tout est idempotent** (upsert par `externalId` + 
 J-7   Cron daily : sync calendrier → upsert matchs de la journée, calcul deadlineAt
 J-0   deadline − 1h : plus de modif d'alignement (contrôle côté API, pas de job nécessaire)
       deadline : job `snapshot-lineups` fige l'alignement de chaque user (copie en fantasy_lineup)
+        — garde-fou : une équipe dont l'effectif a été confirmé après la deadline est ignorée
+          (`(FantasyTeam.validatedAt ?? createdAt) > gameweek.deadlineAt`) — un nouvel inscrit qui
+          valide son effectif après la deadline ne marque pas de points sur la journée déjà en
+          cours ; le job reste rejouable tant que la journée n'est pas `isScored`.
+          `validatedAt` est posé à chaque `POST /api/my-team/squad` et en fin de draft enchères ;
+          backfill des équipes antérieures sur `createdAt` (scripts/backfill-team-validated-at.ts).
 J-0   soir : cron `sync-results` (toutes les 2h de 20h à 2h) → scores des matchs
 J+1   matin : notes LNH publiées → cron `sync-ratings` (scraper) OU import CSV admin
       dès que toutes les notes d'un match sont là → job `compute-scores` :

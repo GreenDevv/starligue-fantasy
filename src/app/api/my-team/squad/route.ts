@@ -130,7 +130,7 @@ export async function POST(request: Request) {
       });
       await tx.fantasyTeam.update({
         where: { id: ctx.teamId },
-        data: { budget: budget - totalSpent, isValidated: true, captainId: null },
+        data: { budget: budget - totalSpent, isValidated: true, validatedAt: new Date(), captainId: null },
       });
     });
   }

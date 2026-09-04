@@ -69,7 +69,7 @@ export async function resolveRoundNow(roundId: string): Promise<void> {
       for (const teamId of affectedTeamIds) {
         const count = await tx.fantasySquadPlayer.count({ where: { fantasyTeamId: teamId } });
         if (count === 14) {
-          await tx.fantasyTeam.update({ where: { id: teamId }, data: { isValidated: true, captainId: null } });
+          await tx.fantasyTeam.update({ where: { id: teamId }, data: { isValidated: true, validatedAt: new Date(), captainId: null } });
         }
       }
     }
