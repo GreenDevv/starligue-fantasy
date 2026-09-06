@@ -10,6 +10,8 @@ const OUT = join(HERE, "out");
 const data = JSON.parse(readFileSync(join(OUT, "data.json"), "utf8"));
 
 const b64 = (name) => `data:image/png;base64,${readFileSync(join(OUT, name)).toString("base64")}`;
+const REEL = "/private/tmp/claude-501/-Users-tish-Projects-starligue-fantasy/864acd49-1050-43cb-9adb-5972703f0ea6/scratchpad/recap-reel/reel-recap-j1.mp4";
+const reelDataUri = `data:video/mp4;base64,${readFileSync(REEL).toString("base64")}`;
 
 const HASHTAGS = "#StarligueFantasy #Handball #FantasyHandball #DaikinStarLigue #LNH";
 
@@ -180,6 +182,12 @@ const html = `<title>Pack contenu Journée 1</title>
     padding: 3px 9px; border-radius: 999px; }
   .status.wip { background: rgba(245,158,11,0.14); color: var(--amber); border: 1px solid rgba(245,158,11,0.4); }
   .status.ok { background: rgba(45,212,191,0.14); color: var(--teal); border: 1px solid rgba(45,212,191,0.4); }
+  .reel-panel { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; gap: 26px; align-items: start; }
+  .reel-panel video { width: 100%; border-radius: 12px; background: #000; display: block; }
+  .acts { margin: 0; padding-left: 20px; }
+  .acts li { margin: 7px 0; color: #cbd5e1; font-size: 13.5px; }
+  .acts li b { color: var(--text); }
+  @media (max-width: 640px) { .reel-panel { grid-template-columns: 1fr; } .reel-panel video { max-width: 300px; margin: 0 auto; } }
   .foot { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
   @media (prefers-color-scheme: light) {
     :root:not([data-theme="dark"]) {
@@ -198,43 +206,64 @@ const html = `<title>Pack contenu Journée 1</title>
     <p class="eyebrow">Brouillons — à valider avant publication</p>
     <h1>Pack contenu <span>Journée 1</span></h1>
     <p class="lede">
-      Cinq visuels statiques (1080×1350) générés depuis les vraies données J1 de la prod.
-      Rien n'est publié sur Instagram. Le reel récap arrive dans un second envoi.
+      Cinq visuels statiques (1080×1350) + le reel récap (1080×1920, ~42 s), générés
+      depuis les vraies données J1 de la prod. Rien n'est publié sur Instagram.
     </p>
   </header>
 
   <h2>Les 5 posts <span class="status ok">rendus</span></h2>
   <div class="grid">${cards}</div>
 
-  <h2>Le reel récap fantasy <span class="status wip">en cours</span></h2>
+  <h2>Le reel récap fantasy <span class="status ok">rendu</span></h2>
+  <div class="panel reel-panel">
+    <video src="${reelDataUri}" controls playsinline preload="metadata"></video>
+    <div class="reel-notes">
+      <p style="margin:0 0 12px;color:var(--muted);font-size:14px">
+        Vertical 1080×1920, muet (musique à ajouter dans l'app IG), ~47 s. Brouillon
+        aussi en ligne : <code>starliguefantasy.fr/social/reel-recap-j1.mp4</code>. Non publié.
+        <b>v2</b> — retours du 06/09 intégrés.
+      </p>
+      <ol class="acts">
+        <li><b>Intro</b> — les 16 logos en spirale → « JOURNÉE 1 · le récap »</li>
+        <li><b>Les 8 matchs, un par un</b> — fiche face-à-face (écussons + halos couleur club + score en gros)</li>
+        <li><b>Le plan des 8 rencontres</b> — récap sur un écran</li>
+        <li><b>Le classement bouge</b> — 16 clubs à 0-0-0 en ordre alphabétique (« avant la J1 »), puis les points s'affichent et chaque ligne glisse vers son rang J1 <i>(inchangé)</i></li>
+        <li><b>L'équipe type sur le terrain</b> — PitchView, écussons de club + points par joueur</li>
+        <li><b>Le top 3 managers</b> — classement général, points de la journée</li>
+        <li><b>La journée en chiffres</b> — moyenne 78,8 pts + le club de cœur (MHB, 250 pts fantasy sur la journée)</li>
+        <li><b>Plan final</b> — Starligue Fantasy + les 16 logos</li>
+      </ol>
+      <p style="margin:12px 0 0;color:var(--muted);font-size:13px">
+        Retiré vs v1 : le tableau des meilleures perfs (l'équipe type sur le terrain le remplace).
+        Imperfections restantes : quelques chevauchements très courts pendant le re-tri du classement ;
+        têtes des joueurs les plus hauts du terrain effleurées par le bord ; pseudos managers en capitales.
+      </p>
+    </div>
+  </div>
+
+  <h2>Données figées du reel (contrôle)</h2>
   <div class="panel">
-    <p style="margin:0 0 14px;color:var(--muted);font-size:14px">
-      Vertical 1080×1920, muet, ~45 s. 5 actes : intro → les 8 scores → le classement qui bouge
-      (16 clubs à 0-0-0, ordre alphabétique, puis chaque ligne glisse vers son rang J1) →
-      récap fantasy → plan final. Données ci-dessous, figées.
-    </p>
     <div class="cols">
       <div>
         <h4>Équipe type J1</h4>
         <pre>${bestXI}</pre>
       </div>
       <div>
-        <h4>Top 5 performances fantasy</h4>
-        <pre>${data.fantasy.performances
-          .map((p, i) => `${i + 1}. ${p.player ? p.player.firstName + " " + p.player.lastName : "?"} — ${p.points} pts (note ${p.lnhRating})`)
-          .join("\n")}</pre>
+        <h4>Top 3 classement général</h4>
+        <pre>${topFantasy}</pre>
       </div>
       <div>
-        <h4>Top 5 classement général</h4>
-        <pre>${topFantasy}</pre>
+        <h4>Club de cœur (points fantasy / journée)</h4>
+        <pre>${(data.clubFantasyRanking ?? [])
+          .map((c, i) => `${i + 1}. ${c.shortName} — ${c.points} pts (${c.players} j.)`)
+          .join("\n")}</pre>
       </div>
       <div>
         <h4>Repères journée</h4>
         <pre>Moyenne : ${data.fantasy.avgGwPoints} pts
 Médiane : ${data.fantasy.medianGwPoints} pts
 Meilleur score : ${data.fantasy.maxGwPoints} pts
-Équipes notées : ${data.fantasy.lineupCount}
-Meilleur club : ${data.bestClub.shortName} (${data.bestClub.points} pts, ${data.bestClub.goalAvg > 0 ? "+" : ""}${data.bestClub.goalAvg})</pre>
+Équipes notées : ${data.fantasy.lineupCount}</pre>
       </div>
     </div>
   </div>

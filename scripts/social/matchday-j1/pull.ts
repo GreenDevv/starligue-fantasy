@@ -18,7 +18,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { prisma } from "@/lib/db";
 import { getStatLeaders } from "@/lib/stats/get-stat-leaders";
-import { computeGameweekBestXI } from "@/lib/players/compute-gameweek-best-xi";
+import { computeGameweekBestXI, computeGameweekPlayerPoints } from "@/lib/players/compute-gameweek-best-xi";
 import { computeBestPerformances } from "@/lib/players/compute-best-performances";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -115,6 +115,27 @@ async function main() {
       }
     : null;
 
+  // 7. « Club de cœur » = club Starligue dont les joueurs ont cumulé le plus de
+  //    points fantasy sur la journée (titulaire, hors capitaine — même hypothèse
+  //    que l'équipe type / les meilleures perfs).
+  const gwPlayerPoints = await computeGameweekPlayerPoints(gameweek.id);
+  const allPlayers = await prisma.player.findMany({
+    where: { id: { in: [...gwPlayerPoints.keys()] } },
+    select: { id: true, clubId: true, club: { select: { name: true, shortName: true, logoUrl: true } } },
+  });
+  const clubAgg = new Map<string, { name: string; shortName: string; logoUrl: string | null; points: number; players: number }>();
+  for (const p of allPlayers) {
+    const pts = gwPlayerPoints.get(p.id) ?? 0;
+    const cur = clubAgg.get(p.clubId) ?? { name: p.club.name, shortName: p.club.shortName, logoUrl: p.club.logoUrl, points: 0, players: 0 };
+    cur.points += pts;
+    cur.players += 1;
+    clubAgg.set(p.clubId, cur);
+  }
+  const clubFantasyRanking = [...clubAgg.values()]
+    .map((c) => ({ ...c, points: Math.round(c.points * 10) / 10 }))
+    .sort((a, b) => b.points - a.points);
+  const heartClub = clubFantasyRanking[0] ?? null;
+
   const data = {
     generatedAt: new Date().toISOString(),
     season: season.label,
@@ -142,6 +163,8 @@ async function main() {
       minGwPoints: pts.length ? Math.min(...pts) : 0,
     },
     bestClub,
+    heartClub,
+    clubFantasyRanking: clubFantasyRanking.slice(0, 5),
   };
 
   const outPath = join(HERE, "out", "data.json");
@@ -158,6 +181,7 @@ async function main() {
     avgGwPoints: data.fantasy.avgGwPoints,
     lineupCount: data.fantasy.lineupCount,
     bestClub: bestClub?.shortName,
+    heartClub: heartClub ? `${heartClub.shortName} ${heartClub.points}` : null,
   }, null, 2));
 }
 
