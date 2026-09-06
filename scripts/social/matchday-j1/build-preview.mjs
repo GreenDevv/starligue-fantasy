@@ -219,24 +219,25 @@ const html = `<title>Pack contenu Journée 1</title>
     <video src="${reelDataUri}" controls playsinline preload="metadata"></video>
     <div class="reel-notes">
       <p style="margin:0 0 12px;color:var(--muted);font-size:14px">
-        Vertical 1080×1920, muet (musique à ajouter dans l'app IG), ~47 s. Brouillon
+        Vertical 1080×1920, muet (musique à ajouter dans l'app IG), ~50 s. Brouillon
         aussi en ligne : <code>starliguefantasy.fr/social/reel-recap-j1.mp4</code>. Non publié.
-        <b>v2</b> — retours du 06/09 intégrés.
+        <b>v3</b> — retours du 06/09 intégrés.
       </p>
       <ol class="acts">
         <li><b>Intro</b> — les 16 logos en spirale → « JOURNÉE 1 · le récap »</li>
         <li><b>Les 8 matchs, un par un</b> — fiche face-à-face (écussons + halos couleur club + score en gros)</li>
         <li><b>Le plan des 8 rencontres</b> — récap sur un écran</li>
         <li><b>Le classement bouge</b> — 16 clubs à 0-0-0 en ordre alphabétique (« avant la J1 »), puis les points s'affichent et chaque ligne glisse vers son rang J1 <i>(inchangé)</i></li>
-        <li><b>L'équipe type sur le terrain</b> — PitchView, écussons de club + points par joueur</li>
+        <li><b>L'équipe type sur le terrain</b> — PitchView, écusson de club + pastille de points sur le buste (plus sur le visage)</li>
         <li><b>Le top 3 managers</b> — classement général, points de la journée</li>
-        <li><b>La journée en chiffres</b> — moyenne 78,8 pts + le club de cœur (MHB, 250 pts fantasy sur la journée)</li>
+        <li><b>Les clubs de cœur</b> — top 3 du classement des clubs d'origine des managers, avec écusson FFHandball (comme le top 3 managers)</li>
+        <li><b>La moyenne de la journée</b> — 78,8 pts, sans le nombre d'équipes</li>
         <li><b>Plan final</b> — Starligue Fantasy + les 16 logos</li>
       </ol>
       <p style="margin:12px 0 0;color:var(--muted);font-size:13px">
-        Retiré vs v1 : le tableau des meilleures perfs (l'équipe type sur le terrain le remplace).
         Imperfections restantes : quelques chevauchements très courts pendant le re-tri du classement ;
-        têtes des joueurs les plus hauts du terrain effleurées par le bord ; pseudos managers en capitales.
+        têtes des joueurs les plus hauts du terrain effleurées par le bord ; pseudos managers en capitales ;
+        durée ~50 s.
       </p>
     </div>
   </div>
@@ -253,9 +254,9 @@ const html = `<title>Pack contenu Journée 1</title>
         <pre>${topFantasy}</pre>
       </div>
       <div>
-        <h4>Club de cœur (points fantasy / journée)</h4>
-        <pre>${(data.clubFantasyRanking ?? [])
-          .map((c, i) => `${i + 1}. ${c.shortName} — ${c.points} pts (${c.players} j.)`)
+        <h4>Clubs de cœur (clubs d'origine des managers)</h4>
+        <pre>${(data.homeClubRanking ?? [])
+          .map((c) => `${c.rank}. ${c.name} — ${c.points} pts${c.managers > 1 ? ` (${c.managers} managers)` : ""}`)
           .join("\n")}</pre>
       </div>
       <div>
