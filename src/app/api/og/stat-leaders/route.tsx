@@ -21,10 +21,16 @@ export const dynamic = "force-dynamic";
 
 const SIZE = { width: 1080, height: 1350 };
 const HERO_HEIGHT = 620;
+// Les photos lnh.fr "small_" sont des portraits détourés en 2:3 (≈350×525), tête en
+// haut. En les rendant à pleine largeur (1080×1620, même ratio 2:3) ancrées top:0
+// dans le bandeau hero (overflow hidden à 620px), on garde le visage visible —
+// Satori ignore `object-position`, d'où ce calage par la taille + top plutôt qu'un
+// simple objectFit: cover (qui recadrait au centre = poitrine seule).
+const HERO_PHOTO_HEIGHT = 1620;
 
 const querySchema = z.object({
   statKey: z.enum(STAT_LINE_KEYS),
-  scope: z.enum(["season", "average"]),
+  scope: z.enum(["season", "average", "gameweek"]),
   seasonId: z.string().min(1),
   gameweekNumber: z.coerce.number().int().min(1).optional(),
 });
@@ -65,7 +71,7 @@ function initials(firstName: string, lastName: string): string {
   return `${a}${b}`.toUpperCase() || "?";
 }
 
-function formatValue(value: number, scope: "season" | "average"): string {
+function formatValue(value: number, scope: "season" | "average" | "gameweek"): string {
   return scope === "average" ? value.toFixed(1) : String(Math.round(value));
 }
 
@@ -104,7 +110,7 @@ export async function GET(request: Request) {
   const statLine = getStatLine(statKey);
 
   const [{ leaders }, fonts] = await Promise.all([
-    getStatLeaders({ statKey, scope, seasonId }),
+    getStatLeaders({ statKey, scope, seasonId, gameweekNumber }),
     loadFonts(),
   ]);
 
@@ -120,7 +126,8 @@ export async function GET(request: Request) {
   const rest = rows.slice(1, 5);
 
   const title = statLine?.label.toUpperCase() ?? statKey;
-  const scopeBadge = scope === "average" ? "MOYENNE / MATCH" : "TOTAL SAISON";
+  const scopeBadge =
+    scope === "average" ? "MOYENNE / MATCH" : scope === "gameweek" ? "SUR LA JOURNÉE" : "TOTAL SAISON";
 
   return new ImageResponse(
     (
@@ -202,7 +209,7 @@ export async function GET(request: Request) {
               <img
                 src={hero.leader.photoUrl}
                 width={SIZE.width}
-                height={HERO_HEIGHT}
+                height={HERO_PHOTO_HEIGHT}
                 style={{ position: "absolute", top: 0, left: 0, objectFit: "cover" }}
               />
             ) : (
