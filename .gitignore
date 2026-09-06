@@ -23,6 +23,7 @@ next-env.d.ts
 /.qodo
 /.impeccable
 skills-lock.json
+/scratch
 
 # debug
 npm-debug.log*

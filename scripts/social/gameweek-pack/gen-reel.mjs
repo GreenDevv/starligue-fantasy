@@ -1,29 +1,41 @@
-// Génère reel.html (self-contained, window.seek(t)) — reel « Récap Journée 1 ».
-// Actes : intro 16 logos → les 8 matchs un par un (fiche face-à-face, écussons +
-// score) → le plan des 8 rencontres → le classement Starligue qui passe de J0
-// (alphabétique, 0-0-0) au tableau J1 en se re-triant → l'équipe type sur le
-// terrain (PitchView, écussons de club + points) → le top 3 managers → la journée
-// en chiffres (moyenne + club de cœur = club qui a rapporté le + de points) →
-// plan final.
+// Étape « reel » du pack : construit <outDir>/reel/reel.html (self-contained,
+// window.seek(t)) à partir de <outDir>/data.json. Télécharge photos joueurs (lnh.fr)
+// et écussons des clubs d'origine (FFHandball) en data URI dans <outDir>/reel/assets/.
 //
-//   node scripts/social/matchday-j1/reel/gen.mjs
+//   node scripts/social/gameweek-pack/gen-reel.mjs <outDir>
 //
-// Lit <scratch>/recap-reel/data.json (scripts/social/matchday-j1/pull.ts), écrit
-// <scratch>/recap-reel/reel.html. Télécharge les photos joueurs lnh.fr manquantes.
+// Actes : intro 16 logos → les matchs un par un (fiche face-à-face) → le plan des
+// rencontres → le classement Starligue qui passe de J-1 (alphabétique, 0-0-0) au
+// tableau de la journée en se re-triant → l'équipe type sur le terrain (port de
+// HandballPitch.tsx) → les 5 meilleures perfs → le top 3 managers + la moyenne en
+// pied → les clubs de cœur → plan final.
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
+import { REPO, HERE } from "./config.mjs";
 
-const SCRATCH = "/private/tmp/claude-501/-Users-tish-Projects-starligue-fantasy/864acd49-1050-43cb-9adb-5972703f0ea6/scratchpad/";
-const DIR = SCRATCH + "recap-reel/";
-const REPO = "/Users/tish/Projects/starligue-fantasy/";
-const PLAYERS = DIR + "players/";
-mkdirSync(PLAYERS, { recursive: true });
+const OUT_DIR = process.argv[2];
+if (!OUT_DIR) {
+  console.error("usage: gen-reel.mjs <outDir>");
+  process.exit(1);
+}
+const REEL_DIR = join(OUT_DIR, "reel");
+const ASSETS = join(REEL_DIR, "assets");
+mkdirSync(ASSETS, { recursive: true });
 
-const d = JSON.parse(readFileSync(DIR + "data.json", "utf-8"));
-const b64 = (p) => "data:image/png;base64," + readFileSync(p).toString("base64");
-const OVR = REPO + "scripts/social/matchday-j1/reel/logo-overrides/";
-const hasOvr = (sn) => existsSync(OVR + sn.toLowerCase() + ".png");
-const clubLogo = (sn) => b64(hasOvr(sn) ? OVR + sn.toLowerCase() + ".png" : REPO + "public/clubs/" + sn.toLowerCase() + ".png");
-const rawLogo = (sn) => b64(REPO + "public/clubs/" + sn.toLowerCase() + ".png");
+const d = JSON.parse(readFileSync(join(OUT_DIR, "data.json"), "utf-8"));
+const GW = d.gameweek.number;
+const N = d.matches.length;
+// "2026-2027" → "26·27"
+const SEASON_SHORT = (() => {
+  const m = String(d.season).match(/(\d{2})(\d{2}).*?(\d{2})(\d{2})/);
+  return m ? `${m[2]}·${m[4]}` : String(d.season);
+})();
+
+const b64file = (p) => "data:image/png;base64," + readFileSync(p).toString("base64");
+const OVR = join(HERE, "reel", "logo-overrides");
+const hasOvr = (sn) => existsSync(join(OVR, sn.toLowerCase() + ".png"));
+const clubLogo = (sn) => b64file(hasOvr(sn) ? join(OVR, sn.toLowerCase() + ".png") : join(REPO, "public/clubs", sn.toLowerCase() + ".png"));
+const rawLogo = (sn) => b64file(join(REPO, "public/clubs", sn.toLowerCase() + ".png"));
 
 // Couleur primaire par club (reprise du reel « 16 maillots » / programme-journée).
 const COLOR = {
@@ -31,13 +43,14 @@ const COLOR = {
   TREMBLAY: "#F5C518", CRMHB: "#E2001A", HBCN: "#00A651", SARAN: "#2E7BD6", PAUC: "#E2001A",
   CSMBH: "#FFD200", SRVH: "#E4123A", CAEN: "#E4002B", FENIX: "#5CB8E6", USDK: "#E2001A", PSG: "#E30613",
 };
+const colorOf = (sn) => COLOR[sn] || "#2DD4BF";
 // Clubs dont le logo a besoin d'un fond blanc en petit (cf. src/components/ui/ClubLogo.tsx)
 const WHITE_BG = new Set(["CRMHB", "USAM"]);
 
 // ---- photos joueurs (téléchargées une fois, UA navigateur + Referer lnh.fr) ----
 const slug = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
 async function ensurePhoto(playerKey, url) {
-  const f = PLAYERS + slug(playerKey) + ".png";
+  const f = join(ASSETS, slug(playerKey) + ".png");
   if (existsSync(f)) return f;
   const res = await fetch(url, {
     headers: { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36", Referer: "https://www.lnh.fr/" },
@@ -57,15 +70,14 @@ for (const [last, first, url] of photoUnits) {
   if (photoPath[k]) continue;
   try { photoPath[k] = await ensurePhoto(k, url); } catch (err) { console.warn(String(err)); }
 }
-const pImg = (last, first) => (photoPath[`${last} ${first}`] ? b64(photoPath[`${last} ${first}`]) : null);
+const pImg = (last, first) => (photoPath[`${last} ${first}`] ? b64file(photoPath[`${last} ${first}`]) : null);
 
-// Logos des clubs d'origine (FFHandball, .webp hotlinké) — téléchargés une fois en
-// data URI pour ne pas dépendre du réseau au moment du rendu Playwright.
+// Logos des clubs d'origine (FFHandball, .webp hotlinké) → data URI.
 const clubLogoDataUri = {};
 for (const c of d.homeClubRanking ?? []) {
   if (!c.logoUrl) continue;
-  const ext = c.logoUrl.split(".").pop().split("?")[0] || "webp";
-  const f = PLAYERS + "club-" + slug(c.name) + "." + ext;
+  const ext = (c.logoUrl.split(".").pop() || "webp").split("?")[0];
+  const f = join(ASSETS, "club-" + slug(c.name) + "." + ext);
   try {
     if (!existsSync(f)) {
       const r = await fetch(c.logoUrl, { headers: { "User-Agent": "Mozilla/5.0" } });
@@ -76,13 +88,10 @@ for (const c of d.homeClubRanking ?? []) {
 }
 
 // ============ données dérivées ============
-const MATCHES = d.matches.map((m) => ({
-  h: m.home.shortName, a: m.away.shortName, hs: m.home.score, as: m.away.score,
-}));
-
-const J1 = d.standing.map((s) => ({ sn: s.clubShortName, rank: s.rank, pts: s.points, ga: s.goalAvg }));
-const alpha = [...J1].map((r) => r.sn).sort((a, b) => a.localeCompare(b));
-for (const r of J1) r.startIdx = alpha.indexOf(r.sn);
+const MATCHES = d.matches.map((m) => ({ h: m.home.shortName, a: m.away.shortName, hs: m.home.score, as: m.away.score }));
+const STAND = d.standing.map((s) => ({ sn: s.clubShortName, rank: s.rank, pts: s.points, ga: s.goalAvg }));
+const alpha = [...STAND].map((r) => r.sn).sort((a, b) => a.localeCompare(b));
+for (const r of STAND) r.startIdx = alpha.indexOf(r.sn);
 
 const XI_ORDER = ["GK", "LW", "LB", "CB", "RB", "RW", "PV"];
 const XI = d.fantasy.bestXI
@@ -93,30 +102,22 @@ const TOP = d.fantasy.topFantasy.slice(0, 3).map((t) => ({
   rank: t.rank, name: t.userName ?? t.teamName, league: t.leagueName ?? "", pts: t.gwPoints,
 }));
 const PERF = (d.fantasy.performances ?? []).slice(0, 5).map((p, i) => ({
-  n: i + 1,
-  first: p.player?.firstName ?? "",
-  last: p.player?.lastName ?? "",
-  sn: p.player?.club?.shortName ?? "",
-  pts: p.points,
-  note: p.lnhRating,
+  n: i + 1, first: p.player?.firstName ?? "", last: p.player?.lastName ?? "",
+  sn: p.player?.club?.shortName ?? "", pts: p.points, note: p.lnhRating,
 }));
 const F = d.fantasy;
-const HEART = d.heartClub;
 const CLUBS = (d.homeClubRanking ?? []).slice(0, 3);
 
 // ============ PITCH (port de src/components/pitch/HandballPitch.tsx) ============
 const COURT = 200, VIEW_TOP = 62, GOAL_DEPTH = 16, BOTTOM_PAD = 4;
 const VIEW_H = COURT + GOAL_DEPTH - VIEW_TOP + BOTTOM_PAD; // 158
-const PHOTO_W = 22, PHOTO_H = PHOTO_W * 1.5; // 22 × 33
+const PHOTO_W = 22, PHOTO_H = PHOTO_W * 1.5;
 const SLOT = {
   GK: { x: 100.9, y: 198 }, PV: { x: 100.3, y: 147 }, LB: { x: 165.4, y: 93 },
   CB: { x: 99.2, y: 99 }, RB: { x: 35.6, y: 95.2 }, LW: { x: 169.1, y: 151 }, RW: { x: 29, y: 154.5 },
 };
 const nameFs = (n) => (n.length > 14 ? 7 : n.length > 10 ? 8 : 9);
-const pct = (c, dx = 0, dy = 0) => ({
-  left: ((c.x + dx) / COURT) * 100,
-  top: ((c.y + dy - VIEW_TOP) / VIEW_H) * 100,
-});
+const pct = (c, dx = 0, dy = 0) => ({ left: ((c.x + dx) / COURT) * 100, top: ((c.y + dy - VIEW_TOP) / VIEW_H) * 100 });
 
 function namePlateSVG(cx, topY, name) {
   const label = name.toUpperCase();
@@ -125,32 +126,23 @@ function namePlateSVG(cx, topY, name) {
   return `<rect x="${(cx - w / 2).toFixed(2)}" y="${topY.toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}" rx="${(h / 2).toFixed(2)}" fill="#060E0A" fill-opacity="0.82" stroke="#2DD4BF" stroke-opacity="0.24" stroke-width="0.5"/>
     <text x="${cx.toFixed(2)}" y="${(topY + h / 2 + fs * 0.34).toFixed(2)}" text-anchor="middle" fill="#F1F5F9" font-size="${fs}" font-weight="700" style="font-family:'Barlow Condensed',sans-serif;letter-spacing:.02em">${label}</text>`;
 }
-
-const pitchNamePlates = XI.map((p) => namePlateSVG(SLOT[p.pos].x, SLOT[p.pos].y + 2, p.last)).join("\n    ");
-
-const pitchPhotos = XI.map((p, i) => {
-  const c = SLOT[p.pos];
-  const pos = pct(c, 0, -PHOTO_H);
-  const wPct = (PHOTO_W / COURT) * 100;
-  const img = pImg(p.last, p.first);
-  return `<div class="pp" id="PP${i}" style="left:${pos.left}%;top:${pos.top}%;width:${wPct}%">
-      ${img ? `<img src="${img}"/>` : ""}
-    </div>`;
+const pitchNamePlates = XI.filter((p) => SLOT[p.pos]).map((p) => namePlateSVG(SLOT[p.pos].x, SLOT[p.pos].y + 2, p.last)).join("\n    ");
+const pitchPhotos = XI.filter((p) => SLOT[p.pos]).map((p, i) => {
+  const c = SLOT[p.pos], pos = pct(c, 0, -PHOTO_H), wPct = (PHOTO_W / COURT) * 100, img = pImg(p.last, p.first);
+  return `<div class="pp" id="PP${i}" style="left:${pos.left}%;top:${pos.top}%;width:${wPct}%">${img ? `<img src="${img}"/>` : ""}</div>`;
 }).join("\n    ");
-
-const pitchBadges = XI.map((p, i) => {
+const pitchBadges = XI.filter((p) => SLOT[p.pos]).map((p, i) => {
   const c = SLOT[p.pos];
   const club = pct(c, PHOTO_W / 2 - 2, -3);
-  const pts = pct(c, -PHOTO_W / 2 - 1, -PHOTO_H * 0.5); // buste gauche, pas sur la tête (cf. HandballPitch.tsx)
-  const badgePct = (9.5 / COURT) * 100;
-  const ptsPct = (14 / COURT) * 100;
-  const white = WHITE_BG.has(p.sn);
-  const pos = p.pts >= 0;
+  const pts = pct(c, -PHOTO_W / 2 - 1, -PHOTO_H * 0.5); // buste gauche, pas sur la tête
+  const badgePct = (9.5 / COURT) * 100, ptsPct = (14 / COURT) * 100;
+  const white = WHITE_BG.has(p.sn), positive = p.pts >= 0;
   return `<div class="pb" id="PB${i}" style="left:${club.left}%;top:${club.top}%;width:${badgePct}%${white ? ";background:#fff" : ""}">
       <img src="${rawLogo(p.sn)}"${white ? ' style="padding:8%"' : ""}/>
     </div>
-    <div class="pv" id="PV${i}" style="left:${pts.left}%;top:${pts.top}%;width:${ptsPct}%;border-color:${pos ? "#34D399" : "#F87171"};color:${pos ? "#34D399" : "#F87171"}">${p.pts}</div>`;
+    <div class="pv" id="PV${i}" style="left:${pts.left}%;top:${pts.top}%;width:${ptsPct}%;border-color:${positive ? "#34D399" : "#F87171"};color:${positive ? "#34D399" : "#F87171"}">${p.pts}</div>`;
 }).join("\n    ");
+const NPITCH = XI.filter((p) => SLOT[p.pos]).length;
 
 // ============ fragments HTML ============
 const introLogos = alpha.map((sn) => `<div class="ic"><img src="${clubLogo(sn)}"/></div>`).join("");
@@ -158,27 +150,19 @@ const introLogos = alpha.map((sn) => `<div class="ic"><img src="${clubLogo(sn)}"
 const matchCards = MATCHES.map((m, i) => {
   const hw = m.hs > m.as, aw = m.as > m.hs;
   return `<div class="mc" id="MC${i}">
-    <div class="mc-glow gh" style="background:radial-gradient(circle, ${COLOR[m.h]}55, transparent 62%)"></div>
-    <div class="mc-glow ga" style="background:radial-gradient(circle, ${COLOR[m.a]}55, transparent 62%)"></div>
+    <div class="mc-glow gh" style="background:radial-gradient(circle, ${colorOf(m.h)}55, transparent 62%)"></div>
+    <div class="mc-glow ga" style="background:radial-gradient(circle, ${colorOf(m.a)}55, transparent 62%)"></div>
     <img class="mc-wm wh" src="${rawLogo(m.h)}"/>
     <img class="mc-wm wa" src="${rawLogo(m.a)}"/>
     <div class="mc-seam"></div>
     <div class="mc-sweep"></div>
-    <div class="mc-edge eh" style="background:${COLOR[m.h]}"></div>
-    <div class="mc-edge ea" style="background:${COLOR[m.a]}"></div>
-    <div class="mc-no">Match <b>${i + 1}</b> / 8</div>
+    <div class="mc-edge eh" style="background:${colorOf(m.h)}"></div>
+    <div class="mc-edge ea" style="background:${colorOf(m.a)}"></div>
+    <div class="mc-no">Match <b>${i + 1}</b> / ${N}</div>
     <div class="mc-body">
-      <div class="mc-side">
-        <img src="${clubLogo(m.h)}"/>
-        <span class="mc-sn ${hw ? "w" : ""}">${m.h}</span>
-      </div>
-      <div class="mc-score">
-        <b class="${hw ? "w" : ""}">${m.hs}</b><i>–</i><b class="${aw ? "w" : ""}">${m.as}</b>
-      </div>
-      <div class="mc-side">
-        <img src="${clubLogo(m.a)}"/>
-        <span class="mc-sn ${aw ? "w" : ""}">${m.a}</span>
-      </div>
+      <div class="mc-side"><img src="${clubLogo(m.h)}"/><span class="mc-sn ${hw ? "w" : ""}">${m.h}</span></div>
+      <div class="mc-score"><b class="${hw ? "w" : ""}">${m.hs}</b><i>&ndash;</i><b class="${aw ? "w" : ""}">${m.as}</b></div>
+      <div class="mc-side"><img src="${clubLogo(m.a)}"/><span class="mc-sn ${aw ? "w" : ""}">${m.a}</span></div>
     </div>
     <div class="mc-final">Terminé</div>
   </div>`;
@@ -189,24 +173,20 @@ const planRows = MATCHES.map((m, i) => {
   return `<div class="pr" id="PR${i}">
     <span class="pr-h ${hw ? "w" : ""}">${m.h}</span>
     <img class="pr-lg" src="${clubLogo(m.h)}"/>
-    <span class="pr-sc"><b class="${hw ? "w" : ""}">${m.hs}</b><i>–</i><b class="${aw ? "w" : ""}">${m.as}</b></span>
+    <span class="pr-sc"><b class="${hw ? "w" : ""}">${m.hs}</b><i>&ndash;</i><b class="${aw ? "w" : ""}">${m.as}</b></span>
     <img class="pr-lg" src="${clubLogo(m.a)}"/>
     <span class="pr-a ${aw ? "w" : ""}">${m.a}</span>
   </div>`;
 }).join("\n");
 
-const standRows = J1.map((r) => `<div class="tr" id="TR${r.sn}" data-start="${r.startIdx}" data-rank="${r.rank}" data-pts="${r.pts}" data-ga="${r.ga}">
-    <span class="tr-pos"></span>
-    <img class="tr-lg" src="${clubLogo(r.sn)}"/>
-    <span class="tr-sn">${r.sn}</span>
-    <span class="tr-j">0</span>
-    <span class="tr-ga">0</span>
-    <span class="tr-pt">0</span>
+const standRows = STAND.map((r) => `<div class="tr" id="TR${r.sn}" data-start="${r.startIdx}" data-rank="${r.rank}" data-pts="${r.pts}" data-ga="${r.ga}">
+    <span class="tr-pos"></span><img class="tr-lg" src="${clubLogo(r.sn)}"/><span class="tr-sn">${r.sn}</span>
+    <span class="tr-j">0</span><span class="tr-ga">0</span><span class="tr-pt">0</span>
   </div>`).join("\n");
 
 const topRows = TOP.map((t, i) => `<div class="cr" id="CR${i}">
     <span class="cr-r">${t.rank}</span>
-    <span class="cr-nm"><b>${t.name}</b>${t.league ? `<em>ligue ${t.league}</em>` : ""}</span>
+    <span class="cr-nm"><b>${esc(t.name)}</b>${t.league ? `<em>ligue ${esc(t.league)}</em>` : ""}</span>
     <span class="cr-pt">${t.pts.toFixed(1)}<u>pts</u></span>
   </div>`).join("\n");
 
@@ -216,22 +196,19 @@ const perfRows = PERF.map((p, i) => {
   return `<div class="qr" id="QR${i}">
     <span class="qr-n">${p.n}</span>
     <span class="qr-face">${img ? `<img src="${img}"/>` : ""}</span>
-    <span class="qr-nm"><i>${p.first}</i><b>${p.last}</b><em>${p.sn}${p.note !== null && p.note !== undefined ? ` · note LNH ${fmtN(p.note)}` : ""}</em></span>
+    <span class="qr-nm"><i>${esc(p.first)}</i><b>${esc(p.last)}</b><em>${esc(p.sn)}${p.note != null ? ` &middot; note LNH ${fmtN(p.note)}` : ""}</em></span>
     <span class="qr-pt">${fmtN(p.pts)}<u>pts</u></span>
   </div>`;
 }).join("\n");
 
-const clubEscape = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
-// Nom court pour l'affichage : on retire le suffixe générique (« HANDBALL », « HB »,
-// « HBC »…) — l'écusson et le sous-titre ville portent déjà le contexte.
-const shortClubName = (n) =>
-  String(n).replace(/\s+(HANDBALL|HAND|HB|HBC|HBH|H\.?B\.?|CLUB)\.?$/i, "").trim() || String(n);
+function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+const shortClubName = (n) => String(n).replace(/\s+(HANDBALL|HAND|HB|HBC|HBH|H\.?B\.?|CLUB)\.?$/i, "").trim() || String(n);
 const clubRows = CLUBS.map((c, i) => {
   const logo = clubLogoDataUri[c.name];
   return `<div class="cr cr-club" id="KR${i}">
     <span class="cr-r">${c.rank}</span>
-    <span class="cr-badge">${logo ? `<img src="${logo}"/>` : `<span>${clubEscape(c.name).charAt(0)}</span>`}</span>
-    <span class="cr-nm"><b>${clubEscape(shortClubName(c.name))}</b>${c.city ? `<em>${clubEscape(c.city)}${c.managers > 1 ? ` · ${c.managers} managers` : ""}</em>` : ""}</span>
+    <span class="cr-badge">${logo ? `<img src="${logo}"/>` : `<span>${esc(c.name).charAt(0)}</span>`}</span>
+    <span class="cr-nm"><b>${esc(shortClubName(c.name))}</b>${c.city ? `<em>${esc(c.city)}${c.managers > 1 ? ` &middot; ${c.managers} managers` : ""}</em>` : ""}</span>
     <span class="cr-pt">${c.points.toFixed(1)}<u>pts</u></span>
   </div>`;
 }).join("\n");
@@ -252,8 +229,6 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
 .bg-rad{background:
   radial-gradient(ellipse 90% 34% at 50% 4%, rgba(45,212,191,.16), transparent 60%),
   radial-gradient(ellipse 70% 40% at 92% 100%, rgba(245,158,11,.12), transparent 60%), #0E1116}
-
-/* ---------- intro ---------- */
 #intro{z-index:80;overflow:hidden;background:radial-gradient(circle at 50% 32%, rgba(45,212,191,.18), transparent 54%),
   radial-gradient(circle at 84% 92%, rgba(245,158,11,.13), transparent 46%), #0B0F16}
 #intro .ic{position:absolute;left:50%;top:46%;width:150px;height:150px;margin:-75px 0 0 -75px;will-change:transform,opacity}
@@ -263,8 +238,6 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
 #intro .ttl .m{font-family:"Barlow Condensed";font-weight:800;font-size:180px;line-height:.86;text-transform:uppercase;margin-top:18px;letter-spacing:-.01em}
 #intro .ttl .m b{color:#F59E0B}
 #intro .ttl .s{margin-top:18px;font-family:"Barlow Condensed";font-weight:700;font-size:34px;letter-spacing:.16em;text-transform:uppercase;color:#94A3B8}
-
-/* ---------- fiche match ---------- */
 .mc{position:absolute;inset:0;overflow:hidden;background:radial-gradient(120% 80% at 50% 26%, #131922 0%, #0A0E15 58%, #07090F 100%)}
 .mc-glow{position:absolute;top:-8%;width:1150px;height:1150px;border-radius:50%;filter:blur(4px);opacity:0;will-change:opacity}
 .mc-glow.gh{left:-330px}.mc-glow.ga{right:-330px}
@@ -285,8 +258,6 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
 .mc-score b{color:#CBD5E1}.mc-score b.w{color:#F59E0B}
 .mc-score i{font-style:normal;font-size:70px;color:#3B475A}
 .mc-final{position:absolute;top:1210px;left:0;right:0;text-align:center;font-family:"Barlow Condensed";font-weight:700;font-size:28px;letter-spacing:.4em;text-transform:uppercase;color:#2DD4BF;will-change:opacity}
-
-/* ---------- plan des 8 rencontres ---------- */
 #plan{padding:300px 70px 300px}
 #plan .hd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;margin-bottom:52px}
 #plan .list{display:flex;flex-direction:column;gap:14px}
@@ -298,8 +269,6 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
 .pr-lg{width:56px;height:56px;object-fit:contain}
 .pr-sc{display:flex;align-items:center;justify-content:center;gap:14px;font-family:"Barlow Condensed";font-weight:800;font-size:60px}
 .pr-sc b{color:#F1F5F9}.pr-sc b.w{color:#F59E0B}.pr-sc i{font-style:normal;font-size:32px;color:#475569}
-
-/* ---------- classement ---------- */
 #stand{padding:150px 60px 90px}
 #stand .hd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
 #stand .flip{position:relative;height:46px;margin-top:8px;width:520px}
@@ -314,8 +283,6 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
 .tr-sn{font-family:"Barlow Condensed";font-weight:800;font-size:38px;text-transform:uppercase;color:#F1F5F9;padding-left:8px}
 .tr-j,.tr-ga{text-align:center;font-size:26px;color:#94A3B8;font-variant-numeric:tabular-nums}
 .tr-pt{text-align:right;font-family:"Barlow Condensed";font-weight:800;font-size:40px;color:#F59E0B;font-variant-numeric:tabular-nums}
-
-/* ---------- équipe type sur le terrain ---------- */
 #pitch{display:flex;flex-direction:column;justify-content:center;padding:40px 40px}
 #pitch .hd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;margin-bottom:34px}
 .court{position:relative;width:920px;margin:0 auto;border:1px solid rgba(45,212,191,.3);background:#0A1710;overflow:hidden;
@@ -331,8 +298,6 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
   display:flex;align-items:center;justify-content:center;font-family:"Barlow Condensed";font-weight:800;font-size:22px;line-height:1}
 #pitch .brand{margin-top:30px;text-align:center;font-family:"Barlow Condensed";font-weight:700;font-size:24px;letter-spacing:.24em;text-transform:uppercase;color:#475569}
 #pitch .brand b{color:#2DD4BF}
-
-/* ---------- top 5 perfs ---------- */
 #perf{display:flex;flex-direction:column;justify-content:center;padding:60px 60px}
 #perf .hd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;margin-bottom:44px}
 #perf .list{display:flex;flex-direction:column;gap:16px}
@@ -349,8 +314,6 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
 .qr-nm em{font-family:"Inter";font-style:normal;font-size:20px;color:#64748B;margin-top:6px;letter-spacing:.02em}
 .qr-pt{text-align:right;font-family:"Barlow Condensed";font-weight:800;font-size:60px;color:#F59E0B;line-height:.9}
 .qr-pt u{display:block;text-decoration:none;font-size:20px;color:#64748B;letter-spacing:.1em}
-
-/* ---------- top 3 managers (+ moyenne) ---------- */
 #gc,#clubs{display:flex;flex-direction:column;justify-content:center;padding:60px 66px}
 #gc .hd,#clubs .hd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;margin-bottom:52px}
 #gc .list,#clubs .list{display:flex;flex-direction:column;gap:26px}
@@ -373,8 +336,6 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
 .cr-nm em{font-family:"Inter";font-style:normal;font-size:22px;color:#64748B;margin-top:8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .cr-pt{text-align:right;font-family:"Barlow Condensed";font-weight:800;font-size:66px;color:#F59E0B;line-height:.9}
 .cr-pt u{display:block;text-decoration:none;font-size:22px;color:#64748B;letter-spacing:.1em}
-
-/* ---------- plan final ---------- */
 #outro{z-index:90;background:radial-gradient(circle at 50% 20%, rgba(45,212,191,.2), transparent 50%),
   radial-gradient(circle at 84% 94%, rgba(245,158,11,.13), transparent 44%), #0B0F16}
 #outro .box{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;will-change:opacity,transform}
@@ -389,8 +350,8 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
   <div id="intro" class="scene">
     ${introLogos}
     <div class="ttl">
-      <div class="k">Starligue Fantasy · Daikin StarLigue 26·27</div>
-      <div class="m">Journée <b>1</b></div>
+      <div class="k">Starligue Fantasy &middot; Daikin StarLigue ${SEASON_SHORT}</div>
+      <div class="m">Journée <b>${GW}</b></div>
       <div class="s">le récap</div>
     </div>
   </div>
@@ -398,7 +359,7 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
   ${matchCards}
 
   <div id="plan" class="scene bg-rad">
-    <div class="hd"><div class="ey">Daikin StarLigue · Journée 1</div><div class="h1">Les <b>8 rencontres</b></div></div>
+    <div class="hd"><div class="ey">Daikin StarLigue &middot; Journée ${GW}</div><div class="h1">Les <b>${N} rencontres</b></div></div>
     <div class="list">${planRows}</div>
   </div>
 
@@ -406,14 +367,14 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
     <div class="hd">
       <div class="ey">Daikin StarLigue</div>
       <div class="h1">Le <b>classement</b></div>
-      <div class="flip"><span id="fl0">avant la journée 1</span><span id="fl1" style="opacity:0">après la journée 1</span></div>
+      <div class="flip"><span id="fl0">avant la journée ${GW}</span><span id="fl1" style="opacity:0">après la journée ${GW}</span></div>
     </div>
     <div class="colh"><span>#</span><span>Club</span><span>J</span><span>+/-</span><span>Pts</span></div>
     <div class="body" id="standBody">${standRows}</div>
   </div>
 
   <div id="pitch" class="scene bg-rad">
-    <div class="hd"><div class="ey">Récap Fantasy · Journée 1</div><div class="h1">L'équipe <b>type</b></div></div>
+    <div class="hd"><div class="ey">Récap Fantasy &middot; Journée ${GW}</div><div class="h1">L'équipe <b>type</b></div></div>
     <div class="court">
       <svg viewBox="0 ${VIEW_TOP} ${COURT} ${VIEW_H}">
         <defs>
@@ -436,22 +397,22 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
         ${pitchBadges}
       </div>
     </div>
-    <div class="brand">Starligue <b>Fantasy</b> · équipe type de la journée</div>
+    <div class="brand">Starligue <b>Fantasy</b> &middot; équipe type de la journée</div>
   </div>
 
   <div id="perf" class="scene bg-rad">
-    <div class="hd"><div class="ey">Récap Fantasy · Journée 1</div><div class="h1">Les <b>5</b> meilleures perfs</div></div>
+    <div class="hd"><div class="ey">Récap Fantasy &middot; Journée ${GW}</div><div class="h1">Les <b>5</b> meilleures perfs</div></div>
     <div class="list">${perfRows}</div>
   </div>
 
   <div id="gc" class="scene bg-rad">
-    <div class="hd"><div class="ey">Récap Fantasy · Journée 1</div><div class="h1">Le top <b>3</b> managers</div></div>
+    <div class="hd"><div class="ey">Récap Fantasy &middot; Journée ${GW}</div><div class="h1">Le top <b>3</b> managers</div></div>
     <div class="list">${topRows}</div>
     <div class="avg"><span class="v" id="gcAvg">0</span><span class="l">points en moyenne par équipe</span></div>
   </div>
 
   <div id="clubs" class="scene bg-rad">
-    <div class="hd"><div class="ey">Récap Fantasy · Journée 1</div><div class="h1">Les clubs de <b>cœur</b></div><div class="sub2">clubs d'origine des managers · points fantasy cumulés</div></div>
+    <div class="hd"><div class="ey">Récap Fantasy &middot; Journée ${GW}</div><div class="h1">Les clubs de <b>cœur</b></div><div class="sub2">clubs d'origine des managers &middot; points fantasy cumulés</div></div>
     <div class="list">${clubRows}</div>
   </div>
 
@@ -466,15 +427,16 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
 
 </div>
 <script>
+const N=${N}, NPITCH=${NPITCH};
 const ROWH=70, MC=1350;
 const T_INTRO=2800;
-const T_MATCH0=T_INTRO;                 // 8 fiches * MC
-const T_MATCH_END=T_MATCH0+8*MC;
+const T_MATCH0=T_INTRO;
+const T_MATCH_END=T_MATCH0+N*MC;
 const T_PLAN=[T_MATCH_END,T_MATCH_END+3600];
 const T_STAND=[T_PLAN[1],T_PLAN[1]+9600];
 const T_PITCH=[T_STAND[1],T_STAND[1]+5200];
 const T_PERF=[T_PITCH[1],T_PITCH[1]+4800];
-const T_GC=[T_PERF[1],T_PERF[1]+6000];   // top 3 managers + moyenne en pied
+const T_GC=[T_PERF[1],T_PERF[1]+6000];
 const T_CLUBS=[T_GC[1],T_GC[1]+4400];
 const T_OUTRO=[T_CLUBS[1],T_CLUBS[1]+4400];
 const TOTAL=T_OUTRO[1];
@@ -581,7 +543,7 @@ function seekStand(t){
     const rr=r.querySelector('.tr-pos'), landed=ph(lt,s0+700,s0+1000);
     rr.textContent=flip>0.5?String(rank):'–';
     rr.style.opacity=(flip<0.5?0.35:lerp(0.35,1,landed)).toFixed(2);
-    rr.style.color=(flip>0.5&&rank===1)?'#F59E0B':(flip>0.5&&rank>=15)?'#F87171':'#94A3B8';
+    rr.style.color=(flip>0.5&&rank===1)?'#F59E0B':(flip>0.5&&rank>=${d.standing.length - 1})?'#F87171':'#94A3B8';
   });
 }
 
@@ -595,14 +557,13 @@ function seekPitch(t){
   const ci=eOut(ph(lt,120,620));
   court.style.opacity=(ci*(1-out)).toFixed(3);
   court.style.transform='scale('+lerp(.94,1,ci)+')';
-  for(let i=0;i<7;i++){
+  for(let i=0;i<NPITCH;i++){
     const a=eOut(ph(lt,420+i*130,420+i*130+420))*(1-out);
     const pp=$('PP'+i), pb=$('PB'+i), pv=$('PV'+i);
     if(pp){pp.style.opacity=a.toFixed(3);pp.style.transform='translateX(-50%) translateY('+lerp(16,0,a)+'px)';}
     if(pb) pb.style.opacity=a.toFixed(3);
     if(pv) pv.style.opacity=a.toFixed(3);
   }
-  // les bandeaux nom (SVG) apparaissent avec la couche photo — via opacity globale du <g>? simple: fade court entier gère déjà
   sc.querySelector('.brand').style.opacity=(inn*(1-out)*.9).toFixed(3);
 }
 
@@ -610,7 +571,6 @@ function seekGc(t){
   const lt=t-T_GC[0];
   const out=ph(lt,T_GC[1]-T_GC[0]-320,T_GC[1]-T_GC[0]);
   panelList('gc',T_GC,t,'.cr',120);
-  // moyenne en pied, plus petite, après les 3 cartes
   const avg=$('gc').querySelector('.avg');
   const ai=eOut(ph(lt,1600,2100));
   avg.style.opacity=(ai*(1-out)).toFixed(3);
@@ -621,11 +581,11 @@ function seekGc(t){
 window.seek=function(t){
   t=clamp(t,0,TOTAL-1);
   ['intro','plan','stand','pitch','perf','gc','clubs','outro'].forEach((id)=>show(id,false));
-  for(let i=0;i<8;i++) $('MC'+i).style.display='none';
+  for(let i=0;i<N;i++) $('MC'+i).style.display='none';
 
   if(t<T_INTRO+30){ show('intro',true); seekIntro(t); return; }
   if(t<T_MATCH_END){
-    const idx=Math.min(7,Math.floor((t-T_MATCH0)/MC));
+    const idx=Math.min(N-1,Math.floor((t-T_MATCH0)/MC));
     $('MC'+idx).style.display='block';
     seekMatch(idx,t-(T_MATCH0+idx*MC));
     return;
@@ -649,5 +609,5 @@ window.seek(0);
 </script>
 </body></html>`;
 
-writeFileSync(DIR + "reel.html", html);
-console.log("reel.html:", (html.length / 1024 / 1024).toFixed(2), "Mo · heartClub", HEART && HEART.shortName, HEART && HEART.points);
+writeFileSync(join(REEL_DIR, "reel.html"), html);
+console.log(`→ ${join(REEL_DIR, "reel.html")}  (${(html.length / 1024 / 1024).toFixed(1)} Mo, J${GW}, ${N} matchs)`);
