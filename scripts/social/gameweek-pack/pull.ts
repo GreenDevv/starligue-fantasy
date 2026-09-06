@@ -1,29 +1,33 @@
 /**
- * Dump toutes les données J1 (saison live) nécessaires au pack de contenu Instagram :
- *   - les 8 scores
- *   - le classement Starligue J1 (ClubStanding) + un classement "J0" synthétique (0-0-0)
+ * Étape 1 du pack de contenu par journée (voir generate.mjs).
+ * Dump toutes les données d'une journée notée (saison live) → <outDir>/data.json :
+ *   - les 8 scores + le classement Starligue de la journée (ClubStanding)
  *   - top buteurs / passeurs / gardiens de la journée (getStatLeaders scope=gameweek)
- *   - équipe type J1 + top 5 performances (mêmes fonctions que generate-weekly-news)
+ *   - équipe type + top 5 perfs (mêmes fonctions que generate-weekly-news)
  *   - top 3 du classement général fantasy + moyenne de points de la journée
- *   - meilleur club de la journée
+ *   - clubs de cœur (classement des clubs d'origine des managers)
  *
  * Usage :
- *   source scratchpad/.proddb.env
- *   DATABASE_URL="$PROD_DATABASE_URL" pnpm tsx scripts/social/matchday-j1/pull.ts [gameweekNumber=1]
- *
- * Écrit scripts/social/matchday-j1/out/data.json (git-ignoré via /scratch ? non — dossier out/).
+ *   DATABASE_URL="<prod>" pnpm tsx scripts/social/gameweek-pack/pull.ts <gameweekNumber> <outDir>
  */
-import { writeFileSync } from "node:fs";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { writeFileSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
 import { prisma } from "@/lib/db";
 import { getStatLeaders } from "@/lib/stats/get-stat-leaders";
 import { computeGameweekBestXI, computeGameweekPlayerPoints } from "@/lib/players/compute-gameweek-best-xi";
 import { computeBestPerformances } from "@/lib/players/compute-best-performances";
 import { getClubFantasyRanking } from "@/lib/community/club-fantasy-ranking";
 
-const HERE = dirname(fileURLToPath(import.meta.url));
-const GW = Number(process.argv[2] ?? "1");
+const GW = Number(process.argv[2]);
+const OUT_DIR = process.argv[3] ?? "";
+if (!GW || !OUT_DIR) {
+  console.error("usage: pull.ts <gameweekNumber> <outDir>");
+  process.exit(1);
+}
+if (/localhost|127\.0\.0\.1/.test(process.env.DATABASE_URL ?? "")) {
+  console.error("⚠️  DATABASE_URL pointe sur une base locale — le pack a besoin de la prod.");
+  process.exit(1);
+}
 
 async function main() {
   const season = await prisma.season.findFirstOrThrow({ where: { isActive: true } });
@@ -154,7 +158,8 @@ async function main() {
   const data = {
     generatedAt: new Date().toISOString(),
     season: season.label,
-    gameweek: { number: GW, deadlineAt: gameweek.deadlineAt.toISOString() },
+    seasonId: season.id,
+    gameweek: { number: GW, id: gameweek.id, deadlineAt: gameweek.deadlineAt.toISOString() },
     matches: matches.map((m) => ({
       kickoffAt: m.kickoffAt.toISOString(),
       status: m.status,
@@ -183,11 +188,14 @@ async function main() {
     homeClubRanking,
   };
 
-  const outPath = join(HERE, "out", "data.json");
+  mkdirSync(OUT_DIR, { recursive: true });
+  const outPath = join(OUT_DIR, "data.json");
   writeFileSync(outPath, JSON.stringify(data, null, 2));
-  console.log("wrote", outPath);
+  console.log("→", outPath);
   console.log(JSON.stringify({
+    gameweek: GW,
     matches: data.matches.length,
+    finished: data.matches.filter((m) => m.status === "FINISHED").length,
     standingRows: data.standing.length,
     scorers: scorers.leaders.slice(0, 3).map((l) => `${l.lastName} ${l.value}`),
     passers: passers.leaders.slice(0, 3).map((l) => `${l.lastName} ${l.value}`),
