@@ -470,8 +470,11 @@ export function HandballPitch({
           if (!player) return null;
           const coords = SLOT_COORDS[pos];
           const standing = Boolean(player.photoUrl);
+          // Silhouette debout : écusson au pied (droite), pastille de points sur le
+          // buste (gauche, à mi-hauteur) — surtout PAS sur la tête (dy proche de
+          // -PHOTO_HEIGHT recouvrait le visage, demande explicite 2026-09-06).
           const clubOffset = standing ? { dx: PHOTO_WIDTH / 2 - 2, dy: -3 } : { dx: 9.5, dy: 9.5 };
-          const pointsOffset = standing ? { dx: -PHOTO_WIDTH / 2 + 2, dy: -PHOTO_HEIGHT + 5 } : { dx: -9.5, dy: -9.5 };
+          const pointsOffset = standing ? { dx: -PHOTO_WIDTH / 2 - 1, dy: -PHOTO_HEIGHT * 0.5 } : { dx: -9.5, dy: -9.5 };
           const captainOffset = standing ? { dx: PHOTO_WIDTH / 2 - 2, dy: -PHOTO_HEIGHT + 5 } : { dx: 9.5, dy: -9.5 };
           return (
             <Fragment key={pos}>
