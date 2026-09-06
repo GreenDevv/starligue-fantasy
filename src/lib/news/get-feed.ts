@@ -62,6 +62,7 @@ export async function getNewsFeed(
 
 export interface NewsItemDetail extends NewsFeedItem {
   content: string | null;
+  payload: unknown;
 }
 
 /** Détail complet d'une actu — page /starligue/[id] (lecture de l'article sans quitter le site). */
@@ -76,6 +77,7 @@ export async function getNewsItemById(id: string): Promise<NewsItemDetail | null
       title: true,
       excerpt: true,
       content: true,
+      payload: true,
       sourceUrl: true,
       imageUrl: true,
       publishedAt: true,

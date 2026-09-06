@@ -23,8 +23,12 @@ export interface TeamOfWeekCardData {
 export async function getTeamOfWeekCard(seasonId: string): Promise<TeamOfWeekCardData | null> {
   const newsItem = await getLatestGeneratedNews(seasonId, "TEAM_OF_WEEK");
   if (!newsItem) return null;
+  return resolveTeamOfWeekCard(newsItem.payload);
+}
 
-  const parsed = TeamOfWeekPayloadSchema.safeParse(newsItem.payload);
+/** Résout un payload TEAM_OF_WEEK brut (d'un NewsItem précis) → carte — page /starligue/[id]. */
+export async function resolveTeamOfWeekCard(payload: unknown): Promise<TeamOfWeekCardData | null> {
+  const parsed = TeamOfWeekPayloadSchema.safeParse(payload);
   if (!parsed.success || parsed.data.entries.length === 0) return null;
 
   const players = await prisma.player.findMany({
@@ -75,8 +79,12 @@ export interface PerformancesCardData {
 export async function getPerformancesCard(seasonId: string): Promise<PerformancesCardData | null> {
   const newsItem = await getLatestGeneratedNews(seasonId, "PERFORMANCE");
   if (!newsItem) return null;
+  return resolvePerformancesCard(newsItem.payload);
+}
 
-  const parsed = PerformancesPayloadSchema.safeParse(newsItem.payload);
+/** Résout un payload PERFORMANCE brut (d'un NewsItem précis) → carte — page /starligue/[id]. */
+export async function resolvePerformancesCard(payload: unknown): Promise<PerformancesCardData | null> {
+  const parsed = PerformancesPayloadSchema.safeParse(payload);
   if (!parsed.success || parsed.data.entries.length === 0) return null;
 
   const players = await prisma.player.findMany({

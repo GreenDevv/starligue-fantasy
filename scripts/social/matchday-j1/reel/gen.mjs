@@ -54,6 +54,22 @@ for (const e of d.fantasy.bestXI) {
 }
 const pImg = (last, first) => (photoPath[`${last} ${first}`] ? b64(photoPath[`${last} ${first}`]) : null);
 
+// Logos des clubs d'origine (FFHandball, .webp hotlinké) — téléchargés une fois en
+// data URI pour ne pas dépendre du réseau au moment du rendu Playwright.
+const clubLogoDataUri = {};
+for (const c of d.homeClubRanking ?? []) {
+  if (!c.logoUrl) continue;
+  const ext = c.logoUrl.split(".").pop().split("?")[0] || "webp";
+  const f = PLAYERS + "club-" + slug(c.name) + "." + ext;
+  try {
+    if (!existsSync(f)) {
+      const r = await fetch(c.logoUrl, { headers: { "User-Agent": "Mozilla/5.0" } });
+      if (r.ok) writeFileSync(f, Buffer.from(await r.arrayBuffer()));
+    }
+    if (existsSync(f)) clubLogoDataUri[c.name] = `data:image/${ext === "svg" ? "svg+xml" : ext};base64,` + readFileSync(f).toString("base64");
+  } catch (err) { console.warn(String(err)); }
+}
+
 // ============ données dérivées ============
 const MATCHES = d.matches.map((m) => ({
   h: m.home.shortName, a: m.away.shortName, hs: m.home.score, as: m.away.score,
@@ -73,6 +89,7 @@ const TOP = d.fantasy.topFantasy.slice(0, 3).map((t) => ({
 }));
 const F = d.fantasy;
 const HEART = d.heartClub;
+const CLUBS = (d.homeClubRanking ?? []).slice(0, 3);
 
 // ============ PITCH (port de src/components/pitch/HandballPitch.tsx) ============
 const COURT = 200, VIEW_TOP = 62, GOAL_DEPTH = 16, BOTTOM_PAD = 4;
@@ -111,7 +128,7 @@ const pitchPhotos = XI.map((p, i) => {
 const pitchBadges = XI.map((p, i) => {
   const c = SLOT[p.pos];
   const club = pct(c, PHOTO_W / 2 - 2, -3);
-  const pts = pct(c, -PHOTO_W / 2 + 2, -PHOTO_H + 5);
+  const pts = pct(c, -PHOTO_W / 2 - 1, -PHOTO_H * 0.5); // buste gauche, pas sur la tête (cf. HandballPitch.tsx)
   const badgePct = (9.5 / COURT) * 100;
   const ptsPct = (14 / COURT) * 100;
   const white = WHITE_BG.has(p.sn);
@@ -180,6 +197,21 @@ const topRows = TOP.map((t, i) => `<div class="cr" id="CR${i}">
     <span class="cr-pt">${t.pts.toFixed(1)}<u>pts</u></span>
   </div>`).join("\n");
 
+const clubEscape = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+// Nom court pour l'affichage : on retire le suffixe générique (« HANDBALL », « HB »,
+// « HBC »…) — l'écusson et le sous-titre ville portent déjà le contexte.
+const shortClubName = (n) =>
+  String(n).replace(/\s+(HANDBALL|HAND|HB|HBC|HBH|H\.?B\.?|CLUB)\.?$/i, "").trim() || String(n);
+const clubRows = CLUBS.map((c, i) => {
+  const logo = clubLogoDataUri[c.name];
+  return `<div class="cr cr-club" id="KR${i}">
+    <span class="cr-r">${c.rank}</span>
+    <span class="cr-badge">${logo ? `<img src="${logo}"/>` : `<span>${clubEscape(c.name).charAt(0)}</span>`}</span>
+    <span class="cr-nm"><b>${clubEscape(shortClubName(c.name))}</b>${c.city ? `<em>${clubEscape(c.city)}${c.managers > 1 ? ` · ${c.managers} managers` : ""}</em>` : ""}</span>
+    <span class="cr-pt">${c.points.toFixed(1)}<u>pts</u></span>
+  </div>`;
+}).join("\n");
+
 const html = `<!doctype html><html><head><meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -192,6 +224,7 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
 .ey{font-family:"Barlow Condensed";font-weight:700;font-size:27px;letter-spacing:.4em;text-transform:uppercase;color:#2DD4BF}
 .h1{font-family:"Barlow Condensed";font-weight:800;font-size:112px;line-height:.9;text-transform:uppercase;letter-spacing:-.01em}
 .h1 b{color:#F59E0B}
+.sub2{font-family:"Inter";font-weight:500;font-size:22px;color:#64748B;margin-top:6px;letter-spacing:.02em}
 .bg-rad{background:
   radial-gradient(ellipse 90% 34% at 50% 4%, rgba(45,212,191,.16), transparent 60%),
   radial-gradient(ellipse 70% 40% at 92% 100%, rgba(245,158,11,.12), transparent 60%), #0E1116}
@@ -276,9 +309,15 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
 #pitch .brand b{color:#2DD4BF}
 
 /* ---------- top 3 managers ---------- */
-#gc{display:flex;flex-direction:column;justify-content:center;padding:60px 66px}
-#gc .hd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;margin-bottom:52px}
-#gc .list{display:flex;flex-direction:column;gap:26px}
+#gc,#clubs{display:flex;flex-direction:column;justify-content:center;padding:60px 66px}
+#gc .hd,#clubs .hd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;margin-bottom:52px}
+#gc .list,#clubs .list{display:flex;flex-direction:column;gap:26px}
+.cr-club{grid-template-columns:96px 116px 1fr 200px !important}
+.cr-club .cr-nm b{font-size:40px}
+.cr-club .cr-pt{font-size:56px}
+.cr-badge{display:flex;align-items:center;justify-content:center;width:100px;height:100px;border-radius:16px;background:#fff;overflow:hidden}
+.cr-badge img{width:100%;height:100%;object-fit:contain;padding:8%}
+.cr-badge span{font-family:"Barlow Condensed";font-weight:800;font-size:52px;color:#0E1116}
 .cr{display:grid;grid-template-columns:110px 1fr 240px;align-items:center;height:190px;
   background:linear-gradient(120deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.09);border-radius:22px;padding:0 44px;will-change:transform,opacity}
 .cr:first-child{border-color:rgba(245,158,11,.35);background:linear-gradient(120deg,rgba(245,158,11,.12),rgba(255,255,255,.02))}
@@ -291,17 +330,11 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
 .cr-pt u{display:block;text-decoration:none;font-size:22px;color:#64748B;letter-spacing:.1em}
 
 /* ---------- chiffres ---------- */
-#num{display:flex;flex-direction:column;justify-content:center;padding:60px 70px}
-#num .hd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;margin-bottom:64px}
-#num .big{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:60px;will-change:opacity,transform}
-#num .big .v{font-family:"Barlow Condensed";font-weight:800;font-size:210px;line-height:.82;color:#F59E0B}
-#num .big .l{font-family:"Barlow Condensed";font-weight:700;font-size:32px;letter-spacing:.14em;text-transform:uppercase;color:#94A3B8}
-#num .heart{display:flex;flex-direction:column;align-items:center;gap:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:54px 40px;will-change:opacity,transform}
-#num .heart .club{display:flex;align-items:center;gap:24px}
-#num .heart .club img{width:110px;height:110px;object-fit:contain}
-#num .heart .club .cn{font-family:"Barlow Condensed";font-weight:800;font-size:100px;text-transform:uppercase;color:#F1F5F9}
-#num .heart .l{font-family:"Barlow Condensed";font-weight:700;font-size:26px;letter-spacing:.1em;text-transform:uppercase;color:#94A3B8;text-align:center}
-#num .heart .l b{color:#2DD4BF}
+#num{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:60px 70px}
+#num .hd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;margin-bottom:90px}
+#num .big{display:flex;flex-direction:column;align-items:center;gap:14px;will-change:opacity,transform}
+#num .big .v{font-family:"Barlow Condensed";font-weight:800;font-size:300px;line-height:.8;color:#F59E0B}
+#num .big .l{font-family:"Barlow Condensed";font-weight:700;font-size:38px;letter-spacing:.14em;text-transform:uppercase;color:#94A3B8}
 
 /* ---------- plan final ---------- */
 #outro{z-index:90;background:radial-gradient(circle at 50% 20%, rgba(45,212,191,.2), transparent 50%),
@@ -373,13 +406,14 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
     <div class="list">${topRows}</div>
   </div>
 
+  <div id="clubs" class="scene bg-rad">
+    <div class="hd"><div class="ey">Récap Fantasy · Journée 1</div><div class="h1">Les clubs de <b>cœur</b></div><div class="sub2">clubs d'origine des managers · points fantasy cumulés</div></div>
+    <div class="list">${clubRows}</div>
+  </div>
+
   <div id="num" class="scene bg-rad">
-    <div class="hd"><div class="ey">Récap Fantasy · Journée 1</div><div class="h1">La journée en <b>chiffres</b></div></div>
+    <div class="hd"><div class="ey">Récap Fantasy · Journée 1</div><div class="h1">La moyenne de la <b>journée</b></div></div>
     <div class="big"><span class="v" id="numAvg">0</span><span class="l">points en moyenne par équipe</span></div>
-    <div class="heart">
-      <div class="club"><img src="${rawLogo(HEART.shortName)}"/><span class="cn">${HEART.shortName}</span></div>
-      <div class="l">le club de cœur · <b id="numHeart">0</b> pts fantasy sur la journée</div>
-    </div>
   </div>
 
   <div id="outro" class="scene">
@@ -401,7 +435,8 @@ const T_PLAN=[T_MATCH_END,T_MATCH_END+3600];
 const T_STAND=[T_PLAN[1],T_PLAN[1]+9600];
 const T_PITCH=[T_STAND[1],T_STAND[1]+5600];
 const T_GC=[T_PITCH[1],T_PITCH[1]+4400];
-const T_NUM=[T_GC[1],T_GC[1]+4600];
+const T_CLUBS=[T_GC[1],T_GC[1]+4400];
+const T_NUM=[T_CLUBS[1],T_CLUBS[1]+3600];
 const T_OUTRO=[T_NUM[1],T_NUM[1]+4400];
 const TOTAL=T_OUTRO[1];
 window.TOTAL=TOTAL;
@@ -414,7 +449,7 @@ const eOut4=t=>1-Math.pow(1-t,4);
 const eInOut=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
 const back=t=>{const c=1.7,c3=c+1;return 1+c3*Math.pow(t-1,3)+c*Math.pow(t-1,2);};
 const $=id=>document.getElementById(id);
-const FLEX=new Set(['pitch','gc','num']);
+const FLEX=new Set(['pitch','gc','clubs','num']);
 const show=(id,on)=>{$(id).style.display=on?(FLEX.has(id)?'flex':'block'):'none';};
 
 function seekIntro(t){
@@ -541,17 +576,14 @@ function seekNum(t){
   const big=sc.querySelector('.big');
   big.style.opacity=(eOut(ph(lt,200,560))*(1-out)).toFixed(3);
   big.style.transform='translateY('+lerp(18,0,eOut(ph(lt,200,560)))+'px)';
-  $('numAvg').textContent=(lerp(0,${F.avgGwPoints},eOut(ph(lt,240,1200)))).toFixed(1);
-  const heart=sc.querySelector('.heart');
-  const hi=eOut(ph(lt,700,1200));
-  heart.style.opacity=(hi*(1-out)).toFixed(3);
-  heart.style.transform='translateY('+lerp(28,0,hi)+'px) scale('+lerp(.94,1,hi)+')';
-  $('numHeart').textContent=Math.round(lerp(0,${HEART ? HEART.points : 0},eOut(ph(lt,900,1800))));
+  const bc=eOut(ph(lt,240,1300));
+  $('numAvg').textContent=(lerp(0,${F.avgGwPoints},bc)).toFixed(1);
+  sc.querySelector('.big .v').style.transform='scale('+lerp(1.5,1,back(clamp(ph(lt,200,620),0,1)))+')';
 }
 
 window.seek=function(t){
   t=clamp(t,0,TOTAL-1);
-  ['intro','plan','stand','pitch','gc','num','outro'].forEach((id)=>show(id,false));
+  ['intro','plan','stand','pitch','gc','clubs','num','outro'].forEach((id)=>show(id,false));
   for(let i=0;i<8;i++) $('MC'+i).style.display='none';
 
   if(t<T_INTRO+30){ show('intro',true); seekIntro(t); return; }
@@ -565,6 +597,7 @@ window.seek=function(t){
   if(t<T_STAND[1]){ show('stand',true); seekStand(t); return; }
   if(t<T_PITCH[1]){ show('pitch',true); seekPitch(t); return; }
   if(t<T_GC[1]){ show('gc',true); panelList('gc',T_GC,t,'.cr',120); return; }
+  if(t<T_CLUBS[1]){ show('clubs',true); panelList('clubs',T_CLUBS,t,'.cr',120); return; }
   if(t<T_NUM[1]){ show('num',true); seekNum(t); return; }
 
   show('outro',true);

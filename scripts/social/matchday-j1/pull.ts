@@ -20,6 +20,7 @@ import { prisma } from "@/lib/db";
 import { getStatLeaders } from "@/lib/stats/get-stat-leaders";
 import { computeGameweekBestXI, computeGameweekPlayerPoints } from "@/lib/players/compute-gameweek-best-xi";
 import { computeBestPerformances } from "@/lib/players/compute-best-performances";
+import { getClubFantasyRanking } from "@/lib/community/club-fantasy-ranking";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const GW = Number(process.argv[2] ?? "1");
@@ -88,7 +89,7 @@ async function main() {
   const pts = lineups.map((l) => Number(l.points));
   const avgGwPoints = pts.length ? pts.reduce((a, b) => a + b, 0) / pts.length : 0;
   const medianGwPoints = pts.length
-    ? [...pts].sort((a, b) => a - b)[Math.floor(pts.length / 2)]
+    ? ([...pts].sort((a, b) => a - b)[Math.floor(pts.length / 2)] ?? 0)
     : 0;
 
   const topFantasy = lineups.slice(0, 5).map((l, i) => ({
@@ -136,6 +137,20 @@ async function main() {
     .sort((a, b) => b.points - a.points);
   const heartClub = clubFantasyRanking[0] ?? null;
 
+  // 8. « Clubs de cœur » = classement des clubs d'origine des managers par points
+  //    fantasy cumulés (widget dashboard « Classement des clubs ») — top 3 pour le reel.
+  const homeClubRanking = (await getClubFantasyRanking({ seasonId: season.id, mode: "live" }))
+    .slice(0, 5)
+    .map((r) => ({
+      rank: r.rank,
+      name: r.clubName,
+      city: r.clubCity,
+      country: r.clubCountry,
+      logoUrl: r.clubLogoUrl,
+      managers: r.managers,
+      points: Math.round(r.points * 10) / 10,
+    }));
+
   const data = {
     generatedAt: new Date().toISOString(),
     season: season.label,
@@ -165,6 +180,7 @@ async function main() {
     bestClub,
     heartClub,
     clubFantasyRanking: clubFantasyRanking.slice(0, 5),
+    homeClubRanking,
   };
 
   const outPath = join(HERE, "out", "data.json");

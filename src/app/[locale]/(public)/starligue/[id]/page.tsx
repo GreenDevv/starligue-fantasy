@@ -4,6 +4,9 @@ import { getTranslations, getFormatter } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { getNewsItemById } from "@/lib/news/get-feed";
+import { resolveTeamOfWeekCard, resolvePerformancesCard } from "@/lib/news/get-weekly-cards";
+import { StarligueBestXICard } from "@/components/starligue/StarligueBestXICard";
+import { StarliguePerformancesCard } from "@/components/starligue/StarliguePerformancesCard";
 
 // Article lu sur notre propre site — texte intégral extrait côté serveur au scraping
 // (src/lib/news/html-to-text.ts, jamais de HTML stocké/rendu : uniquement du texte,
@@ -18,6 +21,12 @@ export default async function NewsItemPage({ params }: { params: { id: string } 
   const format = await getFormatter();
 
   const paragraphs = item.content ? item.content.split("\n\n") : [];
+
+  // Actus générées équipe type / meilleures perfs : on rend le contenu réel
+  // (terrain / classement) sous le texte, pas seulement le titre.
+  const teamOfWeek = item.category === "TEAM_OF_WEEK" ? await resolveTeamOfWeekCard(item.payload) : null;
+  const performances = item.category === "PERFORMANCE" ? await resolvePerformancesCard(item.payload) : null;
+  const hasGeneratedCard = Boolean(teamOfWeek || performances);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 px-4 pb-16 pt-8 sm:px-6">
@@ -51,7 +60,7 @@ export default async function NewsItemPage({ params }: { params: { id: string } 
         </div>
       ) : item.excerpt ? (
         <p className="text-sm leading-relaxed text-text-muted">{item.excerpt}</p>
-      ) : item.category === "INJURY" && item.player ? (
+      ) : hasGeneratedCard ? null : item.category === "INJURY" && item.player ? (
         // Actu générée (createInjuryNewsItem, jamais de content/excerpt) : un
         // texte actionnable plutôt que le message générique "pas de texte associé"
         // — demande explicite de l'utilisateur, 2026-08-06.
@@ -60,6 +69,13 @@ export default async function NewsItemPage({ params }: { params: { id: string } 
         </p>
       ) : (
         <p className="text-sm text-text-muted">{t("noContent")}</p>
+      )}
+
+      {teamOfWeek && (
+        <StarligueBestXICard gameweekNumber={teamOfWeek.gameweekNumber} entries={teamOfWeek.entries} />
+      )}
+      {performances && (
+        <StarliguePerformancesCard gameweekNumber={performances.gameweekNumber} entries={performances.entries} />
       )}
 
       {item.sourceUrl && (
