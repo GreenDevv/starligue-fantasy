@@ -229,9 +229,8 @@ const html = `<title>Pack contenu Journée 1</title>
         <li><b>Le plan des 8 rencontres</b> — récap sur un écran</li>
         <li><b>Le classement bouge</b> — 16 clubs à 0-0-0 en ordre alphabétique (« avant la J1 »), puis les points s'affichent et chaque ligne glisse vers son rang J1 <i>(inchangé)</i></li>
         <li><b>L'équipe type sur le terrain</b> — PitchView, écusson de club + pastille de points sur le buste (plus sur le visage)</li>
-        <li><b>Le top 3 managers</b> — classement général, points de la journée</li>
+        <li><b>Le top 3 managers</b> — classement général + la <b>moyenne de la journée</b> (78,8 pts) en pied, en plus petit</li>
         <li><b>Les clubs de cœur</b> — top 3 du classement des clubs d'origine des managers, avec écusson FFHandball (comme le top 3 managers)</li>
-        <li><b>La moyenne de la journée</b> — 78,8 pts, sans le nombre d'équipes</li>
         <li><b>Plan final</b> — Starligue Fantasy + les 16 logos</li>
       </ol>
       <p style="margin:12px 0 0;color:var(--muted);font-size:13px">

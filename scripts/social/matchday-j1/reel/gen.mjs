@@ -47,10 +47,15 @@ async function ensurePhoto(playerKey, url) {
   return f;
 }
 const photoPath = {};
-for (const e of d.fantasy.bestXI) {
-  if (!e.photoUrl) continue;
-  const k = `${e.lastName} ${e.firstName}`;
-  try { photoPath[k] = await ensurePhoto(k, e.photoUrl); } catch (err) { console.warn(String(err)); }
+const photoUnits = [
+  ...d.fantasy.bestXI.map((e) => [e.lastName, e.firstName, e.photoUrl]),
+  ...(d.fantasy.performances ?? []).map((p) => [p.player?.lastName, p.player?.firstName, p.player?.photoUrl]),
+];
+for (const [last, first, url] of photoUnits) {
+  if (!url || !last) continue;
+  const k = `${last} ${first}`;
+  if (photoPath[k]) continue;
+  try { photoPath[k] = await ensurePhoto(k, url); } catch (err) { console.warn(String(err)); }
 }
 const pImg = (last, first) => (photoPath[`${last} ${first}`] ? b64(photoPath[`${last} ${first}`]) : null);
 
@@ -86,6 +91,14 @@ const XI = d.fantasy.bestXI
 
 const TOP = d.fantasy.topFantasy.slice(0, 3).map((t) => ({
   rank: t.rank, name: t.userName ?? t.teamName, league: t.leagueName ?? "", pts: t.gwPoints,
+}));
+const PERF = (d.fantasy.performances ?? []).slice(0, 5).map((p, i) => ({
+  n: i + 1,
+  first: p.player?.firstName ?? "",
+  last: p.player?.lastName ?? "",
+  sn: p.player?.club?.shortName ?? "",
+  pts: p.points,
+  note: p.lnhRating,
 }));
 const F = d.fantasy;
 const HEART = d.heartClub;
@@ -196,6 +209,17 @@ const topRows = TOP.map((t, i) => `<div class="cr" id="CR${i}">
     <span class="cr-nm"><b>${t.name}</b>${t.league ? `<em>ligue ${t.league}</em>` : ""}</span>
     <span class="cr-pt">${t.pts.toFixed(1)}<u>pts</u></span>
   </div>`).join("\n");
+
+const fmtN = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
+const perfRows = PERF.map((p, i) => {
+  const img = pImg(p.last, p.first);
+  return `<div class="qr" id="QR${i}">
+    <span class="qr-n">${p.n}</span>
+    <span class="qr-face">${img ? `<img src="${img}"/>` : ""}</span>
+    <span class="qr-nm"><i>${p.first}</i><b>${p.last}</b><em>${p.sn}${p.note !== null && p.note !== undefined ? ` · note LNH ${fmtN(p.note)}` : ""}</em></span>
+    <span class="qr-pt">${fmtN(p.pts)}<u>pts</u></span>
+  </div>`;
+}).join("\n");
 
 const clubEscape = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
 // Nom court pour l'affichage : on retire le suffixe générique (« HANDBALL », « HB »,
@@ -308,10 +332,31 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
 #pitch .brand{margin-top:30px;text-align:center;font-family:"Barlow Condensed";font-weight:700;font-size:24px;letter-spacing:.24em;text-transform:uppercase;color:#475569}
 #pitch .brand b{color:#2DD4BF}
 
-/* ---------- top 3 managers ---------- */
+/* ---------- top 5 perfs ---------- */
+#perf{display:flex;flex-direction:column;justify-content:center;padding:60px 60px}
+#perf .hd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;margin-bottom:44px}
+#perf .list{display:flex;flex-direction:column;gap:16px}
+.qr{display:grid;grid-template-columns:70px 108px 1fr 168px;align-items:center;height:150px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:0 34px;gap:24px;will-change:transform,opacity}
+.qr:first-child{border-color:rgba(245,158,11,.35);background:linear-gradient(120deg,rgba(245,158,11,.12),rgba(255,255,255,.02))}
+.qr-n{font-family:"Barlow Condensed";font-weight:800;font-size:44px;color:#475569}
+.qr:first-child .qr-n{color:#F59E0B}
+.qr-face{width:108px;height:108px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,rgba(45,212,191,.5),rgba(14,17,22,.7));flex:none}
+.qr-face img{width:100%;height:150px;object-fit:cover;object-position:center top;transform:translateY(-6px)}
+.qr-nm{display:flex;flex-direction:column;line-height:1.05;min-width:0}
+.qr-nm i{font-family:"Barlow Condensed";font-weight:700;font-size:24px;letter-spacing:.06em;font-style:normal;text-transform:uppercase;color:#94A3B8}
+.qr-nm b{font-family:"Barlow Condensed";font-weight:800;font-size:50px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qr-nm em{font-family:"Inter";font-style:normal;font-size:20px;color:#64748B;margin-top:6px;letter-spacing:.02em}
+.qr-pt{text-align:right;font-family:"Barlow Condensed";font-weight:800;font-size:60px;color:#F59E0B;line-height:.9}
+.qr-pt u{display:block;text-decoration:none;font-size:20px;color:#64748B;letter-spacing:.1em}
+
+/* ---------- top 3 managers (+ moyenne) ---------- */
 #gc,#clubs{display:flex;flex-direction:column;justify-content:center;padding:60px 66px}
 #gc .hd,#clubs .hd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;margin-bottom:52px}
 #gc .list,#clubs .list{display:flex;flex-direction:column;gap:26px}
+#gc .avg{margin-top:52px;display:flex;flex-direction:column;align-items:center;gap:6px;will-change:opacity,transform}
+#gc .avg .v{font-family:"Barlow Condensed";font-weight:800;font-size:104px;line-height:.85;color:#F59E0B}
+#gc .avg .l{font-family:"Barlow Condensed";font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:#64748B}
 .cr-club{grid-template-columns:96px 116px 1fr 200px !important}
 .cr-club .cr-nm b{font-size:40px}
 .cr-club .cr-pt{font-size:56px}
@@ -328,13 +373,6 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
 .cr-nm em{font-family:"Inter";font-style:normal;font-size:22px;color:#64748B;margin-top:8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .cr-pt{text-align:right;font-family:"Barlow Condensed";font-weight:800;font-size:66px;color:#F59E0B;line-height:.9}
 .cr-pt u{display:block;text-decoration:none;font-size:22px;color:#64748B;letter-spacing:.1em}
-
-/* ---------- chiffres ---------- */
-#num{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:60px 70px}
-#num .hd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;margin-bottom:90px}
-#num .big{display:flex;flex-direction:column;align-items:center;gap:14px;will-change:opacity,transform}
-#num .big .v{font-family:"Barlow Condensed";font-weight:800;font-size:300px;line-height:.8;color:#F59E0B}
-#num .big .l{font-family:"Barlow Condensed";font-weight:700;font-size:38px;letter-spacing:.14em;text-transform:uppercase;color:#94A3B8}
 
 /* ---------- plan final ---------- */
 #outro{z-index:90;background:radial-gradient(circle at 50% 20%, rgba(45,212,191,.2), transparent 50%),
@@ -401,19 +439,20 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
     <div class="brand">Starligue <b>Fantasy</b> · équipe type de la journée</div>
   </div>
 
+  <div id="perf" class="scene bg-rad">
+    <div class="hd"><div class="ey">Récap Fantasy · Journée 1</div><div class="h1">Les <b>5</b> meilleures perfs</div></div>
+    <div class="list">${perfRows}</div>
+  </div>
+
   <div id="gc" class="scene bg-rad">
     <div class="hd"><div class="ey">Récap Fantasy · Journée 1</div><div class="h1">Le top <b>3</b> managers</div></div>
     <div class="list">${topRows}</div>
+    <div class="avg"><span class="v" id="gcAvg">0</span><span class="l">points en moyenne par équipe</span></div>
   </div>
 
   <div id="clubs" class="scene bg-rad">
     <div class="hd"><div class="ey">Récap Fantasy · Journée 1</div><div class="h1">Les clubs de <b>cœur</b></div><div class="sub2">clubs d'origine des managers · points fantasy cumulés</div></div>
     <div class="list">${clubRows}</div>
-  </div>
-
-  <div id="num" class="scene bg-rad">
-    <div class="hd"><div class="ey">Récap Fantasy · Journée 1</div><div class="h1">La moyenne de la <b>journée</b></div></div>
-    <div class="big"><span class="v" id="numAvg">0</span><span class="l">points en moyenne par équipe</span></div>
   </div>
 
   <div id="outro" class="scene">
@@ -427,17 +466,17 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E1116}
 
 </div>
 <script>
-const ROWH=70, MC=1500;
+const ROWH=70, MC=1350;
 const T_INTRO=2800;
 const T_MATCH0=T_INTRO;                 // 8 fiches * MC
 const T_MATCH_END=T_MATCH0+8*MC;
 const T_PLAN=[T_MATCH_END,T_MATCH_END+3600];
 const T_STAND=[T_PLAN[1],T_PLAN[1]+9600];
-const T_PITCH=[T_STAND[1],T_STAND[1]+5600];
-const T_GC=[T_PITCH[1],T_PITCH[1]+4400];
+const T_PITCH=[T_STAND[1],T_STAND[1]+5200];
+const T_PERF=[T_PITCH[1],T_PITCH[1]+4800];
+const T_GC=[T_PERF[1],T_PERF[1]+6000];   // top 3 managers + moyenne en pied
 const T_CLUBS=[T_GC[1],T_GC[1]+4400];
-const T_NUM=[T_CLUBS[1],T_CLUBS[1]+3600];
-const T_OUTRO=[T_NUM[1],T_NUM[1]+4400];
+const T_OUTRO=[T_CLUBS[1],T_CLUBS[1]+4400];
 const TOTAL=T_OUTRO[1];
 window.TOTAL=TOTAL;
 
@@ -449,7 +488,7 @@ const eOut4=t=>1-Math.pow(1-t,4);
 const eInOut=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
 const back=t=>{const c=1.7,c3=c+1;return 1+c3*Math.pow(t-1,3)+c*Math.pow(t-1,2);};
 const $=id=>document.getElementById(id);
-const FLEX=new Set(['pitch','gc','clubs','num']);
+const FLEX=new Set(['pitch','perf','gc','clubs']);
 const show=(id,on)=>{$(id).style.display=on?(FLEX.has(id)?'flex':'block'):'none';};
 
 function seekIntro(t){
@@ -567,23 +606,21 @@ function seekPitch(t){
   sc.querySelector('.brand').style.opacity=(inn*(1-out)*.9).toFixed(3);
 }
 
-function seekNum(t){
-  const lt=t-T_NUM[0];
-  const out=ph(lt,T_NUM[1]-T_NUM[0]-320,T_NUM[1]-T_NUM[0]);
-  const inn=eOut(ph(lt,50,420));
-  const sc=$('num');
-  sc.querySelector('.hd').style.opacity=(inn*(1-out)).toFixed(3);
-  const big=sc.querySelector('.big');
-  big.style.opacity=(eOut(ph(lt,200,560))*(1-out)).toFixed(3);
-  big.style.transform='translateY('+lerp(18,0,eOut(ph(lt,200,560)))+'px)';
-  const bc=eOut(ph(lt,240,1300));
-  $('numAvg').textContent=(lerp(0,${F.avgGwPoints},bc)).toFixed(1);
-  sc.querySelector('.big .v').style.transform='scale('+lerp(1.5,1,back(clamp(ph(lt,200,620),0,1)))+')';
+function seekGc(t){
+  const lt=t-T_GC[0];
+  const out=ph(lt,T_GC[1]-T_GC[0]-320,T_GC[1]-T_GC[0]);
+  panelList('gc',T_GC,t,'.cr',120);
+  // moyenne en pied, plus petite, après les 3 cartes
+  const avg=$('gc').querySelector('.avg');
+  const ai=eOut(ph(lt,1600,2100));
+  avg.style.opacity=(ai*(1-out)).toFixed(3);
+  avg.style.transform='translateY('+lerp(24,0,ai)+'px)';
+  $('gcAvg').textContent=(lerp(0,${F.avgGwPoints},eOut(ph(lt,1700,2600)))).toFixed(1);
 }
 
 window.seek=function(t){
   t=clamp(t,0,TOTAL-1);
-  ['intro','plan','stand','pitch','gc','clubs','num','outro'].forEach((id)=>show(id,false));
+  ['intro','plan','stand','pitch','perf','gc','clubs','outro'].forEach((id)=>show(id,false));
   for(let i=0;i<8;i++) $('MC'+i).style.display='none';
 
   if(t<T_INTRO+30){ show('intro',true); seekIntro(t); return; }
@@ -596,9 +633,9 @@ window.seek=function(t){
   if(t<T_PLAN[1]){ show('plan',true); panelList('plan',T_PLAN,t,'.pr',80); return; }
   if(t<T_STAND[1]){ show('stand',true); seekStand(t); return; }
   if(t<T_PITCH[1]){ show('pitch',true); seekPitch(t); return; }
-  if(t<T_GC[1]){ show('gc',true); panelList('gc',T_GC,t,'.cr',120); return; }
+  if(t<T_PERF[1]){ show('perf',true); panelList('perf',T_PERF,t,'.qr',90); return; }
+  if(t<T_GC[1]){ show('gc',true); seekGc(t); return; }
   if(t<T_CLUBS[1]){ show('clubs',true); panelList('clubs',T_CLUBS,t,'.cr',120); return; }
-  if(t<T_NUM[1]){ show('num',true); seekNum(t); return; }
 
   show('outro',true);
   const ot=t-T_OUTRO[0];
