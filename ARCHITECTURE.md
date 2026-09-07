@@ -1069,6 +1069,56 @@ ouverte.
   meilleur ou moins bon que le blessé — pas de remboursement si l'état du joueur
   s'améliore ensuite.
 
+### 13.7 Points d'accueil (arrivée en cours de saison)
+
+Rejoindre une ligue crée une `FantasyTeam` neuve à `totalPoints = 0` (§2.5). Un
+manager qui arrive après quelques journées est donc mathématiquement hors course
+au cumul. Les **points d'accueil** neutralisent ce retard : pour chaque journée
+déjà notée *avant* la première journée que l'arrivant pouvait jouer, on lui
+crédite un score de référence. Hypothèse : un nouveau manager est ~dans la
+moyenne → ni avantagé, ni condamné, il grimpe/descend ensuite à son mérite.
+
+- **Logique pure** : `src/lib/scoring/catchup.ts` (`median`, `computeCatchupCredit`,
+  `firstEligibleGameweekNumber`, `parseCatchupConfig`), testée
+  (`catchup.test.ts`). **Orchestration** : `src/lib/scoring/recompute-catchup.ts`.
+- **Première journée jouable** = première `Gameweek` dont `deadlineAt ≥`
+  `FantasyTeam.validatedAt` (fallback `createdAt`). Cohérent avec le garde-fou
+  `validatedAt` de `snapshot-lineups` (§2.4) : l'arrivant n'a de toute façon aucun
+  `FantasyLineup` réel sur les journées manquées.
+- **Crédit d'une journée manquée** = **médiane globale** (toutes ligues
+  confondues) des `points` réels des `FantasyLineup` de cette journée
+  × `CATCHUP_FACTOR` (défaut **0.9** — léger malus d'arrivée tardive, compense
+  l'avantage de constituer son effectif en connaissant les performances). Peut
+  être négatif si la journée a été globalement ratée par les managers.
+  `CATCHUP_ENABLED` (défaut `true`) coupe entièrement le mécanisme.
+- **Stockage** : lignes `FantasyLineup` avec `isCatchup = true`, `entries = []`,
+  `bonus = null`, `points = crédit`. `recalcTotalPoints`
+  (`src/lib/scoring/recalc-total-points.ts`) les somme sans traitement
+  particulier ; `snapshotFantasyStandings` les intègre au cumul par journée.
+- **Idempotence** : `recomputeCatchupCredits(seasonId)` fait *delete-puis-create*
+  de toutes les lignes `isCatchup` de la saison (comme `PlayerValueHistory`,
+  §13.3). Appelée (a) en fin de `computeGameweekScores`, avant le snapshot de
+  classement — la médiane d'une journée n'est connue qu'une fois notée, et
+  l'arrivée d'un nouveau ou un recompute d'une journée passée décale les
+  crédits ; (b) à la validation d'un effectif en cours de saison
+  (`POST /api/my-team/squad`, best-effort) pour un retour immédiat.
+- `computeGameweekScores` **ignore** les lignes `isCatchup` (pas de vrai effectif
+  à noter) : `include: { lineups: { where: { isCatchup: false } } }`.
+- **Affichage** : `/leaderboard/team/[id]` et `/team/history` rendent ces lignes
+  avec le libellé « Points d'accueil » (pas de lien vers un détail d'effectif
+  inexistant). Évolution de rang = `null` avant la 1ʳᵉ vraie journée (déjà géré,
+  `fantasy-rank.ts`).
+- **Scope** : jeu en direct uniquement (comme §14, §16) — la Simulation avance au
+  curseur admin, pas de « milieu de saison » réel.
+- **Config** : `CATCHUP_ENABLED`, `CATCHUP_FACTOR` dans `GameConfig` (seed).
+- **Déploiement** : `scripts/backfill-catchup-credits.ts` une fois en prod après
+  la migration `20260907150000_add_lineup_is_catchup`.
+- **Limite connue** : l'arrivant constitue son effectif aux valeurs marchandes
+  *courantes* et en connaissant les performances. Contrepartie : ces joueurs
+  valent désormais plus cher, et les managers en place ont eu la valorisation
+  (§13.3) + la conversion points→budget (§13.2). Le facteur 0.9 amortit ; pas de
+  mitigation supplémentaire en v1.
+
 ---
 
 ## 14. Pronostics de journée (multiplicateur de points)

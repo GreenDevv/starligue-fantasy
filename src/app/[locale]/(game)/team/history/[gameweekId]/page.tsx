@@ -54,6 +54,36 @@ export default async function LineupDetailPage({
 
   if (!lineup) notFound();
 
+  // Ligne "points d'accueil" (§13.7) : aucun effectif snapshoté, juste un crédit
+  // médian pour une journée jouée avant l'arrivée du manager.
+  if ("isCatchup" in lineup && lineup.isCatchup === true) {
+    const credit = lineup.points !== null ? Number(lineup.points) : 0;
+    return (
+      <div className="flex flex-col gap-4">
+        <Link
+          href={`/team/history?league=${ctx.leagueId}`}
+          className="text-sm text-text-muted transition-colors hover:text-text"
+        >
+          ← {t("common.backToHistory")}
+        </Link>
+        <div className="pixel-corners border border-border bg-surface px-4 py-8 text-center">
+          <h1 className="text-2xl text-text">{t("common.matchday", { number: lineup.gameweek.number })}</h1>
+          <p
+            className={`mt-2 font-arcade text-4xl leading-none drop-shadow-[0_0_8px_currentColor] ${
+              credit >= 0 ? "text-points-pos" : "text-points-neg"
+            }`}
+          >
+            {credit > 0 ? `+${credit}` : credit}
+          </p>
+          <p className="mt-3 text-sm font-semibold uppercase tracking-widest text-text-muted">
+            {t("history.catchup")}
+          </p>
+          <p className="mx-auto mt-1 max-w-xs text-xs text-text-muted">{t("history.catchupHint")}</p>
+        </div>
+      </div>
+    );
+  }
+
   // En simulation "scored" = ce lineup a déjà des points (chaque équipe avance à
   // son rythme tant que l'avancée n'est pas globale, cf plan étape 6).
   const isScored = mode === "simulation" ? lineup.points !== null : lineup.gameweek.isScored;

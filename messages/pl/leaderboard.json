@@ -24,6 +24,8 @@
       "squad": "Drużyna",
       "predictions": "Typowanie",
       "total": "Suma"
-    }
+    },
+    "catchup": "Punkty powitalne",
+    "catchupHint": "Mediana wyników menedżerów za kolejki rozegrane przed dołączeniem (−10%)"
   }
 }

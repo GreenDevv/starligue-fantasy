@@ -24,6 +24,8 @@
       "squad": "Equip",
       "predictions": "Pronòstics",
       "total": "Total"
-    }
+    },
+    "catchup": "Punts de benvinguda",
+    "catchupHint": "Mediana dels mànagers en les jornades disputades abans de la teva arribada (−10 %)"
   }
 }

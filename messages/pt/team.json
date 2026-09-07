@@ -43,7 +43,9 @@
     "emptyHintLive": "Os registos são criados automaticamente antes de cada prazo.",
     "emptyHintSim": "Assim que um admin fizer avançar a simulação, as jornadas aparecem aqui.",
     "pending": "Pendente",
-    "ptsArrow": "pts →"
+    "ptsArrow": "pts →",
+    "catchup": "Pontos de boas-vindas",
+    "catchupHint": "Mediana dos treinadores nas jornadas disputadas antes da tua entrada (−10 %)"
   },
   "gameweekDetail": {
     "statusSimScored": "Jornada calculada",

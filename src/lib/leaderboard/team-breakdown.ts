@@ -18,6 +18,9 @@ export interface TeamGameweekBreakdownRow {
   predictionMultiplier: number | null;
   predictionDelta: number | null;
   bonus: BonusType | null;
+  // Ligne "points d'accueil" (§13.7) : pas de vrai effectif, `points` = crédit
+  // médian de la journée. rawPoints/predictionDelta restent null.
+  isCatchup: boolean;
 }
 
 export interface TeamBreakdownResult {
@@ -48,6 +51,7 @@ export async function getFantasyTeamBreakdown(teamId: string): Promise<TeamBreak
           rawPoints: true,
           predictionMultiplier: true,
           bonus: true,
+          isCatchup: true,
           gameweekId: true,
           gameweek: { select: { number: true } },
         },
@@ -80,6 +84,7 @@ export async function getFantasyTeamBreakdown(teamId: string): Promise<TeamBreak
         predictionMultiplier: l.predictionMultiplier !== null ? Number(l.predictionMultiplier) : null,
         predictionDelta: rawPoints !== null ? predictionDeltaPoints(rawPoints, points) : null,
         bonus: l.bonus,
+        isCatchup: l.isCatchup,
       };
     }),
   };

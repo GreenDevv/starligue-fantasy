@@ -24,6 +24,8 @@
       "squad": "Hold",
       "predictions": "Pronosticering",
       "total": "I alt"
-    }
+    },
+    "catchup": "Velkomstpoint",
+    "catchupHint": "Median for managere i de runder, der blev spillet, før du kom med (−10 %)"
   }
 }

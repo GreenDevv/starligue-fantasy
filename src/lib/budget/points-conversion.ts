@@ -1,7 +1,7 @@
 // Conversion de points de saison en budget de transfert — fonction PURE, aucun
 // import Prisma. Déclenchée manuellement par l'utilisateur, uniquement pendant une
 // fenêtre de transfert ouverte (contrôlé côté route). Les points convertis sortent
-// définitivement de totalPoints — voir src/lib/scoring/compute.ts::recalcTotalPoints,
+// définitivement de totalPoints — voir src/lib/scoring/recalc-total-points.ts,
 // qui soustrait FantasyTeam.pointsConverted du total recalculé à chaque journée pour
 // que la conversion ne soit jamais écrasée par un recompute.
 

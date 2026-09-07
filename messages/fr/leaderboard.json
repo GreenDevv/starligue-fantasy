@@ -24,6 +24,8 @@
       "squad": "Effectif",
       "predictions": "Pronostics",
       "total": "Total"
-    }
+    },
+    "catchup": "Points d'accueil",
+    "catchupHint": "Médiane des managers pour les journées disputées avant ton arrivée (−10 %)"
   }
 }

@@ -56,6 +56,7 @@ export async function GET(request: Request) {
       isScored: l.gameweek.isScored,
       points: l.points !== null ? Number(l.points) : null,
       bonus: l.bonus,
+      isCatchup: l.isCatchup,
     })),
   });
 }

@@ -62,7 +62,28 @@ export default async function TeamBreakdownPage({
             <span className="text-right">{t("team.col.total")}</span>
           </div>
           <div className="divide-y divide-border">
-            {[...team.gameweeks].reverse().map((gw) => (
+            {[...team.gameweeks].reverse().map((gw) =>
+              gw.isCatchup ? (
+                <div
+                  key={gw.gameweekId}
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm"
+                  title={t("team.catchupHint")}
+                >
+                  <span className="font-arcade text-base text-text-muted sm:text-sm">
+                    {t("gameweekLabel", { number: gw.gameweekNumber })}
+                  </span>
+                  <span className="flex-1 text-[10px] uppercase tracking-widest text-text-muted">
+                    {t("team.catchup")}
+                  </span>
+                  <span
+                    className={`text-right font-semibold tabular-nums ${
+                      gw.points > 0 ? "text-points-pos" : gw.points < 0 ? "text-points-neg" : "text-text-muted"
+                    }`}
+                  >
+                    {gw.points > 0 ? `+${gw.points}` : gw.points}
+                  </span>
+                </div>
+              ) : (
               <div
                 key={gw.gameweekId}
                 className="grid grid-cols-2 gap-x-2 gap-y-1 px-4 py-2.5 text-sm sm:grid-cols-[3.5rem_1fr_1fr_1fr] sm:items-center"
@@ -111,7 +132,8 @@ export default async function TeamBreakdownPage({
                   {gw.points > 0 ? `+${gw.points}` : gw.points}
                 </span>
               </div>
-            ))}
+              )
+            )}
           </div>
         </div>
       )}
