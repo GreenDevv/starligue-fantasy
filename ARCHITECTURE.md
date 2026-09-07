@@ -1087,10 +1087,11 @@ moyenne → ni avantagé, ni condamné, il grimpe/descend ensuite à son mérite
   `FantasyLineup` réel sur les journées manquées.
 - **Crédit d'une journée manquée** = **médiane globale** (toutes ligues
   confondues) des `points` réels des `FantasyLineup` de cette journée
-  × `CATCHUP_FACTOR` (défaut **0.9** — léger malus d'arrivée tardive, compense
-  l'avantage de constituer son effectif en connaissant les performances). Peut
-  être négatif si la journée a été globalement ratée par les managers.
-  `CATCHUP_ENABLED` (défaut `true`) coupe entièrement le mécanisme.
+  × `CATCHUP_FACTOR` (défaut **0.5** — malus d'arrivée tardive assumé : l'arrivant
+  repart à la moitié du barème médian sur les journées manquées, ce qui décourage
+  d'attendre et compense l'avantage de constituer son effectif en connaissant les
+  performances). Peut être négatif si la journée a été globalement ratée par les
+  managers. `CATCHUP_ENABLED` (défaut `true`) coupe entièrement le mécanisme.
 - **Stockage** : lignes `FantasyLineup` avec `isCatchup = true`, `entries = []`,
   `bonus = null`, `points = crédit`. `recalcTotalPoints`
   (`src/lib/scoring/recalc-total-points.ts`) les somme sans traitement
@@ -1116,8 +1117,9 @@ moyenne → ni avantagé, ni condamné, il grimpe/descend ensuite à son mérite
 - **Limite connue** : l'arrivant constitue son effectif aux valeurs marchandes
   *courantes* et en connaissant les performances. Contrepartie : ces joueurs
   valent désormais plus cher, et les managers en place ont eu la valorisation
-  (§13.3) + la conversion points→budget (§13.2). Le facteur 0.9 amortit ; pas de
-  mitigation supplémentaire en v1.
+  (§13.3) + la conversion points→budget (§13.2). Le facteur 0.5 tranche largement
+  en faveur des managers présents depuis le début ; pas de mitigation
+  supplémentaire en v1.
 
 ---
 

@@ -33,8 +33,8 @@ describe("median", () => {
 
 describe("computeCatchupCredit", () => {
   it("médiane × facteur, arrondi à 1 décimale", () => {
-    // médiane [10,20,30,40,55] = 30 → ×0.9 = 27
-    expect(computeCatchupCredit([10, 20, 30, 40, 55])).toBe(27);
+    // médiane [10,20,30,40,55] = 30 → ×0.5 (défaut) = 15
+    expect(computeCatchupCredit([10, 20, 30, 40, 55])).toBe(15);
   });
 
   it("facteur configurable", () => {
@@ -49,9 +49,9 @@ describe("computeCatchupCredit", () => {
     expect(computeCatchupCredit([-20, -10, -6], { enabled: true, factor: 1 })).toBe(-10);
   });
 
-  it("arrondit correctement", () => {
-    // médiane [11,14] = 12.5 → ×0.9 = 11.25 → 11.3
-    expect(computeCatchupCredit([11, 14])).toBe(11.3);
+  it("arrondit à 1 décimale", () => {
+    // médiane [11,16] = 13.5 → ×0.9 = 12.15 → 12.2
+    expect(computeCatchupCredit([11, 16], { enabled: true, factor: 0.9 })).toBe(12.2);
   });
 });
 

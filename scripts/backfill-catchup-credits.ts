@@ -13,6 +13,10 @@ import { recomputeCatchupCredits } from "@/lib/scoring/recompute-catchup";
 // Requiert DATABASE_URL = URL Railway prod (?sslmode=require) — cf. memory
 // prod_database_access, piège base locale.
 //   DATABASE_URL="<prod>?sslmode=require" npx tsx scripts/backfill-catchup-credits.ts
+//
+// Option `--factor <x>` : upsert `CATCHUP_FACTOR` dans GameConfig AVANT le recalcul
+// (sert à changer le facteur en prod puis recréditer l'existant en une passe).
+//   ... npx tsx scripts/backfill-catchup-credits.ts --factor 0.5
 
 async function main() {
   const dbUrl = process.env.DATABASE_URL ?? "";
@@ -22,6 +26,22 @@ async function main() {
         `  DATABASE_URL="${dbUrl.slice(0, 40)}..."`
     );
     process.exit(1);
+  }
+
+  const factorIdx = process.argv.indexOf("--factor");
+  if (factorIdx !== -1) {
+    const raw = process.argv[factorIdx + 1];
+    const factor = Number(raw);
+    if (!Number.isFinite(factor) || factor < 0) {
+      console.error(`--factor invalide : "${raw}"`);
+      process.exit(1);
+    }
+    await prisma.gameConfig.upsert({
+      where: { key: "CATCHUP_FACTOR" },
+      update: { value: String(factor) },
+      create: { key: "CATCHUP_FACTOR", value: String(factor) },
+    });
+    console.log(`  ✓ GameConfig CATCHUP_FACTOR = ${factor}`);
   }
 
   const seasons = await prisma.season.findMany({
