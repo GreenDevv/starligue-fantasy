@@ -14,10 +14,35 @@
 //   SimulationLineup.points, pas Gameweek.isScored — même piège que documenté
 //   dans team/history/[gameweekId]/page.tsx) → on lit le lineup scoré le plus
 //   récent de CHAQUE équipe individuellement.
+//
+// v2 (ARCHITECTURE.md §24) : chaque récap est enrichi avec le détail par joueur
+// (getGameweekLineupDetail), le meilleur titulaire de la journée et l'évolution du
+// rang au classement général (getRankMovement — null si le snapshot n'existe pas
+// encore, ex. 1ʳᵉ journée ou backfill prod pas encore lancé).
 import { prisma } from "@/lib/db";
 import type { SeasonMode } from "@/lib/team/active-team-context";
+import {
+  getGameweekLineupDetail,
+  pickTopPerformer,
+  type LineupPlayerDetail,
+} from "@/lib/team/gameweek-lineup-detail";
+import { getRankMovement, type RankMovement } from "@/lib/standings/get-rank-movement";
 
 export interface PendingGameweekRecap {
+  mode: SeasonMode;
+  teamId: string;
+  teamName: string;
+  leagueId: string;
+  leagueName: string;
+  gameweekId: string;
+  gameweekNumber: number;
+  points: number;
+  players: LineupPlayerDetail[];
+  topPerformer: LineupPlayerDetail | null;
+  rank: RankMovement | null;
+}
+
+interface BaseRecap {
   mode: SeasonMode;
   teamId: string;
   teamName: string;
@@ -33,12 +58,30 @@ export async function getPendingGameweekRecaps(
   mode: SeasonMode,
   seasonId: string
 ): Promise<PendingGameweekRecap[]> {
-  return mode === "simulation"
-    ? getSimulationPendingRecaps(userId, seasonId)
-    : getLivePendingRecaps(userId, seasonId);
+  const base =
+    mode === "simulation"
+      ? await getSimulationPendingRecaps(userId, seasonId)
+      : await getLivePendingRecaps(userId, seasonId);
+
+  const snapshotMode = mode === "simulation" ? "SIMULATION" : "LIVE";
+
+  return Promise.all(
+    base.map(async (r): Promise<PendingGameweekRecap> => {
+      const [detail, rank] = await Promise.all([
+        getGameweekLineupDetail(mode, r.teamId, r.gameweekId),
+        getRankMovement(seasonId, snapshotMode, r.teamId, r.gameweekNumber),
+      ]);
+      return {
+        ...r,
+        players: detail?.players ?? [],
+        topPerformer: detail ? pickTopPerformer(detail) : null,
+        rank,
+      };
+    })
+  );
 }
 
-async function getLivePendingRecaps(userId: string, seasonId: string): Promise<PendingGameweekRecap[]> {
+async function getLivePendingRecaps(userId: string, seasonId: string): Promise<BaseRecap[]> {
   const latestScored = await prisma.gameweek.findFirst({
     where: { seasonId, isScored: true },
     orderBy: { number: "desc" },
@@ -58,7 +101,7 @@ async function getLivePendingRecaps(userId: string, seasonId: string): Promise<P
     },
   });
 
-  const recaps: PendingGameweekRecap[] = [];
+  const recaps: BaseRecap[] = [];
   for (const team of teams) {
     const points = team.lineups[0]?.points;
     if (points === undefined || points === null) continue;
@@ -76,7 +119,7 @@ async function getLivePendingRecaps(userId: string, seasonId: string): Promise<P
   return recaps;
 }
 
-async function getSimulationPendingRecaps(userId: string, seasonId: string): Promise<PendingGameweekRecap[]> {
+async function getSimulationPendingRecaps(userId: string, seasonId: string): Promise<BaseRecap[]> {
   const teams = await prisma.simulationTeam.findMany({
     where: { userId, isValidated: true, seasonId },
     include: {
@@ -90,7 +133,7 @@ async function getSimulationPendingRecaps(userId: string, seasonId: string): Pro
     },
   });
 
-  const recaps: PendingGameweekRecap[] = [];
+  const recaps: BaseRecap[] = [];
   for (const team of teams) {
     const latestScoredLineup = team.lineups[0];
     if (!latestScoredLineup || latestScoredLineup.points === null) continue;

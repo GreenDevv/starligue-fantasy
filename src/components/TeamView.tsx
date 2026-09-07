@@ -9,6 +9,7 @@ import { JerseyBadge } from "@/components/jersey/JerseyBadge";
 import { BonusPicker, type BonusType } from "@/components/BonusPicker";
 import { MatchesStrip } from "@/components/dashboard/MatchesStrip";
 import { StatLeadersPanel } from "@/components/dashboard/StatLeadersPanel";
+import { LiveTeamScoreCard } from "@/components/live/LiveTeamScoreCard";
 import { resolveApiError } from "@/lib/api/error-messages";
 
 interface SquadEntry {
@@ -308,6 +309,9 @@ export function TeamView({
           />
         </div>
       )}
+
+      {/* Score provisoire de la journée en cours — visible seulement pendant les matchs */}
+      <LiveTeamScoreCard />
 
       {/* Pitch + bench */}
       <HandballPitch starters={starters} bench={bench} captainId={captainId} onSwap={swapRole} />

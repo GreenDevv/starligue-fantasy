@@ -179,7 +179,14 @@
     "title": "Spieltag {number} gewertet",
     "subtitlePositive": "{team} zeigt einen starken Spieltag!",
     "subtitleNegative": "{team} hatte einen schwierigen Spieltag.",
-    "detailCta": "Details ansehen"
+    "detailCta": "Details ansehen",
+    "shareCta": "Meinen Rückblick teilen",
+    "sharePreparing": "Wird vorbereitet…",
+    "starters": "Startaufstellung",
+    "bench": "Bank",
+    "topPerformer": "Bester deiner Aufstellung",
+    "globalRank": "Gesamtrang",
+    "leagueRank": "In deiner Liga"
   },
   "championsLeague": {
     "title": "EHF Champions League"

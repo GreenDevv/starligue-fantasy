@@ -179,7 +179,14 @@
     "title": "Matchday {number} scored",
     "subtitlePositive": "{team} put together a great matchday!",
     "subtitleNegative": "{team} had a rough matchday.",
-    "detailCta": "See details"
+    "detailCta": "See details",
+    "shareCta": "Share my recap",
+    "sharePreparing": "Preparing…",
+    "starters": "Starters",
+    "bench": "Bench",
+    "topPerformer": "Best in your lineup",
+    "globalRank": "Overall ranking",
+    "leagueRank": "In your league"
   },
   "championsLeague": {
     "title": "EHF Champions League"

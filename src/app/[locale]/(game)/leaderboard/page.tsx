@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { LeaderboardList } from "@/components/leaderboard/LeaderboardList";
+import { LiveLeaderboard } from "@/components/live/LiveLeaderboard";
 import { useSession } from "next-auth/react";
 
 interface StandingEntry {
@@ -81,6 +82,9 @@ export default function LeaderboardPage() {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl text-text">{t("title")}</h1>
+
+      {/* Classement provisoire en direct — visible seulement pendant une journée en cours */}
+      <LiveLeaderboard />
 
       {/* Tabs */}
       <div className="pixel-corners flex gap-1 border border-border bg-surface p-1">

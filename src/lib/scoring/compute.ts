@@ -7,6 +7,7 @@ import { computeStatLeaderBonuses, type StatLeaderPlayerInput } from "./stat-lea
 import { applyGameweekValueAdjustments } from "@/lib/players/apply-value-adjustment";
 import { resolveOutcome, type PredictionOutcome } from "@/lib/predictions/outcome";
 import { computeGameweekMultiplier, applyMultiplier, parseMultiplierConfig } from "@/lib/predictions/multiplier";
+import { snapshotFantasyStandings } from "@/lib/standings/snapshot-fantasy-standings";
 import { Decimal } from "@prisma/client/runtime/library";
 
 interface LineupEntryJson {
@@ -206,6 +207,15 @@ export async function computeGameweekScores(gameweekId: string): Promise<{ lineu
     where: { id: gameweekId },
     data: { isScored: true },
   });
+
+  // Snapshot du classement général fantasy à l'issue de la journée (rang global +
+  // rang de ligue + cumul) — sert l'évolution ▲/▼ du récap et le Centre live.
+  // try/catch : un échec de snapshot ne doit jamais annuler un scoring réussi.
+  try {
+    await snapshotFantasyStandings(gameweek.seasonId, gameweek.number, "LIVE");
+  } catch (e) {
+    console.error("[compute-scores][fantasy-standing-snapshot]", e);
+  }
 
   return { lineupCount };
 }

@@ -179,7 +179,14 @@
     "title": "Kolejka {number} rozliczona",
     "subtitlePositive": "{team} notuje udaną kolejkę!",
     "subtitleNegative": "{team} miał trudną kolejkę.",
-    "detailCta": "Zobacz szczegóły"
+    "detailCta": "Zobacz szczegóły",
+    "shareCta": "Udostępnij podsumowanie",
+    "sharePreparing": "Przygotowywanie…",
+    "starters": "Podstawowy skład",
+    "bench": "Ławka",
+    "topPerformer": "Najlepszy w składzie",
+    "globalRank": "Klasyfikacja generalna",
+    "leagueRank": "W twojej lidze"
   },
   "championsLeague": {
     "title": "EHF Champions League"
