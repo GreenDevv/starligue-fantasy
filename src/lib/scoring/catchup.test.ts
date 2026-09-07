@@ -33,8 +33,8 @@ describe("median", () => {
 
 describe("computeCatchupCredit", () => {
   it("médiane × facteur, arrondi à 1 décimale", () => {
-    // médiane [10,20,30,40,55] = 30 → ×0.5 (défaut) = 15
-    expect(computeCatchupCredit([10, 20, 30, 40, 55])).toBe(15);
+    // médiane [10,20,30,40,55] = 30 → ×0.7 (défaut) = 21
+    expect(computeCatchupCredit([10, 20, 30, 40, 55])).toBe(21);
   });
 
   it("facteur configurable", () => {

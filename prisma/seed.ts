@@ -120,7 +120,7 @@ const GAME_CONFIG: Record<string, string> = {
   NOTIFICATION_LEAD_MINUTES: "60",
   // Points d'accueil (arrivée en cours de saison) — src/lib/scoring/catchup.ts, ARCHITECTURE.md §13.7
   CATCHUP_ENABLED: "true",
-  CATCHUP_FACTOR: "0.5", // médiane globale de la journée × 0,5 (malus d'arrivée tardive assumé)
+  CATCHUP_FACTOR: "0.7", // médiane globale de la journée × 0,7 (malus d'arrivée tardive)
 };
 
 const HOUR = 60 * 60 * 1000;
