@@ -5,19 +5,19 @@
 // alors que les autres ont déjà cumulé N journées → mathématiquement hors course.
 // Solution : pour chaque journée notée AVANT la première journée que l'arrivant
 // pouvait jouer, on lui crédite la médiane des points réellement marqués par les
-// managers cette journée-là, × un facteur (défaut 0,9 : léger malus qui décourage
-// d'attendre et compense l'avantage de constituer son effectif en connaissance de
-// cause). Hypothèse : un nouveau manager est ~dans la moyenne → ni avantagé, ni
-// condamné, il grimpe ou descend ensuite à son mérite.
+// managers cette journée-là, × un facteur (défaut 0,5 : malus d'arrivée tardive
+// assumé — décourage d'attendre et compense l'avantage de constituer son effectif
+// en connaissance de cause). L'arrivant repart donc à la moitié du barème médian
+// sur les journées manquées, puis grimpe/descend ensuite à son mérite.
 
 export interface CatchupConfig {
   enabled: boolean;
-  factor: number; // CATCHUP_FACTOR — multiplie la médiane (défaut 0,9)
+  factor: number; // CATCHUP_FACTOR — multiplie la médiane (défaut 0,5)
 }
 
 export const DEFAULT_CATCHUP_CONFIG: CatchupConfig = {
   enabled: true,
-  factor: 0.9,
+  factor: 0.5,
 };
 
 export function parseCatchupConfig(
@@ -26,7 +26,7 @@ export function parseCatchupConfig(
 ): CatchupConfig {
   return {
     enabled: (raw["CATCHUP_ENABLED"] ?? "true") === "true",
-    factor: parseFloat(raw["CATCHUP_FACTOR"] ?? "0.9"),
+    factor: parseFloat(raw["CATCHUP_FACTOR"] ?? "0.5"),
     ...overrides,
   };
 }
