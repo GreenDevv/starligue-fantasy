@@ -132,6 +132,56 @@ export async function createCarouselContainer(
   return data.id;
 }
 
+const ContainerStatusSchema = z.object({
+  status_code: z.enum(["EXPIRED", "ERROR", "FINISHED", "IN_PROGRESS", "PUBLISHED"]).optional(),
+});
+
+export interface ContainerPollOptions {
+  // Délai entre deux vérifications de statut, en ms (0 = aucune attente, pour les tests).
+  pollDelayMs?: number;
+  // Nombre maximum de vérifications avant d'abandonner.
+  pollMaxAttempts?: number;
+}
+
+const DEFAULT_POLL_DELAY_MS = 3000;
+const DEFAULT_POLL_MAX_ATTEMPTS = 40; // ~2 min avec le délai par défaut
+
+// Attend qu'un conteneur média soit prêt à publier. Instagram télécharge et valide
+// les images de façon ASYNCHRONE après la création du conteneur : appeler
+// media_publish sur un conteneur encore `IN_PROGRESS` échoue avec
+// "Media ID is not available". Le délai grandit avec le nombre de slides — d'où
+// l'échec observé le 2026-09-07 sur les carrousels attaque (8 slides) et défense
+// (6) alors que gardiens (2) passait juste à temps. Doc Meta : sonder le champ
+// `status_code` jusqu'à `FINISHED` avant de publier.
+export async function waitForContainerReady(
+  containerId: string,
+  creds: InstagramCredentials,
+  opts: ContainerPollOptions = {}
+): Promise<void> {
+  const delayMs = opts.pollDelayMs ?? DEFAULT_POLL_DELAY_MS;
+  const maxAttempts = opts.pollMaxAttempts ?? DEFAULT_POLL_MAX_ATTEMPTS;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const url = new URL(`${GRAPH_API_BASE}/${containerId}`);
+    url.searchParams.set("fields", "status_code");
+    url.searchParams.set("access_token", creds.accessToken);
+
+    const res = await fetch(url);
+    const { status_code } = await parseGraphResponse(res, ContainerStatusSchema);
+
+    if (status_code === "FINISHED" || status_code === "PUBLISHED") return;
+    if (status_code === "ERROR" || status_code === "EXPIRED") {
+      throw new InstagramApiError(`Conteneur média Instagram en état ${status_code}`);
+    }
+    // IN_PROGRESS (ou champ absent) → attendre et réessayer.
+    if (delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
+  }
+
+  throw new InstagramApiError(
+    `Conteneur média Instagram toujours pas prêt après ${maxAttempts} vérifications`
+  );
+}
+
 export interface PostCarouselParams {
   imageUrls: string[]; // 2-10 images, ordre = ordre des slides
   caption: string;
@@ -139,16 +189,19 @@ export interface PostCarouselParams {
 
 // Enchaîne les 3 étapes du flow carrousel. Les créations d'enfants sont séquentielles
 // (pas Promise.all) : plus simple à débugger si une image échoue au milieu, et la
-// Graph API n'a pas de gain de perf notable à paralléliser ces appels.
+// Graph API n'a pas de gain de perf notable à paralléliser ces appels. On sonde le
+// statut du conteneur parent avant de publier (voir waitForContainerReady).
 export async function postCarousel(
   params: PostCarouselParams,
-  creds: InstagramCredentials
+  creds: InstagramCredentials,
+  opts: ContainerPollOptions = {}
 ): Promise<PostImageResult> {
   const childrenIds: string[] = [];
   for (const imageUrl of params.imageUrls) {
     childrenIds.push(await createCarouselItemContainer(imageUrl, creds));
   }
   const creationId = await createCarouselContainer(childrenIds, params.caption, creds);
+  await waitForContainerReady(creationId, creds, opts);
   const mediaId = await publishContainer(creationId, creds);
   return { mediaId, creationId };
 }
@@ -165,9 +218,11 @@ export interface PostImageResult {
 
 export async function postImage(
   params: PostImageParams,
-  creds: InstagramCredentials
+  creds: InstagramCredentials,
+  opts: ContainerPollOptions = {}
 ): Promise<PostImageResult> {
   const creationId = await createImageContainer(params.imageUrl, params.caption, creds);
+  await waitForContainerReady(creationId, creds, opts);
   const mediaId = await publishContainer(creationId, creds);
   return { mediaId, creationId };
 }

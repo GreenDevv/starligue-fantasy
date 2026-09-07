@@ -6,6 +6,7 @@ import {
   createCarouselItemContainer,
   createCarouselContainer,
   postCarousel,
+  waitForContainerReady,
   InstagramApiError,
 } from "./client";
 
@@ -54,16 +55,22 @@ describe("instagram client", () => {
     expect(calledUrl.searchParams.get("creation_id")).toBe("CREATION_1");
   });
 
-  it("chaîne création puis publication dans postImage", async () => {
+  it("chaîne création, attente de statut puis publication dans postImage", async () => {
     const mockFetch = global.fetch as ReturnType<typeof vi.fn>;
     mockFetch
       .mockResolvedValueOnce({ ok: true, json: async () => ({ id: "CREATION_1" }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ status_code: "FINISHED" }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ id: "MEDIA_1" }) });
 
-    const result = await postImage({ imageUrl: "https://example.com/img.jpg", caption: "Hello" }, creds);
+    const result = await postImage(
+      { imageUrl: "https://example.com/img.jpg", caption: "Hello" },
+      creds,
+      { pollDelayMs: 0 }
+    );
 
     expect(result).toEqual({ mediaId: "MEDIA_1", creationId: "CREATION_1" });
-    expect(mockFetch).toHaveBeenCalledTimes(2);
+    expect(mockFetch).toHaveBeenCalledTimes(3);
+    expect((mockFetch.mock.calls[1]![0] as URL).searchParams.get("fields")).toBe("status_code");
   });
 
   it("lève une InstagramApiError lisible sur erreur Graph API", async () => {
@@ -129,20 +136,58 @@ describe("instagram client", () => {
     expect(calledUrl.searchParams.get("caption")).toBe("Légende");
   });
 
-  it("postCarousel enchaîne un conteneur par image puis le carrousel puis la publication", async () => {
+  it("postCarousel enchaîne les conteneurs, attend le statut FINISHED, puis publie", async () => {
     const mockFetch = global.fetch as ReturnType<typeof vi.fn>;
     mockFetch
       .mockResolvedValueOnce({ ok: true, json: async () => ({ id: "ITEM_1" }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ id: "ITEM_2" }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ id: "CAROUSEL_1" }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ status_code: "IN_PROGRESS" }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ status_code: "FINISHED" }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ id: "MEDIA_1" }) });
 
     const result = await postCarousel(
       { imageUrls: ["https://example.com/1.png", "https://example.com/2.png"], caption: "Légende" },
-      creds
+      creds,
+      { pollDelayMs: 0 }
     );
 
     expect(result).toEqual({ mediaId: "MEDIA_1", creationId: "CAROUSEL_1" });
-    expect(mockFetch).toHaveBeenCalledTimes(4);
+    expect(mockFetch).toHaveBeenCalledTimes(6);
+    // 4e appel = 1re vérification de statut sur le conteneur carrousel
+    expect((mockFetch.mock.calls[3]![0] as URL).toString()).toContain("/CAROUSEL_1");
+  });
+
+  describe("waitForContainerReady", () => {
+    it("réessaie tant que le conteneur est IN_PROGRESS puis rend la main sur FINISHED", async () => {
+      const mockFetch = global.fetch as ReturnType<typeof vi.fn>;
+      mockFetch
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ status_code: "IN_PROGRESS" }) })
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ status_code: "IN_PROGRESS" }) })
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ status_code: "FINISHED" }) });
+
+      await waitForContainerReady("CONTAINER_1", creds, { pollDelayMs: 0 });
+
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+    });
+
+    it("lève une InstagramApiError si le conteneur passe en ERROR", async () => {
+      const mockFetch = global.fetch as ReturnType<typeof vi.fn>;
+      mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ status_code: "ERROR" }) });
+
+      await expect(waitForContainerReady("CONTAINER_1", creds, { pollDelayMs: 0 })).rejects.toBeInstanceOf(
+        InstagramApiError
+      );
+    });
+
+    it("lève une InstagramApiError si le conteneur n'est jamais prêt", async () => {
+      const mockFetch = global.fetch as ReturnType<typeof vi.fn>;
+      mockFetch.mockResolvedValue({ ok: true, json: async () => ({ status_code: "IN_PROGRESS" }) });
+
+      await expect(
+        waitForContainerReady("CONTAINER_1", creds, { pollDelayMs: 0, pollMaxAttempts: 3 })
+      ).rejects.toBeInstanceOf(InstagramApiError);
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+    });
   });
 });
