@@ -28,26 +28,32 @@ jobs:
             url="${url}?dryRun=true"
           fi
 
-          response=$(curl -sS -w "\n%{http_code}" -X POST \
-            -H "Authorization: Bearer ${CRON_SECRET}" \
-            "$url")
-          body=$(echo "$response" | sed '$d')
-          status=$(echo "$response" | tail -n 1)
-
-          echo "$body" | python3 -m json.tool || echo "$body"
-
-          if [ "$status" -ge 300 ]; then
-            echo "::error::HTTP $status"
-            exit 1
-          fi
-
-          # La route renvoie 200 même si un carrousel échoue (data[].success=false,
-          # ex. "Media ID is not available") — on remonte ces échecs partiels pour
-          # que le run GitHub soit rouge et visible, au lieu de passer inaperçu.
+          # La route ne publie qu'UN carrousel par appel (créer 6-8 conteneurs +
+          # attendre FINISHED + publier ≈ 50 s ; 3 d'affilée dépassaient le timeout
+          # proxy Railway → 502). On rappelle donc l'endpoint tant qu'il renvoie
+          # remaining=true. Idempotent côté serveur (SocialPost.dedupeKey).
           # jq est préinstallé sur les runners ubuntu-latest.
-          failures=$(echo "$body" | jq -r '[.data[]? | select(.success == false) | "\(.kind) J\(.gameweekNumber): \(.reason)"] | join("\n")')
-          if [ -n "$failures" ]; then
-            echo "::error::Carrousels en échec :"
-            echo "$failures"
-            exit 1
-          fi
+          for attempt in 1 2 3 4 5 6; do
+            echo "--- Appel $attempt ---"
+            response=$(curl -sS -w "\n%{http_code}" --max-time 280 -X POST \
+              -H "Authorization: Bearer ${CRON_SECRET}" \
+              "$url")
+            body=$(echo "$response" | sed '$d')
+            status=$(echo "$response" | tail -n 1)
+
+            echo "$body" | python3 -m json.tool || echo "$body"
+
+            if [ "$status" -ge 300 ]; then
+              echo "::error::HTTP $status"
+              exit 1
+            fi
+
+            failures=$(echo "$body" | jq -r '[.data[]? | select(.success == false) | "\(.kind) J\(.gameweekNumber): \(.reason)"] | join("\n")')
+            if [ -n "$failures" ]; then
+              echo "::error::Carrousels en échec :"
+              echo "$failures"
+              exit 1
+            fi
+
+            [ "$(echo "$body" | jq -r '.remaining // false')" != "true" ] && break
+          done

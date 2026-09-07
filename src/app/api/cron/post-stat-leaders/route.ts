@@ -98,6 +98,14 @@ export async function POST(request: Request) {
 
   const results: JobResult[] = [];
 
+  // On ne publie qu'UN carrousel par appel (hors dryRun) puis on rend la main :
+  // créer 6-8 conteneurs enfants + attendre le statut FINISHED + publier prend
+  // 40-60 s, et 3 carrousels d'affilée dépassaient le timeout du proxy Railway
+  // (502 "Application failed to respond", vu le 2026-09-07). Le workflow
+  // rappelle l'endpoint en boucle tant qu'il reste un post à faire ; l'idempotence
+  // par SocialPost.dedupeKey garantit qu'on ne republie jamais.
+  let published = false;
+
   for (const gameweek of candidates) {
     for (const post of POST_DEFINITIONS) {
       const dedupeKey = `stat-leaders:${post.kind}:${gameweek.id}`;
@@ -116,12 +124,20 @@ export async function POST(request: Request) {
         continue;
       }
 
+      if (published) {
+        // Un carrousel a déjà été publié cet appel — on liste les restants comme
+        // "à faire" pour que le workflow sache qu'il doit rappeler l'endpoint.
+        results.push({ gameweekNumber: gameweek.number, kind: post.kind, skipped: true, reason: "reporté (1 post/appel)" });
+        continue;
+      }
+
       try {
         const creds = getInstagramCredentialsFromEnv();
         const { mediaId } = await postCarousel({ imageUrls, caption }, creds);
         const permalink = await getMediaPermalink(mediaId, creds);
         await prisma.socialPost.create({ data: { dedupeKey, gameweekId: gameweek.id, mediaId, permalink } });
         results.push({ gameweekNumber: gameweek.number, kind: post.kind, success: true, mediaId, permalink });
+        published = true;
       } catch (e) {
         results.push({
           gameweekNumber: gameweek.number,
@@ -133,5 +149,7 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ data: results });
+  // `remaining` : encore des posts à publier (le workflow doit rappeler l'endpoint).
+  const remaining = results.some((r) => r.reason === "reporté (1 post/appel)");
+  return NextResponse.json({ data: results, remaining });
 }
