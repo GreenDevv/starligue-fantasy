@@ -179,7 +179,14 @@
     "title": "Jornada {number} puntuada",
     "subtitlePositive": "{team} encadena una gran jornada!",
     "subtitleNegative": "{team} ha tingut una jornada complicada.",
-    "detailCta": "Veure detall"
+    "detailCta": "Veure detall",
+    "shareCta": "Comparteix el meu resum",
+    "sharePreparing": "Preparant…",
+    "starters": "Titulars",
+    "bench": "Banqueta",
+    "topPerformer": "El millor de la teva alineació",
+    "globalRank": "Classificació general",
+    "leagueRank": "A la teva lliga"
   },
   "championsLeague": {
     "title": "EHF Champions League"
