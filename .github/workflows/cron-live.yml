@@ -1,0 +1,43 @@
+name: Cron live (résultats + classement Starligue en direct)
+
+# Lot 1 du « Centre live » : pendant les créneaux de match, rafraîchit vite
+# Match.status/scores + le classement officiel Starligue (route /api/cron/sync-live,
+# qui ne fait rien s'il n'y a aucun match dans [now-3h, now+30min]).
+#
+# GitHub Actions décale souvent les crons de plusieurs minutes sous charge : on vise
+# ~toutes les 5 min, la fraîcheur réelle est plutôt 5-15 min. Le suivi minute par
+# minute (feed eStatsChannels lnh.fr) viendra dans un lot suivant.
+#
+# Fenêtres larges en UTC couvrant les jours/heures de match LNH (mer.-dim.,
+# ~18h-00h30 Paris = ~16h-22h30 UTC en été / 17h-23h30 en hiver) : la route filtre
+# elle-même sur la présence d'un match, donc on peut sur-planifier sans risque.
+on:
+  schedule:
+    - cron: "*/5 16-23 * * 3,4,5,6" # mer. jeu. ven. sam. — 16-23 UTC
+    - cron: "*/5 13-21 * * 0"       # dim. — 13-21 UTC (matchs d'après-midi)
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "forcer la synchro même hors créneau de match"
+        type: boolean
+        default: false
+
+jobs:
+  sync-live:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler /api/cron/sync-live
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          url="https://starliguefantasy.fr/api/cron/sync-live"
+          [ "$FORCE" = "true" ] && url="$url?force=true"
+          response=$(curl -sS -w "\n%{http_code}" -X POST -H "Authorization: Bearer ${CRON_SECRET}" "$url")
+          body=$(echo "$response" | sed '$d')
+          status=$(echo "$response" | tail -n 1)
+          echo "$body" | python3 -m json.tool || echo "$body"
+          if [ "$status" -ge 300 ]; then
+            echo "::error::HTTP $status"
+            exit 1
+          fi

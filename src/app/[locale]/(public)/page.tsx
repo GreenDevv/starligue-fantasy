@@ -18,6 +18,7 @@ import { ehfCompetitionSlug } from "@/lib/matches/ehf-competition-slugs";
 import { getActiveClubs } from "@/lib/clubs/get-active-clubs";
 import { MatchesStrip } from "@/components/dashboard/MatchesStrip";
 import { TodayMatchCarousel } from "@/components/dashboard/TodayMatchCarousel";
+import { LiveRefresher } from "@/components/live/LiveRefresher";
 import { ClubLogoLink } from "@/components/starligue/ClubLogoLink";
 import { StandingsSection } from "@/components/starligue/StandingsSection";
 import { NewsFeed } from "@/components/starligue/NewsFeed";
@@ -124,8 +125,17 @@ export default async function HomePage({
   // explicite de l'utilisateur), même source que le widget "Classement Starligue".
   const rankByClubId: Record<string, number> = Object.fromEntries(standings.rows.map((r) => [r.clubId, r.rank]));
 
+  // Fenêtre live : au moins un match aujourd'hui dont le coup d'envoi tombe dans
+  // [now-3h, now+30min] → la home se rafraîchit toute seule (scores + classement).
+  const nowMs = Date.now();
+  const liveWindowActive = todayMatches.some((m) => {
+    const k = new Date(m.kickoffAt).getTime();
+    return k >= nowMs - 3 * 60 * 60 * 1000 && k <= nowMs + 30 * 60 * 1000;
+  });
+
   return (
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-4 px-4 pb-16 pt-6 sm:px-6">
+      <LiveRefresher active={liveWindowActive} />
       <IntroSplash clubs={clubs} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-1">
