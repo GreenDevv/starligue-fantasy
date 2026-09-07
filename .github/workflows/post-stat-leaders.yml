@@ -44,13 +44,8 @@ jobs:
           # La route renvoie 200 même si un carrousel échoue (data[].success=false,
           # ex. "Media ID is not available") — on remonte ces échecs partiels pour
           # que le run GitHub soit rouge et visible, au lieu de passer inaperçu.
-          failures=$(echo "$body" | python3 -c '
-import sys, json
-data = json.load(sys.stdin).get("data", [])
-for x in data:
-    if x.get("success") is False:
-        print(f"{x.get(\"kind\")} J{x.get(\"gameweekNumber\")}: {x.get(\"reason\")}")
-')
+          # jq est préinstallé sur les runners ubuntu-latest.
+          failures=$(echo "$body" | jq -r '[.data[]? | select(.success == false) | "\(.kind) J\(.gameweekNumber): \(.reason)"] | join("\n")')
           if [ -n "$failures" ]; then
             echo "::error::Carrousels en échec :"
             echo "$failures"
