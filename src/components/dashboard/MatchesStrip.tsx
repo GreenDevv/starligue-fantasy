@@ -59,7 +59,16 @@ interface MatchesStripProps {
   // desktop le viewport déclenche sm:/md: alors que chaque strip ne fait que
   // ~300px, d'où le débordement/clipping des logos). Un nombre de colonnes fixe
   // (non lié au viewport) contourne ça pour ces usages en conteneur étroit connu.
-  fixedColumns?: 2 | 3;
+  // 1 : une seule colonne, un match par ligne (logos + score centrés) — pour un
+  // rail vraiment étroit (ex: colonne "résultats" de la home à 240px, où même 2
+  // colonnes de logos "lg" débordaient les uns sur les autres).
+  fixedColumns?: 1 | 2 | 3;
+  // Échappatoire : classe(s) Tailwind de colonnes de grille, prioritaire sur
+  // `fixedColumns` et `size`. Même logique que `sizeClassName` sur ClubLogo —
+  // pour le cas où le conteneur a une largeur qui change au breakpoint (ex: la
+  // colonne "résultats" de la home fait 100% sur mobile mais 240px sur lg :
+  // "grid-cols-2 lg:grid-cols-1" pour 2-up serré en mobile, 1-up aéré en desktop).
+  gridColsClassName?: string;
   // Titre affiché à la place de "Résultats"/"Prochains matchs" (ex: "Warm Up" pour
   // une liste qui mélange les deux, ARCHITECTURE.md §19). Sans effet sur l'usage
   // championnat existant si omis.
@@ -169,6 +178,7 @@ export function MatchesStrip({
   matches,
   size = "wide",
   fixedColumns,
+  gridColsClassName,
   title: titleOverride,
   disableLink,
   showDate,
@@ -184,7 +194,18 @@ export function MatchesStrip({
   const title = titleOverride ?? (variant === "results" ? t("matchesStrip.results") : t("matchesStrip.upcoming"));
   const dateRange = formatGameweekRange(format, matches.map((m) => m.kickoffAt));
   const { logo, gridCols: responsiveGridCols, boxPad, outerGap } = SIZE_CONFIG[size];
-  const gridCols = fixedColumns ? (fixedColumns === 2 ? "grid-cols-2" : "grid-cols-3") : responsiveGridCols;
+  const gridCols =
+    gridColsClassName ??
+    (fixedColumns ? { 1: "grid-cols-1", 2: "grid-cols-2", 3: "grid-cols-3" }[fixedColumns] : responsiveGridCols);
+  // Ligne de match "pleine largeur" (logos plus espacés du score, score agrandi) :
+  // toujours si une seule colonne, ou seulement à partir de lg si la grille passe
+  // à 1 colonne à ce breakpoint (cas "grid-cols-2 lg:grid-cols-1" de la home).
+  const rowSpacing =
+    fixedColumns === 1
+      ? { gap: "gap-3", score: "text-base" }
+      : gridColsClassName?.includes("lg:grid-cols-1")
+        ? { gap: "gap-1 lg:gap-3", score: "text-sm lg:text-base" }
+        : { gap: "gap-1", score: "text-sm" };
   const containerTone = tone === "highlight" ? "border-accent/40 bg-accent/10" : "border-border bg-surface";
   const isOpen = !collapsible || open;
 
@@ -207,8 +228,11 @@ export function MatchesStrip({
             const hasScore = m.homeScore !== null && m.awayScore !== null;
             const homeRank = m.homeClub.id ? rankByClubId?.[m.homeClub.id] : undefined;
             const awayRank = m.awayClub.id ? rankByClubId?.[m.awayClub.id] : undefined;
+            // 1 colonne : un match par ligne pleine largeur — on espace davantage
+            // les logos du score et on grossit le score pour que la ligne se lise
+            // comme un résultat, pas comme un encart compressé (voir rowSpacing).
             const logosRow = (
-              <div className="flex items-center justify-center gap-1">
+              <div className={`flex items-center justify-center ${rowSpacing.gap}`}>
                 <div className="flex flex-col items-center gap-0.5">
                   <ClubLogo club={m.homeClub} size={logo} title={clubTooltip(m.homeClub)} />
                   {homeRank !== undefined && (
@@ -216,7 +240,7 @@ export function MatchesStrip({
                   )}
                 </div>
                 {hasScore && (
-                  <span className="font-arcade text-sm tracking-wide text-text">
+                  <span className={`font-arcade tracking-wide text-text ${rowSpacing.score}`}>
                     {m.homeScore}-{m.awayScore}
                   </span>
                 )}

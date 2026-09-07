@@ -270,11 +270,14 @@ export default async function HomePage({
         </div>
 
         <div className="flex flex-col gap-4 lg:col-start-1 lg:row-start-1">
+          {/* 2-up serré sur mobile (colonne pleine largeur), 1-up aéré sur desktop
+              où cette colonne ne fait que 240px et 2 logos "lg" + le score se
+              chevauchaient (feedback 2026-09-07). */}
           <MatchesStrip
             variant="results"
             gameweekNumber={matchStrips.lastResults.gameweekNumber}
             matches={matchStrips.lastResults.matches}
-            fixedColumns={2}
+            gridColsClassName="grid-cols-2 lg:grid-cols-1"
             rankByClubId={rankByClubId}
           />
           <StandingsSection gameweekNumber={standings.gameweekNumber} rows={standings.rows} />
