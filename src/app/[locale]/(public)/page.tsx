@@ -270,11 +270,16 @@ export default async function HomePage({
         </div>
 
         <div className="flex flex-col gap-4 lg:col-start-1 lg:row-start-1">
+          {/* Rail gauche = 240px sur desktop : logos réduits ("sm") + 1 match par
+              ligne (2-up seulement sur mobile où la colonne est pleine largeur),
+              sinon les logos "lg" + le score débordaient l'encart (feedback
+              2026-09-07, à deux reprises). */}
           <MatchesStrip
             variant="results"
             gameweekNumber={matchStrips.lastResults.gameweekNumber}
             matches={matchStrips.lastResults.matches}
-            fixedColumns={2}
+            gridColsClassName="grid-cols-2 lg:grid-cols-1"
+            logoSize="sm"
             rankByClubId={rankByClubId}
           />
           <StandingsSection gameweekNumber={standings.gameweekNumber} rows={standings.rows} />

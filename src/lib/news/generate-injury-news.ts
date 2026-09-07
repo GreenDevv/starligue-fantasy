@@ -16,29 +16,36 @@ interface InjuredPlayer {
   club: { id: string; name: string; shortName: string };
 }
 
-// reason : motif libre saisi par l'admin (ex. "fin de contrat") pour les cas qui ne
-// sont pas une vraie blessure médicale mais doivent quand même passer par le même
-// mécanisme (joker médical + email, voir notify-player-injured.ts) — demande
-// explicite de l'utilisateur, 2026-08-06 (cas Théophile CAUSSE). Ignoré côté "lève
-// la blessure" (pas de sens dans ce sens), et remplace "blessé" par un wording
-// neutre plutôt que de forcer le mot dans le texte libre de l'admin.
+// reason : motif libre saisi par l'admin (ex. "fin de contrat", "transféré à X")
+// pour les cas qui ne sont pas une vraie blessure médicale mais doivent quand même
+// passer par le même mécanisme (joker médical + email, voir notify-player-injured.ts)
+// — demande explicite de l'utilisateur, 2026-08-06 (cas Théophile CAUSSE). Ignoré
+// côté "lève la blessure" (pas de sens dans ce sens). Quand il est présent, l'actu
+// bascule en catégorie TRANSFER (rubrique "Transferts", pas "Blessures") avec un
+// titre "quitte le club — <motif>" (2026-09-07).
 export async function createInjuryNewsItem(player: InjuredPlayer, reason?: string): Promise<void> {
   const season = await prisma.season.findFirst({ where: { isActive: true } });
   if (!season || season.id !== player.seasonId) return; // joueur hors saison live → pas d'actu
 
   const isInjured = player.injuredAt !== null;
+  // reason renseigné à la déclaration = ce n'est pas une vraie blessure médicale
+  // mais un départ (transfert, fin de contrat) : même mécanisme de jeu (joker
+  // médical, cf. notify-player-injured.ts) mais l'actu doit tomber sous la
+  // rubrique "Transferts", pas "Blessures" (demande explicite 2026-09-07).
+  const isDeparture = isInjured && Boolean(reason);
   const dedupeSuffix = isInjured ? player.injuredAt!.toISOString() : `cleared-${Date.now()}`;
-  const title = isInjured
-    ? reason
-      ? `${player.firstName} ${player.lastName} (${player.club.shortName}) indisponible pour la saison (${reason})`
-      : `${player.firstName} ${player.lastName} (${player.club.shortName}) blessé`
-    : `${player.firstName} ${player.lastName} (${player.club.shortName}) de retour de blessure`;
+  const name = `${player.firstName} ${player.lastName} (${player.club.shortName})`;
+  const title = !isInjured
+    ? `${name} de retour de blessure`
+    : isDeparture
+      ? `${name} quitte le club — ${reason}`
+      : `${name} blessé`;
 
   await prisma.newsItem.upsert({
     where: { dedupeKey: `injury:${player.id}:${dedupeSuffix}` },
     create: {
       seasonId: season.id,
-      category: "INJURY",
+      category: isDeparture ? "TRANSFER" : "INJURY",
       sourceType: "GENERATED",
       sourceKey: "system",
       title,
