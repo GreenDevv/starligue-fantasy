@@ -870,6 +870,13 @@ model FantasyLineup {
   // tant que non calculé.
   rawPoints            Decimal? @db.Decimal(7, 1)
   predictionMultiplier Decimal? @db.Decimal(4, 3)
+  // "Points d'accueil" (ARCHITECTURE.md §13.7) : ligne synthétique créée pour une
+  // équipe qui a rejoint la ligue APRÈS cette journée, afin qu'elle ne soit pas
+  // condamnée au cumul. entries = [], bonus = null, points = médiane globale des
+  // points réels de la journée × CATCHUP_FACTOR. Recalculée (delete-puis-create)
+  // par recomputeCatchupCredits — jamais notée par computeGameweekScores, qui
+  // ignore ces lignes.
+  isCatchup     Boolean     @default(false)
   createdAt     DateTime    @default(now())
 
   @@unique([fantasyTeamId, gameweekId])

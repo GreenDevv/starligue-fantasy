@@ -24,6 +24,8 @@
       "squad": "Kader",
       "predictions": "Tipps",
       "total": "Gesamt"
-    }
+    },
+    "catchup": "Willkommenspunkte",
+    "catchupHint": "Median der Manager für die Spieltage vor deinem Beitritt (−10 %)"
   }
 }

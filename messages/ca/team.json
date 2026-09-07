@@ -43,7 +43,9 @@
     "emptyHintLive": "Les instantànies es creen automàticament abans de cada data límit.",
     "emptyHintSim": "Quan un admin avanci la simulació, les jornades apareixeran aquí.",
     "pending": "Pendent",
-    "ptsArrow": "pts →"
+    "ptsArrow": "pts →",
+    "catchup": "Punts de benvinguda",
+    "catchupHint": "Mediana dels mànagers en les jornades disputades abans de la teva arribada (−10 %)"
   },
   "gameweekDetail": {
     "statusSimScored": "Jornada calculada",

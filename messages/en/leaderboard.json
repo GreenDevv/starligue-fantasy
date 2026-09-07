@@ -24,6 +24,8 @@
       "squad": "Squad",
       "predictions": "Predictions",
       "total": "Total"
-    }
+    },
+    "catchup": "Welcome points",
+    "catchupHint": "Median manager score for the gameweeks played before you joined (−10%)"
   }
 }

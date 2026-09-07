@@ -8,6 +8,8 @@ import { applyGameweekValueAdjustments } from "@/lib/players/apply-value-adjustm
 import { resolveOutcome, type PredictionOutcome } from "@/lib/predictions/outcome";
 import { computeGameweekMultiplier, applyMultiplier, parseMultiplierConfig } from "@/lib/predictions/multiplier";
 import { snapshotFantasyStandings } from "@/lib/standings/snapshot-fantasy-standings";
+import { recalcTotalPoints } from "./recalc-total-points";
+import { recomputeCatchupCredits } from "./recompute-catchup";
 import { Decimal } from "@prisma/client/runtime/library";
 
 interface LineupEntryJson {
@@ -34,7 +36,9 @@ export async function computeGameweekScores(gameweekId: string): Promise<{ lineu
           awayClub: true,
         },
       },
-      lineups: true,
+      // Les lignes "points d'accueil" (§13.7) n'ont pas de vrai effectif à noter —
+      // recomputeCatchupCredits les recalcule séparément en fin de run.
+      lineups: { where: { isCatchup: false } },
     },
   });
 
@@ -208,6 +212,12 @@ export async function computeGameweekScores(gameweekId: string): Promise<{ lineu
     data: { isScored: true },
   });
 
+  // Points d'accueil (§13.7) : maintenant que cette journée est notée, sa médiane
+  // est connue → (re)calcule les crédits d'accueil de toute la saison. Idempotent
+  // (delete-puis-create). Fait AVANT le snapshot de classement pour que le cumul
+  // snapshoté intègre ces points.
+  await recomputeCatchupCredits(gameweek.seasonId);
+
   // Snapshot du classement général fantasy à l'issue de la journée (rang global +
   // rang de ligue + cumul) — sert l'évolution ▲/▼ du récap et le Centre live.
   // try/catch : un échec de snapshot ne doit jamais annuler un scoring réussi.
@@ -218,24 +228,4 @@ export async function computeGameweekScores(gameweekId: string): Promise<{ lineu
   }
 
   return { lineupCount };
-}
-
-// totalPoints = Σ(lineup.points) - pointsConverted : la conversion points → budget
-// (src/lib/budget/points-conversion.ts) retire définitivement des points du
-// classement, et doit survivre à un recompute de journée qui recalcule tout depuis
-// la table FantasyLineup — d'où la soustraction ici plutôt qu'un decrement ponctuel.
-async function recalcTotalPoints(fantasyTeamId: string) {
-  const [lineups, team] = await Promise.all([
-    prisma.fantasyLineup.findMany({
-      where: { fantasyTeamId, points: { not: null } },
-      select: { points: true },
-    }),
-    prisma.fantasyTeam.findUniqueOrThrow({ where: { id: fantasyTeamId }, select: { pointsConverted: true } }),
-  ]);
-  const rawTotal = lineups.reduce((s, l) => s + Number(l.points ?? 0), 0);
-  const total = rawTotal - Number(team.pointsConverted);
-  await prisma.fantasyTeam.update({
-    where: { id: fantasyTeamId },
-    data: { totalPoints: new Decimal(Math.round(total * 10) / 10) },
-  });
 }

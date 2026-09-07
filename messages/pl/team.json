@@ -43,7 +43,9 @@
     "emptyHintLive": "Snapshoty tworzone są automatycznie przed każdym terminem.",
     "emptyHintSim": "Gdy admin przesunie symulację do przodu, kolejki pojawią się tutaj.",
     "pending": "Oczekujące",
-    "ptsArrow": "pkt →"
+    "ptsArrow": "pkt →",
+    "catchup": "Punkty powitalne",
+    "catchupHint": "Mediana wyników menedżerów za kolejki rozegrane przed dołączeniem (−10%)"
   },
   "gameweekDetail": {
     "statusSimScored": "Kolejka rozliczona",

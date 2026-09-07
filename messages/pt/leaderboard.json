@@ -24,6 +24,8 @@
       "squad": "Equipa",
       "predictions": "Prognósticos",
       "total": "Total"
-    }
+    },
+    "catchup": "Pontos de boas-vindas",
+    "catchupHint": "Mediana dos treinadores nas jornadas disputadas antes da tua entrada (−10 %)"
   }
 }

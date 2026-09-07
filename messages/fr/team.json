@@ -43,7 +43,9 @@
     "emptyHintLive": "Les snapshots sont créés automatiquement avant chaque deadline.",
     "emptyHintSim": "Une fois qu'un admin fait avancer la simulation, les journées apparaissent ici.",
     "pending": "En attente",
-    "ptsArrow": "pts →"
+    "ptsArrow": "pts →",
+    "catchup": "Points d'accueil",
+    "catchupHint": "Médiane des managers pour les journées disputées avant ton arrivée (−10 %)"
   },
   "gameweekDetail": {
     "statusSimScored": "Journée calculée",

@@ -8,6 +8,7 @@ import { validateSquad } from "@/lib/squad/validation";
 import type { SquadPlayer } from "@/lib/squad/validation";
 import { hasLiveSeasonStarted, hasSimulationSeasonStarted } from "@/lib/squad/season-lock";
 import { resolveSeasonMode, resolveActiveTeamContext } from "@/lib/team/active-team-context";
+import { recomputeCatchupCredits } from "@/lib/scoring/recompute-catchup";
 
 const bodySchema = z.object({
   playerIds: z.array(z.string()).length(14),
@@ -133,6 +134,18 @@ export async function POST(request: Request) {
         data: { budget: budget - totalSpent, isValidated: true, validatedAt: new Date(), captainId: null },
       });
     });
+
+    // Effectif validé en cours de saison → crédite tout de suite les points
+    // d'accueil des journées déjà notées (ARCHITECTURE.md §13.7). Idempotent, et
+    // de toute façon rejoué en fin de chaque journée notée — un échec ici ne doit
+    // pas faire échouer la validation.
+    if (seasonStarted) {
+      try {
+        await recomputeCatchupCredits(ctx.seasonId);
+      } catch (e) {
+        console.error("[my-team/squad][catchup]", e);
+      }
+    }
   }
 
   return NextResponse.json({ data: { success: true } });

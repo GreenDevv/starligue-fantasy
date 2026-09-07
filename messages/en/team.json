@@ -43,7 +43,9 @@
     "emptyHintLive": "Snapshots are created automatically before each deadline.",
     "emptyHintSim": "Once an admin advances the simulation, matchdays will appear here.",
     "pending": "Pending",
-    "ptsArrow": "pts →"
+    "ptsArrow": "pts →",
+    "catchup": "Welcome points",
+    "catchupHint": "Median manager score for the gameweeks played before you joined (−10%)"
   },
   "gameweekDetail": {
     "statusSimScored": "Matchday scored",

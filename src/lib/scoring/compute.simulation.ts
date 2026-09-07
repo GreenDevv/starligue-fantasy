@@ -123,7 +123,7 @@ export async function computeSimulationGameweekScores(
 }
 
 // totalPoints = Σ(lineup.points) - pointsConverted — même raison qu'en jeu en
-// direct (src/lib/scoring/compute.ts::recalcTotalPoints) : la conversion points →
+// direct (src/lib/scoring/recalc-total-points.ts) : la conversion points →
 // budget doit survivre à un recompute qui recalcule tout depuis SimulationLineup.
 // Réutilisé par l'avancée ET le retour en arrière admin (src/lib/simulation/admin-advance.ts)
 // — un retour en arrière supprime la SimulationLineup de la journée annulée, donc

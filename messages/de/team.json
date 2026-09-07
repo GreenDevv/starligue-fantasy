@@ -43,7 +43,9 @@
     "emptyHintLive": "Snapshots werden automatisch vor jeder Deadline erstellt.",
     "emptyHintSim": "Sobald ein Admin die Simulation vorantreibt, erscheinen die Spieltage hier.",
     "pending": "Ausstehend",
-    "ptsArrow": "Pkt →"
+    "ptsArrow": "Pkt →",
+    "catchup": "Willkommenspunkte",
+    "catchupHint": "Median der Manager für die Spieltage vor deinem Beitritt (−10 %)"
   },
   "gameweekDetail": {
     "statusSimScored": "Spieltag berechnet",

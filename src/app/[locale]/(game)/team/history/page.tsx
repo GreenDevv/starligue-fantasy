@@ -95,6 +95,34 @@ export default async function HistoryPage({
               // En simulation, "scored" = ce lineup a déjà des points (chaque équipe
               // avance à son rythme tant que l'avancée n'est pas globale, étape 6).
               const isScored = mode === "simulation" ? pts !== null : l.gameweek.isScored;
+
+              // Ligne "points d'accueil" (§13.7) : pas d'effectif à consulter → pas
+              // de lien vers le détail, juste le crédit.
+              const isCatchup = "isCatchup" in l && l.isCatchup === true;
+              if (isCatchup) {
+                return (
+                  <div key={l.id} className="flex items-center gap-4 px-4 py-3.5" title={t("history.catchupHint")}>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-text">
+                        {t("common.matchday", { number: l.gameweek.number })}
+                      </p>
+                      <p className="text-xs text-text-muted">{t("history.catchup")}</p>
+                    </div>
+                    <div className="text-right">
+                      <p
+                        className={`font-arcade text-2xl leading-none ${
+                          (pts ?? 0) >= 0
+                            ? "text-points-pos drop-shadow-[0_0_6px_currentColor]"
+                            : "text-points-neg drop-shadow-[0_0_6px_currentColor]"
+                        }`}
+                      >
+                        {(pts ?? 0) > 0 ? `+${pts}` : pts}
+                      </p>
+                      <p className="mt-0.5 text-[10px] text-text-muted">{t("history.ptsArrow")}</p>
+                    </div>
+                  </div>
+                );
+              }
               return (
                 <Link
                   key={l.id}

@@ -118,6 +118,9 @@ const GAME_CONFIG: Record<string, string> = {
   PREDICTION_BASE_PROB_AWAY: "0.45",
   // Notifications push (app mobile) — ARCHITECTURE.md §20.2
   NOTIFICATION_LEAD_MINUTES: "60",
+  // Points d'accueil (arrivée en cours de saison) — src/lib/scoring/catchup.ts, ARCHITECTURE.md §13.7
+  CATCHUP_ENABLED: "true",
+  CATCHUP_FACTOR: "0.9", // médiane globale de la journée × 0,9 (léger malus d'arrivée tardive)
 };
 
 const HOUR = 60 * 60 * 1000;

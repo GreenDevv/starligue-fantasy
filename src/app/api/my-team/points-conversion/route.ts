@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 // saison de l'équipe en budget de transfert, au taux GameConfig POINTS_TO_BUDGET_RATE.
 // Autorisé uniquement pendant une fenêtre de transfert ouverte (même contrainte que
 // /api/my-team/transfer). Les points convertis sortent définitivement de totalPoints
-// — voir src/lib/scoring/compute.ts::recalcTotalPoints.
+// — voir src/lib/scoring/recalc-total-points.ts.
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { Decimal } from "@prisma/client/runtime/library";

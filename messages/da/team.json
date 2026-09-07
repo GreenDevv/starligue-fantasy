@@ -43,7 +43,9 @@
     "emptyHintLive": "Snapshots oprettes automatisk før hver deadline.",
     "emptyHintSim": "Når en admin rykker simulationen frem, vises runderne her.",
     "pending": "Afventer",
-    "ptsArrow": "point →"
+    "ptsArrow": "point →",
+    "catchup": "Velkomstpoint",
+    "catchupHint": "Median for managere i de runder, der blev spillet, før du kom med (−10 %)"
   },
   "gameweekDetail": {
     "statusSimScored": "Runde beregnet",
