@@ -209,6 +209,7 @@ model Season {
   clubStandings                   ClubStanding[]
   newsItems                       NewsItem[]
   friendlyMatches                 FriendlyMatch[]
+  fantasyStandingSnapshots        FantasyStandingSnapshot[]
 }
 
 model Club {
@@ -675,6 +676,36 @@ model ClubStanding {
 
   @@unique([seasonId, gameweekNumber, clubId])
   @@index([seasonId, gameweekNumber])
+}
+
+// Mode d'une saison de jeu : LIVE (2026/27 en temps réel) ou SIMULATION (rejeu
+// d'une saison passée, avancée par un admin). Séparé du type TS `SeasonMode`
+// ("live"|"simulation") de src/lib/team/active-team-context.ts — ici l'enum SQL.
+enum SeasonMode {
+  LIVE
+  SIMULATION
+}
+
+// Snapshot du classement général fantasy à l'issue de chaque journée notée
+// (src/lib/standings/snapshot-fantasy-standings.ts) — sert l'évolution ▲/▼ du récap
+// et le « Centre live » (classement fantasy en direct). Immuable par
+// (saison, mode, journée, équipe) : upsert only, rejouable pour un recompute.
+model FantasyStandingSnapshot {
+  id               String     @id @default(cuid())
+  seasonId         String
+  season           Season     @relation(fields: [seasonId], references: [id])
+  mode             SeasonMode
+  gameweekNumber   Int
+  teamId           String
+  leagueId         String
+  globalRank       Int
+  leagueRank       Int
+  cumulativePoints Decimal    @db.Decimal(8, 1)
+  capturedAt       DateTime   @default(now())
+
+  @@unique([seasonId, mode, gameweekNumber, teamId])
+  @@index([seasonId, mode, gameweekNumber])
+  @@index([mode, teamId])
 }
 
 // Flux d'actus de la page publique /starligue (ARCHITECTURE.md §8.2) — agrège du
