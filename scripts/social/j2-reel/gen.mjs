@@ -16,7 +16,7 @@ const hasOverride = (sn) => existsSync(OVERRIDES + sn.toLowerCase() + ".png");
 const finaleLogo = (sn) => (hasOverride(sn) ? b64(OVERRIDES + sn.toLowerCase() + ".png") : clubLogo(sn));
 const playerImg = (sn) => b64(DIR + "players/" + sn + ".png");
 const tvLogo = (name) => b64(REPO + "public/broadcasters/" + (name === "beIN Sport" ? "bein-sport" : "handball-tv") + ".png");
-const dayShort = (day) => day.replace("Vendredi", "VEN").replace("Samedi", "SAM").replace("Dimanche", "DIM").replace(" sept.", " SEPT");
+const dayShort = (day) => day.replace("Jeudi", "JEU").replace("Vendredi", "VEN").replace("Samedi", "SAM").replace("Dimanche", "DIM").replace(" sept.", " SEPT");
 
 // ---- intro : 16 logos en spirale (consistency avec le reel 16-maillots) ----
 const INTRO_CLUBS = ["MHB", "USAM", "LIMOGES", "CCMHB", "SAHB", "TREMBLAY", "CRMHB", "HBCN",
@@ -36,7 +36,7 @@ const teamMeta = (sn) => {
   const ts = d.teamState?.[sn] ?? { rank: null, form: [] };
   const rank = ts.rank ? `<span class="tm-rank">${ts.rank}<i>e</i></span>` : "";
   const hist = (ts.form ?? []).slice(-4)
-    .map((h) => `<span class="tm-op"><img src="${clubLogo(h.opp)}"/><b class="tm-b ${h.r}">${FORM_LABEL[h.r] ?? "?"}</b></span>`)
+    .map((h) => `<span class="tm-op${hasOverride(h.opp) ? " ov" : ""}"><img src="${finaleLogo(h.opp)}"/><b class="tm-b ${h.r}">${FORM_LABEL[h.r] ?? "?"}</b></span>`)
     .join("");
   return `<div class="mc-tm">${rank}${hist ? `<span class="tm-hist">${hist}</span>` : ""}</div>`;
 };
@@ -73,11 +73,10 @@ const cards = d.fixtures.map((f, i) => {
     <div class="mc-nm ph"><i>${ph.first}</i><b>${ph.last}</b></div>
     <div class="mc-nm pa"><i>${pa.first}</i><b>${pa.last}</b></div>
     <div class="mc-info">
-      <span class="mc-i-dt">${dayShort(f.day)} · ${f.time}</span>
-      <span class="mc-i-sep"></span>
-      <span class="mc-i-pl">${H.salle} · ${H.ville}</span>
-      <span class="mc-i-sep"></span>
-      <img class="mc-i-tv" src="${tvLogo(f.tv)}"/>
+      <span class="mc-i-rule"></span>
+      <div class="mc-i-when">${dayShort(f.day)}<em>${f.time}</em></div>
+      <div class="mc-i-where">${H.salle} · ${H.ville}</div>
+      <span class="mc-i-tv"><img src="${tvLogo(f.tv)}"/></span>
     </div>
   </div>`;
 }).join("\n  ");
@@ -158,17 +157,18 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#05070C}
 /* classement + forme Starligue, sous l'écusson : gros chiffre de rang + écusson(s)
    de l'adversaire de chaque journée déjà jouée (même taille), pastille V/N/D posée
    dessus (taille conservée) */
-.mc-tm{margin-top:18px;display:flex;align-items:center;justify-content:center;gap:15px;will-change:opacity,transform}
-.mc-tm .tm-rank{font-family:"Barlow Condensed";font-weight:800;font-size:48px;line-height:1;color:#F4F7FB;
+.mc-tm{margin-top:18px;display:flex;align-items:center;justify-content:center;gap:18px;will-change:opacity,transform}
+.mc-tm .tm-rank{font-family:"Barlow Condensed";font-weight:800;font-size:57px;line-height:1;color:#F4F7FB;
   display:inline-flex;align-items:baseline;gap:2px;text-shadow:0 3px 14px rgba(0,0,0,.7),0 0 4px rgba(0,0,0,.5)}
-.mc-tm .tm-rank i{font-style:normal;font-size:23px;font-weight:700;color:#A6B6C8}
-.mc-tm .tm-hist{display:flex;align-items:center;gap:14px}
-.mc-tm .tm-op{position:relative;width:48px;height:48px;display:inline-flex;align-items:center;justify-content:center}
+.mc-tm .tm-rank i{font-style:normal;font-size:27px;font-weight:700;color:#A6B6C8}
+.mc-tm .tm-hist{display:flex;align-items:center;gap:16px}
+.mc-tm .tm-op{position:relative;width:57px;height:57px;display:inline-flex;align-items:center;justify-content:center}
 .mc-tm .tm-op img{width:100%;height:100%;object-fit:contain;
   filter:drop-shadow(0 0 2px rgba(255,255,255,.5)) drop-shadow(0 4px 10px rgba(0,0,0,.6))}
-.mc-tm .tm-b{position:absolute;right:-8px;bottom:-6px;min-width:27px;height:27px;padding:0 3px;border-radius:8px;
+.mc-tm .tm-op.ov img{filter:drop-shadow(0 0 2px rgba(0,0,0,.4)) drop-shadow(0 4px 10px rgba(0,0,0,.55))}
+.mc-tm .tm-b{position:absolute;right:-9px;bottom:-7px;min-width:31px;height:31px;padding:0 4px;border-radius:9px;
   display:flex;align-items:center;justify-content:center;
-  font-family:"Barlow Condensed";font-weight:800;font-size:18px;color:#04060A;
+  font-family:"Barlow Condensed";font-weight:800;font-size:21px;color:#04060A;
   box-shadow:0 3px 10px rgba(0,0,0,.55);border:2px solid #05070C}
 .mc-tm .tm-b.W{background:#22C55E}
 .mc-tm .tm-b.D{background:#9AA7B6}
@@ -178,19 +178,26 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#05070C}
   width:132px;height:132px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   border:2px solid rgba(255,255,255,.28);background:rgba(6,9,14,.5);backdrop-filter:blur(2px);
   box-shadow:0 14px 34px rgba(0,0,0,.5);will-change:opacity,transform}
-.mc-nm{position:absolute;bottom:500px;z-index:7;display:flex;flex-direction:column;padding:8px 4px;will-change:opacity,transform}
+.mc-nm{position:absolute;bottom:520px;z-index:7;display:flex;flex-direction:column;padding:8px 4px;will-change:opacity,transform}
 .mc-nm i{font-family:"Barlow Condensed";font-weight:700;font-size:24px;letter-spacing:.16em;font-style:normal;
   text-transform:uppercase;color:rgba(255,255,255,.78);text-shadow:0 2px 8px #000}
 .mc-nm b{font-family:"Barlow Condensed";font-weight:800;font-size:66px;line-height:.9;letter-spacing:.005em;
   text-transform:uppercase;color:#fff;text-shadow:0 4px 14px #000, 0 0 30px rgba(0,0,0,.9)}
 .mc-nm.ph{left:60px;align-items:flex-start}
 .mc-nm.pa{right:60px;align-items:flex-end;text-align:right}
-.mc-info{position:absolute;left:0;right:0;bottom:356px;z-index:8;display:flex;align-items:center;justify-content:center;gap:18px;
-  padding:0 70px;font-family:"Barlow Condensed";font-weight:700;text-transform:uppercase;
-  color:#CBD5E1;font-size:26px;letter-spacing:.1em;will-change:opacity,transform}
-.mc-info .mc-i-dt{color:#fff}
-.mc-info .mc-i-sep{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.35);flex:none}
-.mc-info .mc-i-tv{height:34px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(255,255,255,.6))}
+/* bandeau infos match — bloc centré empilé : filet d'accent, date+heure en gros,
+   salle · ville en dessous, diffuseur en pastille blanche */
+.mc-info{position:absolute;left:0;right:0;bottom:372px;z-index:8;display:flex;flex-direction:column;align-items:center;gap:11px;
+  padding:0 56px;will-change:opacity,transform}
+.mc-info .mc-i-rule{width:52px;height:3px;border-radius:2px;background:#2DD4BF;box-shadow:0 0 12px rgba(45,212,191,.55)}
+.mc-info .mc-i-when{font-family:"Barlow Condensed";font-weight:800;font-size:37px;line-height:1;letter-spacing:.13em;
+  text-transform:uppercase;color:#fff;text-shadow:0 3px 16px rgba(0,0,0,.75);display:flex;align-items:baseline;gap:15px}
+.mc-info .mc-i-when em{font-style:normal;color:#F59E0B}
+.mc-info .mc-i-where{font-family:"Barlow Condensed";font-weight:600;font-size:26px;letter-spacing:.04em;
+  text-transform:uppercase;color:#C4D0DE;text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.8)}
+.mc-info .mc-i-tv{margin-top:3px;background:#fff;border-radius:10px;padding:7px 15px;display:flex;
+  box-shadow:0 8px 22px rgba(0,0,0,.45)}
+.mc-info .mc-i-tv img{height:27px;object-fit:contain;display:block}
 
 /* ---------- final plan ---------- */
 #finale{position:absolute;inset:0;z-index:90;overflow:hidden;background:
