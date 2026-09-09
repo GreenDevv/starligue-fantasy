@@ -1,18 +1,27 @@
-// Assemble les données du reel « programme J2 » → <REEL_DIR>/data.json
-// - fixtures : J02 Daikin StarLigue 2026/27, scrapées de lnh.fr (calendrier +
-//   pages "Infos" pour les salles), figées ici comme pour la J1.
-// - club meta : couleur (reprise du reel 16-maillots), salle + ville (table CLUB,
-//   validées à la J1 + recoupées lnh.fr pour les 8 clubs à domicile de la J2).
-// - joueur mis en avant : LE MEILLEUR joueur de chaque club sur la J1, au sens
-//   POINTS FANTASY (computeGameweekPlayerPoints : note LNH + bonus victoire +
-//   bonus/malus leader de journée). Repli sur le meilleur AVEC photo lnh.fr si le
-//   tout meilleur n'en a pas (sinon silhouette moche dans le reel).
+// Assemble les données du reel « programme de la journée » (REEL_GW) → <REEL_DIR>/data.json
+// - fixtures : programme de la journée, figé dans FIXTURES ci-dessous (scrapé du
+//   calendrier lnh.fr — jour/heure/diffuseur ; les salles ne sont pas exposées
+//   par le calendrier => table CLUB).
+// - club meta : couleur (reprise du reel 16-maillots), salle + ville (table CLUB).
+// - joueur mis en avant : LE MEILLEUR joueur de chaque club sur la journée
+//   PRÉCÉDENTE, au sens POINTS FANTASY (computeGameweekPlayerPoints : note LNH +
+//   bonus victoire + bonus/malus leader de journée). Repli sur le meilleur AVEC
+//   photo lnh.fr si le tout meilleur n'en a pas (sinon silhouette moche).
+// - classement + forme : dernier snapshot ClubStanding + résultats Match FINISHED
+//   (championnat uniquement), calculés automatiquement depuis la prod.
 //
-// Usage :
-//   DATABASE_URL="<prod>?sslmode=require" REEL_DIR=/abs/path/ pnpm tsx scripts/social/j2-reel/data.ts
+// Usage (J2 par défaut ; pour J3+ : REEL_GW=3 + mettre à jour FIXTURES ci-dessous
+// depuis le calendrier lnh.fr — cf. scripts/social/j2-reel/README.md) :
+//   DATABASE_URL="<prod>?sslmode=require" REEL_GW=2 REEL_DIR=/abs/path/ pnpm tsx scripts/social/j2-reel/data.ts
 import { writeFileSync } from "node:fs";
 import { prisma } from "@/lib/db";
 import { computeGameweekPlayerPoints } from "@/lib/players/compute-gameweek-best-xi";
+
+const GW = Number(process.env.REEL_GW ?? "2");
+if (!Number.isInteger(GW) || GW < 2) {
+  console.error("REEL_GW invalide (entier >= 2 ; la forme/joueur mis en avant vient de la journée précédente).");
+  process.exit(1);
+}
 
 const DIR = (process.env.REEL_DIR ?? "").replace(/\/?$/, "/");
 if (!DIR || DIR === "/") {
@@ -44,8 +53,11 @@ const CLUB: Record<string, { color: string; salle: string; ville: string }> = {
   PSG:      { color: "#E30613", salle: "Stade Pierre de Coubertin",               ville: "Paris" },
 };
 
-// lnh.fr J02, ordre chrono. Diffuseur vérifié le 2026-09-09 sur le calendrier
-// lnh.fr (hd1/hd3/4max => beIN Sport ; htvsmall => Handball TV).
+// Programme de la journée REEL_GW, ordre chrono. À REMPLACER à chaque journée
+// depuis le calendrier lnh.fr (jour + heure + diffuseur : hd1/hd3/4max => beIN
+// Sport, htvsmall => Handball TV). Un garde-fou plus bas compare les affiches à
+// celles de la base pour éviter d'utiliser un FIXTURES périmé.
+// -- J02, vérifié le 2026-09-09 --
 const FIXTURES = [
   { home: "LIMOGES", away: "SARAN",    day: "Jeudi 10 sept.",   time: "20h00", tv: "Handball TV" },
   { home: "SRVH",    away: "USDK",     day: "Vendredi 11 sept.", time: "19h30", tv: "Handball TV" },
@@ -59,12 +71,30 @@ const FIXTURES = [
 
 async function main() {
   const season = await prisma.season.findFirstOrThrow({ where: { isActive: true } });
-  const gw1 = await prisma.gameweek.findUniqueOrThrow({
-    where: { seasonId_number: { seasonId: season.id, number: 1 } },
+
+  // Garde-fou : les affiches de FIXTURES doivent correspondre à la journée REEL_GW en base.
+  const gwMatches = await prisma.match.findMany({
+    where: { seasonId: season.id, gameweek: { number: GW } },
+    select: { homeClub: { select: { shortName: true } }, awayClub: { select: { shortName: true } } },
+  });
+  const dbPairs = new Set(gwMatches.map((m) => `${m.homeClub.shortName}-${m.awayClub.shortName}`));
+  const fxPairs = new Set(FIXTURES.map((f) => `${f.home}-${f.away}`));
+  const missing = [...dbPairs].filter((p) => !fxPairs.has(p));
+  const extra = [...fxPairs].filter((p) => !dbPairs.has(p));
+  if (dbPairs.size > 0 && (missing.length || extra.length)) {
+    throw new Error(
+      `FIXTURES ne correspond pas à la J${GW} en base — mets-le à jour depuis lnh.fr.\n` +
+      `  manquantes (en base, pas dans FIXTURES) : ${missing.join(", ") || "—"}\n` +
+      `  en trop (dans FIXTURES, pas en base)    : ${extra.join(", ") || "—"}`
+    );
+  }
+
+  const prev = await prisma.gameweek.findUniqueOrThrow({
+    where: { seasonId_number: { seasonId: season.id, number: GW - 1 } },
   });
 
-  const points = await computeGameweekPlayerPoints(gw1.id);
-  if (points.size === 0) throw new Error("Aucun point J1 calculé — la J1 est-elle notée ?");
+  const points = await computeGameweekPlayerPoints(prev.id);
+  if (points.size === 0) throw new Error(`Aucun point J${GW - 1} calculé — la journée précédente est-elle notée ?`);
 
   const players = await prisma.player.findMany({
     where: { id: { in: [...points.keys()] } },
@@ -88,11 +118,11 @@ async function main() {
       if (dp !== 0) return dp;
       return Number(b.marketValue) - Number(a.marketValue);
     });
-    if (!arr.length) { console.warn("AUCUN joueur noté J1 pour", sn); continue; }
+    if (!arr.length) { console.warn(`AUCUN joueur noté J${GW - 1} pour`, sn); continue; }
     const best = arr[0]!;
     const chosen = best.photoUrl ? best : (arr.find((p) => p.photoUrl) ?? best);
     if (chosen.id !== best.id) {
-      console.warn(`⚠️  ${sn} : meilleur J1 = ${best.firstName} ${best.lastName} (${points.get(best.id)} pts) SANS photo → repli sur ${chosen.firstName} ${chosen.lastName} (${points.get(chosen.id)} pts)`);
+      console.warn(`⚠️  ${sn} : meilleur J${GW - 1} = ${best.firstName} ${best.lastName} (${points.get(best.id)} pts) SANS photo → repli sur ${chosen.firstName} ${chosen.lastName} (${points.get(chosen.id)} pts)`);
     }
     picks[sn] = {
       name: `${chosen.firstName} ${chosen.lastName}`,
@@ -149,7 +179,7 @@ async function main() {
     teamState[sn] = { rank: rankByClub.get(sn) ?? null, form: (formByClub.get(sn) ?? []).slice(-5) };
   }
 
-  const out = { gameweek: 2, source: "computeGameweekPlayerPoints(J1)", standingGw, generatedAt: new Date().toISOString(), club: CLUB, fixtures: FIXTURES, picks, teamState };
+  const out = { gameweek: GW, source: `computeGameweekPlayerPoints(J${GW - 1})`, standingGw, generatedAt: new Date().toISOString(), club: CLUB, fixtures: FIXTURES, picks, teamState };
   writeFileSync(DIR + "data.json", JSON.stringify(out, null, 2));
   console.log("data.json écrit →", DIR + "data.json");
   const fmt = (sn: string) => `${sn} [${teamState[sn]?.rank ?? "?"}e ${(teamState[sn]?.form ?? []).map((h) => `${h.r}v${h.opp}`).join(",") || "–"}]`;
