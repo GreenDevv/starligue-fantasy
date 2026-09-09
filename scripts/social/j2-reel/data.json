@@ -2,7 +2,7 @@
   "gameweek": 2,
   "source": "computeGameweekPlayerPoints(J1)",
   "standingGw": 1,
-  "generatedAt": "2026-09-09T11:36:10.788Z",
+  "generatedAt": "2026-09-09T12:46:00.974Z",
   "club": {
     "MHB": {
       "color": "#F0801F",
@@ -277,97 +277,145 @@
     "MHB": {
       "rank": 1,
       "form": [
-        "W"
+        {
+          "r": "W",
+          "opp": "CCMHB"
+        }
       ]
     },
     "USAM": {
       "rank": 5,
       "form": [
-        "W"
+        {
+          "r": "W",
+          "opp": "CRMHB"
+        }
       ]
     },
     "LIMOGES": {
       "rank": 3,
       "form": [
-        "W"
+        {
+          "r": "W",
+          "opp": "SRVH"
+        }
       ]
     },
     "CCMHB": {
       "rank": 16,
       "form": [
-        "L"
+        {
+          "r": "L",
+          "opp": "MHB"
+        }
       ]
     },
     "SAHB": {
       "rank": 9,
       "form": [
-        "L"
+        {
+          "r": "L",
+          "opp": "PAUC"
+        }
       ]
     },
     "TREMBLAY": {
       "rank": 15,
       "form": [
-        "L"
+        {
+          "r": "L",
+          "opp": "HBCN"
+        }
       ]
     },
     "CRMHB": {
       "rank": 10,
       "form": [
-        "L"
+        {
+          "r": "L",
+          "opp": "USAM"
+        }
       ]
     },
     "HBCN": {
       "rank": 2,
       "form": [
-        "W"
+        {
+          "r": "W",
+          "opp": "TREMBLAY"
+        }
       ]
     },
     "SARAN": {
       "rank": 7,
       "form": [
-        "W"
+        {
+          "r": "W",
+          "opp": "FENIX"
+        }
       ]
     },
     "PAUC": {
       "rank": 6,
       "form": [
-        "W"
+        {
+          "r": "W",
+          "opp": "SAHB"
+        }
       ]
     },
     "CSMBH": {
       "rank": 13,
       "form": [
-        "L"
+        {
+          "r": "L",
+          "opp": "PSG"
+        }
       ]
     },
     "SRVH": {
       "rank": 14,
       "form": [
-        "L"
+        {
+          "r": "L",
+          "opp": "LIMOGES"
+        }
       ]
     },
     "CAEN": {
       "rank": 8,
       "form": [
-        "W"
+        {
+          "r": "W",
+          "opp": "USDK"
+        }
       ]
     },
     "FENIX": {
       "rank": 11,
       "form": [
-        "L"
+        {
+          "r": "L",
+          "opp": "SARAN"
+        }
       ]
     },
     "USDK": {
       "rank": 12,
       "form": [
-        "L"
+        {
+          "r": "L",
+          "opp": "CAEN"
+        }
       ]
     },
     "PSG": {
       "rank": 4,
       "form": [
-        "W"
+        {
+          "r": "W",
+          "opp": "CSMBH"
+        }
       ]
     }
   }

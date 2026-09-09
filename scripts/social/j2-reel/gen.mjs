@@ -28,13 +28,17 @@ const introLogos = INTRO_CLUBS.map((sn) =>
 ).join("");
 
 // ---- classement + forme (résultats Starligue uniquement), sous chaque écusson ----
+// Grand chiffre de classement + à côté, pour chaque journée Starligue déjà jouée,
+// l'écusson de l'adversaire (même taille que le chiffre) avec la pastille V/N/D
+// du résultat posée dessus.
 const FORM_LABEL = { W: "V", D: "N", L: "D" }; // Victoire / Nul / Défaite
 const teamMeta = (sn) => {
   const ts = d.teamState?.[sn] ?? { rank: null, form: [] };
   const rank = ts.rank ? `<span class="tm-rank">${ts.rank}<i>e</i></span>` : "";
-  const form = (ts.form ?? []).slice(-5)
-    .map((r) => `<b class="tm-f ${r}">${FORM_LABEL[r] ?? "?"}</b>`).join("");
-  return `<div class="mc-tm">${rank}${form ? `<span class="tm-form">${form}</span>` : ""}</div>`;
+  const hist = (ts.form ?? []).slice(-4)
+    .map((h) => `<span class="tm-op"><img src="${clubLogo(h.opp)}"/><b class="tm-b ${h.r}">${FORM_LABEL[h.r] ?? "?"}</b></span>`)
+    .join("");
+  return `<div class="mc-tm">${rank}${hist ? `<span class="tm-hist">${hist}</span>` : ""}</div>`;
 };
 
 // ---- match cards ----
@@ -151,18 +155,24 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#05070C}
 .mc-col{display:flex;flex-direction:column;align-items:center;width:300px}
 .mc-crest{width:230px;height:230px;object-fit:contain;will-change:opacity,transform;
   filter:drop-shadow(0 0 3px rgba(255,255,255,.95)) drop-shadow(0 0 2px rgba(255,255,255,.9)) drop-shadow(0 16px 30px rgba(0,0,0,.6))}
-/* classement + forme (5 derniers résultats Starligue), sous l'écusson */
-.mc-tm{margin-top:16px;display:flex;align-items:center;justify-content:center;gap:9px;will-change:opacity,transform}
-.mc-tm .tm-rank{font-family:"Barlow Condensed";font-weight:800;font-size:27px;line-height:1;color:#F4F7FB;
-  padding:4px 11px;border-radius:999px;background:rgba(6,9,14,.55);border:1px solid rgba(255,255,255,.30);
-  display:inline-flex;align-items:baseline;gap:1px;box-shadow:0 6px 16px rgba(0,0,0,.45)}
-.mc-tm .tm-rank i{font-style:normal;font-size:16px;font-weight:700;color:#9FB0C4}
-.mc-tm .tm-form{display:flex;gap:5px}
-.mc-tm .tm-f{width:27px;height:27px;border-radius:8px;display:flex;align-items:center;justify-content:center;
-  font-family:"Barlow Condensed";font-weight:800;font-size:18px;color:#04060A;box-shadow:0 4px 12px rgba(0,0,0,.4)}
-.mc-tm .tm-f.W{background:#22C55E}
-.mc-tm .tm-f.D{background:#9AA7B6}
-.mc-tm .tm-f.L{background:#EF4444;color:#fff}
+/* classement + forme Starligue, sous l'écusson : gros chiffre de rang + écusson(s)
+   de l'adversaire de chaque journée déjà jouée (même taille), pastille V/N/D posée
+   dessus (taille conservée) */
+.mc-tm{margin-top:18px;display:flex;align-items:center;justify-content:center;gap:15px;will-change:opacity,transform}
+.mc-tm .tm-rank{font-family:"Barlow Condensed";font-weight:800;font-size:48px;line-height:1;color:#F4F7FB;
+  display:inline-flex;align-items:baseline;gap:2px;text-shadow:0 3px 14px rgba(0,0,0,.7),0 0 4px rgba(0,0,0,.5)}
+.mc-tm .tm-rank i{font-style:normal;font-size:23px;font-weight:700;color:#A6B6C8}
+.mc-tm .tm-hist{display:flex;align-items:center;gap:14px}
+.mc-tm .tm-op{position:relative;width:48px;height:48px;display:inline-flex;align-items:center;justify-content:center}
+.mc-tm .tm-op img{width:100%;height:100%;object-fit:contain;
+  filter:drop-shadow(0 0 2px rgba(255,255,255,.5)) drop-shadow(0 4px 10px rgba(0,0,0,.6))}
+.mc-tm .tm-b{position:absolute;right:-8px;bottom:-6px;min-width:27px;height:27px;padding:0 3px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:"Barlow Condensed";font-weight:800;font-size:18px;color:#04060A;
+  box-shadow:0 3px 10px rgba(0,0,0,.55);border:2px solid #05070C}
+.mc-tm .tm-b.W{background:#22C55E}
+.mc-tm .tm-b.D{background:#9AA7B6}
+.mc-tm .tm-b.L{background:#EF4444;color:#fff}
 .mc-vs{font-family:"Barlow Condensed";font-weight:800;font-size:82px;line-height:1;color:#F4F7FB;flex:none;
   margin-top:49px;
   width:132px;height:132px;border-radius:50%;display:flex;align-items:center;justify-content:center;

@@ -129,20 +129,22 @@ async function main() {
       awayClub: { select: { shortName: true } },
     },
   });
-  const formByClub = new Map<string, ("W" | "D" | "L")[]>();
-  const pushForm = (sn: string, r: "W" | "D" | "L") => {
+  type FormEntry = { r: "W" | "D" | "L"; opp: string };
+  const formByClub = new Map<string, FormEntry[]>();
+  const pushForm = (sn: string, r: "W" | "D" | "L", opp: string) => {
     const l = formByClub.get(sn) ?? [];
-    l.push(r);
+    l.push({ r, opp });
     formByClub.set(sn, l);
   };
   for (const m of finished) {
     const hs = m.homeScore!, as = m.awayScore!;
-    pushForm(m.homeClub.shortName, hs > as ? "W" : hs < as ? "L" : "D");
-    pushForm(m.awayClub.shortName, as > hs ? "W" : as < hs ? "L" : "D");
+    pushForm(m.homeClub.shortName, hs > as ? "W" : hs < as ? "L" : "D", m.awayClub.shortName);
+    pushForm(m.awayClub.shortName, as > hs ? "W" : as < hs ? "L" : "D", m.homeClub.shortName);
   }
 
-  // 5 derniers résultats max, ordre chrono (le plus récent en dernier)
-  const teamState: Record<string, { rank: number | null; form: ("W" | "D" | "L")[] }> = {};
+  // 5 derniers résultats max, ordre chrono (le plus récent en dernier) ; chaque
+  // entrée = { r: V/N/D, opp: shortName de l'adversaire ce jour-là }
+  const teamState: Record<string, { rank: number | null; form: FormEntry[] }> = {};
   for (const sn of Object.keys(CLUB)) {
     teamState[sn] = { rank: rankByClub.get(sn) ?? null, form: (formByClub.get(sn) ?? []).slice(-5) };
   }
@@ -150,7 +152,7 @@ async function main() {
   const out = { gameweek: 2, source: "computeGameweekPlayerPoints(J1)", standingGw, generatedAt: new Date().toISOString(), club: CLUB, fixtures: FIXTURES, picks, teamState };
   writeFileSync(DIR + "data.json", JSON.stringify(out, null, 2));
   console.log("data.json écrit →", DIR + "data.json");
-  const fmt = (sn: string) => `${sn} [${teamState[sn]?.rank ?? "?"}e ${(teamState[sn]?.form ?? []).join("") || "–"}]`;
+  const fmt = (sn: string) => `${sn} [${teamState[sn]?.rank ?? "?"}e ${(teamState[sn]?.form ?? []).map((h) => `${h.r}v${h.opp}`).join(",") || "–"}]`;
   for (const f of FIXTURES) {
     console.log(`${f.day} ${f.time}  ${fmt(f.home)} (${picks[f.home]?.name}) vs ${fmt(f.away)} (${picks[f.away]?.name})  — ${f.tv}`);
   }
