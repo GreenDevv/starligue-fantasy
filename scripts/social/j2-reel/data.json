@@ -1,0 +1,275 @@
+{
+  "gameweek": 2,
+  "source": "computeGameweekPlayerPoints(J1)",
+  "generatedAt": "2026-09-09T11:09:24.136Z",
+  "club": {
+    "MHB": {
+      "color": "#F0801F",
+      "salle": "FDI Stadium",
+      "ville": "Montpellier"
+    },
+    "USAM": {
+      "color": "#16B24E",
+      "salle": "Le Parnasse",
+      "ville": "Nîmes"
+    },
+    "LIMOGES": {
+      "color": "#F5333F",
+      "salle": "Palais des Sports de Beaublanc",
+      "ville": "Limoges"
+    },
+    "CCMHB": {
+      "color": "#4FB6F0",
+      "salle": "Colisée de Chartres",
+      "ville": "Chartres"
+    },
+    "SAHB": {
+      "color": "#A855F7",
+      "salle": "CSI de Sélestat",
+      "ville": "Sélestat"
+    },
+    "TREMBLAY": {
+      "color": "#F5C518",
+      "salle": "Palais des Sports de Tremblay",
+      "ville": "Tremblay-en-France"
+    },
+    "CRMHB": {
+      "color": "#E2001A",
+      "salle": "Glaz Arena",
+      "ville": "Cesson-Sévigné"
+    },
+    "HBCN": {
+      "color": "#00A651",
+      "salle": "H Arena",
+      "ville": "Nantes"
+    },
+    "SARAN": {
+      "color": "#2E7BD6",
+      "salle": "Halle des sports du Bois Joly",
+      "ville": "Saran"
+    },
+    "PAUC": {
+      "color": "#E2001A",
+      "salle": "Arena du Pays d'Aix",
+      "ville": "Aix-en-Provence"
+    },
+    "CSMBH": {
+      "color": "#FFD200",
+      "salle": "Le Phare",
+      "ville": "Chambéry"
+    },
+    "SRVH": {
+      "color": "#E4123A",
+      "salle": "Palais des Sports Jean-Marie Cannizzaro",
+      "ville": "Saint-Raphaël"
+    },
+    "CAEN": {
+      "color": "#E4002B",
+      "salle": "Palais des Sports de Caen",
+      "ville": "Caen"
+    },
+    "FENIX": {
+      "color": "#5CB8E6",
+      "salle": "Palais des Sports André Brouat",
+      "ville": "Toulouse"
+    },
+    "USDK": {
+      "color": "#E2001A",
+      "salle": "Stades de Flandres",
+      "ville": "Dunkerque"
+    },
+    "PSG": {
+      "color": "#E30613",
+      "salle": "Stade Pierre de Coubertin",
+      "ville": "Paris"
+    }
+  },
+  "fixtures": [
+    {
+      "home": "LIMOGES",
+      "away": "SARAN",
+      "day": "Jeudi 10 sept.",
+      "time": "20h00",
+      "tv": "Handball TV"
+    },
+    {
+      "home": "SRVH",
+      "away": "USDK",
+      "day": "Vendredi 11 sept.",
+      "time": "19h30",
+      "tv": "Handball TV"
+    },
+    {
+      "home": "CCMHB",
+      "away": "TREMBLAY",
+      "day": "Vendredi 11 sept.",
+      "time": "20h00",
+      "tv": "beIN Sport"
+    },
+    {
+      "home": "SAHB",
+      "away": "CSMBH",
+      "day": "Vendredi 11 sept.",
+      "time": "20h30",
+      "tv": "Handball TV"
+    },
+    {
+      "home": "FENIX",
+      "away": "CAEN",
+      "day": "Vendredi 11 sept.",
+      "time": "20h30",
+      "tv": "Handball TV"
+    },
+    {
+      "home": "HBCN",
+      "away": "PAUC",
+      "day": "Samedi 12 sept.",
+      "time": "19h00",
+      "tv": "beIN Sport"
+    },
+    {
+      "home": "PSG",
+      "away": "CRMHB",
+      "day": "Samedi 12 sept.",
+      "time": "20h00",
+      "tv": "Handball TV"
+    },
+    {
+      "home": "USAM",
+      "away": "MHB",
+      "day": "Dimanche 13 sept.",
+      "time": "17h00",
+      "tv": "beIN Sport"
+    }
+  ],
+  "picks": {
+    "MHB": {
+      "name": "Charles BOLZINGER",
+      "last": "BOLZINGER",
+      "first": "Charles",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_bolzinger-charles__picture__2026-2027-3841-17804.png",
+      "pos": "GK",
+      "points": 70
+    },
+    "USAM": {
+      "name": "Hugo KAMTCHOP BARIL",
+      "last": "KAMTCHOP BARIL",
+      "first": "Hugo",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_kamtchop-baril-hugo__picture__2026-2027-2242-17873.png",
+      "pos": "PV",
+      "points": 56
+    },
+    "LIMOGES": {
+      "name": "Jules LIGNIÈRES",
+      "last": "LIGNIÈRES",
+      "first": "Jules",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_lignieres-jules__picture__2026-2027-7732-17786.png",
+      "pos": "CB",
+      "points": 69.2
+    },
+    "CCMHB": {
+      "name": "Koussay BEN FRAJ",
+      "last": "BEN FRAJ",
+      "first": "Koussay",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_ben-fraj-koussay__picture__2026-2027-8323-17716.png",
+      "pos": "LB",
+      "points": 22.8
+    },
+    "SAHB": {
+      "name": "Tobias JORGENSEN",
+      "last": "JORGENSEN",
+      "first": "Tobias",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_jorgensen-tobias__picture__2026-2027-7682-17974.png",
+      "pos": "CB",
+      "points": 32.8
+    },
+    "TREMBLAY": {
+      "name": "Wesley PARDIN",
+      "last": "PARDIN",
+      "first": "Wesley",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_pardin-wesley__picture__2026-2027-3-18037.png",
+      "pos": "GK",
+      "points": 37.6
+    },
+    "CRMHB": {
+      "name": "Alex MORAN",
+      "last": "MORAN",
+      "first": "Alex",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_moran-alex__picture__2026-2027-2994-17676.png",
+      "pos": "RW",
+      "points": 40.4
+    },
+    "HBCN": {
+      "name": "Christoffer BONDE",
+      "last": "BONDE",
+      "first": "Christoffer",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_bonde-christoffer__picture__2026-2027-10245-17832.png",
+      "pos": "GK",
+      "points": 54.8
+    },
+    "SARAN": {
+      "name": "Zoran RADIC",
+      "last": "RADIC",
+      "first": "Zoran",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_radic-zoran__picture__2026-2027-5282-17956.png",
+      "pos": "GK",
+      "points": 54
+    },
+    "PAUC": {
+      "name": "Joze BAZNIK",
+      "last": "BAZNIK",
+      "first": "Joze",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_baznik-joze__picture__2026-2027-3624-17602.png",
+      "pos": "GK",
+      "points": 70
+    },
+    "CSMBH": {
+      "name": "Roberto RODRÍGUEZ LARIO",
+      "last": "RODRÍGUEZ LARIO",
+      "first": "Roberto",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_rodriguez-lario-roberto__picture__2026-2027-8884-17705.png",
+      "pos": "GK",
+      "points": 60
+    },
+    "SRVH": {
+      "name": "Johannes MARESCOT",
+      "last": "MARESCOT",
+      "first": "Johannes",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_marescot-johannes__picture__2026-2027-1176-17925.png",
+      "pos": "PV",
+      "points": 44
+    },
+    "CAEN": {
+      "name": "Milos MOCEVIC",
+      "last": "MOCEVIC",
+      "first": "Milos",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_mocevic-milos__picture__2026-2027-5259-17649.png",
+      "pos": "GK",
+      "points": 78
+    },
+    "FENIX": {
+      "name": "Nemanja ILIC",
+      "last": "ILIC",
+      "first": "Nemanja",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_ilic-nemanja__picture__2026-2027-1292-18004.png",
+      "pos": "LW",
+      "points": 55.2
+    },
+    "USDK": {
+      "name": "Taras MINOTSKYI",
+      "last": "MINOTSKYI",
+      "first": "Taras",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_minotskyi-taras__picture__2026-2027-5571-17763.png",
+      "pos": "LB",
+      "points": 32.4
+    },
+    "PSG": {
+      "name": "Elohim PRANDI",
+      "last": "PRANDI",
+      "first": "Elohim",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_prandi-elohim__picture__2026-2027-2573-17904.png",
+      "pos": "LB",
+      "points": 38
+    }
+  }
+}
