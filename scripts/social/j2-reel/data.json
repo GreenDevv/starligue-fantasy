@@ -1,7 +1,8 @@
 {
   "gameweek": 2,
   "source": "computeGameweekPlayerPoints(J1)",
-  "generatedAt": "2026-09-09T11:09:24.136Z",
+  "standingGw": 1,
+  "generatedAt": "2026-09-09T11:36:10.788Z",
   "club": {
     "MHB": {
       "color": "#F0801F",
@@ -270,6 +271,104 @@
       "photoUrl": "https://www.lnh.fr/medias/sports_players/small_prandi-elohim__picture__2026-2027-2573-17904.png",
       "pos": "LB",
       "points": 38
+    }
+  },
+  "teamState": {
+    "MHB": {
+      "rank": 1,
+      "form": [
+        "W"
+      ]
+    },
+    "USAM": {
+      "rank": 5,
+      "form": [
+        "W"
+      ]
+    },
+    "LIMOGES": {
+      "rank": 3,
+      "form": [
+        "W"
+      ]
+    },
+    "CCMHB": {
+      "rank": 16,
+      "form": [
+        "L"
+      ]
+    },
+    "SAHB": {
+      "rank": 9,
+      "form": [
+        "L"
+      ]
+    },
+    "TREMBLAY": {
+      "rank": 15,
+      "form": [
+        "L"
+      ]
+    },
+    "CRMHB": {
+      "rank": 10,
+      "form": [
+        "L"
+      ]
+    },
+    "HBCN": {
+      "rank": 2,
+      "form": [
+        "W"
+      ]
+    },
+    "SARAN": {
+      "rank": 7,
+      "form": [
+        "W"
+      ]
+    },
+    "PAUC": {
+      "rank": 6,
+      "form": [
+        "W"
+      ]
+    },
+    "CSMBH": {
+      "rank": 13,
+      "form": [
+        "L"
+      ]
+    },
+    "SRVH": {
+      "rank": 14,
+      "form": [
+        "L"
+      ]
+    },
+    "CAEN": {
+      "rank": 8,
+      "form": [
+        "W"
+      ]
+    },
+    "FENIX": {
+      "rank": 11,
+      "form": [
+        "L"
+      ]
+    },
+    "USDK": {
+      "rank": 12,
+      "form": [
+        "L"
+      ]
+    },
+    "PSG": {
+      "rank": 4,
+      "form": [
+        "W"
+      ]
     }
   }
 }

@@ -104,11 +104,55 @@ async function main() {
     };
   }
 
-  const out = { gameweek: 2, source: "computeGameweekPlayerPoints(J1)", generatedAt: new Date().toISOString(), club: CLUB, fixtures: FIXTURES, picks };
+  // --- Classement + forme (résultats Starligue UNIQUEMENT — le modèle Match ne
+  // contient que le championnat ; les amicaux sont dans FriendlyMatch) ---
+  const latestStanding = await prisma.clubStanding.aggregate({
+    where: { seasonId: season.id },
+    _max: { gameweekNumber: true },
+  });
+  const standingGw = latestStanding._max.gameweekNumber;
+  const rankByClub = new Map<string, number>();
+  if (standingGw !== null) {
+    const rows = await prisma.clubStanding.findMany({
+      where: { seasonId: season.id, gameweekNumber: standingGw },
+      select: { rank: true, club: { select: { shortName: true } } },
+    });
+    for (const r of rows) rankByClub.set(r.club.shortName, r.rank);
+  }
+
+  const finished = await prisma.match.findMany({
+    where: { seasonId: season.id, status: "FINISHED", homeScore: { not: null }, awayScore: { not: null } },
+    orderBy: { kickoffAt: "asc" },
+    select: {
+      homeScore: true, awayScore: true,
+      homeClub: { select: { shortName: true } },
+      awayClub: { select: { shortName: true } },
+    },
+  });
+  const formByClub = new Map<string, ("W" | "D" | "L")[]>();
+  const pushForm = (sn: string, r: "W" | "D" | "L") => {
+    const l = formByClub.get(sn) ?? [];
+    l.push(r);
+    formByClub.set(sn, l);
+  };
+  for (const m of finished) {
+    const hs = m.homeScore!, as = m.awayScore!;
+    pushForm(m.homeClub.shortName, hs > as ? "W" : hs < as ? "L" : "D");
+    pushForm(m.awayClub.shortName, as > hs ? "W" : as < hs ? "L" : "D");
+  }
+
+  // 5 derniers résultats max, ordre chrono (le plus récent en dernier)
+  const teamState: Record<string, { rank: number | null; form: ("W" | "D" | "L")[] }> = {};
+  for (const sn of Object.keys(CLUB)) {
+    teamState[sn] = { rank: rankByClub.get(sn) ?? null, form: (formByClub.get(sn) ?? []).slice(-5) };
+  }
+
+  const out = { gameweek: 2, source: "computeGameweekPlayerPoints(J1)", standingGw, generatedAt: new Date().toISOString(), club: CLUB, fixtures: FIXTURES, picks, teamState };
   writeFileSync(DIR + "data.json", JSON.stringify(out, null, 2));
   console.log("data.json écrit →", DIR + "data.json");
+  const fmt = (sn: string) => `${sn} [${teamState[sn]?.rank ?? "?"}e ${(teamState[sn]?.form ?? []).join("") || "–"}]`;
   for (const f of FIXTURES) {
-    console.log(`${f.day} ${f.time}  ${f.home} (${picks[f.home]?.name} · ${picks[f.home]?.points}) vs ${f.away} (${picks[f.away]?.name} · ${picks[f.away]?.points})  — ${f.tv}`);
+    console.log(`${f.day} ${f.time}  ${fmt(f.home)} (${picks[f.home]?.name}) vs ${fmt(f.away)} (${picks[f.away]?.name})  — ${f.tv}`);
   }
 }
 

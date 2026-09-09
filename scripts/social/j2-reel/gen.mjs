@@ -27,6 +27,16 @@ const introLogos = INTRO_CLUBS.map((sn) =>
   `<div class="ic${hasOverride(sn) ? " ov" : ""}"><img src="${finaleLogo(sn)}"/></div>`
 ).join("");
 
+// ---- classement + forme (résultats Starligue uniquement), sous chaque écusson ----
+const FORM_LABEL = { W: "V", D: "N", L: "D" }; // Victoire / Nul / Défaite
+const teamMeta = (sn) => {
+  const ts = d.teamState?.[sn] ?? { rank: null, form: [] };
+  const rank = ts.rank ? `<span class="tm-rank">${ts.rank}<i>e</i></span>` : "";
+  const form = (ts.form ?? []).slice(-5)
+    .map((r) => `<b class="tm-f ${r}">${FORM_LABEL[r] ?? "?"}</b>`).join("");
+  return `<div class="mc-tm">${rank}${form ? `<span class="tm-form">${form}</span>` : ""}</div>`;
+};
+
 // ---- match cards ----
 const cards = d.fixtures.map((f, i) => {
   const H = d.club[f.home], A = d.club[f.away];
@@ -46,9 +56,15 @@ const cards = d.fixtures.map((f, i) => {
     <div class="mc-vign"></div>
     <div class="mc-no">Match <b>${i + 1}</b> / 8</div>
     <div class="mc-head">
-      <img class="mc-crest ch" src="${clubLogo(f.home)}"/>
+      <div class="mc-col ch">
+        <img class="mc-crest ch" src="${clubLogo(f.home)}"/>
+        ${teamMeta(f.home)}
+      </div>
       <span class="mc-vs">VS</span>
-      <img class="mc-crest ca" src="${clubLogo(f.away)}"/>
+      <div class="mc-col ca">
+        <img class="mc-crest ca" src="${clubLogo(f.away)}"/>
+        ${teamMeta(f.away)}
+      </div>
     </div>
     <div class="mc-nm ph"><i>${ph.first}</i><b>${ph.last}</b></div>
     <div class="mc-nm pa"><i>${pa.first}</i><b>${pa.last}</b></div>
@@ -131,10 +147,24 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#05070C}
 .mc-no{position:absolute;top:150px;left:60px;z-index:6;font-family:"Barlow Condensed";font-weight:700;
   font-size:27px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.62);will-change:opacity}
 .mc-no b{color:#F59E0B}
-.mc-head{position:absolute;top:200px;left:0;right:0;z-index:6;display:flex;align-items:center;justify-content:center;gap:70px}
+.mc-head{position:absolute;top:200px;left:0;right:0;z-index:6;display:flex;align-items:flex-start;justify-content:center;gap:70px}
+.mc-col{display:flex;flex-direction:column;align-items:center;width:300px}
 .mc-crest{width:230px;height:230px;object-fit:contain;will-change:opacity,transform;
   filter:drop-shadow(0 0 3px rgba(255,255,255,.95)) drop-shadow(0 0 2px rgba(255,255,255,.9)) drop-shadow(0 16px 30px rgba(0,0,0,.6))}
+/* classement + forme (5 derniers résultats Starligue), sous l'écusson */
+.mc-tm{margin-top:16px;display:flex;align-items:center;justify-content:center;gap:9px;will-change:opacity,transform}
+.mc-tm .tm-rank{font-family:"Barlow Condensed";font-weight:800;font-size:27px;line-height:1;color:#F4F7FB;
+  padding:4px 11px;border-radius:999px;background:rgba(6,9,14,.55);border:1px solid rgba(255,255,255,.30);
+  display:inline-flex;align-items:baseline;gap:1px;box-shadow:0 6px 16px rgba(0,0,0,.45)}
+.mc-tm .tm-rank i{font-style:normal;font-size:16px;font-weight:700;color:#9FB0C4}
+.mc-tm .tm-form{display:flex;gap:5px}
+.mc-tm .tm-f{width:27px;height:27px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-family:"Barlow Condensed";font-weight:800;font-size:18px;color:#04060A;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.mc-tm .tm-f.W{background:#22C55E}
+.mc-tm .tm-f.D{background:#9AA7B6}
+.mc-tm .tm-f.L{background:#EF4444;color:#fff}
 .mc-vs{font-family:"Barlow Condensed";font-weight:800;font-size:82px;line-height:1;color:#F4F7FB;flex:none;
+  margin-top:49px;
   width:132px;height:132px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   border:2px solid rgba(255,255,255,.28);background:rgba(6,9,14,.5);backdrop-filter:blur(2px);
   box-shadow:0 14px 34px rgba(0,0,0,.5);will-change:opacity,transform}
@@ -302,6 +332,11 @@ window.seek=function(t){
     cs[0].style.transform='translateX('+lerp(70,0,back(clamp(cr,0,1)))+'px) scale('+lerp(.6,1,back(clamp(cr,0,1)))+')';
     cs[1].style.opacity=(eOut(cr)*(1-outp)).toFixed(3);
     cs[1].style.transform='translateX('+lerp(-70,0,back(clamp(cr,0,1)))+'px) scale('+lerp(.6,1,back(clamp(cr,0,1)))+')';
+    const tmin=ph(lt,320,660);
+    for(const tm of M.querySelectorAll('.mc-tm')){
+      tm.style.opacity=(eOut(tmin)*(1-outp)).toFixed(3);
+      tm.style.transform='translateY('+lerp(12,0,eOut(tmin))+'px)';
+    }
     const vs=ph(lt,260,520);
     const vsEl=M.querySelector('.mc-vs');
     vsEl.style.opacity=(eOut(vs)*(1-outp)).toFixed(3);
