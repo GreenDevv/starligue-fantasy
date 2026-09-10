@@ -13,6 +13,9 @@ export interface DashboardStripMatch {
   homeScore: number | null;
   awayScore: number | null;
   kickoffAt: Date;
+  status: string;
+  liveMinute: number | null;
+  livePeriod: string | null;
   // Diffuseur TV officiel (ARCHITECTURE.md §4.2) — null tant que non (re)synchronisé
   // depuis lnh.fr (syncCalendarsIdsForSeason) ou pour un match sans diffuseur connu.
   broadcasterName: string | null;
@@ -86,7 +89,10 @@ export async function getDashboardMatchStrips(
   return {
     lastResults: {
       gameweekNumber: lastFinishedGameweek?.number ?? null,
-      matches: lastFinishedGameweek?.matches.filter((m) => m.status === "FINISHED") ?? [],
+      // FINISHED + LIVE : la journée « en cours » affiche ses matchs joués ET ceux
+      // en train de se jouer (suivi minute par minute).
+      matches:
+        lastFinishedGameweek?.matches.filter((m) => m.status === "FINISHED" || m.status === "LIVE") ?? [],
     },
     upcoming: {
       gameweekNumber: upcomingGameweek?.number ?? null,

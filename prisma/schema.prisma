@@ -606,6 +606,14 @@ model Match {
   // (page d'abonnement/calendrier), pas un lien direct vers CE match précis.
   broadcasterName  String?
   broadcasterUrl   String?
+  // Suivi minute par minute pendant le match (feed lnh.fr /ajaxpost1
+  // contents_action=view_tab_live, src/lib/ingestion/live-feed.ts) — null hors
+  // direct. liveMinute = minutes écoulées dans la période courante (0-30),
+  // livePeriod = "1H" | "HT" | "2H" | "FT". homeScore/awayScore et status sont
+  // aussi rafraîchis depuis ce feed pendant le direct.
+  liveMinute       Int?
+  livePeriod       String?
+  liveUpdatedAt    DateTime?
   externalIds      Json              @default("{}")
   playerStats      PlayerMatchStat[]
   predictionMarket PredictionMarket?

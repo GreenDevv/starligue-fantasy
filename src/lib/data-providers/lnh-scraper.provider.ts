@@ -546,6 +546,89 @@ export function parseMatchBoxscoreHtml(html: string): ScrapedMatchBoxscoreRow[] 
   return results;
 }
 
+// --- Feed live d'un match (onglet "view_tab_live", contents_controller=sportsCalendars) ---
+// Reconnaissance 2026-09-11 (scripts/probe-lnh-live-feed.ts). Le HTML contient une
+// table `table-stats events` : une ligne <tr> par événement, DU PLUS RÉCENT AU PLUS
+// ANCIEN. Chaque ligne : `event-icon <type>` (goals, goals_7m, red_card, two_min,
+// missed, stops, timeout, alert, blocked, periods_finish…), minute `<b>MM:SS</b>`
+// (repart de 00:00 à la 2ᵉ mi-temps), `<div class="score"> H - A </div>`, et le
+// libellé de l'événement. `periods_finish` sert pour "Fin de la première mi-temps"
+// ET "Fin du match".
+
+export interface ScrapedLiveMatchState {
+  homeScore: number;
+  awayScore: number;
+  minute: number; // minutes écoulées dans le match (0-60), continu sur les 2 périodes
+  period: "1H" | "HT" | "2H" | "FT";
+  finished: boolean;
+  eventCount: number;
+  lastEvent: string | null;
+}
+
+interface LiveFeedRow {
+  icon: string;
+  minute: number; // dans la période (0-30)
+  home: number;
+  away: number;
+  event: string;
+}
+
+function parseLiveFeedRows(html: string): LiveFeedRow[] {
+  const tableStart = html.indexOf("table-stats events");
+  if (tableStart === -1) return [];
+  const table = html.slice(tableStart);
+  const rows: LiveFeedRow[] = [];
+  for (const tr of table.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)) {
+    const cell = tr[1] ?? "";
+    const icon = cell.match(/event-icon\s+([a-z0-9_]+)/i)?.[1];
+    const mm = cell.match(/<b>\s*(\d{1,2}):(\d{2})\s*<\/b>/);
+    const score = cell.match(/class="score">\s*(\d+)\s*-\s*(\d+)/);
+    if (!icon || !mm || !score) continue;
+    rows.push({
+      icon,
+      minute: parseInt(mm[1]!, 10),
+      home: parseInt(score[1]!, 10),
+      away: parseInt(score[2]!, 10),
+      event: (cell.match(/class="cell-event">\s*([\s\S]*?)\s*<\/div>/)?.[1] ?? "").replace(/\s+/g, " ").trim(),
+    });
+  }
+  return rows;
+}
+
+export function parseLiveMatchFeedHtml(html: string): ScrapedLiveMatchState | null {
+  const rows = parseLiveFeedRows(html);
+  if (rows.length === 0) return null; // match pas commencé / feed vide
+
+  const newest = rows[0]!;
+  const finishEvents = rows.filter((r) => r.icon === "periods_finish");
+  const matchOver = /fin du match/i.test(newest.event) && newest.icon === "periods_finish";
+  const atHalfTime =
+    newest.icon === "periods_finish" && /mi-?temps/i.test(newest.event) && !matchOver;
+  // On est en 2ᵉ période dès qu'une "fin de mi-temps" existe plus bas (plus ancienne)
+  // sans "fin de match".
+  const inSecondHalf = !matchOver && !atHalfTime && finishEvents.length >= 1;
+
+  const period: ScrapedLiveMatchState["period"] = matchOver
+    ? "FT"
+    : atHalfTime
+      ? "HT"
+      : inSecondHalf
+        ? "2H"
+        : "1H";
+
+  const minute = matchOver ? 60 : atHalfTime ? 30 : inSecondHalf ? 30 + newest.minute : newest.minute;
+
+  return {
+    homeScore: newest.home,
+    awayScore: newest.away,
+    minute: Math.min(minute, 60),
+    period,
+    finished: matchOver,
+    eventCount: rows.length,
+    lastEvent: newest.event || null,
+  };
+}
+
 // Infère l'année d'une date de calendrier sans année ("ven. 05 sept." / "sam. 06 juin") :
 // août→décembre = 1ère année de la saison, janvier→juillet = 2ème année.
 // seasonStartYear = ex 2025 pour la saison "2025-2026".
@@ -1205,6 +1288,37 @@ export class LnhScraperProvider implements StarligueDataProvider {
 
     const html = await res.text();
     return parseMatchBoxscoreHtml(html);
+  }
+
+  // Feed live d'un match (score minute par minute + événements) — onglet
+  // "view_tab_live", même conventions que fetchMatchBoxscore (pas besoin de clé
+  // CSRF). null si le feed est vide (match pas commencé). Voir parseLiveMatchFeedHtml.
+  async fetchLiveMatchState(calendarsId: string, seasonsId: string): Promise<ScrapedLiveMatchState | null> {
+    const body = new URLSearchParams({
+      contents_controller: "sportsCalendars",
+      contents_action: "view_tab_live",
+      calendars_id: calendarsId,
+      seasons_id: seasonsId,
+    });
+
+    const res = await this.fetchWithTimeout(AJAX_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-Requested-With": "XMLHttpRequest",
+        "User-Agent": "Mozilla/5.0 (compatible; StarligueFantasyBot/1.0)",
+      },
+      body: body.toString(),
+    });
+    if (!res) {
+      throw new IngestionError(
+        `LNH Scraper : impossible de récupérer le feed live du match ${calendarsId}`,
+        this.name,
+        true
+      );
+    }
+
+    return parseLiveMatchFeedHtml(await res.text());
   }
 
   // Récupère les boxscores de plusieurs matchs déjà joués (ex : les ~8 matchs d'une

@@ -59,7 +59,8 @@
     "noResults": "Todavía no hay resultados.",
     "noUpcoming": "No hay partidos programados.",
     "collapse": "Contraer",
-    "expand": "Expandir"
+    "expand": "Expandir",
+    "halfTime": "Descanso"
   },
   "warmup": {
     "title": "Warm-up"

@@ -59,7 +59,8 @@
     "noResults": "Encara no hi ha resultats.",
     "noUpcoming": "No hi ha partits programats.",
     "collapse": "Replega",
-    "expand": "Desplega"
+    "expand": "Desplega",
+    "halfTime": "Descans"
   },
   "warmup": {
     "title": "Warm-up"

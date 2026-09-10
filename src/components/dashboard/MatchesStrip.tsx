@@ -28,6 +28,11 @@ interface StripMatch {
   homeScore: number | null;
   awayScore: number | null;
   kickoffAt: string | Date;
+  // Suivi minute par minute (src/lib/ingestion/live-feed.ts) — renseignés seulement
+  // pour un match en cours. Absents partout ailleurs (n'affecte aucun strip existant).
+  status?: string;
+  liveMinute?: number | null;
+  livePeriod?: string | null;
   // URL personnalisée pour CE match précis (ex: page groupe EHF depuis la home,
   // /matches/ehf/[competition]/[group]) — prioritaire sur `disableLink` et sur la
   // résolution par défaut (/matches/[id] ou /clubs/.../vs/...). Chaîne (pas une
@@ -232,6 +237,13 @@ export function MatchesStrip({
                   ? `/matches/${m.id}`
                   : `/clubs/${m.homeClub.id}/vs/${m.awayClub.id}`);
             const hasScore = m.homeScore !== null && m.awayScore !== null;
+            const isLive = m.status === "LIVE";
+            const liveLabel =
+              isLive && m.livePeriod === "HT"
+                ? t("matchesStrip.halfTime")
+                : isLive && typeof m.liveMinute === "number"
+                  ? `${m.liveMinute}'`
+                  : null;
             const homeRank = m.homeClub.id ? rankByClubId?.[m.homeClub.id] : undefined;
             const awayRank = m.awayClub.id ? rankByClubId?.[m.awayClub.id] : undefined;
             // 1 colonne : un match par ligne pleine largeur — on espace davantage
@@ -249,7 +261,11 @@ export function MatchesStrip({
                   )}
                 </div>
                 {hasScore && (
-                  <span className={`shrink-0 font-arcade tracking-wide text-text ${rowSpacing.score}`}>
+                  <span
+                    className={`shrink-0 font-arcade tracking-wide ${rowSpacing.score} ${
+                      isLive ? "text-points-neg drop-shadow-[0_0_5px_currentColor]" : "text-text"
+                    }`}
+                  >
                     {m.homeScore}-{m.awayScore}
                   </span>
                 )}
@@ -261,17 +277,29 @@ export function MatchesStrip({
                 </div>
               </div>
             );
-            const content = showDate ? (
-              <div className="flex flex-col items-center gap-0.5">
-                <span className="text-[9px] uppercase leading-none tracking-wide text-text-muted">
-                  {formatDayMonth(format, new Date(m.kickoffAt))}{" "}
-                  {format.dateTime(new Date(m.kickoffAt), { hour: "2-digit", minute: "2-digit" })}
-                </span>
-                {logosRow}
-              </div>
-            ) : (
-              logosRow
-            );
+            const content =
+              isLive && liveLabel ? (
+                <div className="flex flex-col items-center gap-0.5">
+                  <span className="flex items-center gap-1 text-[9px] font-semibold uppercase leading-none tracking-wide text-points-neg">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-points-neg opacity-75" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-points-neg" />
+                    </span>
+                    {liveLabel}
+                  </span>
+                  {logosRow}
+                </div>
+              ) : showDate ? (
+                <div className="flex flex-col items-center gap-0.5">
+                  <span className="text-[9px] uppercase leading-none tracking-wide text-text-muted">
+                    {formatDayMonth(format, new Date(m.kickoffAt))}{" "}
+                    {format.dateTime(new Date(m.kickoffAt), { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                  {logosRow}
+                </div>
+              ) : (
+                logosRow
+              );
             const boxClassName = `relative flex min-w-0 items-center justify-center gap-0.5 overflow-hidden rounded-md border border-border/60 bg-bg transition-colors hover:border-accent/50 ${boxPad}`;
             const tooltip = matchTooltip(m, format);
             const box = href ? (
