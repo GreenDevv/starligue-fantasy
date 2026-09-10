@@ -59,7 +59,8 @@
     "noResults": "No results yet.",
     "noUpcoming": "No matches scheduled.",
     "collapse": "Collapse",
-    "expand": "Expand"
+    "expand": "Expand",
+    "halfTime": "Half-time"
   },
   "warmup": {
     "title": "Warm-up"

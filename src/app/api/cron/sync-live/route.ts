@@ -18,6 +18,7 @@ import { prisma } from "@/lib/db";
 import { verifyCronAuth } from "@/lib/cron-auth";
 import { IngestionError } from "@/lib/data-providers/lnh-scraper.provider";
 import { syncCalendarsIdsForSeason } from "@/lib/ingestion/boxscore";
+import { syncLiveMatchFeeds } from "@/lib/ingestion/live-feed";
 import { syncLiveClubStandings } from "@/lib/standings/live-sync";
 
 const LNH_SEASONS_ID = "40";
@@ -53,7 +54,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ data: { skipped: true, reason: "aucun match dans le créneau" } });
   }
 
-  const out: { results?: unknown; standings?: unknown; errors: string[] } = { errors: [] };
+  const out: { results?: unknown; liveFeed?: unknown; standings?: unknown; errors: string[] } = { errors: [] };
 
   try {
     out.results = await syncCalendarsIdsForSeason(season.id, LNH_SEASONS_ID, SEASON_START_YEAR);
@@ -62,6 +63,14 @@ export async function POST(req: Request) {
     console.warn("[sync-live] calendars:", String(err));
     out.errors.push(`calendars: ${String(err)}`);
     if (!recoverable) return NextResponse.json({ error: { code: "SCRAPER_ERROR", message: String(err) } }, { status: 502 });
+  }
+
+  // Suivi minute par minute (feed view_tab_live) — score + chrono des matchs en cours.
+  try {
+    out.liveFeed = await syncLiveMatchFeeds(season.id, LNH_SEASONS_ID);
+  } catch (err) {
+    console.warn("[sync-live] liveFeed:", String(err));
+    out.errors.push(`liveFeed: ${String(err)}`);
   }
 
   // Journée en cours = dernière avec au moins un match terminé (0 en pré-saison).

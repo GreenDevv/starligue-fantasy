@@ -59,7 +59,8 @@
     "noResults": "Ingen resultater endnu.",
     "noUpcoming": "Ingen planlagte kampe.",
     "collapse": "Skjul",
-    "expand": "Vis"
+    "expand": "Vis",
+    "halfTime": "Pause"
   },
   "warmup": {
     "title": "Warm-up"

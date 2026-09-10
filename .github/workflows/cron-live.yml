@@ -5,16 +5,17 @@ name: Cron live (résultats + classement Starligue en direct)
 # qui ne fait rien s'il n'y a aucun match dans [now-3h, now+30min]).
 #
 # GitHub Actions décale souvent les crons de plusieurs minutes sous charge : on vise
-# ~toutes les 5 min, la fraîcheur réelle est plutôt 5-15 min. Le suivi minute par
-# minute (feed eStatsChannels lnh.fr) viendra dans un lot suivant.
+# ~toutes les 2 min, la fraîcheur réelle est plutôt 2-8 min. Depuis 09/2026 la route
+# ingère aussi le feed minute-par-minute (view_tab_live → Match.liveMinute/livePeriod
+# + score, src/lib/ingestion/live-feed.ts).
 #
 # Fenêtres larges en UTC couvrant les jours/heures de match LNH (mer.-dim.,
 # ~18h-00h30 Paris = ~16h-22h30 UTC en été / 17h-23h30 en hiver) : la route filtre
 # elle-même sur la présence d'un match, donc on peut sur-planifier sans risque.
 on:
   schedule:
-    - cron: "*/5 16-23 * * 3,4,5,6" # mer. jeu. ven. sam. — 16-23 UTC
-    - cron: "*/5 13-21 * * 0"       # dim. — 13-21 UTC (matchs d'après-midi)
+    - cron: "*/2 16-23 * * 3,4,5,6" # mer. jeu. ven. sam. — 16-23 UTC
+    - cron: "*/2 13-21 * * 0"       # dim. — 13-21 UTC (matchs d'après-midi)
   workflow_dispatch:
     inputs:
       force:
