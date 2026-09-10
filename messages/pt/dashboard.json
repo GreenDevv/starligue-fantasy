@@ -46,7 +46,8 @@
     "ctaGuest": "Criar a minha equipa Fantasy →",
     "footerDisclaimer": "Projeto pessoal, sem qualquer relação oficial com a LNH ou a Daikin StarLigue.",
     "footerPrivacyLink": "Privacidade e cookies",
-    "footerSupportLink": "Suporte"
+    "footerSupportLink": "Suporte",
+    "currentGameweekBand": "Jornada {number} em curso"
   },
   "page": {
     "title": "Comunidade",

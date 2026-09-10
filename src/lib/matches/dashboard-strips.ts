@@ -60,6 +60,25 @@ export async function getSimulationDashboardMatchStrips(
   return { lastResults, upcoming };
 }
 
+/**
+ * Journée de championnat EN COURS : la plus avancée dont la deadline est passée et
+ * qui n'est pas encore confirmée (LIVE ou en attente de résultats). Renvoie TOUS
+ * ses matchs (joués, en cours, à venir) pour un encart mis en avant sur la home.
+ * null s'il n'y a pas de journée en cours (pré-saison, ou tout est confirmé).
+ */
+export async function getCurrentGameweekStrip(
+  seasonId: string,
+  now: Date = new Date()
+): Promise<{ gameweekNumber: number; matches: DashboardStripMatch[] } | null> {
+  const gameweek = await prisma.gameweek.findFirst({
+    where: { seasonId, deadlineAt: { lte: now }, confirmedAt: null },
+    orderBy: { number: "desc" },
+    include: { matches: { include: { homeClub: CLUB_SELECT, awayClub: CLUB_SELECT }, orderBy: { kickoffAt: "asc" } } },
+  });
+  if (!gameweek) return null;
+  return { gameweekNumber: gameweek.number, matches: gameweek.matches };
+}
+
 export async function getDashboardMatchStrips(
   seasonId: string,
   // Numéro de journée forcé pour "prochains matchs" (dropdown de navigation sur la

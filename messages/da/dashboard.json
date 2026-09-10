@@ -46,7 +46,8 @@
     "ctaGuest": "Opret mit Fantasy-hold →",
     "footerDisclaimer": "Personligt projekt, uden officiel tilknytning til LNH eller Daikin StarLigue.",
     "footerPrivacyLink": "Privatliv & cookies",
-    "footerSupportLink": "Support"
+    "footerSupportLink": "Support",
+    "currentGameweekBand": "Runde {number} i gang"
   },
   "page": {
     "title": "Fællesskab",

@@ -120,6 +120,10 @@ interface MatchesStripProps {
   // État initial du tiroir si collapsible est vrai (défaut : ouvert). La home
   // l'utilise à false pour les 5 strips concernés (demande explicite).
   defaultOpen?: boolean;
+  // Ne rend pas l'en-tête (titre + journée + dates) : la grille de matchs seule.
+  // Pour un encart qui fournit déjà son propre titre (ex: bande "journée en cours"
+  // de la home).
+  hideHeader?: boolean;
 }
 
 // Même design que "wide", réduit à l'échelle pour "square"/"mini" (widget dashboard
@@ -197,6 +201,7 @@ export function MatchesStrip({
   gameweekNav,
   collapsible,
   defaultOpen = true,
+  hideHeader = false,
 }: MatchesStripProps) {
   const t = useTranslations("dashboard");
   const format = useFormatter();
@@ -351,7 +356,7 @@ export function MatchesStrip({
           dates, avec repli en douceur (flex-wrap, jamais coupé au milieu d'un mot
           grâce à whitespace-nowrap sur chaque étiquette) si jamais ça manque encore
           de place plutôt qu'un chevauchement. */}
-      <div className={isOpen ? "mb-2" : ""}>
+      <div className={isOpen && !hideHeader ? "mb-2" : ""} hidden={hideHeader}>
         <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-1.5">
             {/* tracking-wide (pas -widest) : "UPCOMING MATCHES" est nettement plus
