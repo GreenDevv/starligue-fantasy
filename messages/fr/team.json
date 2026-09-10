@@ -206,5 +206,9 @@
       "tooManyFromClub": "Trop de joueurs de {club} : {count} sélectionnés, {max} maximum par club.",
       "playerAlreadyOwned": "{players} déjà remporté(s) par une autre équipe de la ligue."
     }
+  },
+  "subnav": {
+    "pitch": "Terrain",
+    "more": "Plus"
   }
 }

@@ -206,5 +206,9 @@
       "tooManyFromClub": "Zu viele Spieler von {club}: {count} ausgewählt, maximal {max} pro Verein.",
       "playerAlreadyOwned": "{players} bereits von einem anderen Team der Liga gewonnen."
     }
+  },
+  "subnav": {
+    "pitch": "Feld",
+    "more": "Mehr"
   }
 }

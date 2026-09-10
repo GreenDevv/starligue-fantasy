@@ -206,5 +206,9 @@
       "tooManyFromClub": "Massa jugadors de {club}: {count} seleccionats, màxim {max} per club.",
       "playerAlreadyOwned": "{players} ja guanyat(s) per un altre equip de la lliga."
     }
+  },
+  "subnav": {
+    "pitch": "Camp",
+    "more": "Més"
   }
 }

@@ -2,10 +2,11 @@
 // Extrait de (game)/leagues/[id]/page.tsx : l'équipe vit désormais sur /team
 // (une entrée de nav à part entière), la page ligue ne montre plus que la ligue
 // elle-même (classement, chat, invit). Composant serveur async, rendu par
-// (game)/team/page.tsx une fois l'équipe active résolue.
+// (game)/team/page.tsx une fois l'équipe active résolue. La sous-navigation
+// (transferts, trades, renommage, sélecteur de ligue) est fournie par
+// (game)/team/layout.tsx via <TeamSubnav>.
 import { prisma } from "@/lib/db";
 import { isLiveTransferWindowOpenForSeason, isSimulationTransferWindowOpenForSeason } from "@/lib/transfers/status";
-import { hasLiveSeasonStarted, hasSimulationSeasonStarted } from "@/lib/squad/season-lock";
 import { getDashboardMatchStrips, getSimulationDashboardMatchStrips } from "@/lib/matches/dashboard-strips";
 import { TeamView } from "@/components/TeamView";
 import type { SeasonMode } from "@/lib/team/active-team-context";
@@ -42,13 +43,11 @@ export async function MyTeamSection({
   leagueId,
   seasonId,
   team,
-  memberships,
 }: {
   mode: SeasonMode;
   leagueId: string;
   seasonId: string;
   team: TeamWithSquad;
-  memberships: Array<{ league: { id: string; name: string } }>;
 }) {
   const squad = team.squad.map((s) => ({
     squadEntryId: s.id,
@@ -74,7 +73,6 @@ export async function MyTeamSection({
 
   let lastScoredGameweek: { number: number; points: number; lineupId: string; gameweekId: string } | null = null;
   let transferWindowOpen = false;
-  let seasonStarted = false;
   let dashboardStrips = null;
 
   if (mode === "simulation") {
@@ -97,7 +95,6 @@ export async function MyTeamSection({
       select: { currentSimulationGameweekNumber: true },
     });
     transferWindowOpen = await isSimulationTransferWindowOpenForSeason(seasonId);
-    seasonStarted = hasSimulationSeasonStarted(season.currentSimulationGameweekNumber);
     dashboardStrips = await getSimulationDashboardMatchStrips(seasonId, season.currentSimulationGameweekNumber);
   } else {
     const lastLineup = await prisma.fantasyLineup.findFirst({
@@ -115,12 +112,8 @@ export async function MyTeamSection({
           }
         : null;
     transferWindowOpen = await isLiveTransferWindowOpenForSeason(seasonId);
-    const gameweekDeadlines = await prisma.gameweek.findMany({ where: { seasonId }, select: { deadlineAt: true } });
-    seasonStarted = hasLiveSeasonStarted(gameweekDeadlines.map((g) => g.deadlineAt), new Date());
     dashboardStrips = await getDashboardMatchStrips(seasonId);
   }
-
-  const leagues = memberships.map((m) => ({ id: m.league.id, name: m.league.name }));
 
   return (
     <TeamView
@@ -131,12 +124,10 @@ export async function MyTeamSection({
       pointsToBudgetRate={pointsToBudgetRate}
       jerseyConfig={team.jerseyConfig}
       leagueId={leagueId}
-      leagues={leagues.length > 1 ? leagues : undefined}
       squad={squad}
       lastScoredGameweek={lastScoredGameweek}
       captainId={team.captainId}
       transferWindowOpen={transferWindowOpen}
-      seasonStarted={seasonStarted}
       dashboardStrips={dashboardStrips}
       statsSeasonId={seasonId}
       pendingBonus={team.pendingBonus}

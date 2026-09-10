@@ -64,25 +64,12 @@ export default async function TeamPage({
     return null;
   }
 
-  const [memberships, pendingRecaps] = await Promise.all([
-    prisma.leagueMember.findMany({
-      where: { userId, league: { seasonId: ctx.seasonId } },
-      include: { league: { select: { id: true, name: true } } },
-      orderBy: { joinedAt: "asc" },
-    }),
-    getPendingGameweekRecaps(userId, mode, ctx.seasonId),
-  ]);
+  const pendingRecaps = await getPendingGameweekRecaps(userId, mode, ctx.seasonId);
 
   return (
-    <div className="flex flex-col gap-5">
+    <>
       <GameweekRecapModal recaps={pendingRecaps} />
-      <MyTeamSection
-        mode={ctx.mode}
-        leagueId={ctx.leagueId}
-        seasonId={ctx.seasonId}
-        team={team}
-        memberships={memberships}
-      />
-    </div>
+      <MyTeamSection mode={ctx.mode} leagueId={ctx.leagueId} seasonId={ctx.seasonId} team={team} />
+    </>
   );
 }

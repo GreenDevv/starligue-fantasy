@@ -206,5 +206,9 @@
       "tooManyFromClub": "For mange spillere fra {club}: {count} valgt, maks {max} pr. klub.",
       "playerAlreadyOwned": "{players} allerede vundet af et andet hold i ligaen."
     }
+  },
+  "subnav": {
+    "pitch": "Bane",
+    "more": "Mere"
   }
 }
