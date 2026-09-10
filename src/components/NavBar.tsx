@@ -19,7 +19,8 @@ import {
 // Pas d'entrée "Calendrier" : /matches est passée en mode Starligue (public),
 // voir PublicNavBar.tsx — ces items sont désormais réservés au mode Fantasy
 // (connexion requise).
-// Exporté : réutilisé par MobileMenu.tsx (menu plein écran mobile).
+// Exporté : réutilisé par MobileMenu.tsx (menu plein écran mobile) et
+// FantasyTabBar.tsx (barre d'onglets basse mobile).
 export const NAV_ITEMS = [
   { href: "/team", key: "team", Icon: PitchIcon },
   { href: "/market", key: "market", Icon: MarketIcon },
@@ -28,6 +29,10 @@ export const NAV_ITEMS = [
   { href: "/leaderboard", key: "leaderboard", Icon: LeaderboardIcon },
   { href: "/dashboard", key: "dashboard", Icon: DashboardIcon },
 ] as const;
+
+// Sous-ensemble affiché dans la barre d'onglets basse sur mobile (FantasyTabBar).
+// Les autres entrées (Pronos, Communauté) restent dans le menu hamburger.
+export const MOBILE_TAB_KEYS = ["team", "market", "leagues", "leaderboard"] as const;
 
 export function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);

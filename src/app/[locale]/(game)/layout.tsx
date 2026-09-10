@@ -8,6 +8,7 @@ import { SeasonToggle } from "@/components/SeasonToggle";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { MobileMenu } from "@/components/MobileMenu";
+import { FantasyTabBar } from "@/components/nav/FantasyTabBar";
 import { ModeSwitchLink } from "@/components/nav/ModeSwitchLink";
 import { resolveSeasonMode } from "@/lib/team/active-team-context";
 
@@ -76,7 +77,9 @@ export default async function GameLayout({
         </div>
       </nav>
       <DeadlineBanner initialGameweek={bannerGameweek} />
-      <main className="mx-auto max-w-2xl px-4 py-6 pb-6">{children}</main>
+      {/* pb-24 sur mobile : dégage la FantasyTabBar fixe (masquée sm:) */}
+      <main className="mx-auto max-w-2xl px-4 py-6 pb-24 sm:pb-6">{children}</main>
+      <FantasyTabBar />
     </div>
   );
 }
