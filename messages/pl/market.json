@@ -3,8 +3,8 @@
   "playerCount": "{count, plural, one {# zawodnik} few {# zawodników} many {# zawodników} other {# zawodnika}} · {seasonMode}",
   "searchPlaceholder": "Szukaj zawodnika lub klubu…",
   "allPositions": "Wszyscy",
-  "sortByValue": "↓ Wartość",
-  "sortByName": "↓ Nazwisko",
+  "sortByValue": "Wartość",
+  "sortByName": "Nazwisko",
   "noPlayersFound": "Nie znaleziono zawodnika",
   "trend": {
     "up": "W górę",
@@ -15,5 +15,12 @@
     "remaining": "Pozostało {value}M",
     "over": "Przekroczenie o {value}M",
     "spent": "Wydano: {value}M"
-  }
+  },
+  "sortByPoints": "Punkty",
+  "sortByValueRatio": "Wydajność",
+  "sortCycleHint": "Zmień sortowanie",
+  "bestValueTitle": "Najlepszy stosunek",
+  "bestValueSubtitle": "Punkty fantasy na milion",
+  "perMillionShort": "pkt/M",
+  "pointsShort": "pkt"
 }

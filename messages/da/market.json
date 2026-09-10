@@ -3,8 +3,8 @@
   "playerCount": "{count, plural, one {# spiller} other {# spillere}} · {seasonMode}",
   "searchPlaceholder": "Søg efter en spiller eller klub…",
   "allPositions": "Alle",
-  "sortByValue": "↓ Værdi",
-  "sortByName": "↓ Navn",
+  "sortByValue": "Værdi",
+  "sortByName": "Navn",
   "noPlayersFound": "Ingen spillere fundet",
   "trend": {
     "up": "Stigende",
@@ -15,5 +15,12 @@
     "remaining": "{value}M tilbage",
     "over": "{value}M over budget",
     "spent": "Brugt: {value}M"
-  }
+  },
+  "sortByPoints": "Point",
+  "sortByValueRatio": "Effektivitet",
+  "sortCycleHint": "Skift sortering",
+  "bestValueTitle": "Bedste værdi",
+  "bestValueSubtitle": "Fantasy-point pr. million",
+  "perMillionShort": "pt/M",
+  "pointsShort": "pt"
 }

@@ -3,8 +3,8 @@
   "playerCount": "{count, plural, one {# player} other {# players}} · {seasonMode}",
   "searchPlaceholder": "Search for a player or club…",
   "allPositions": "All",
-  "sortByValue": "↓ Value",
-  "sortByName": "↓ Name",
+  "sortByValue": "Value",
+  "sortByName": "Name",
   "noPlayersFound": "No players found",
   "trend": {
     "up": "Rising",
@@ -15,5 +15,12 @@
     "remaining": "{value}M left",
     "over": "{value}M over budget",
     "spent": "Spent: {value}M"
-  }
+  },
+  "sortByPoints": "Points",
+  "sortByValueRatio": "Efficiency",
+  "sortCycleHint": "Change sort",
+  "bestValueTitle": "Best value",
+  "bestValueSubtitle": "Fantasy points per million",
+  "perMillionShort": "pts/M",
+  "pointsShort": "pts"
 }

@@ -3,8 +3,8 @@
   "playerCount": "{count, plural, one {# jugador} other {# jugadores}} · {seasonMode}",
   "searchPlaceholder": "Busca un jugador o club…",
   "allPositions": "Todos",
-  "sortByValue": "↓ Valor",
-  "sortByName": "↓ Nombre",
+  "sortByValue": "Valor",
+  "sortByName": "Nombre",
   "noPlayersFound": "No se han encontrado jugadores",
   "trend": {
     "up": "Al alza",
@@ -15,5 +15,12 @@
     "remaining": "{value}M restantes",
     "over": "{value}M de exceso",
     "spent": "Gastado: {value}M"
-  }
+  },
+  "sortByPoints": "Puntos",
+  "sortByValueRatio": "Rendimiento",
+  "sortCycleHint": "Cambiar orden",
+  "bestValueTitle": "Mejor rendimiento",
+  "bestValueSubtitle": "Puntos fantasy por millón",
+  "perMillionShort": "pts/M",
+  "pointsShort": "pts"
 }

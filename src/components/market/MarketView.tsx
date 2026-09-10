@@ -9,72 +9,86 @@ import { POSITIONS } from "@/lib/squad/validation";
 import { PositionBadge } from "@/components/ui/Badge";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
+import { Sparkline } from "@/components/ui/Sparkline";
 import { SkeletonRow } from "@/components/ui/Skeleton";
 import type { SeasonMode } from "@/lib/team/active-team-context";
+import type { MarketPlayer } from "@/lib/players/market-list";
 
-interface Player {
-  id: string;
-  firstName: string;
-  lastName: string;
-  position: Position;
-  marketValue: number;
-  valueTrend: "up" | "down" | null;
-  photoUrl?: string | null;
-  photoOffsetX?: number;
-  photoOffsetY?: number;
-  photoZoom?: number;
-  club: { id: string; shortName: string; name: string; logoUrl?: string | null };
-}
+type SortKey = "pointsPerMillion" | "seasonPoints" | "marketValue" | "lastName";
 
 const listVariants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.02 } },
+  show: { transition: { staggerChildren: 0.015 } },
 };
 const itemVariants = {
   hidden: { opacity: 0, y: 6 },
   show: { opacity: 1, y: 0, transition: { duration: 0.2 } },
 };
 
-// La saison affichée est résolue côté serveur (cookie seasonMode, voir page.tsx) —
-// ce composant ne fait que fetch /api/players, qui lit le même cookie pour filtrer.
+const SORT_CYCLE: SortKey[] = ["pointsPerMillion", "seasonPoints", "marketValue", "lastName"];
+
 export function MarketView({ mode }: { mode: SeasonMode }) {
   const t = useTranslations("market");
   const tLabels = useTranslations("labels");
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [players, setPlayers] = useState<MarketPlayer[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [posFilter, setPosFilter] = useState<Position | "ALL">("ALL");
-  const [sortBy, setSortBy] = useState<"marketValue" | "lastName">("marketValue");
+  const [sortBy, setSortBy] = useState<SortKey>("marketValue");
 
   useEffect(() => {
     setLoading(true);
-    fetch("/api/players?perPage=250")
+    fetch("/api/market")
       .then((r) => r.json())
-      .then((data: { data?: { players: Player[] } }) => {
+      .then((data: { data?: { players: MarketPlayer[] } }) => {
         if (data.data?.players) setPlayers(data.data.players);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, [mode]);
 
+  const hasScoredData = useMemo(() => players.some((p) => p.seasonPoints !== 0), [players]);
+
+  const byPosition = useMemo(
+    () => players.filter((p) => posFilter === "ALL" || p.position === posFilter),
+    [players, posFilter]
+  );
+
   const filtered = useMemo(() => {
-    return players
-      .filter((p) => {
-        if (posFilter !== "ALL" && p.position !== posFilter) return false;
-        if (
-          search &&
-          !`${p.firstName} ${p.lastName} ${p.club.shortName}`
-            .toLowerCase()
-            .includes(search.toLowerCase())
-        )
-          return false;
-        return true;
-      })
-      .sort((a, b) =>
-        sortBy === "marketValue"
-          ? b.marketValue - a.marketValue
-          : a.lastName.localeCompare(b.lastName)
-      );
-  }, [players, posFilter, search, sortBy]);
+    const q = search.trim().toLowerCase();
+    const rows = byPosition.filter(
+      (p) => !q || `${p.firstName} ${p.lastName} ${p.club.shortName}`.toLowerCase().includes(q)
+    );
+    return rows.sort((a, b) => {
+      switch (sortBy) {
+        case "lastName":
+          return a.lastName.localeCompare(b.lastName);
+        case "seasonPoints":
+          return b.seasonPoints - a.seasonPoints;
+        case "pointsPerMillion":
+          return b.pointsPerMillion - a.pointsPerMillion;
+        default:
+          return b.marketValue - a.marketValue;
+      }
+    });
+  }, [byPosition, search, sortBy]);
+
+  // Bande "meilleurs rendements" : top points/M du filtre poste courant (joueurs
+  // ayant déjà marqué). Ignore la recherche texte — c'est une reco, pas un résultat.
+  const bestValue = useMemo(() => {
+    if (!hasScoredData) return [];
+    return [...byPosition]
+      .filter((p) => p.seasonPoints > 0)
+      .sort((a, b) => b.pointsPerMillion - a.pointsPerMillion)
+      .slice(0, 8);
+  }, [byPosition, hasScoredData]);
+
+  const sortLabel: Record<SortKey, string> = {
+    pointsPerMillion: t("sortByValueRatio"),
+    seasonPoints: t("sortByPoints"),
+    marketValue: t("sortByValue"),
+    lastName: t("sortByName"),
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -115,28 +129,59 @@ export function MarketView({ mode }: { mode: SeasonMode }) {
           ))}
         </div>
         <button
-          onClick={() =>
-            setSortBy((s) => (s === "marketValue" ? "lastName" : "marketValue"))
-          }
+          onClick={() => setSortBy((s) => SORT_CYCLE[(SORT_CYCLE.indexOf(s) + 1) % SORT_CYCLE.length]!)}
           className="pixel-corners-sm shrink-0 border border-border px-3 py-1 text-xs uppercase tracking-wide text-text-muted transition-colors hover:text-text"
+          title={t("sortCycleHint")}
         >
-          {sortBy === "marketValue" ? t("sortByValue") : t("sortByName")}
+          ↓ {sortLabel[sortBy]}
         </button>
       </div>
+
+      {/* Bande "meilleurs rendements" */}
+      {!loading && bestValue.length > 0 && (
+        <div>
+          <div className="mb-1.5 flex items-baseline justify-between">
+            <p className="text-xs font-semibold uppercase tracking-widest text-accent">{t("bestValueTitle")}</p>
+            <p className="text-[10px] text-text-muted">{t("bestValueSubtitle")}</p>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none]">
+            {bestValue.map((p) => (
+              <Link
+                key={p.id}
+                href={`/players/${p.id}`}
+                className="pixel-corners-sm flex w-32 shrink-0 flex-col items-center gap-1 border border-border bg-surface p-2 text-center transition-colors hover:border-accent/50"
+              >
+                <PlayerAvatar player={p} size="md" variant="photo" focus="head" />
+                <span className="w-full truncate text-xs font-medium text-text">
+                  {p.firstName.charAt(0)}. {p.lastName}
+                </span>
+                <span className="flex items-center gap-1 text-[10px] text-text-muted">
+                  <ClubLogo club={p.club} size="xs" />
+                  {p.club.shortName} · {tLabels(`positionShort.${p.position}`)}
+                </span>
+                <span className="font-arcade text-xl leading-none text-accent drop-shadow-[0_0_6px_currentColor]">
+                  {p.pointsPerMillion.toFixed(1)}
+                </span>
+                <span className="text-[9px] uppercase tracking-wide text-text-muted">
+                  {t("perMillionShort")} · {p.marketValue.toFixed(1)}M
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Player list */}
       {loading ? (
         <div className="pixel-corners overflow-hidden border border-border bg-surface">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: 8 }).map((_, i) => (
             <SkeletonRow key={i} className={i > 0 ? "border-t border-border" : ""} />
           ))}
         </div>
       ) : (
         <div className="pixel-corners overflow-hidden border border-border bg-surface">
           {filtered.length === 0 ? (
-            <p className="py-8 text-center text-sm text-text-muted">
-              {t("noPlayersFound")}
-            </p>
+            <p className="py-8 text-center text-sm text-text-muted">{t("noPlayersFound")}</p>
           ) : (
             <motion.div className="divide-y divide-border" initial="hidden" animate="show" variants={listVariants}>
               {filtered.map((player) => (
@@ -153,14 +198,33 @@ export function MarketView({ mode }: { mode: SeasonMode }) {
                       <span className="flex items-center gap-1.5 text-xs text-text-muted">
                         <ClubLogo club={player.club} size="xs" />
                         {player.club.shortName}
+                        <PositionBadge position={player.position} className="ml-0.5 scale-90" />
                       </span>
                     </div>
-                    <PositionBadge position={player.position} className="shrink-0" />
-                    <span className="flex w-20 shrink-0 items-center justify-end gap-1 text-right font-arcade text-lg tracking-wide text-accent-secondary">
-                      {player.valueTrend === "up" && <span className="text-sm text-points-pos" title={t("trend.up")}>▲</span>}
-                      {player.valueTrend === "down" && <span className="text-sm text-points-neg" title={t("trend.down")}>▼</span>}
-                      {player.marketValue.toFixed(1)}M
-                    </span>
+
+                    {player.form.length > 0 && (
+                      <Sparkline values={player.form} className="hidden shrink-0 min-[360px]:block" />
+                    )}
+
+                    <div className="flex w-24 shrink-0 flex-col items-end">
+                      <span className="flex items-center gap-1 font-arcade text-lg leading-none tracking-wide text-accent-secondary">
+                        {player.valueTrend === "up" && (
+                          <span className="text-xs text-points-pos" title={t("trend.up")}>▲</span>
+                        )}
+                        {player.valueTrend === "down" && (
+                          <span className="text-xs text-points-neg" title={t("trend.down")}>▼</span>
+                        )}
+                        {player.marketValue.toFixed(1)}M
+                      </span>
+                      {hasScoredData && (
+                        <span className="mt-0.5 text-[10px] tabular-nums text-text-muted">
+                          {player.seasonPoints} {t("pointsShort")}
+                          {player.pointsPerMillion !== 0 && (
+                            <> · {player.pointsPerMillion.toFixed(1)}{t("perMillionShort")}</>
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </Link>
                 </motion.div>
               ))}
