@@ -18,7 +18,8 @@
     "player": "Player",
     "saves": "Saves",
     "savePercentage": "Save %",
-    "rating": "Rating"
+    "rating": "Rating",
+    "h2hHistory": "Head-to-head history"
   },
   "panel": {
     "recentResults": "Recent results",

@@ -18,7 +18,8 @@
     "player": "Jugador",
     "saves": "Paradas",
     "savePercentage": "% Paradas",
-    "rating": "Nota"
+    "rating": "Nota",
+    "h2hHistory": "Historial de enfrentamientos"
   },
   "panel": {
     "recentResults": "Últimos resultados",

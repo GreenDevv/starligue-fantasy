@@ -102,9 +102,8 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <Link href="/" className="text-sm text-text-muted hover:text-text transition-colors">
-        ← {tClubs("detail.backToNews")}
-      </Link>
+      {/* Retour à l'accueil : désormais dans (browse)/layout.tsx, commun à toutes
+          les pages du mode Starligue. */}
 
       {/* Club header — toute la div ouvre le menu déroulant pour naviguer vers un
           autre club (demande explicite de l'utilisateur : cliquer n'importe où

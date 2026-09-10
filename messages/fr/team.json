@@ -210,7 +210,8 @@
   },
   "subnav": {
     "pitch": "Terrain",
-    "more": "Plus"
+    "more": "Plus",
+    "league": "Ligue"
   },
   "gameweekPanel": {
     "title": "Cette journée",

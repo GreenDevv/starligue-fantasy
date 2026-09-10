@@ -18,7 +18,8 @@
     "player": "Spieler",
     "saves": "Paraden",
     "savePercentage": "% Paraden",
-    "rating": "Bewertung"
+    "rating": "Bewertung",
+    "h2hHistory": "Duell-Historie"
   },
   "panel": {
     "recentResults": "Letzte Ergebnisse",

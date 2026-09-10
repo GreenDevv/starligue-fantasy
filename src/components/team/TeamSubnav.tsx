@@ -146,23 +146,29 @@ function LeagueContextSwitcher({ leagues, activeLeagueId }: { leagues: League[];
     router.refresh();
   }
 
+  const t = useTranslations("team");
   return (
-    <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none]">
-      {leagues.map((l) => (
-        <button
-          key={l.id}
-          onClick={() => switchLeague(l.id)}
-          disabled={switching}
-          className={cn(
-            "pixel-corners-sm shrink-0 px-3 py-1 text-xs uppercase tracking-wide transition-colors",
-            l.id === activeLeagueId
-              ? "bg-accent text-bg shadow-glow-accent"
-              : "border border-border text-text-muted hover:text-text"
-          )}
-        >
-          {l.name}
-        </button>
-      ))}
+    <div className="pixel-corners-sm flex items-center gap-2 border border-border bg-surface/60 px-2 py-1.5">
+      <span className="shrink-0 text-[10px] font-semibold uppercase tracking-widest text-text-muted">
+        {t("subnav.league")}
+      </span>
+      <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none]">
+        {leagues.map((l) => (
+          <button
+            key={l.id}
+            onClick={() => switchLeague(l.id)}
+            disabled={switching}
+            className={cn(
+              "pixel-corners-sm shrink-0 px-2.5 py-1 text-xs font-medium uppercase tracking-wide transition-colors",
+              l.id === activeLeagueId
+                ? "bg-accent text-bg shadow-glow-accent"
+                : "border border-border text-text-muted hover:text-text"
+            )}
+          >
+            {l.name}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

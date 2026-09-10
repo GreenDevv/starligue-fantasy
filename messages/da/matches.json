@@ -18,7 +18,8 @@
     "player": "Spiller",
     "saves": "Redninger",
     "savePercentage": "% Redninger",
-    "rating": "Karakter"
+    "rating": "Karakter",
+    "h2hHistory": "Indbyrdes historik"
   },
   "panel": {
     "recentResults": "Seneste resultater",
