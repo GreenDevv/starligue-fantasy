@@ -232,6 +232,43 @@ calendrier de la saison en direct n'étant importé **qu'une fois** par CSV
   la saison 2025/26 étant terminée, son `kickoffAt` n'a en revanche plus
   de raison de bouger.
 
+### 4.3 Corrections LNH a posteriori (`/admin/lnh-corrections`)
+
+La LNH révise certaines **notes de performance** 2 à 3 jours après les matchs
+(constaté sur la J1 2026/27 : seul Caen–Dunkerque corrigé, ~48h après — notes
+ajustées + colonne « neutralisations » remplie a posteriori). Le scoring étant
+**rejouable** (§4.1), un écran d'admin dédié permet de rattraper ces corrections
+proprement plutôt que de relancer `sync-ratings` en aveugle.
+
+- **Logique pure** (`src/lib/lnh-corrections/`, testée) : `diff.ts` compare les
+  `PlayerMatchStat` enregistrés au re-scrape lnh.fr et produit une correction par
+  couple `matchId:playerId` (clé stable cochée en UI) ; `report.ts` construit le
+  compte rendu par équipe (écart de points, écart de rang, joueurs concernés) ;
+  `email.ts` le rédige (FR uniquement, comme l'email de blessure — pas de
+  `User.locale`).
+- **Scrape partagé** : `scrapeGameweekBoxscoreRows()` (`src/lib/ingestion/boxscore.ts`)
+  extrait la brique « scrape + matching joueur sans écriture » que `syncGameweekBoxscore`
+  utilisait déjà en interne.
+- **Flux en deux temps** (décision produit) :
+  1. `GET /api/admin/lnh-corrections?gameweek=N` → analyse (lecture seule).
+  2. `POST …/apply` `{ gameweek, correctionKeys }` → upsert des seules stats
+     sélectionnées + `computeGameweekScores` (si la journée est notée) + renvoie le
+     compte rendu. **N'envoie aucun email.**
+  3. L'admin relit le compte rendu, décoche éventuellement des managers, puis
+     `POST …/send-emails` `{ gameweek, rows }` → un email par utilisateur (regroupe
+     ses équipes), dédup `NotificationLog` (`lnh-correction:J{n}:{userId}:{yyyymmdd}`).
+  4. `POST …/revert` `{ gameweek, undo }` restaure les valeurs d'avant + rejoue le
+     scoring (le payload `undo` est renvoyé par `/apply`).
+- **Périmètre des emails** : tous les managers dont les points de la journée
+  bougent, y compris l'impact **indirect** (le bonus « leader de journée »
+  `src/lib/scoring/stat-leaders.ts` est calculé sur toute la ligue — corriger un
+  joueur non possédé peut déplacer un bonus). Wording branché : propriétaire direct
+  (« la note de X : A → B ») vs indirect (« le classement des leaders de journée a
+  été recalculé »).
+- **Pas de table d'audit** (v1) : le compte rendu est affiché/renvoyé, pas stocké ;
+  relancer l'analyse après application montre naturellement 0 écart restant.
+- CLI équivalent en lecture seule : `scripts/diff-lnh-ratings.ts`.
+
 ---
 
 ## 5. Modèle de données (Prisma)

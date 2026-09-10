@@ -197,17 +197,33 @@ export interface GameweekBoxscoreSyncResult {
   statsUpserted: number;
 }
 
+/** Une ligne de boxscore scrapée, déjà rapprochée d'un joueur et d'un match en base. */
+export interface ScrapedGameweekStatRow {
+  matchId: string;
+  playerId: string;
+  playerFirstName: string;
+  playerLastName: string;
+  clubShortName: string;
+  row: ScrapedMatchBoxscoreRow;
+}
+
+export interface ScrapedGameweekStats {
+  gameweekNumber: number;
+  matchesProcessed: number;
+  rows: ScrapedGameweekStatRow[];
+}
+
 /**
- * Scrape et upsert les stats détaillées de boxscore de tous les matchs joués d'une
- * journée de la saison en direct. Reprend le même flux que
- * src/lib/simulation/advance.ts (résolution club slug → joueur par nom+club, upsert
- * PlayerMatchStat via boxscoreRowToStatFields), mais pour tous les matchs de la
- * journée d'un coup plutôt que pour l'équipe d'un seul utilisateur.
+ * Scrape les stats détaillées de boxscore de tous les matchs joués d'une journée de
+ * la saison en direct et les rapproche des joueurs/matchs en base (club slug → nom
+ * court → joueur par nom+club, même résolution que src/lib/simulation/advance.ts).
+ * N'ÉCRIT RIEN — brique partagée par syncGameweekBoxscore (qui upsert) et par
+ * l'analyse des corrections LNH a posteriori (src/lib/lnh-corrections).
  */
-export async function syncGameweekBoxscore(
+export async function scrapeGameweekBoxscoreRows(
   gameweekId: string,
   lnhSeasonsId: string
-): Promise<GameweekBoxscoreSyncResult> {
+): Promise<ScrapedGameweekStats> {
   const gameweek = await prisma.gameweek.findUniqueOrThrow({
     where: { id: gameweekId },
     include: { matches: true },
@@ -218,7 +234,7 @@ export async function syncGameweekBoxscore(
     .filter((x): x is { match: (typeof gameweek.matches)[number]; calendarsId: string } => Boolean(x.calendarsId));
 
   if (matchesWithCalendarsId.length === 0) {
-    return { gameweekNumber: gameweek.number, matchesProcessed: 0, statsUpserted: 0 };
+    return { gameweekNumber: gameweek.number, matchesProcessed: 0, rows: [] };
   }
 
   const provider = createLnhScraperProvider();
@@ -244,18 +260,46 @@ export async function syncGameweekBoxscore(
     playerByKey.set(key, p);
   }
 
-  const statUpserts: Array<{ matchId: string; playerId: string } & ScrapedMatchBoxscoreRow> = [];
+  const rows: ScrapedGameweekStatRow[] = [];
   for (const { match, calendarsId } of matchesWithCalendarsId) {
-    const rows = boxscoresByCalendarsId.get(calendarsId) ?? [];
-    for (const row of rows) {
+    const boxRows = boxscoresByCalendarsId.get(calendarsId) ?? [];
+    for (const row of boxRows) {
       const clubShortName = clubShortNameBySlug.get(row.lnhClubSlug.toLowerCase());
       if (!clubShortName) continue;
       const key = `${row.lastName.toLowerCase()}|${row.firstName.toLowerCase()}|${clubShortName.toLowerCase()}`;
       const player = playerByKey.get(key);
       if (!player) continue;
-      statUpserts.push({ matchId: match.id, playerId: player.id, ...row });
+      rows.push({
+        matchId: match.id,
+        playerId: player.id,
+        playerFirstName: player.firstName,
+        playerLastName: player.lastName,
+        clubShortName,
+        row,
+      });
     }
   }
+
+  return { gameweekNumber: gameweek.number, matchesProcessed: matchesWithCalendarsId.length, rows };
+}
+
+/**
+ * Scrape et upsert les stats détaillées de boxscore de tous les matchs joués d'une
+ * journée de la saison en direct. Reprend le même flux que
+ * src/lib/simulation/advance.ts (résolution club slug → joueur par nom+club, upsert
+ * PlayerMatchStat via boxscoreRowToStatFields), mais pour tous les matchs de la
+ * journée d'un coup plutôt que pour l'équipe d'un seul utilisateur.
+ */
+export async function syncGameweekBoxscore(
+  gameweekId: string,
+  lnhSeasonsId: string
+): Promise<GameweekBoxscoreSyncResult> {
+  const { gameweekNumber, matchesProcessed, rows } = await scrapeGameweekBoxscoreRows(
+    gameweekId,
+    lnhSeasonsId
+  );
+
+  const statUpserts = rows.map((r) => ({ matchId: r.matchId, playerId: r.playerId, ...r.row }));
 
   if (statUpserts.length > 0) {
     await prisma.$transaction(
@@ -271,8 +315,8 @@ export async function syncGameweekBoxscore(
   }
 
   return {
-    gameweekNumber: gameweek.number,
-    matchesProcessed: matchesWithCalendarsId.length,
+    gameweekNumber,
+    matchesProcessed,
     statsUpserted: statUpserts.length,
   };
 }
