@@ -45,7 +45,8 @@
     "pending": "Pending",
     "ptsArrow": "pts →",
     "catchup": "Welcome points",
-    "catchupHint": "Median manager score for the gameweeks played before you joined (−10%)"
+    "catchupHint": "Median manager score for the gameweeks played before you joined (−10%)",
+    "corrected": "Ratings corrected by the LNH"
   },
   "gameweekDetail": {
     "statusSimScored": "Matchday scored",

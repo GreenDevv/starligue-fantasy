@@ -45,7 +45,8 @@
     "pending": "En attente",
     "ptsArrow": "pts →",
     "catchup": "Points d'accueil",
-    "catchupHint": "Médiane des managers pour les journées disputées avant ton arrivée (−10 %)"
+    "catchupHint": "Médiane des managers pour les journées disputées avant ton arrivée (−10 %)",
+    "corrected": "Notes corrigées par la LNH"
   },
   "gameweekDetail": {
     "statusSimScored": "Journée calculée",

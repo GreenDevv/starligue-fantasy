@@ -45,7 +45,8 @@
     "pending": "Pendiente",
     "ptsArrow": "pts →",
     "catchup": "Puntos de bienvenida",
-    "catchupHint": "Mediana de los mánagers en las jornadas disputadas antes de tu llegada (−10 %)"
+    "catchupHint": "Mediana de los mánagers en las jornadas disputadas antes de tu llegada (−10 %)",
+    "corrected": "Notas corregidas por la LNH"
   },
   "gameweekDetail": {
     "statusSimScored": "Jornada calculada",

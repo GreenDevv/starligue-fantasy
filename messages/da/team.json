@@ -45,7 +45,8 @@
     "pending": "Afventer",
     "ptsArrow": "point →",
     "catchup": "Velkomstpoint",
-    "catchupHint": "Median for managere i de runder, der blev spillet, før du kom med (−10 %)"
+    "catchupHint": "Median for managere i de runder, der blev spillet, før du kom med (−10 %)",
+    "corrected": "Karakterer rettet af LNH"
   },
   "gameweekDetail": {
     "statusSimScored": "Runde beregnet",

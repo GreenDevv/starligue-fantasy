@@ -4,6 +4,8 @@ import { getTranslations, getFormatter } from "next-intl/server";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { GameweekTimeline } from "@/components/matches/GameweekTimeline";
 import { getClubStandings } from "@/lib/standings/get";
+import { getGameweekState } from "@/lib/gameweek/state";
+import { GameweekStateBadge } from "@/components/gameweek/GameweekStateBadge";
 
 interface Props {
   searchParams: { gw?: string };
@@ -73,6 +75,16 @@ export default async function MatchesPage({ searchParams }: Props) {
   const prevGw = gwNumber > 1 ? gwNumber - 1 : null;
   const nextGw = gwNumber < totalGameweeks ? gwNumber + 1 : null;
 
+  const gwState = gameweek
+    ? getGameweekState({
+        deadlineAt: gameweek.deadlineAt,
+        isScored: gameweek.isScored,
+        confirmedAt: gameweek.confirmedAt,
+        matchStatuses: gameweek.matches.map((m) => m.status),
+        now,
+      })
+    : null;
+
   // Position au classement Starligue de chaque club — affichée discrètement (entre
   // parenthèses) à côté des logos ci-dessous (demande explicite de l'utilisateur).
   const rankByClubId: Record<string, number> = Object.fromEntries(standings.rows.map((r) => [r.clubId, r.rank]));
@@ -101,8 +113,9 @@ export default async function MatchesPage({ searchParams }: Props) {
           <span className="text-sm text-text-muted/30">←</span>
         )}
 
-        <span className="font-display text-sm uppercase tracking-wide text-text">
+        <span className="flex items-center gap-2 font-display text-sm uppercase tracking-wide text-text">
           {t("list.gameweek", { number: gwNumber })}
+          {gwState && <GameweekStateBadge state={gwState.state} tone={gwState.tone} size="xs" />}
         </span>
 
         {nextGw ? (

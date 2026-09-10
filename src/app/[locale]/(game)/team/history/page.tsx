@@ -3,6 +3,8 @@ import { redirect, Link } from "@/i18n/navigation";
 import { getTranslations, getFormatter } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { resolveSeasonMode, resolveActiveTeamContext } from "@/lib/team/active-team-context";
+import { getSeasonGameweekStatuses } from "@/lib/gameweek/get-gameweek-status";
+import { GameweekStateBadge } from "@/components/gameweek/GameweekStateBadge";
 
 export default async function HistoryPage({
   params,
@@ -27,6 +29,11 @@ export default async function HistoryPage({
     redirect({ href: "/leagues", locale: params.locale });
     return null;
   }
+
+  // État de confiance par journée (live uniquement — la simulation est pilotée par
+  // le curseur admin, pas par une fenêtre de correction LNH).
+  const gwStatuses =
+    mode === "live" ? await getSeasonGameweekStatuses(ctx.seasonId) : null;
 
   const team =
     mode === "simulation"
@@ -124,13 +131,31 @@ export default async function HistoryPage({
                   className="flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-border/20"
                 >
                   <div className="flex-1">
-                    <p className="flex items-center gap-1.5 text-sm font-medium text-text">
+                    <p className="flex flex-wrap items-center gap-1.5 text-sm font-medium text-text">
                       {t("common.matchday", { number: l.gameweek.number })}
                       {l.bonus && (
                         <span className="text-[9px] font-semibold uppercase tracking-widest text-accent-secondary">
                           {tLabels(`bonus.${l.bonus}`)}
                         </span>
                       )}
+                      {(() => {
+                        const st = gwStatuses?.get(l.gameweek.number);
+                        if (!st) return null;
+                        return (
+                          <>
+                            {(st.state === "LIVE" ||
+                              st.state === "AWAITING_RESULTS" ||
+                              st.state === "PROVISIONAL") && (
+                              <GameweekStateBadge state={st.state} tone={st.tone} size="xs" />
+                            )}
+                            {st.hasCorrection && (
+                              <span className="text-[9px] text-accent-secondary" title={t("history.corrected")}>
+                                🔧
+                              </span>
+                            )}
+                          </>
+                        );
+                      })()}
                     </p>
                     <p className="text-xs text-text-muted">
                       {format.dateTime(new Date(l.gameweek.deadlineAt), {

@@ -45,7 +45,8 @@
     "pending": "Ausstehend",
     "ptsArrow": "Pkt →",
     "catchup": "Willkommenspunkte",
-    "catchupHint": "Median der Manager für die Spieltage vor deinem Beitritt (−10 %)"
+    "catchupHint": "Median der Manager für die Spieltage vor deinem Beitritt (−10 %)",
+    "corrected": "Von der LNH korrigierte Noten"
   },
   "gameweekDetail": {
     "statusSimScored": "Spieltag berechnet",
