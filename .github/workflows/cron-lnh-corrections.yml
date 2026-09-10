@@ -1,0 +1,42 @@
+name: Cron corrections LNH (mardi matin)
+
+# Corrections LNH a posteriori — ARCHITECTURE.md §4.3. Les matchs Daikin StarLigue
+# ont lieu le week-end, la LNH révise ensuite certaines notes de performance 2 à 3
+# jours après (constaté : ~48h). Ce job re-vérifie les 2 dernières journées notées,
+# APPLIQUE les corrections trouvées + rejoue le scoring de la journée
+# (computeGameweekScores, rejouable — les points, le classement, l'équipe type et
+# les leaders de la page /starligue restent alignés sur les notes officielles), crée
+# un LnhCorrectionBatch et prévient les ADMINS par email des lots à relire.
+#
+# N'envoie AUCUN email manager : l'envoi des explications aux managers reste une
+# décision humaine, prise depuis /admin/lnh-corrections.
+#
+# Mardi 07:00 UTC (≈ 08:00-09:00 à Paris selon la saison) : après le week-end de
+# championnat et le délai de correction LNH, avant le début de semaine. La route est
+# idempotente (upsert des stats + scoring rejouable) — si rien n'a changé, le job ne
+# crée aucun lot et n'envoie aucun email.
+on:
+  schedule:
+    - cron: "0 7 * * 2"
+  workflow_dispatch: {}
+
+jobs:
+  check-lnh-corrections:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler /api/cron/lnh-corrections
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          response=$(curl -sS -w "\n%{http_code}" -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://starliguefantasy.fr/api/cron/lnh-corrections")
+          body=$(echo "$response" | sed '$d')
+          status=$(echo "$response" | tail -n 1)
+
+          echo "$body" | python3 -m json.tool || echo "$body"
+
+          if [ "$status" -ge 300 ]; then
+            echo "::error::HTTP $status"
+            exit 1
+          fi

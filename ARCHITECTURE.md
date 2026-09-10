@@ -249,12 +249,16 @@ un écran d'admin sert à relire et à décider de l'envoi des emails aux manage
 - **Scrape partagé** : `scrapeGameweekBoxscoreRows()` (`src/lib/ingestion/boxscore.ts`)
   extrait la brique « scrape + matching joueur sans écriture » que `syncGameweekBoxscore`
   utilisait déjà en interne.
-- **Cron `POST /api/cron/lnh-corrections`** (`cron-results.yml`, le soir après
-  `sync-ratings`) : pour les 2 dernières journées notées (`?gameweek=N`/`?lookback=K`
-  pour forcer) → `analyze` → si écarts → **applique tout + `computeGameweekScores`**
-  (données toujours alignées sur les notes officielles) → crée un `LnhCorrectionBatch`
+- **Cron `POST /api/cron/lnh-corrections`** (`cron-lnh-corrections.yml`, **mardi
+  07:00 UTC** — après le week-end de championnat et le délai de correction LNH) :
+  pour les 2 dernières journées notées (`?gameweek=N`/`?lookback=K` pour forcer) →
+  `analyze` → si écarts → **applique tout + `computeGameweekScores`** (points,
+  classement, **équipe type et leaders de `/starligue`** via `generateWeeklyNews`,
+  tous alignés sur les notes officielles) → crée un `LnhCorrectionBatch`
   (`appliedBy = "cron"`) → **email aux admins** (`role = ADMIN`) listant les lots à
-  relire. **N'envoie jamais d'email manager.**
+  relire. **N'envoie jamais d'email manager.** Idempotent : sans écart, aucun lot,
+  aucun email. Un post Instagram « Leaders » déjà publié (§17, idempotent) n'est PAS
+  reposté.
 - **Modèle `LnhCorrectionBatch`** (§5) : `report` = `{ correctionsApplied, impactRows,
   undo }` — suffit pour notifier et pour revenir en arrière sans re-scraper.
   `notifiedAt`/`dismissedAt` null = en attente.
