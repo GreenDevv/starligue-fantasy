@@ -47,7 +47,8 @@
     "footerDisclaimer": "Projeto pessoal, sem qualquer relação oficial com a LNH ou a Daikin StarLigue.",
     "footerPrivacyLink": "Privacidade e cookies",
     "footerSupportLink": "Suporte",
-    "currentGameweekBand": "Jornada {number} em curso"
+    "currentGameweekBand": "Jornada {number} em curso",
+    "currentGameweekPerfs": "Melhores desempenhos da jornada"
   },
   "page": {
     "title": "Comunidade",

@@ -47,7 +47,8 @@
     "footerDisclaimer": "Personal project, not officially affiliated with the LNH or the Daikin StarLigue.",
     "footerPrivacyLink": "Privacy & cookies",
     "footerSupportLink": "Support",
-    "currentGameweekBand": "Gameweek {number} in progress"
+    "currentGameweekBand": "Gameweek {number} in progress",
+    "currentGameweekPerfs": "Top performances so far"
   },
   "page": {
     "title": "Community",
