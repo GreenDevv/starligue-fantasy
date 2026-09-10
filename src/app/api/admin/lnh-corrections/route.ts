@@ -8,6 +8,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { IngestionError } from "@/lib/data-providers/lnh-scraper.provider";
 import { analyzeGameweekCorrections } from "@/lib/lnh-corrections/analyze";
+import { getPendingBatches } from "@/lib/lnh-corrections/batches";
 
 async function requireAdmin() {
   const session = await auth();
@@ -22,17 +23,28 @@ export async function GET(req: Request) {
   }
 
   const gwParam = new URL(req.url).searchParams.get("gameweek");
-  const gameweekNumber = gwParam ? parseInt(gwParam, 10) : NaN;
+
+  // Sans ?gameweek : ne renvoie que les lots en attente de notification (le cron
+  // a pu appliquer des corrections depuis la dernière visite).
+  if (!gwParam) {
+    const pendingBatches = await getPendingBatches();
+    return NextResponse.json({ data: { pendingBatches } });
+  }
+
+  const gameweekNumber = parseInt(gwParam, 10);
   if (!Number.isInteger(gameweekNumber) || gameweekNumber < 1) {
     return NextResponse.json(
-      { error: { code: "BAD_REQUEST", message: "Paramètre ?gameweek=N requis" } },
+      { error: { code: "BAD_REQUEST", message: "Paramètre ?gameweek=N invalide" } },
       { status: 400 }
     );
   }
 
   try {
-    const data = await analyzeGameweekCorrections(gameweekNumber);
-    return NextResponse.json({ data });
+    const [analysis, pendingBatches] = await Promise.all([
+      analyzeGameweekCorrections(gameweekNumber),
+      getPendingBatches(),
+    ]);
+    return NextResponse.json({ data: { ...analysis, pendingBatches } });
   } catch (e) {
     if (e instanceof IngestionError) {
       return NextResponse.json({ error: { code: "SCRAPER_ERROR", message: e.message } }, { status: 502 });

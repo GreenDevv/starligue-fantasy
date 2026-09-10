@@ -40,7 +40,8 @@
     "ANALYZE_ERROR": "Erreur pendant l'analyse des corrections",
     "APPLY_ERROR": "Erreur pendant l'application des corrections",
     "SEND_ERROR": "Erreur pendant l'envoi des emails",
-    "REVERT_ERROR": "Erreur pendant le retour arrière"
+    "REVERT_ERROR": "Erreur pendant le retour arrière",
+    "DISMISS_ERROR": "Erreur en classant le lot"
   },
   "dashboard": {
     "title": "Dashboard Admin",
@@ -328,7 +329,13 @@
   },
   "lnhCorrections": {
     "title": "Corrections LNH",
-    "subtitle": "La LNH révise certaines notes 2 à 3 jours après les matchs. Re-scrape une journée, compare avec l'enregistré, applique tout ou partie, préviens les managers impactés.",
+    "subtitle": "La LNH révise certaines notes 2 à 3 jours après les matchs. Le cron hebdo applique les corrections et rejoue le scoring tout seul ; ici tu relis les lots et tu décides d'envoyer (ou non) un email d'explication aux managers.",
+    "pendingTitle": "Lots en attente de notification ({count})",
+    "manualTitle": "Passe manuelle sur une journée",
+    "gwPlaceholder": "N° journée",
+    "byCron": "appliqué par le cron",
+    "byAdmin": "appliqué à la main",
+    "batchTitle": "J{gw} — {count} correction(s) appliquée(s)",
     "analyzeButton": "Analyser la journée",
     "analyzing": "Analyse…",
     "summary": "J{gw} · {season} — {scraped} match(s) re-scrapé(s), {total} correction(s) dont {ratings} sur la note LNH.",
@@ -342,7 +349,8 @@
     "applyHint": "Applique les stats sélectionnées puis rejoue le calcul des points de la journée. Réversible.",
     "applyHintNotScored": "Journée pas encore notée : seules les stats seront corrigées, le calcul se fera au scoring normal.",
     "confirmApply": "Appliquer {count} correction(s) sur la J{gw} et rejouer le calcul des points ? (réversible)",
-    "appliedSummary": "{count} correction(s) appliquée(s) — {teams} équipe(s) dont les points ont bougé.",
+    "appliedWithBatch": "{count} correction(s) appliquée(s) — {teams} manager(s) impacté(s), voir le lot ci-dessus pour les prévenir.",
+    "appliedNoImpact": "{count} correction(s) appliquée(s) — aucun manager impacté.",
     "colManager": "Manager",
     "colTeam": "Équipe",
     "colPoints": "Points J",
@@ -351,12 +359,11 @@
     "indirectReason": "Bonus « leader de journée » recalculé (aucun joueur aligné corrigé)",
     "sendButton": "Envoyer les emails ({count})",
     "sending": "Envoi…",
-    "confirmSend": "Envoyer un email d'explication à {count} manager(s) ?",
     "sendResult": "{sent} envoyé(s), {skipped} ignoré(s) (déjà notifiés), {failed} en échec.",
+    "dismissButton": "Ignorer (ne pas notifier)",
+    "confirmDismiss": "Classer ce lot sans prévenir les managers ? (les corrections restent appliquées)",
     "revertButton": "Annuler les corrections",
     "reverting": "Annulation…",
-    "confirmRevert": "Restaurer les stats d'avant l'application et rejouer le calcul ?",
-    "revertDone": "{count} stat(s) restaurée(s), points recalculés.",
-    "noImpact": "Aucune équipe impactée : les corrections ne changent aucun point."
+    "confirmRevert": "Restaurer les stats d'avant l'application et rejouer le calcul ?"
   }
 }

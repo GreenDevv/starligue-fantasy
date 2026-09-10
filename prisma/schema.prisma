@@ -167,6 +167,28 @@ model NotificationLog {
   sentAt    DateTime @default(now())
 }
 
+// Lot de corrections LNH a posteriori appliqué sur une journée (ARCHITECTURE.md
+// §4.3) — par le cron hebdo (`appliedBy = "cron"`) ou à la main depuis
+// /admin/lnh-corrections (`appliedBy = <userId>`). Le cron APPLIQUE + rejoue le
+// scoring tout seul (données toujours alignées sur les notes officielles) mais
+// n'envoie JAMAIS d'email manager : l'admin relit `report` puis déclenche l'envoi
+// (`notifiedAt`) ou l'ignore (`dismissedAt`). `report` = { correctionsApplied,
+// impactRows, undo } (voir src/lib/lnh-corrections/apply.ts) — suffit à envoyer les
+// emails et à revenir en arrière sans re-scraper.
+model LnhCorrectionBatch {
+  id              String    @id @default(cuid())
+  gameweekNumber  Int
+  appliedAt       DateTime  @default(now())
+  appliedBy       String // "cron" | userId admin
+  correctionCount Int
+  report          Json
+  notifiedAt      DateTime? // emails managers envoyés
+  notifiedCount   Int       @default(0)
+  dismissedAt     DateTime? // lot classé sans notifier
+
+  @@index([notifiedAt, dismissedAt])
+}
+
 // Requis par @auth/prisma-adapter (OAuth Google + credentials)
 model Account {
   id                String  @id @default(cuid())

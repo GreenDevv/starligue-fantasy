@@ -236,37 +236,46 @@ calendrier de la saison en direct n'étant importé **qu'une fois** par CSV
 
 La LNH révise certaines **notes de performance** 2 à 3 jours après les matchs
 (constaté sur la J1 2026/27 : seul Caen–Dunkerque corrigé, ~48h après — notes
-ajustées + colonne « neutralisations » remplie a posteriori). Le scoring étant
-**rejouable** (§4.1), un écran d'admin dédié permet de rattraper ces corrections
-proprement plutôt que de relancer `sync-ratings` en aveugle.
+ajustées + colonne « neutralisations » remplie a posteriori). Comme c'est
+hebdomadaire, un **cron** re-vérifie automatiquement les dernières journées notées ;
+un écran d'admin sert à relire et à décider de l'envoi des emails aux managers.
 
 - **Logique pure** (`src/lib/lnh-corrections/`, testée) : `diff.ts` compare les
   `PlayerMatchStat` enregistrés au re-scrape lnh.fr et produit une correction par
   couple `matchId:playerId` (clé stable cochée en UI) ; `report.ts` construit le
   compte rendu par équipe (écart de points, écart de rang, joueurs concernés) ;
-  `email.ts` le rédige (FR uniquement, comme l'email de blessure — pas de
-  `User.locale`).
+  `email.ts` / `admin-recap-email.ts` les rédigent (FR uniquement, comme l'email de
+  blessure — pas de `User.locale`).
 - **Scrape partagé** : `scrapeGameweekBoxscoreRows()` (`src/lib/ingestion/boxscore.ts`)
   extrait la brique « scrape + matching joueur sans écriture » que `syncGameweekBoxscore`
   utilisait déjà en interne.
-- **Flux en deux temps** (décision produit) :
-  1. `GET /api/admin/lnh-corrections?gameweek=N` → analyse (lecture seule).
-  2. `POST …/apply` `{ gameweek, correctionKeys }` → upsert des seules stats
-     sélectionnées + `computeGameweekScores` (si la journée est notée) + renvoie le
-     compte rendu. **N'envoie aucun email.**
-  3. L'admin relit le compte rendu, décoche éventuellement des managers, puis
-     `POST …/send-emails` `{ gameweek, rows }` → un email par utilisateur (regroupe
-     ses équipes), dédup `NotificationLog` (`lnh-correction:J{n}:{userId}:{yyyymmdd}`).
-  4. `POST …/revert` `{ gameweek, undo }` restaure les valeurs d'avant + rejoue le
-     scoring (le payload `undo` est renvoyé par `/apply`).
+- **Cron `POST /api/cron/lnh-corrections`** (`cron-results.yml`, le soir après
+  `sync-ratings`) : pour les 2 dernières journées notées (`?gameweek=N`/`?lookback=K`
+  pour forcer) → `analyze` → si écarts → **applique tout + `computeGameweekScores`**
+  (données toujours alignées sur les notes officielles) → crée un `LnhCorrectionBatch`
+  (`appliedBy = "cron"`) → **email aux admins** (`role = ADMIN`) listant les lots à
+  relire. **N'envoie jamais d'email manager.**
+- **Modèle `LnhCorrectionBatch`** (§5) : `report` = `{ correctionsApplied, impactRows,
+  undo }` — suffit pour notifier et pour revenir en arrière sans re-scraper.
+  `notifiedAt`/`dismissedAt` null = en attente.
+- **Écran `/admin/lnh-corrections`** :
+  - liste les lots en attente (`GET …` sans `?gameweek`) → tableau d'impact par
+    manager, cases à cocher, **Envoyer les emails** / **Ignorer** / **Annuler**.
+  - passe manuelle : `GET …?gameweek=N` → sélection par joueur/match → `POST …/apply`
+    `{ gameweek, correctionKeys }` (upsert des seules stats cochées + recompute +
+    crée un lot si impact). Même flux ensuite que pour un lot du cron.
+  - `POST …/send-emails` `{ batchId, teamIds? }` → un email par utilisateur (regroupe
+    ses équipes), dédup `NotificationLog` (`lnh-correction:{batchId}:{userId}`), pose
+    `notifiedAt`.
+  - `POST …/dismiss` `{ batchId }` → `dismissedAt` (corrections gardées, emails
+    renoncés). `POST …/revert` `{ batchId }` → restaure les stats d'avant + rejoue le
+    scoring + `dismissedAt`.
 - **Périmètre des emails** : tous les managers dont les points de la journée
   bougent, y compris l'impact **indirect** (le bonus « leader de journée »
   `src/lib/scoring/stat-leaders.ts` est calculé sur toute la ligue — corriger un
   joueur non possédé peut déplacer un bonus). Wording branché : propriétaire direct
   (« la note de X : A → B ») vs indirect (« le classement des leaders de journée a
   été recalculé »).
-- **Pas de table d'audit** (v1) : le compte rendu est affiché/renvoyé, pas stocké ;
-  relancer l'analyse après application montre naturellement 0 écart restant.
 - CLI équivalent en lecture seule : `scripts/diff-lnh-ratings.ts`.
 
 ---

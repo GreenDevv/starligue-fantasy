@@ -1,4 +1,4 @@
-name: Cron résultats du soir (notes LNH + scores matchs)
+name: Cron résultats du soir (notes LNH + scores matchs + corrections a posteriori)
 
 # Extrait de cron-daily.yml le 2026-08-01 : sync-ratings doit tourner le soir, après
 # les matchs (pas le matin avec les actus/Warm Up), donc horaire de déclenchement
@@ -30,6 +30,34 @@ jobs:
           response=$(curl -sS -w "\n%{http_code}" -X POST \
             -H "Authorization: Bearer ${CRON_SECRET}" \
             "https://starliguefantasy.fr/api/cron/sync-ratings")
+          body=$(echo "$response" | sed '$d')
+          status=$(echo "$response" | tail -n 1)
+
+          echo "$body" | python3 -m json.tool || echo "$body"
+
+          if [ "$status" -ge 300 ]; then
+            echo "::error::HTTP $status"
+            exit 1
+          fi
+
+  # Corrections LNH a posteriori (ARCHITECTURE.md §4.3) : la LNH révise des notes
+  # 2-3 jours après les matchs. Ce job re-vérifie les 2 dernières journées notées,
+  # APPLIQUE les corrections + rejoue le scoring (données toujours alignées sur les
+  # notes officielles), et prévient les admins par email des lots à relire.
+  # N'envoie AUCUN email manager (décision humaine, /admin/lnh-corrections).
+  # Tourne après sync-ratings (needs) mais un échec de celui-ci ne le bloque pas.
+  check-lnh-corrections:
+    needs: [sync-ratings]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler /api/cron/lnh-corrections
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          response=$(curl -sS -w "\n%{http_code}" -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://starliguefantasy.fr/api/cron/lnh-corrections")
           body=$(echo "$response" | sed '$d')
           status=$(echo "$response" | tail -n 1)
 
