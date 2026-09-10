@@ -148,7 +148,7 @@ export function StartView({ mode }: { mode: SeasonMode }) {
         return;
       }
 
-      router.push(leagueId ? `/leagues/${leagueId}` : "/leagues");
+      router.push(leagueId ? `/team?league=${leagueId}` : "/team");
     } catch {
       setError(resolveApiError(tRoot, "team", "NETWORK"));
       setSubmitting(false);

@@ -139,7 +139,7 @@ export function TransfersView({ mode }: { mode: SeasonMode }) {
           )}
           <h1 className="text-2xl text-text">{t("transfers.title")}</h1>
         </div>
-        <button onClick={() => router.push(leagueId ? `/leagues/${leagueId}` : "/leagues")} className="text-xs text-text-muted transition-colors hover:text-text">
+        <button onClick={() => router.push(leagueId ? `/team?league=${leagueId}` : "/team")} className="text-xs text-text-muted transition-colors hover:text-text">
           ← {t("common.backToTeam")}
         </button>
       </div>

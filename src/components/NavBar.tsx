@@ -9,24 +9,24 @@ import {
   LeaguesIcon,
   LeaderboardIcon,
   TargetIcon,
+  PitchIcon,
 } from "@/components/ui/icons";
 
-// Pas d'entrée "Équipe" séparée : une équipe fantasy n'existe qu'à l'intérieur
-// d'une ligue (FantasyTeam.leagueId jamais optionnel) — /leagues est le point
-// d'entrée, cliquer sur une ligue affiche l'équipe qui lui est associée
-// (src/app/[locale]/(game)/leagues/[id]/page.tsx).
+// "/team" est l'entrée principale : la vue terrain (ARCHITECTURE.md §8.1), l'écran
+// le plus consulté. L'équipe active est résolue via le cookie activeLeagueId
+// (src/lib/team/active-team-context.ts) — plus besoin de passer par /leagues, qui
+// ne montre désormais que la ligue elle-même (classement, chat, invit).
 // Pas d'entrée "Calendrier" : /matches est passée en mode Starligue (public),
 // voir PublicNavBar.tsx — ces items sont désormais réservés au mode Fantasy
 // (connexion requise).
-// Exporté : réutilisé par MobileMenu.tsx (menu plein écran mobile, remplace
-// l'ancienne MobileTabBar — demande explicite de l'utilisateur de tout
-// regrouper dans un seul menu hamburger plutôt que garder une barre du bas).
+// Exporté : réutilisé par MobileMenu.tsx (menu plein écran mobile).
 export const NAV_ITEMS = [
-  { href: "/dashboard", key: "dashboard", Icon: DashboardIcon },
+  { href: "/team", key: "team", Icon: PitchIcon },
   { href: "/market", key: "market", Icon: MarketIcon },
   { href: "/predictions", key: "predictions", Icon: TargetIcon },
   { href: "/leagues", key: "leagues", Icon: LeaguesIcon },
   { href: "/leaderboard", key: "leaderboard", Icon: LeaderboardIcon },
+  { href: "/dashboard", key: "dashboard", Icon: DashboardIcon },
 ] as const;
 
 export function isActive(pathname: string, href: string): boolean {

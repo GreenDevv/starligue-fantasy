@@ -32,7 +32,10 @@
     "buildSquadCta": "Crear mi plantilla →",
     "leagueLeaderboardTitle": "Clasificación de la liga",
     "globalLeaderboardTitle": "Clasificación general",
-    "globalLeaderboardSubtitle": "Todas las ligas juntas"
+    "globalLeaderboardSubtitle": "Todas las ligas juntas",
+    "myTeamSectionTitle": "Mi equipo",
+    "viewMyTeam": "Ver mi equipo →",
+    "buildMyTeam": "Crear mi equipo →"
   },
   "inviteCodeLabel": "Código de invitación",
   "actions": {

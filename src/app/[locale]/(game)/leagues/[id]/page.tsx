@@ -1,27 +1,23 @@
-// Une équipe (fantasy ou simulation) n'existe qu'à l'intérieur d'une ligue — cette
-// page est donc à la fois "ma ligue" (classement) ET "mon équipe" (terrain,
-// budget, capitaine…) : cliquer sur une ligue affiche directement l'équipe qui lui
-// est associée. Mode dérivé de league.mode (getLeagueDetail), pas du cookie
-// seasonMode — voir plan de fusion live/simulation, étape 5.
+// Page ligue : le classement de la ligue, le chat, le code d'invitation, le rang
+// général. L'équipe elle-même (terrain, capitaine, bonus…) vit sur /team — un
+// bouton "Voir mon équipe" bascule la ligue active et y renvoie. Mode dérivé de
+// league.mode (getLeagueDetail), pas du cookie seasonMode — voir plan de fusion
+// live/simulation, étape 5.
 import { auth } from "@/lib/auth";
 import { redirect, Link } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { getLeagueDetail, isLeagueMember } from "@/lib/leagues/standings";
-import { isLiveTransferWindowOpenForSeason, isSimulationTransferWindowOpenForSeason } from "@/lib/transfers/status";
-import { hasLiveSeasonStarted, hasSimulationSeasonStarted } from "@/lib/squad/season-lock";
-import { getDashboardMatchStrips, getSimulationDashboardMatchStrips } from "@/lib/matches/dashboard-strips";
-import { TeamView } from "@/components/TeamView";
 import { LeaderboardList } from "@/components/leaderboard/LeaderboardList";
 import {
   CopyInviteButton,
   LeaveLeagueButton,
   DeleteLeagueButton,
+  SwitchToTeamButton,
 } from "@/components/leagues/LeagueDetailActions";
 import { LeagueChat } from "@/components/leagues/LeagueChat";
 import { LinkButton } from "@/components/ui/Button";
-import type { SeasonMode } from "@/lib/team/active-team-context";
 
 export default async function LeagueDetailPage({ params }: { params: { id: string; locale: string } }) {
   const t = await getTranslations("leagues");
@@ -42,38 +38,22 @@ export default async function LeagueDetailPage({ params }: { params: { id: strin
 
   const mode = league.mode;
 
-  const [team, memberships] = await Promise.all([
+  const team =
     mode === "simulation"
-      ? prisma.simulationTeam.findFirst({
+      ? await prisma.simulationTeam.findFirst({
           where: { userId, leagueId },
-          include: {
-            squad: { include: { player: { include: { club: { select: { shortName: true, logoUrl: true } } } } } },
-            bonusUsages: { select: { type: true } },
-          },
+          select: { isValidated: true, totalPoints: true, _count: { select: { squad: true } } },
         })
-      : prisma.fantasyTeam.findUnique({
+      : await prisma.fantasyTeam.findUnique({
           where: { userId_leagueId: { userId, leagueId } },
-          include: {
-            squad: { include: { player: { include: { club: { select: { shortName: true, logoUrl: true } } } } } },
-            bonusUsages: { select: { type: true } },
-          },
-        }),
-    prisma.leagueMember.findMany({
-      where: { userId, league: { seasonId: league.seasonId } },
-      include: { league: { select: { id: true, name: true } } },
-      orderBy: { joinedAt: "asc" },
-    }),
-  ]);
+          select: { isValidated: true, totalPoints: true, _count: { select: { squad: true } } },
+        });
   if (!team) {
     redirect({ href: "/leagues", locale: params.locale });
     return;
   }
 
-  if (team.isValidated && team.squad.length === 14 && team.captainId === null) {
-    redirect({ href: `/team/start?league=${leagueId}`, locale: params.locale });
-    return;
-  }
-
+  const squadReady = team.isValidated && team._count.squad === 14;
   const isOwner = league.ownerId === userId;
   const myPoints = Number(team.totalPoints);
   const [globalHigherCount, globalTotal] =
@@ -111,19 +91,25 @@ export default async function LeagueDetailPage({ params }: { params: { id: strin
         </div>
       )}
 
-      {/* Mon équipe */}
-      {!team.isValidated || team.squad.length < 14 ? (
-        <div className="pixel-corners flex flex-col items-center gap-4 border border-border bg-surface py-12 text-center">
-          <h2 className="text-xl text-text">{t("detail.buildSquadTitle")}</h2>
-          <p className="max-w-xs text-text-muted">
-            {t("detail.buildSquadDescription")}
-          </p>
-          <LinkButton href={`/team/build?league=${leagueId}`} size="lg">
-            {t("detail.buildSquadCta")}
-          </LinkButton>
+      {/* Mon équipe — l'écran complet est sur /team */}
+      {squadReady ? (
+        <div className="pixel-corners flex items-center justify-between gap-3 border border-border bg-surface px-4 py-3">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-text-muted">{t("detail.myTeamSectionTitle")}</p>
+            <p className="mt-0.5 font-arcade text-xl text-accent tabular-nums drop-shadow-[0_0_6px_currentColor]">
+              {myPoints} <span className="text-xs font-sans text-text-muted">pts</span>
+            </p>
+          </div>
+          <SwitchToTeamButton leagueId={leagueId} label={t("detail.viewMyTeam")} />
         </div>
       ) : (
-        <MyTeamSection mode={mode} leagueId={leagueId} seasonId={league.seasonId} team={team} memberships={memberships} />
+        <div className="pixel-corners flex flex-col items-center gap-4 border border-border bg-surface py-12 text-center">
+          <h2 className="text-xl text-text">{t("detail.buildSquadTitle")}</h2>
+          <p className="max-w-xs text-text-muted">{t("detail.buildSquadDescription")}</p>
+          <LinkButton href={`/team/build?league=${leagueId}`} size="lg">
+            {t("detail.buildMyTeam")}
+          </LinkButton>
+        </div>
       )}
 
       {/* Classement de la ligue */}
@@ -160,141 +146,5 @@ export default async function LeagueDetailPage({ params }: { params: { id: strin
         {isOwner ? <DeleteLeagueButton leagueId={league.id} /> : <LeaveLeagueButton leagueId={league.id} />}
       </div>
     </div>
-  );
-}
-
-interface TeamWithSquad {
-  id: string;
-  name: string;
-  totalPoints: unknown;
-  budget: unknown;
-  jerseyConfig?: unknown;
-  captainId: string | null;
-  pendingBonus: "TRIPLE_CAPTAIN" | "BENCH_BOOST" | "INSURANCE" | "STATISTICIAN" | null;
-  bonusUsages: Array<{ type: "TRIPLE_CAPTAIN" | "BENCH_BOOST" | "INSURANCE" | "STATISTICIAN" }>;
-  squad: Array<{
-    id: string;
-    role: string;
-    playerId: string;
-    player: {
-      firstName: string;
-      lastName: string;
-      position: string;
-      photoUrl: string | null;
-      photoOffsetX: number;
-      photoOffsetY: number;
-      photoZoom: unknown;
-      marketValue: unknown;
-      club: { shortName: string; logoUrl: string | null };
-    };
-  }>;
-}
-
-async function MyTeamSection({
-  mode,
-  leagueId,
-  seasonId,
-  team,
-  memberships,
-}: {
-  mode: SeasonMode;
-  leagueId: string;
-  seasonId: string;
-  team: TeamWithSquad;
-  memberships: Array<{ league: { id: string; name: string } }>;
-}) {
-  const squad = team.squad.map((s) => ({
-    squadEntryId: s.id,
-    playerId: s.playerId,
-    firstName: s.player.firstName,
-    lastName: s.player.lastName,
-    position: s.player.position,
-    photoUrl: s.player.photoUrl,
-    photoOffsetX: s.player.photoOffsetX,
-    photoOffsetY: s.player.photoOffsetY,
-    photoZoom: Number(s.player.photoZoom),
-    club: s.player.club,
-    role: s.role as "STARTER" | "BENCH",
-    marketValue: Number(s.player.marketValue),
-  }));
-
-  const [pointsRateConfig, seasonBonusQuotaConfig] = await Promise.all([
-    prisma.gameConfig.findUnique({ where: { key: "POINTS_TO_BUDGET_RATE" } }),
-    prisma.gameConfig.findUnique({ where: { key: "SEASON_BONUS_QUOTA_PER_SEASON" } }),
-  ]);
-  const pointsToBudgetRate = pointsRateConfig ? parseFloat(pointsRateConfig.value) : 0.1;
-  const seasonBonusQuota = seasonBonusQuotaConfig ? parseInt(seasonBonusQuotaConfig.value, 10) : 3;
-
-  let lastScoredGameweek: { number: number; points: number; lineupId: string; gameweekId: string } | null = null;
-  let transferWindowOpen = false;
-  let seasonStarted = false;
-  let dashboardStrips = null;
-
-  if (mode === "simulation") {
-    const lastLineup = await prisma.simulationLineup.findFirst({
-      where: { simulationTeamId: team.id, points: { not: null } },
-      orderBy: { gameweek: { number: "desc" } },
-      include: { gameweek: { select: { number: true } } },
-    });
-    lastScoredGameweek =
-      lastLineup && lastLineup.points !== null
-        ? {
-            number: lastLineup.gameweek.number,
-            points: Number(lastLineup.points),
-            lineupId: lastLineup.id,
-            gameweekId: lastLineup.gameweekId,
-          }
-        : null;
-    const season = await prisma.season.findUniqueOrThrow({
-      where: { id: seasonId },
-      select: { currentSimulationGameweekNumber: true },
-    });
-    transferWindowOpen = await isSimulationTransferWindowOpenForSeason(seasonId);
-    seasonStarted = hasSimulationSeasonStarted(season.currentSimulationGameweekNumber);
-    dashboardStrips = await getSimulationDashboardMatchStrips(seasonId, season.currentSimulationGameweekNumber);
-  } else {
-    const lastLineup = await prisma.fantasyLineup.findFirst({
-      where: { fantasyTeamId: team.id, points: { not: null } },
-      orderBy: { gameweek: { number: "desc" } },
-      include: { gameweek: { select: { number: true } } },
-    });
-    lastScoredGameweek =
-      lastLineup && lastLineup.points !== null
-        ? {
-            number: lastLineup.gameweek.number,
-            points: Number(lastLineup.points),
-            lineupId: lastLineup.id,
-            gameweekId: lastLineup.gameweekId,
-          }
-        : null;
-    transferWindowOpen = await isLiveTransferWindowOpenForSeason(seasonId);
-    const gameweekDeadlines = await prisma.gameweek.findMany({ where: { seasonId }, select: { deadlineAt: true } });
-    seasonStarted = hasLiveSeasonStarted(gameweekDeadlines.map((g) => g.deadlineAt), new Date());
-    dashboardStrips = await getDashboardMatchStrips(seasonId);
-  }
-
-  const leagues = memberships.map((m) => ({ id: m.league.id, name: m.league.name }));
-
-  return (
-    <TeamView
-      mode={mode}
-      teamName={team.name}
-      totalPoints={Number(team.totalPoints)}
-      budget={Number(team.budget)}
-      pointsToBudgetRate={pointsToBudgetRate}
-      jerseyConfig={team.jerseyConfig}
-      leagueId={leagueId}
-      leagues={leagues.length > 1 ? leagues : undefined}
-      squad={squad}
-      lastScoredGameweek={lastScoredGameweek}
-      captainId={team.captainId}
-      transferWindowOpen={transferWindowOpen}
-      seasonStarted={seasonStarted}
-      dashboardStrips={dashboardStrips}
-      statsSeasonId={seasonId}
-      pendingBonus={team.pendingBonus}
-      usedBonusTypes={team.bonusUsages.map((u) => u.type)}
-      seasonBonusQuota={seasonBonusQuota}
-    />
   );
 }

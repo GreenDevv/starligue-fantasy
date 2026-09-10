@@ -32,7 +32,10 @@
     "buildSquadCta": "Build my squad →",
     "leagueLeaderboardTitle": "League leaderboard",
     "globalLeaderboardTitle": "Overall leaderboard",
-    "globalLeaderboardSubtitle": "All leagues combined"
+    "globalLeaderboardSubtitle": "All leagues combined",
+    "myTeamSectionTitle": "My team",
+    "viewMyTeam": "View my team →",
+    "buildMyTeam": "Build my team →"
   },
   "inviteCodeLabel": "Invite code",
   "actions": {

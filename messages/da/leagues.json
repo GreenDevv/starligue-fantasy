@@ -32,7 +32,10 @@
     "buildSquadCta": "Opret min trup →",
     "leagueLeaderboardTitle": "Ligastilling",
     "globalLeaderboardTitle": "Samlet stilling",
-    "globalLeaderboardSubtitle": "På tværs af alle ligaer"
+    "globalLeaderboardSubtitle": "På tværs af alle ligaer",
+    "myTeamSectionTitle": "Mit hold",
+    "viewMyTeam": "Se mit hold →",
+    "buildMyTeam": "Byg mit hold →"
   },
   "inviteCodeLabel": "Invitationskode",
   "actions": {

@@ -1,9 +1,15 @@
-// Conservé uniquement pour les anciens liens/favoris — l'équipe vit désormais
-// sur /leagues/[id] (une équipe fantasy n'existe qu'à l'intérieur d'une ligue).
-// Plus jamais linké depuis l'UI.
+// "Mon équipe" — vue centrale du jeu (terrain, capitaine, bonus, historique court).
+// Entrée de nav à part entière : l'équipe active est résolue via le cookie
+// activeLeagueId (ou ?league= explicite), plus besoin de passer par /leagues.
+// Une équipe fantasy/simulation n'existe qu'à l'intérieur d'une ligue — sans
+// ligue, on renvoie vers /leagues (verrou d'onboarding, ARCHITECTURE.md §2.5).
 import { auth } from "@/lib/auth";
 import { redirect } from "@/i18n/navigation";
-import { resolveActiveLeagueId } from "@/lib/team/active-league";
+import { prisma } from "@/lib/db";
+import { resolveSeasonMode, resolveActiveTeamContext } from "@/lib/team/active-team-context";
+import { getPendingGameweekRecaps } from "@/lib/team/pending-gameweek-recap";
+import { MyTeamSection } from "@/components/team/MyTeamSection";
+import { GameweekRecapModal } from "@/components/dashboard/GameweekRecapModal";
 
 export default async function TeamPage({
   params,
@@ -15,9 +21,68 @@ export default async function TeamPage({
   const session = await auth();
   if (!session?.user?.id) {
     redirect({ href: "/login", locale: params.locale });
-    return;
+    return null;
+  }
+  const userId = session.user.id;
+  const mode = resolveSeasonMode();
+
+  const ctx = await resolveActiveTeamContext(userId, mode, searchParams.league);
+  if (!ctx) {
+    redirect({ href: "/leagues", locale: params.locale });
+    return null;
   }
 
-  const leagueId = await resolveActiveLeagueId(session.user.id, searchParams.league);
-  redirect({ href: leagueId ? `/leagues/${leagueId}` : "/leagues", locale: params.locale });
+  const team =
+    mode === "simulation"
+      ? await prisma.simulationTeam.findUnique({
+          where: { id: ctx.teamId },
+          include: {
+            squad: { include: { player: { include: { club: { select: { shortName: true, logoUrl: true } } } } } },
+            bonusUsages: { select: { type: true } },
+          },
+        })
+      : await prisma.fantasyTeam.findUnique({
+          where: { id: ctx.teamId },
+          include: {
+            squad: { include: { player: { include: { club: { select: { shortName: true, logoUrl: true } } } } } },
+            bonusUsages: { select: { type: true } },
+          },
+        });
+
+  if (!team) {
+    redirect({ href: "/leagues", locale: params.locale });
+    return null;
+  }
+
+  if (!team.isValidated || team.squad.length < 14) {
+    redirect({ href: `/team/build?league=${ctx.leagueId}`, locale: params.locale });
+    return null;
+  }
+
+  if (team.isValidated && team.squad.length === 14 && team.captainId === null) {
+    redirect({ href: `/team/start?league=${ctx.leagueId}`, locale: params.locale });
+    return null;
+  }
+
+  const [memberships, pendingRecaps] = await Promise.all([
+    prisma.leagueMember.findMany({
+      where: { userId, league: { seasonId: ctx.seasonId } },
+      include: { league: { select: { id: true, name: true } } },
+      orderBy: { joinedAt: "asc" },
+    }),
+    getPendingGameweekRecaps(userId, mode, ctx.seasonId),
+  ]);
+
+  return (
+    <div className="flex flex-col gap-5">
+      <GameweekRecapModal recaps={pendingRecaps} />
+      <MyTeamSection
+        mode={ctx.mode}
+        leagueId={ctx.leagueId}
+        seasonId={ctx.seasonId}
+        team={team}
+        memberships={memberships}
+      />
+    </div>
+  );
 }

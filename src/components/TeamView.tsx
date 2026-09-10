@@ -113,7 +113,7 @@ export function TeamView({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ leagueId: id }),
     });
-    router.push(`/leagues/${id}`);
+    router.push(`/team?league=${id}`);
     router.refresh();
   }
 

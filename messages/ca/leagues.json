@@ -32,7 +32,10 @@
     "buildSquadCta": "Crear el meu equip →",
     "leagueLeaderboardTitle": "Classificació de la lliga",
     "globalLeaderboardTitle": "Classificació general",
-    "globalLeaderboardSubtitle": "Totes les lligues juntes"
+    "globalLeaderboardSubtitle": "Totes les lligues juntes",
+    "myTeamSectionTitle": "El meu equip",
+    "viewMyTeam": "Veure el meu equip →",
+    "buildMyTeam": "Crear el meu equip →"
   },
   "inviteCodeLabel": "Codi d'invitació",
   "actions": {
