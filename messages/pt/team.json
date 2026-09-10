@@ -210,7 +210,8 @@
   },
   "subnav": {
     "pitch": "Campo",
-    "more": "Mais"
+    "more": "Mais",
+    "league": "Liga"
   },
   "gameweekPanel": {
     "title": "Esta jornada",

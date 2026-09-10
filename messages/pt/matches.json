@@ -18,7 +18,8 @@
     "player": "Jogador",
     "saves": "Defesas",
     "savePercentage": "% Defesas",
-    "rating": "Nota"
+    "rating": "Nota",
+    "h2hHistory": "Histórico de confrontos"
   },
   "panel": {
     "recentResults": "Últimos resultados",

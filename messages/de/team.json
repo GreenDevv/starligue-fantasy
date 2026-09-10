@@ -210,7 +210,8 @@
   },
   "subnav": {
     "pitch": "Feld",
-    "more": "Mehr"
+    "more": "Mehr",
+    "league": "Liga"
   },
   "gameweekPanel": {
     "title": "Dieser Spieltag",

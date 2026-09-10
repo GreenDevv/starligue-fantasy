@@ -18,7 +18,8 @@
     "player": "Jugador",
     "saves": "Aturades",
     "savePercentage": "% Aturades",
-    "rating": "Nota"
+    "rating": "Nota",
+    "h2hHistory": "Historial d'enfrontaments"
   },
   "panel": {
     "recentResults": "Últims resultats",

@@ -210,7 +210,8 @@
   },
   "subnav": {
     "pitch": "Boisko",
-    "more": "Więcej"
+    "more": "Więcej",
+    "league": "Liga"
   },
   "gameweekPanel": {
     "title": "Ta kolejka",

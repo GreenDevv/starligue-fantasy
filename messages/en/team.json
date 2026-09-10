@@ -210,7 +210,8 @@
   },
   "subnav": {
     "pitch": "Pitch",
-    "more": "More"
+    "more": "More",
+    "league": "League"
   },
   "gameweekPanel": {
     "title": "This gameweek",

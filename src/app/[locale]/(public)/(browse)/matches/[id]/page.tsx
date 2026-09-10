@@ -140,13 +140,6 @@ export default async function MatchDetailPage({ params }: { params: { id: string
 
   return (
     <div className="flex flex-col gap-5">
-      <Link
-        href={`/clubs/${match.home.club.id}/vs/${match.away.club.id}`}
-        className="text-sm text-text-muted hover:text-text transition-colors"
-      >
-        ← {match.home.club.shortName} {t("vs")} {match.away.club.shortName}
-      </Link>
-
       {/* Score */}
       <div className="pixel-corners flex items-center justify-center gap-4 border border-border bg-surface p-4 shadow-[0_0_20px_rgba(45,212,191,0.1)]">
         <Link href={`/clubs/${match.home.club.id}`} className="flex flex-1 flex-col items-center gap-2 text-center transition-colors hover:text-accent">
@@ -164,6 +157,13 @@ export default async function MatchDetailPage({ params }: { params: { id: string
       <p className="-mt-3 text-center text-xs text-text-muted">
         {t("detail.summary", { number: match.gameweekNumber, date: formatDate(match.kickoffAt), season: match.seasonLabel })}
       </p>
+
+      <Link
+        href={`/clubs/${match.home.club.id}/vs/${match.away.club.id}`}
+        className="pixel-corners-sm mx-auto inline-flex items-center gap-1.5 border border-border bg-surface px-3 py-1.5 text-xs uppercase tracking-wide text-text-muted transition-colors hover:border-accent/50 hover:text-text"
+      >
+        {t("detail.h2hHistory")} →
+      </Link>
 
       {/* Boxscore */}
       <div>

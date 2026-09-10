@@ -18,7 +18,8 @@
     "player": "Zawodnik",
     "saves": "Obrony",
     "savePercentage": "% Obron",
-    "rating": "Ocena"
+    "rating": "Ocena",
+    "h2hHistory": "Historia meczów"
   },
   "panel": {
     "recentResults": "Ostatnie wyniki",

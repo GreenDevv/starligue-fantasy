@@ -18,7 +18,8 @@
     "player": "Joueur",
     "saves": "Arrêts",
     "savePercentage": "% Arrêts",
-    "rating": "Note"
+    "rating": "Note",
+    "h2hHistory": "Historique des confrontations"
   },
   "panel": {
     "recentResults": "Derniers résultats",
