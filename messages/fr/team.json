@@ -210,5 +210,14 @@
   "subnav": {
     "pitch": "Terrain",
     "more": "Plus"
+  },
+  "gameweekPanel": {
+    "title": "Cette journée",
+    "ready": "Prêt pour la J{number}",
+    "lineupDone": "Effectif aligné",
+    "predictions": "Pronostics",
+    "predictionsCta": "Compléter",
+    "bonus": "Bonus",
+    "noBonus": "aucun"
   }
 }

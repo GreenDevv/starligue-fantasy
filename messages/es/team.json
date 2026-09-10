@@ -210,5 +210,14 @@
   "subnav": {
     "pitch": "Pista",
     "more": "Más"
+  },
+  "gameweekPanel": {
+    "title": "Esta jornada",
+    "ready": "Listo para la J{number}",
+    "lineupDone": "Alineación lista",
+    "predictions": "Pronósticos",
+    "predictionsCta": "Completar",
+    "bonus": "Bonus",
+    "noBonus": "ninguno"
   }
 }

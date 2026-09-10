@@ -210,5 +210,14 @@
   "subnav": {
     "pitch": "Feld",
     "more": "Mehr"
+  },
+  "gameweekPanel": {
+    "title": "Dieser Spieltag",
+    "ready": "Bereit für ST{number}",
+    "lineupDone": "Aufstellung steht",
+    "predictions": "Tipps",
+    "predictionsCta": "Vervollständigen",
+    "bonus": "Bonus",
+    "noBonus": "keiner"
   }
 }

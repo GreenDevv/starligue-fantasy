@@ -210,5 +210,14 @@
   "subnav": {
     "pitch": "Bane",
     "more": "Mere"
+  },
+  "gameweekPanel": {
+    "title": "Denne runde",
+    "ready": "Klar til runde {number}",
+    "lineupDone": "Opstilling klar",
+    "predictions": "Forudsigelser",
+    "predictionsCta": "Fuldfør",
+    "bonus": "Bonus",
+    "noBonus": "ingen"
   }
 }

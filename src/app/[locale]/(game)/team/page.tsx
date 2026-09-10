@@ -8,8 +8,11 @@ import { redirect } from "@/i18n/navigation";
 import { prisma } from "@/lib/db";
 import { resolveSeasonMode, resolveActiveTeamContext } from "@/lib/team/active-team-context";
 import { getPendingGameweekRecaps } from "@/lib/team/pending-gameweek-recap";
+import { getGameweekChecklist } from "@/lib/team/gameweek-checklist";
 import { MyTeamSection } from "@/components/team/MyTeamSection";
+import { GameweekPanel } from "@/components/team/GameweekPanel";
 import { GameweekRecapModal } from "@/components/dashboard/GameweekRecapModal";
+import type { BonusType } from "@/components/BonusPicker";
 
 export default async function TeamPage({
   params,
@@ -64,11 +67,27 @@ export default async function TeamPage({
     return null;
   }
 
-  const pendingRecaps = await getPendingGameweekRecaps(userId, mode, ctx.seasonId);
+  const [pendingRecaps, checklist] = await Promise.all([
+    getPendingGameweekRecaps(userId, mode, ctx.seasonId),
+    mode === "live" ? getGameweekChecklist(ctx.seasonId, ctx.teamId) : Promise.resolve(null),
+  ]);
+
+  const captain = team.captainId ? team.squad.find((s) => s.playerId === team.captainId) : null;
+  const captainName = captain ? `${captain.player.firstName} ${captain.player.lastName}` : null;
 
   return (
     <>
       <GameweekRecapModal recaps={pendingRecaps} />
+      {checklist && (
+        <GameweekPanel
+          gameweekNumber={checklist.gameweekNumber}
+          deadlineAt={checklist.deadlineAt}
+          leagueId={ctx.leagueId}
+          captainName={captainName}
+          pendingBonus={team.pendingBonus as BonusType | null}
+          predictions={checklist.predictions}
+        />
+      )}
       <MyTeamSection mode={ctx.mode} leagueId={ctx.leagueId} seasonId={ctx.seasonId} team={team} />
     </>
   );

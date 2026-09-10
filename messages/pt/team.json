@@ -210,5 +210,14 @@
   "subnav": {
     "pitch": "Campo",
     "more": "Mais"
+  },
+  "gameweekPanel": {
+    "title": "Esta jornada",
+    "ready": "Pronto para a J{number}",
+    "lineupDone": "Onze definido",
+    "predictions": "Prognósticos",
+    "predictionsCta": "Completar",
+    "bonus": "Bónus",
+    "noBonus": "nenhum"
   }
 }

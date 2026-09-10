@@ -210,5 +210,14 @@
   "subnav": {
     "pitch": "Boisko",
     "more": "Więcej"
+  },
+  "gameweekPanel": {
+    "title": "Ta kolejka",
+    "ready": "Gotowy na {number}. kolejkę",
+    "lineupDone": "Skład ustawiony",
+    "predictions": "Typy",
+    "predictionsCta": "Uzupełnij",
+    "bonus": "Bonus",
+    "noBonus": "brak"
   }
 }
