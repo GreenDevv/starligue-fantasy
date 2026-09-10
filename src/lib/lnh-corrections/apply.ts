@@ -7,6 +7,7 @@
 // Deux étapes voulues (décision produit) : cette fonction fait stats + recompute
 // et RENVOIE le compte rendu ; l'envoi des emails est un appel séparé
 // (send-emails.ts), déclenché par l'admin après relecture.
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { scrapeGameweekBoxscoreRows } from "@/lib/ingestion/boxscore";
 import { boxscoreRowToStatFields } from "@/lib/data-providers/lnh-scraper.provider";
@@ -52,7 +53,17 @@ export interface ApplyResult {
   correctionsApplied: AppliedCorrectionSummary[];
   impactRows: ImpactRow[];
   undo: UndoEntry[];
+  /** Lot créé (LnhCorrectionBatch) si des équipes sont impactées — sinon null. */
+  batchId: string | null;
   note?: string;
+}
+
+/** `report` d'un LnhCorrectionBatch — suffit pour notifier et pour revenir en arrière. */
+export interface CorrectionBatchReport {
+  gameweekNumber: number;
+  correctionsApplied: AppliedCorrectionSummary[];
+  impactRows: ImpactRow[];
+  undo: UndoEntry[];
 }
 
 interface ResolvedSelection {
@@ -200,7 +211,8 @@ async function gatherTeamGwState(
 
 export async function applyGameweekCorrections(
   gameweekNumber: number,
-  correctionKeys: string[]
+  correctionKeys: string[],
+  opts: { appliedBy: string }
 ): Promise<ApplyResult> {
   const sel = await resolveSelection(gameweekNumber, correctionKeys);
   const keys = [...sel.fieldsByKey.keys()];
@@ -222,6 +234,7 @@ export async function applyGameweekCorrections(
       correctionsApplied: [],
       impactRows: [],
       undo: [],
+      batchId: null,
       note: "Aucune correction sélectionnée ne correspond à un écart réel — rien appliqué.",
     };
   }
@@ -255,6 +268,7 @@ export async function applyGameweekCorrections(
       correctionsApplied,
       impactRows: [],
       undo,
+      batchId: null,
       note: "Journée non notée : stats corrigées, les points seront calculés lors du scoring normal de la journée.",
     };
   }
@@ -277,6 +291,23 @@ export async function applyGameweekCorrections(
     fieldedPlayerIdsByTeam: after.fieldedPlayerIdsByTeam,
   });
 
+  // Trace le lot uniquement s'il y a des managers à prévenir — sinon rien à
+  // notifier, pas besoin d'une entrée en attente.
+  let batchId: string | null = null;
+  if (impactRows.length > 0) {
+    const report: CorrectionBatchReport = { gameweekNumber, correctionsApplied, impactRows, undo };
+    const batch = await prisma.lnhCorrectionBatch.create({
+      data: {
+        gameweekNumber,
+        appliedBy: opts.appliedBy,
+        correctionCount: keys.length,
+        report: report as unknown as Prisma.InputJsonValue,
+      },
+      select: { id: true },
+    });
+    batchId = batch.id;
+  }
+
   return {
     gameweekId: sel.gameweekId,
     gameweekNumber,
@@ -287,6 +318,7 @@ export async function applyGameweekCorrections(
     correctionsApplied,
     impactRows,
     undo,
+    batchId,
   };
 }
 

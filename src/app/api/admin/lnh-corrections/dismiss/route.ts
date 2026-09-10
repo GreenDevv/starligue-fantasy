@@ -1,14 +1,12 @@
 export const dynamic = "force-dynamic";
 
-// POST /api/admin/lnh-corrections/send-emails — ARCHITECTURE.md §4.3
-// Body { batchId, teamIds? } — envoie l'email d'explication aux managers du lot
-// (LnhCorrectionBatch). `teamIds` restreint aux équipes cochées ; absent = toutes.
-// Un email par utilisateur (regroupe ses équipes), dédup NotificationLog. Marque
-// le lot `notifiedAt`.
+// POST /api/admin/lnh-corrections/dismiss — ARCHITECTURE.md §4.3
+// Body { batchId } — classe un lot sans notifier les managers (les corrections
+// restent appliquées, seul l'email d'explication est renoncé).
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
-import { notifyCorrectionBatch } from "@/lib/lnh-corrections/send-emails";
+import { dismissBatch } from "@/lib/lnh-corrections/batches";
 
 async function requireAdmin() {
   const session = await auth();
@@ -17,10 +15,7 @@ async function requireAdmin() {
   return session;
 }
 
-const BodySchema = z.object({
-  batchId: z.string().min(1),
-  teamIds: z.array(z.string().min(1)).max(2000).optional(),
-});
+const BodySchema = z.object({ batchId: z.string().min(1) });
 
 export async function POST(req: Request) {
   if (!(await requireAdmin())) {
@@ -33,10 +28,10 @@ export async function POST(req: Request) {
   }
 
   try {
-    const result = await notifyCorrectionBatch(parsed.data.batchId, parsed.data.teamIds);
-    return NextResponse.json({ data: result });
+    await dismissBatch(parsed.data.batchId);
+    return NextResponse.json({ data: { dismissed: true } });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Erreur inconnue";
-    return NextResponse.json({ error: { code: "SEND_ERROR", message } }, { status: 400 });
+    return NextResponse.json({ error: { code: "DISMISS_ERROR", message } }, { status: 400 });
   }
 }

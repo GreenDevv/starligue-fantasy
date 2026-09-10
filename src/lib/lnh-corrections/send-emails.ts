@@ -1,10 +1,11 @@
-// Envoi des emails "la LNH a corrigé ses notes" aux managers impactés — étape 2,
-// séparée de l'application des corrections (apply.ts). Un seul email par
-// utilisateur, listant chacune de ses équipes impactées. Dédup via NotificationLog
-// (dedupeKey unique) : rejouer l'envoi le même jour ne renvoie pas deux fois.
+// Envoi des emails "la LNH a corrigé ses notes" aux managers d'un lot
+// (LnhCorrectionBatch) — étape déclenchée par l'admin après relecture, jamais par
+// le cron. Un seul email par utilisateur, listant chacune de ses équipes
+// impactées. Dédup via NotificationLog (dedupeKey unique par lot + utilisateur).
 import { prisma } from "@/lib/db";
 import { getResendClient, EMAIL_FROM } from "@/lib/email/resend-client";
 import { buildLnhCorrectionEmail, type TeamImpactForEmail } from "./email";
+import { loadBatchReport } from "./batches";
 import type { ImpactRow } from "./report";
 
 export interface SendCorrectionEmailsResult {
@@ -15,15 +16,14 @@ export interface SendCorrectionEmailsResult {
   errors: string[];
 }
 
-function dedupeKey(gameweekNumber: number, userId: string): string {
-  const day = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  return `lnh-correction:J${gameweekNumber}:${userId}:${day}`;
-}
-
-export async function sendLnhCorrectionEmails(
-  gameweekNumber: number,
-  rows: ImpactRow[]
+export async function notifyCorrectionBatch(
+  batchId: string,
+  teamIds?: string[]
 ): Promise<SendCorrectionEmailsResult> {
+  const report = await loadBatchReport(batchId);
+  const wanted = teamIds ? new Set(teamIds) : null;
+  const rows: ImpactRow[] = report.impactRows.filter((r) => !wanted || wanted.has(r.teamId));
+
   const byUser = new Map<string, { userId: string; email: string; teams: TeamImpactForEmail[] }>();
   for (const r of rows) {
     const entry = byUser.get(r.userId) ?? { userId: r.userId, email: r.email, teams: [] };
@@ -48,11 +48,11 @@ export async function sendLnhCorrectionEmails(
     return { recipients: 0, sent: 0, skipped: 0, failed: 0, errors: [] };
   }
 
-  const keys = users.map((u) => dedupeKey(gameweekNumber, u.userId));
+  const keyFor = (userId: string) => `lnh-correction:${batchId}:${userId}`;
   const alreadySent = new Set(
     (
       await prisma.notificationLog.findMany({
-        where: { dedupeKey: { in: keys } },
+        where: { dedupeKey: { in: users.map((u) => keyFor(u.userId)) } },
         select: { dedupeKey: true },
       })
     ).map((l) => l.dedupeKey)
@@ -65,24 +65,22 @@ export async function sendLnhCorrectionEmails(
   let failed = 0;
   const errors: string[] = [];
 
-  // Séquentiel : volumes faibles (une poignée de managers par lot de corrections),
-  // évite de rafaler l'API Resend.
+  // Séquentiel : volumes faibles, évite de rafaler l'API Resend.
   for (const u of users) {
-    const key = dedupeKey(gameweekNumber, u.userId);
-    if (alreadySent.has(key)) {
+    if (alreadySent.has(keyFor(u.userId))) {
       skipped++;
       continue;
     }
     try {
       const { subject, html } = buildLnhCorrectionEmail({
-        gameweekNumber,
+        gameweekNumber: report.gameweekNumber,
         teams: u.teams,
         recapUrl,
       });
       const resend = getResendClient();
       const { error } = await resend.emails.send({ from: EMAIL_FROM, to: u.email, subject, html });
       if (error) throw new Error(error.message);
-      await prisma.notificationLog.create({ data: { userId: u.userId, dedupeKey: key } });
+      await prisma.notificationLog.create({ data: { userId: u.userId, dedupeKey: keyFor(u.userId) } });
       sent++;
     } catch (e) {
       failed++;
@@ -91,6 +89,11 @@ export async function sendLnhCorrectionEmails(
       console.error("[lnh-correction-email]", u.email, e);
     }
   }
+
+  await prisma.lnhCorrectionBatch.update({
+    where: { id: batchId },
+    data: { notifiedAt: new Date(), notifiedCount: { increment: sent } },
+  });
 
   return { recipients: users.length, sent, skipped, failed, errors };
 }

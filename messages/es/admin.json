@@ -40,7 +40,8 @@
     "ANALYZE_ERROR": "Error while analysing corrections",
     "APPLY_ERROR": "Error while applying corrections",
     "SEND_ERROR": "Error while sending emails",
-    "REVERT_ERROR": "Error while reverting"
+    "REVERT_ERROR": "Error while reverting",
+    "DISMISS_ERROR": "Error while filing the batch"
   },
   "dashboard": {
     "title": "Dashboard Admin",
@@ -328,7 +329,13 @@
   },
   "lnhCorrections": {
     "title": "LNH corrections",
-    "subtitle": "The LNH revises some ratings 2 to 3 days after matches. Re-scrape a gameweek, compare with what's stored, apply all or part, notify the affected managers.",
+    "subtitle": "The LNH revises some ratings 2 to 3 days after matches. The weekly cron applies the corrections and replays scoring on its own; here you review the batches and decide whether to email the affected managers.",
+    "pendingTitle": "Batches awaiting notification ({count})",
+    "manualTitle": "Manual pass on a gameweek",
+    "gwPlaceholder": "GW number",
+    "byCron": "applied by the cron",
+    "byAdmin": "applied manually",
+    "batchTitle": "GW{gw} — {count} correction(s) applied",
     "analyzeButton": "Analyse gameweek",
     "analyzing": "Analysing…",
     "summary": "GW{gw} · {season} — {scraped} match(es) re-scraped, {total} correction(s) incl. {ratings} on the LNH rating.",
@@ -342,7 +349,8 @@
     "applyHint": "Applies the selected stats then replays the gameweek scoring. Reversible.",
     "applyHintNotScored": "Gameweek not scored yet: only the stats will be fixed, scoring happens in the normal flow.",
     "confirmApply": "Apply {count} correction(s) to GW{gw} and replay scoring? (reversible)",
-    "appliedSummary": "{count} correction(s) applied — {teams} team(s) whose points moved.",
+    "appliedWithBatch": "{count} correction(s) applied — {teams} manager(s) affected, see the batch above to notify them.",
+    "appliedNoImpact": "{count} correction(s) applied — no manager affected.",
     "colManager": "Manager",
     "colTeam": "Team",
     "colPoints": "GW points",
@@ -351,12 +359,11 @@
     "indirectReason": "\"Gameweek leader\" bonus recomputed (no fielded player corrected)",
     "sendButton": "Send emails ({count})",
     "sending": "Sending…",
-    "confirmSend": "Send an explanation email to {count} manager(s)?",
     "sendResult": "{sent} sent, {skipped} skipped (already notified), {failed} failed.",
+    "dismissButton": "Dismiss (don't notify)",
+    "confirmDismiss": "File this batch without notifying managers? (the corrections stay applied)",
     "revertButton": "Revert corrections",
     "reverting": "Reverting…",
-    "confirmRevert": "Restore the pre-apply stats and replay scoring?",
-    "revertDone": "{count} stat(s) restored, points recomputed.",
-    "noImpact": "No team affected: the corrections change no points."
+    "confirmRevert": "Restore the pre-apply stats and replay scoring?"
   }
 }
