@@ -8,7 +8,8 @@
     "news": "Nyheder",
     "dashboard": "Dashboard",
     "backToGame": "← Spil",
-    "homeClubs": "Hjemklubber"
+    "homeClubs": "Hjemklubber",
+    "lnhCorrections": "LNH corrections"
   },
   "common": {
     "loading": "Indlæser…",
@@ -35,7 +36,11 @@
     "NO_DATA": "Ingen data fundet",
     "INVALID_RANGE": "Lukkedatoen skal være efter åbningsdatoen",
     "COMPUTE_ERROR": "Fejl under beregning",
-    "ALREADY_PUBLISHED": "Allerede udgivet i mellemtiden"
+    "ALREADY_PUBLISHED": "Allerede udgivet i mellemtiden",
+    "ANALYZE_ERROR": "Error while analysing corrections",
+    "APPLY_ERROR": "Error while applying corrections",
+    "SEND_ERROR": "Error while sending emails",
+    "REVERT_ERROR": "Error while reverting"
   },
   "dashboard": {
     "title": "Admin Dashboard",
@@ -320,5 +325,38 @@
     "empty": "Ingen klub afventer godkendelse.",
     "filterUnverified": "Afventer",
     "filterAll": "Alle"
+  },
+  "lnhCorrections": {
+    "title": "LNH corrections",
+    "subtitle": "The LNH revises some ratings 2 to 3 days after matches. Re-scrape a gameweek, compare with what's stored, apply all or part, notify the affected managers.",
+    "analyzeButton": "Analyse gameweek",
+    "analyzing": "Analysing…",
+    "summary": "GW{gw} · {season} — {scraped} match(es) re-scraped, {total} correction(s) incl. {ratings} on the LNH rating.",
+    "notScoredBadge": "Gameweek not scored",
+    "noCorrections": "No difference: what we stored matches the current scrape exactly.",
+    "selectMatch": "Select all",
+    "deselectMatch": "Deselect all",
+    "noteLabel": "rating",
+    "applyButton": "Apply selection ({count})",
+    "applying": "Applying…",
+    "applyHint": "Applies the selected stats then replays the gameweek scoring. Reversible.",
+    "applyHintNotScored": "Gameweek not scored yet: only the stats will be fixed, scoring happens in the normal flow.",
+    "confirmApply": "Apply {count} correction(s) to GW{gw} and replay scoring? (reversible)",
+    "appliedSummary": "{count} correction(s) applied — {teams} team(s) whose points moved.",
+    "colManager": "Manager",
+    "colTeam": "Team",
+    "colPoints": "GW points",
+    "colRank": "Overall rank",
+    "colWhy": "Reason",
+    "indirectReason": "\"Gameweek leader\" bonus recomputed (no fielded player corrected)",
+    "sendButton": "Send emails ({count})",
+    "sending": "Sending…",
+    "confirmSend": "Send an explanation email to {count} manager(s)?",
+    "sendResult": "{sent} sent, {skipped} skipped (already notified), {failed} failed.",
+    "revertButton": "Revert corrections",
+    "reverting": "Reverting…",
+    "confirmRevert": "Restore the pre-apply stats and replay scoring?",
+    "revertDone": "{count} stat(s) restored, points recomputed.",
+    "noImpact": "No team affected: the corrections change no points."
   }
 }

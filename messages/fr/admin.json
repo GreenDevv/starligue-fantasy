@@ -8,7 +8,8 @@
     "news": "Actus",
     "dashboard": "Dashboard",
     "backToGame": "← Jeu",
-    "homeClubs": "Clubs d'origine"
+    "homeClubs": "Clubs d'origine",
+    "lnhCorrections": "Corrections LNH"
   },
   "common": {
     "loading": "Chargement…",
@@ -35,7 +36,11 @@
     "NO_DATA": "Aucune donnée trouvée",
     "INVALID_RANGE": "La date de fermeture doit être après la date d'ouverture",
     "COMPUTE_ERROR": "Erreur lors du calcul",
-    "ALREADY_PUBLISHED": "Déjà publiée entre-temps"
+    "ALREADY_PUBLISHED": "Déjà publiée entre-temps",
+    "ANALYZE_ERROR": "Erreur pendant l'analyse des corrections",
+    "APPLY_ERROR": "Erreur pendant l'application des corrections",
+    "SEND_ERROR": "Erreur pendant l'envoi des emails",
+    "REVERT_ERROR": "Erreur pendant le retour arrière"
   },
   "dashboard": {
     "title": "Dashboard Admin",
@@ -320,5 +325,38 @@
     "empty": "Aucun club en attente de validation.",
     "filterUnverified": "En attente",
     "filterAll": "Tous"
+  },
+  "lnhCorrections": {
+    "title": "Corrections LNH",
+    "subtitle": "La LNH révise certaines notes 2 à 3 jours après les matchs. Re-scrape une journée, compare avec l'enregistré, applique tout ou partie, préviens les managers impactés.",
+    "analyzeButton": "Analyser la journée",
+    "analyzing": "Analyse…",
+    "summary": "J{gw} · {season} — {scraped} match(s) re-scrapé(s), {total} correction(s) dont {ratings} sur la note LNH.",
+    "notScoredBadge": "Journée non notée",
+    "noCorrections": "Aucun écart : ce qu'on a enregistré correspond exactement au scrape actuel.",
+    "selectMatch": "Tout cocher",
+    "deselectMatch": "Tout décocher",
+    "noteLabel": "note",
+    "applyButton": "Appliquer la sélection ({count})",
+    "applying": "Application…",
+    "applyHint": "Applique les stats sélectionnées puis rejoue le calcul des points de la journée. Réversible.",
+    "applyHintNotScored": "Journée pas encore notée : seules les stats seront corrigées, le calcul se fera au scoring normal.",
+    "confirmApply": "Appliquer {count} correction(s) sur la J{gw} et rejouer le calcul des points ? (réversible)",
+    "appliedSummary": "{count} correction(s) appliquée(s) — {teams} équipe(s) dont les points ont bougé.",
+    "colManager": "Manager",
+    "colTeam": "Équipe",
+    "colPoints": "Points J",
+    "colRank": "Rang général",
+    "colWhy": "Motif",
+    "indirectReason": "Bonus « leader de journée » recalculé (aucun joueur aligné corrigé)",
+    "sendButton": "Envoyer les emails ({count})",
+    "sending": "Envoi…",
+    "confirmSend": "Envoyer un email d'explication à {count} manager(s) ?",
+    "sendResult": "{sent} envoyé(s), {skipped} ignoré(s) (déjà notifiés), {failed} en échec.",
+    "revertButton": "Annuler les corrections",
+    "reverting": "Annulation…",
+    "confirmRevert": "Restaurer les stats d'avant l'application et rejouer le calcul ?",
+    "revertDone": "{count} stat(s) restaurée(s), points recalculés.",
+    "noImpact": "Aucune équipe impactée : les corrections ne changent aucun point."
   }
 }

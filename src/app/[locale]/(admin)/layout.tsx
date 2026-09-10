@@ -49,6 +49,9 @@ export default async function AdminLayout({
             <Link href="/admin/news" className="text-text-muted transition-colors hover:text-text">
               {t("nav.news")}
             </Link>
+            <Link href="/admin/lnh-corrections" className="text-text-muted transition-colors hover:text-text">
+              {t("nav.lnhCorrections")}
+            </Link>
             <Link href="/admin/handball-clubs" className="text-text-muted transition-colors hover:text-text">
               {t("nav.homeClubs")}
             </Link>
