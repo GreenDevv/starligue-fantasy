@@ -45,7 +45,8 @@
     "pending": "Oczekujące",
     "ptsArrow": "pkt →",
     "catchup": "Punkty powitalne",
-    "catchupHint": "Mediana wyników menedżerów za kolejki rozegrane przed dołączeniem (−10%)"
+    "catchupHint": "Mediana wyników menedżerów za kolejki rozegrane przed dołączeniem (−10%)",
+    "corrected": "Oceny skorygowane przez LNH"
   },
   "gameweekDetail": {
     "statusSimScored": "Kolejka rozliczona",
