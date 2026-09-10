@@ -551,7 +551,12 @@ model Gameweek {
   season                Season                 @relation(fields: [seasonId], references: [id])
   number                Int // J1..J30
   deadlineAt            DateTime
-  isScored              Boolean                @default(false) // tous les points calculés
+  isScored              Boolean                @default(false) // points calculés au moins une fois (rejouable — corrections LNH)
+  // Journée verrouillée : la LNH a relu ses notes (cron corrections du mardi,
+  // src/app/api/cron/lnh-corrections) et les points ne bougeront plus. null tant
+  // que la fenêtre de correction (~2-3 j après les matchs) n'est pas passée →
+  // état "provisoire". Voir src/lib/gameweek/state.ts.
+  confirmedAt          DateTime?
   matches               Match[]
   lineups               FantasyLineup[]
   simulationLineups     SimulationLineup[]

@@ -1,0 +1,43 @@
+name: Cron clôture de journée (résultats → notes → snapshot → points)
+
+# Pipeline automatique de clôture — route /api/cron/settle-gameweek. Remplace la
+# séquence manuelle (sync-ratings → snapshot-lineups → compute-scores →
+# sync-standings) documentée dans la mémoire gameweek_close_and_matchday_pack.
+#
+# Pour chaque journée past-deadline non confirmée : sync calendrier lnh.fr →
+# snapshot des alignements → (si tous les matchs réglés) scrape boxscore → (si
+# toutes les notes là) calcul des points + actus /starligue → classement Starligue.
+# Tout idempotent : la route est quasi-gratuite quand il n'y a rien à faire.
+# NE POSE PAS confirmedAt (🟢) — c'est le rôle de cron-lnh-corrections.yml (mardi).
+#
+# Deux familles de créneaux :
+#   - pendant/juste après les matchs (mer.-dim. soir, dim. après-midi), toutes les
+#     15 min : récupère vite les scores puis les notes dès qu'elles tombent.
+#   - rattrapage 3×/jour : notes publiées en décalé, match reporté rejoué en semaine…
+on:
+  schedule:
+    - cron: "*/15 16-23 * * 3,4,5,6" # mer. jeu. ven. sam. — 16-23 UTC
+    - cron: "*/15 13-21 * * 0"       # dim. — 13-21 UTC
+    - cron: "0 6,12,20 * * *"        # rattrapage quotidien
+  workflow_dispatch: {}
+
+jobs:
+  settle-gameweek:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler /api/cron/settle-gameweek
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          response=$(curl -sS -w "\n%{http_code}" --max-time 280 -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://starliguefantasy.fr/api/cron/settle-gameweek")
+          body=$(echo "$response" | sed '$d')
+          status=$(echo "$response" | tail -n 1)
+
+          echo "$body" | python3 -m json.tool || echo "$body"
+
+          if [ "$status" -ge 300 ]; then
+            echo "::error::HTTP $status"
+            exit 1
+          fi

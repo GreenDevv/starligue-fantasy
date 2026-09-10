@@ -191,6 +191,22 @@ J+1   matin : notes LNH publiées → cron `sync-ratings` (scraper) OU import CS
 
 Le calcul des scores est **rejouable** : `compute-scores(gameweekId)` efface et recalcule. Indispensable quand la LNH corrige une note a posteriori.
 
+**Pipeline automatique (`POST /api/cron/settle-gameweek`, `.github/workflows/cron-settle.yml`)** :
+depuis 09/2026, la séquence `sync calendrier → snapshot-lineups → boxscore → compute-scores → classement`
+n'est plus déclenchée à la main mais par un cron (créneaux de match toutes les 15 min +
+3 rattrapages/jour). Tout idempotent. `snapshot-lineups` est extrait dans
+`src/lib/scoring/snapshot-lineups.ts` (`snapshotGameweekLineups`), réutilisé par la route
+cron historique et par `settle-gameweek`. Le pipeline ne pose **jamais** `Gameweek.confirmedAt`.
+
+**État de confiance d'une journée (`Gameweek.confirmedAt`, `src/lib/gameweek/state.ts`)** :
+`getGameweekState` dérive 5 états — `UPCOMING` → `LIVE` (🟡, match en cours) →
+`AWAITING_RESULTS` (🟠, tous finis, pas encore scoré) → `PROVISIONAL` (🟠, scoré mais points
+susceptibles de bouger) → `CONFIRMED` (🟢). `confirmedAt` est posé par le cron corrections LNH
+du mardi (§4.3) une fois la journée relue — c'est le **seul** déclencheur du passage au 🟢.
+Backfill historique : `scripts/backfill-gameweek-confirmed.ts`. Surfaces d'affichage :
+`<GameweekStateBanner>` sur /team, `<GameweekStandingsBanner>` sur /leaderboard et /leagues/[id]
+(via `GET /api/gameweek-status`), note « points provisoires » dans le récap de journée.
+
 ### 4.2 Ajustement des dates officielles + diffuseur TV
 
 Ajouté le 2026-08-27, demande explicite de l'utilisateur : lnh.fr publie
@@ -657,8 +673,15 @@ POST   /api/cron/sync-ratings             → scraper notes LNH (matin J+1) — 
                                              fantasy n'en dépend pas — PlayerMatchStat seul suffit
                                              — mais les pages match/club et le règlement des
                                              pronostics §14 en ont besoin)
+POST   /api/cron/settle-gameweek          → pipeline auto de clôture : calendrier → snapshot →
+                                             boxscore → compute-scores → classement, journée par
+                                             journée, idempotent. Ne pose PAS confirmedAt (🟢).
+                                             PLANIFIÉ, cron-settle.yml (créneaux de match */15 +
+                                             rattrapage 06/12/20 UTC) — voir §4.1
 POST   /api/cron/snapshot-lineups         → gèle les alignements (à chaque deadline) — pas planifié
+                                             seul (couvert par settle-gameweek), garde le filet manuel
 POST   /api/cron/compute-scores           → calcule points des journées complètes — pas planifié
+                                             seul (couvert par settle-gameweek), garde le filet manuel
 POST   /api/cron/compute-prediction-odds  → crée les marchés de pronostic des matchs sans cotes
                                              (§14) — pas planifié
 POST   /api/cron/sync-news                → scrape lnh.fr + sites de clubs, alimente la page

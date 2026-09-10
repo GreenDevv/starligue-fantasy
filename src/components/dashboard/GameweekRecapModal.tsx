@@ -67,6 +67,7 @@ function PlayerLine({ p }: { p: LineupPlayerDetail }) {
 
 export function GameweekRecapModal({ recaps }: GameweekRecapModalProps) {
   const t = useTranslations("dashboard");
+  const tGw = useTranslations("gameweek");
   const [index, setIndex] = useState(0);
   const [dismissing, setDismissing] = useState(false);
   const [sharing, setSharing] = useState(false);
@@ -185,6 +186,12 @@ export function GameweekRecapModal({ recaps }: GameweekRecapModalProps) {
                     { team: current.teamName }
                   )}
                 </p>
+                {current.provisional && (
+                  <p className="mx-auto mt-2 inline-flex items-center gap-1.5 border border-accent-secondary/40 bg-accent-secondary/10 px-2 py-1 text-[10px] uppercase tracking-wide text-accent-secondary">
+                    <span className="h-1.5 w-1.5 rounded-full bg-accent-secondary" />
+                    {tGw("state.PROVISIONAL.detail")}
+                  </p>
+                )}
               </div>
 
               {rank && (

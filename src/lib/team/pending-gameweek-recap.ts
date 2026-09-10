@@ -40,6 +40,9 @@ export interface PendingGameweekRecap {
   players: LineupPlayerDetail[];
   topPerformer: LineupPlayerDetail | null;
   rank: RankMovement | null;
+  // Points pas encore verrouillés (fenêtre de correction LNH pas passée) — voir
+  // Gameweek.confirmedAt. Toujours false en simulation (curseur admin = vérité).
+  provisional: boolean;
 }
 
 interface BaseRecap {
@@ -51,6 +54,7 @@ interface BaseRecap {
   gameweekId: string;
   gameweekNumber: number;
   points: number;
+  provisional: boolean;
 }
 
 export async function getPendingGameweekRecaps(
@@ -114,6 +118,7 @@ async function getLivePendingRecaps(userId: string, seasonId: string): Promise<B
       gameweekId: latestScored.id,
       gameweekNumber: latestScored.number,
       points: Number(points),
+      provisional: latestScored.confirmedAt === null,
     });
   }
   return recaps;
@@ -147,6 +152,7 @@ async function getSimulationPendingRecaps(userId: string, seasonId: string): Pro
       gameweekId: latestScoredLineup.gameweek.id,
       gameweekNumber: latestScoredLineup.gameweek.number,
       points: Number(latestScoredLineup.points),
+      provisional: false, // simulation : curseur admin = vérité, pas de fenêtre LNH
     });
   }
   return recaps;

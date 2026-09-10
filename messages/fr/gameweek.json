@@ -1,0 +1,28 @@
+{
+  "state": {
+    "LIVE": {
+      "badge": "En cours",
+      "detail": "Matchs en cours — points en direct"
+    },
+    "AWAITING_RESULTS": {
+      "badge": "En attente",
+      "detail": "Résultats en cours de récupération"
+    },
+    "PROVISIONAL": {
+      "badge": "Provisoire",
+      "detail": "Points confirmés après vérification des notes LNH (mardi)"
+    },
+    "CONFIRMED": {
+      "badge": "Confirmée",
+      "detail": "Points définitifs"
+    }
+  },
+  "matchesProgress": "{finished}/{total} matchs",
+  "pointsMayChange": "Ces points peuvent encore changer",
+  "correction": "Notes ajustées par la LNH le {date} — points recalculés",
+  "standings": {
+    "provisional": "Classement provisoire — J{number} en attente de validation",
+    "confirmed": "Classement confirmé jusqu'à la J{number}",
+    "live": "Classement en direct — J{number} en cours"
+  }
+}
