@@ -206,5 +206,18 @@
       "tooManyFromClub": "Demasiados jogadores de {club}: {count} selecionados, máximo {max} por clube.",
       "playerAlreadyOwned": "{players} já conquistado(s) por outra equipa da liga."
     }
+  },
+  "subnav": {
+    "pitch": "Campo",
+    "more": "Mais"
+  },
+  "gameweekPanel": {
+    "title": "Esta jornada",
+    "ready": "Pronto para a J{number}",
+    "lineupDone": "Onze definido",
+    "predictions": "Prognósticos",
+    "predictionsCta": "Completar",
+    "bonus": "Bónus",
+    "noBonus": "nenhum"
   }
 }

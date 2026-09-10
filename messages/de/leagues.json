@@ -32,7 +32,10 @@
     "buildSquadCta": "Meinen Kader erstellen →",
     "leagueLeaderboardTitle": "Liga-Rangliste",
     "globalLeaderboardTitle": "Gesamtrangliste",
-    "globalLeaderboardSubtitle": "Alle Ligen zusammen"
+    "globalLeaderboardSubtitle": "Alle Ligen zusammen",
+    "myTeamSectionTitle": "Mein Team",
+    "viewMyTeam": "Mein Team ansehen →",
+    "buildMyTeam": "Mein Team zusammenstellen →"
   },
   "inviteCodeLabel": "Einladungscode",
   "actions": {

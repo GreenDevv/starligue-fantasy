@@ -206,5 +206,18 @@
       "tooManyFromClub": "Zu viele Spieler von {club}: {count} ausgewählt, maximal {max} pro Verein.",
       "playerAlreadyOwned": "{players} bereits von einem anderen Team der Liga gewonnen."
     }
+  },
+  "subnav": {
+    "pitch": "Feld",
+    "more": "Mehr"
+  },
+  "gameweekPanel": {
+    "title": "Dieser Spieltag",
+    "ready": "Bereit für ST{number}",
+    "lineupDone": "Aufstellung steht",
+    "predictions": "Tipps",
+    "predictionsCta": "Vervollständigen",
+    "bonus": "Bonus",
+    "noBonus": "keiner"
   }
 }

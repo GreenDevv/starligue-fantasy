@@ -28,6 +28,39 @@ export function CopyInviteButton({ inviteCode }: { inviteCode: string }) {
   );
 }
 
+// Bascule la ligue active (cookie activeLeagueId) puis renvoie vers /team, qui
+// affiche l'équipe de cette ligue. Sans ça, /team résoudrait la ligue du cookie
+// (potentiellement une autre pour un utilisateur multi-ligues).
+export function SwitchToTeamButton({ leagueId, label }: { leagueId: string; label: string }) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  async function go() {
+    setLoading(true);
+    try {
+      await fetch("/api/team/active-league", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leagueId }),
+      });
+    } catch {
+      // best-effort : /team acceptera de toute façon ?league= en secours
+    }
+    router.push(`/team?league=${leagueId}`);
+    router.refresh();
+  }
+
+  return (
+    <button
+      onClick={go}
+      disabled={loading}
+      className="pixel-corners-sm shrink-0 bg-accent px-4 py-2 text-sm font-semibold uppercase tracking-wide text-bg transition-colors hover:bg-accent/90 disabled:opacity-50"
+    >
+      {loading ? "…" : label}
+    </button>
+  );
+}
+
 export function LeaveLeagueButton({ leagueId }: { leagueId: string }) {
   const router = useRouter();
   const t = useTranslations("leagues");

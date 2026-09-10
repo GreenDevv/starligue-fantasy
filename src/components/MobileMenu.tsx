@@ -7,7 +7,7 @@ import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { NAV_ITEMS, isActive } from "@/components/NavBar";
+import { NAV_ITEMS, MOBILE_TAB_KEYS, isActive } from "@/components/NavBar";
 import { ModeSwitchLink } from "@/components/nav/ModeSwitchLink";
 import { SeasonToggle } from "@/components/SeasonToggle";
 import { MenuIcon, CloseIcon, LogoutIcon } from "@/components/ui/icons";
@@ -122,7 +122,11 @@ export function MobileMenu({
                     </ModeSwitchLink>
                   </motion.div>
 
-                  {NAV_ITEMS.map(({ href, key, Icon }) => {
+                  {/* Les 4 destinations principales sont dans la FantasyTabBar
+                      (barre basse) — le menu ne garde que le reste. */}
+                  {NAV_ITEMS.filter(
+                    ({ key }) => !(MOBILE_TAB_KEYS as readonly string[]).includes(key)
+                  ).map(({ href, key, Icon }) => {
                     const active = isActive(pathname, href);
                     return (
                       <motion.div key={href} variants={itemVariants}>

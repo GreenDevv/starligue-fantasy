@@ -206,5 +206,18 @@
       "tooManyFromClub": "Zbyt wielu zawodników z {club}: wybrano {count}, maksymalnie {max} na klub.",
       "playerAlreadyOwned": "{players} już wygrany(-i) przez inną drużynę w lidze."
     }
+  },
+  "subnav": {
+    "pitch": "Boisko",
+    "more": "Więcej"
+  },
+  "gameweekPanel": {
+    "title": "Ta kolejka",
+    "ready": "Gotowy na {number}. kolejkę",
+    "lineupDone": "Skład ustawiony",
+    "predictions": "Typy",
+    "predictionsCta": "Uzupełnij",
+    "bonus": "Bonus",
+    "noBonus": "brak"
   }
 }

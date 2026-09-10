@@ -16,7 +16,9 @@ function LoginForm() {
   const params = useSearchParams();
   const locale = useLocale();
   const t = useTranslations("auth");
-  const defaultCallback = `/${locale}/leagues`;
+  // /team résout l'équipe active (cookie activeLeagueId) et renvoie lui-même vers
+  // /leagues si l'utilisateur n'a encore aucune ligue (verrou d'onboarding).
+  const defaultCallback = `/${locale}/team`;
   const callbackUrl = params.get("callbackUrl") ?? defaultCallback;
 
   const [email, setEmail] = useState("");

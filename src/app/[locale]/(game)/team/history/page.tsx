@@ -58,12 +58,6 @@ export default async function HistoryPage({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3">
-        <Link href={`/leagues/${ctx.leagueId}`} className="text-text-muted hover:text-text text-sm transition-colors">
-          ← {t("common.backToTeam")}
-        </Link>
-      </div>
-
       <div>
         {mode === "simulation" && (
           <p className="text-xs font-semibold uppercase tracking-widest text-accent-secondary">

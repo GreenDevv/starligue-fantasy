@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, Link } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { HandballPitch } from "@/components/pitch/HandballPitch";
 import { Button } from "@/components/ui/Button";
@@ -49,7 +49,6 @@ interface TeamViewProps {
   pointsToBudgetRate?: number;
   jerseyConfig?: unknown;
   leagueId: string;
-  leagues?: { id: string; name: string }[];
   squad: SquadEntry[];
   lastScoredGameweek?: {
     number: number;
@@ -59,7 +58,6 @@ interface TeamViewProps {
   } | null;
   captainId?: string | null;
   transferWindowOpen?: boolean;
-  seasonStarted?: boolean;
   dashboardStrips?: DashboardStrips | null;
   statsSeasonId?: string | null;
   pendingBonus?: BonusType | null;
@@ -75,12 +73,10 @@ export function TeamView({
   pointsToBudgetRate = 0.1,
   jerseyConfig,
   leagueId,
-  leagues,
   squad: initialSquad,
   lastScoredGameweek,
   captainId = null,
   transferWindowOpen = false,
-  seasonStarted = false,
   dashboardStrips = null,
   statsSeasonId = null,
   pendingBonus: initialPendingBonus = null,
@@ -89,12 +85,10 @@ export function TeamView({
 }: TeamViewProps) {
   const t = useTranslations("team");
   const tRoot = useTranslations();
-  const router = useRouter();
   const [squad, setSquad] = useState(initialSquad);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [switching, setSwitching] = useState(false);
   const [points, setPoints] = useState(totalPoints);
   const [teamBudget, setTeamBudget] = useState(budget);
   const [convertAmount, setConvertAmount] = useState("");
@@ -104,18 +98,6 @@ export function TeamView({
   const [pendingBonus, setPendingBonus] = useState<BonusType | null>(initialPendingBonus);
   const [bonusSaving, setBonusSaving] = useState(false);
   const [bonusError, setBonusError] = useState<string | null>(null);
-
-  async function switchLeague(id: string) {
-    if (id === leagueId || switching) return;
-    setSwitching(true);
-    await fetch("/api/team/active-league", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ leagueId: id }),
-    });
-    router.push(`/leagues/${id}`);
-    router.refresh();
-  }
 
   function swapRole(playerId: string) {
     const player = squad.find((p) => p.playerId === playerId);
@@ -219,73 +201,18 @@ export function TeamView({
 
   return (
     <div className="flex flex-col gap-6 pb-8">
-      {/* Sélecteur de ligue — visible seulement si l'utilisateur a plusieurs équipes */}
-      {leagues && leagues.length > 1 && (
-        <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none]">
-          {leagues.map((l) => (
-            <button
-              key={l.id}
-              onClick={() => switchLeague(l.id)}
-              disabled={switching}
-              className={`pixel-corners-sm shrink-0 px-3 py-1 text-xs uppercase tracking-wide transition-colors ${
-                l.id === leagueId
-                  ? "bg-accent text-bg shadow-glow-accent"
-                  : "border border-border text-text-muted hover:text-text"
-              }`}
-            >
-              {l.name}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <JerseyBadge jerseyConfig={jerseyConfig} size="lg" />
-          <div className="min-w-0">
-            <h1 className="text-2xl text-text">{teamName}</h1>
-            <p className="mt-0.5 flex items-baseline gap-1.5">
-              <span className="font-arcade text-3xl leading-none tracking-wide text-accent drop-shadow-[0_0_8px_rgba(45,212,191,0.6)]">
-                {points}
-              </span>
-              <span className="text-[10px] uppercase tracking-widest text-text-muted">{t("view.ptsSeasonLabel")}</span>
-            </p>
-          </div>
-        </div>
-        <div className="flex shrink-0 flex-col items-end gap-1.5">
-          <div className="flex gap-2">
-            <Link
-              href={`/team/transfers?league=${leagueId}`}
-              className="pixel-corners-sm border border-border bg-surface px-3 py-1.5 text-xs uppercase tracking-wide text-text-muted transition-colors hover:text-text"
-            >
-              {t("common.transfers")}
-            </Link>
-            <Link
-              href={`/team/trades?league=${leagueId}`}
-              className="pixel-corners-sm border border-border bg-surface px-3 py-1.5 text-xs uppercase tracking-wide text-text-muted transition-colors hover:text-text"
-            >
-              {t("common.trades")}
-            </Link>
-            {/* Rebuild complet interdit une fois la saison commencée — seuls
-                Transferts/Trades modifient l'effectif ensuite (src/lib/squad/season-lock.ts) */}
-            {!seasonStarted && (
-              <Link
-                href={`/team/build?league=${leagueId}`}
-                className="pixel-corners-sm border border-border bg-surface px-3 py-1.5 text-xs uppercase tracking-wide text-text-muted transition-colors hover:text-text"
-              >
-                {t("view.editSquad")}
-              </Link>
-            )}
-          </div>
-          {mode === "live" && (
-            <Link
-              href={`/team/identity?league=${leagueId}&from=team`}
-              className="text-[10px] text-text-muted transition-colors hover:text-text"
-            >
-              {t("view.renameTeam")}
-            </Link>
-          )}
+      {/* Header — navigation (transferts, trades, renommage…) : voir <TeamSubnav>
+          rendu par (game)/team/layout.tsx */}
+      <div className="flex min-w-0 items-center gap-3">
+        <JerseyBadge jerseyConfig={jerseyConfig} size="lg" />
+        <div className="min-w-0">
+          <h1 className="text-2xl text-text">{teamName}</h1>
+          <p className="mt-0.5 flex items-baseline gap-1.5">
+            <span className="font-arcade text-3xl leading-none tracking-wide text-accent drop-shadow-[0_0_8px_rgba(45,212,191,0.6)]">
+              {points}
+            </span>
+            <span className="text-[10px] uppercase tracking-widest text-text-muted">{t("view.ptsSeasonLabel")}</span>
+          </p>
         </div>
       </div>
 
@@ -440,14 +367,6 @@ export function TeamView({
           </div>
         </Link>
       )}
-
-      {/* History link */}
-      <Link
-        href={`/team/history?league=${leagueId}`}
-        className="text-center text-xs text-text-muted transition-colors hover:text-text"
-      >
-        {t("view.viewFullHistory")}
-      </Link>
 
       {/* Save button */}
       <div>

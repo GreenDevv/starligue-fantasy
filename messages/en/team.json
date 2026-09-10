@@ -206,5 +206,18 @@
       "tooManyFromClub": "Too many players from {club}: {count} selected, {max} max per club.",
       "playerAlreadyOwned": "{players} already won by another team in the league."
     }
+  },
+  "subnav": {
+    "pitch": "Pitch",
+    "more": "More"
+  },
+  "gameweekPanel": {
+    "title": "This gameweek",
+    "ready": "Ready for GW{number}",
+    "lineupDone": "Line-up set",
+    "predictions": "Predictions",
+    "predictionsCta": "Complete",
+    "bonus": "Bonus",
+    "noBonus": "none"
   }
 }

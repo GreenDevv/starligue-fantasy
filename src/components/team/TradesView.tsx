@@ -176,7 +176,7 @@ export function TradesView({ mode }: { mode: SeasonMode }) {
           )}
           <h1 className="text-2xl text-text">{t("trades.title")}</h1>
         </div>
-        <button onClick={() => router.push(leagueId ? `/leagues/${leagueId}` : "/leagues")} className="text-xs text-text-muted hover:text-text">
+        <button onClick={() => router.push(leagueId ? `/team?league=${leagueId}` : "/team")} className="text-xs text-text-muted hover:text-text">
           ← {t("common.backToTeam")}
         </button>
       </div>

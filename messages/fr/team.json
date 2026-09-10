@@ -206,5 +206,18 @@
       "tooManyFromClub": "Trop de joueurs de {club} : {count} sélectionnés, {max} maximum par club.",
       "playerAlreadyOwned": "{players} déjà remporté(s) par une autre équipe de la ligue."
     }
+  },
+  "subnav": {
+    "pitch": "Terrain",
+    "more": "Plus"
+  },
+  "gameweekPanel": {
+    "title": "Cette journée",
+    "ready": "Prêt pour la J{number}",
+    "lineupDone": "Effectif aligné",
+    "predictions": "Pronostics",
+    "predictionsCta": "Compléter",
+    "bonus": "Bonus",
+    "noBonus": "aucun"
   }
 }

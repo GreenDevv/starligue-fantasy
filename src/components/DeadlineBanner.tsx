@@ -2,24 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { Link } from "@/i18n/navigation";
+import { deadlineTier, formatCountdown } from "@/lib/team/deadline-countdown";
 
 interface DeadlineBannerProps {
   initialGameweek: { number: number; deadlineAt: string } | null;
-}
-
-function formatCountdown(ms: number): string {
-  if (ms <= 0) return "Deadline passée";
-  const totalSeconds = Math.floor(ms / 1000);
-  const h = Math.floor(totalSeconds / 3600);
-  const m = Math.floor((totalSeconds % 3600) / 60);
-  const s = totalSeconds % 60;
-
-  if (h >= 48) {
-    const d = Math.floor(h / 24);
-    const rh = h % 24;
-    return `${d}j ${rh}h${String(m).padStart(2, "0")}`;
-  }
-  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
 export function DeadlineBanner({ initialGameweek }: DeadlineBannerProps) {
@@ -45,9 +32,7 @@ export function DeadlineBanner({ initialGameweek }: DeadlineBannerProps) {
 
   if (!initialGameweek || remaining === null || remaining < 0) return null;
 
-  const isRed = remaining < 2 * 3_600_000;
-  const isAmber = !isRed && remaining < 24 * 3_600_000;
-  const tier = isRed ? "red" : isAmber ? "amber" : "calm";
+  const tier = deadlineTier(remaining);
 
   return (
     <motion.div
@@ -57,24 +42,26 @@ export function DeadlineBanner({ initialGameweek }: DeadlineBannerProps) {
       transition={{ type: "spring", stiffness: 420, damping: 22 }}
       style={{ transformOrigin: "top" }}
       className={[
-        "relative overflow-hidden border-b px-4 py-1 text-center text-sm",
-        isRed
+        "relative overflow-hidden border-b",
+        tier === "red"
           ? "border-points-neg/40 bg-points-neg/10 text-points-neg shadow-glow-red"
-          : isAmber
+          : tier === "amber"
             ? "border-accent-secondary/40 bg-accent-secondary/10 text-accent-secondary shadow-glow-amber"
             : "border-border bg-surface/50 text-text-muted",
       ].join(" ")}
     >
-      <span className="font-display text-xs uppercase tracking-wide">J{initialGameweek.number}</span>
-      {" · "}
-      <span
-        className={[
-          "font-arcade text-lg tabular-nums tracking-wide",
-          isRed || isAmber ? "drop-shadow-[0_0_6px_currentColor]" : "",
-        ].join(" ")}
-      >
-        {formatCountdown(remaining)}
-      </span>
+      <Link href="/team" className="block px-4 py-1 text-center text-sm transition-opacity hover:opacity-80">
+        <span className="font-display text-xs uppercase tracking-wide">J{initialGameweek.number}</span>
+        {" · "}
+        <span
+          className={[
+            "font-arcade text-lg tabular-nums tracking-wide",
+            tier !== "calm" ? "drop-shadow-[0_0_6px_currentColor]" : "",
+          ].join(" ")}
+        >
+          {formatCountdown(remaining)}
+        </span>
+      </Link>
     </motion.div>
   );
 }

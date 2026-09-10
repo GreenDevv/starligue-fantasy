@@ -32,7 +32,10 @@
     "buildSquadCta": "Créer mon effectif →",
     "leagueLeaderboardTitle": "Classement de la ligue",
     "globalLeaderboardTitle": "Classement général",
-    "globalLeaderboardSubtitle": "Toutes ligues confondues"
+    "globalLeaderboardSubtitle": "Toutes ligues confondues",
+    "myTeamSectionTitle": "Mon équipe",
+    "viewMyTeam": "Voir mon équipe →",
+    "buildMyTeam": "Composer mon effectif →"
   },
   "inviteCodeLabel": "Code d'invitation",
   "actions": {

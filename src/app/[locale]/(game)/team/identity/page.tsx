@@ -50,7 +50,7 @@ export default function TeamIdentityPage() {
 
   function goBack() {
     if (from === "team") {
-      router.push(`/leagues/${leagueId}`);
+      router.push(`/team?league=${leagueId}`);
     } else {
       router.push(`/team/build?league=${leagueId}`);
     }
