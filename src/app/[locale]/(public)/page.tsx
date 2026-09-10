@@ -3,7 +3,8 @@ import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getClubStandings } from "@/lib/standings/get";
-import { getDashboardMatchStrips } from "@/lib/matches/dashboard-strips";
+import { getDashboardMatchStrips, getCurrentGameweekStrip } from "@/lib/matches/dashboard-strips";
+import { getCurrentGameweekStatus } from "@/lib/gameweek/get-gameweek-status";
 import { getNewsFeed } from "@/lib/news/get-feed";
 import { getTeamOfWeekCard, getPerformancesCard } from "@/lib/news/get-weekly-cards";
 import { getWeeklyStatLeaders } from "@/lib/stats/get-weekly-leaders";
@@ -17,6 +18,7 @@ import { getTodayMatches } from "@/lib/matches/get-today-matches";
 import { ehfCompetitionSlug } from "@/lib/matches/ehf-competition-slugs";
 import { getActiveClubs } from "@/lib/clubs/get-active-clubs";
 import { MatchesStrip } from "@/components/dashboard/MatchesStrip";
+import { GameweekStateBadge } from "@/components/gameweek/GameweekStateBadge";
 import { TodayMatchCarousel } from "@/components/dashboard/TodayMatchCarousel";
 import { LiveRefresher } from "@/components/live/LiveRefresher";
 import { ClubLogoLink } from "@/components/starligue/ClubLogoLink";
@@ -104,6 +106,8 @@ export default async function HomePage({
     europeanLeagueMatches,
     todayMatches,
     clubs,
+    currentGwStrip,
+    currentGwStatus,
   ] = await Promise.all([
     getClubStandings(season.id),
     getDashboardMatchStrips(season.id, gwOverride),
@@ -118,7 +122,16 @@ export default async function HomePage({
     getEuropeanLeagueMatches(season.id),
     getTodayMatches(season.id),
     getActiveClubs(season.id),
+    getCurrentGameweekStrip(season.id),
+    getCurrentGameweekStatus(season.id),
   ]);
+
+  // Bande "journée de championnat en cours" — mise en avant quand la J en cours
+  // n'est pas confirmée et qu'il reste des matchs à jouer / en train de se jouer.
+  const showCurrentGwBand =
+    currentGwStrip !== null &&
+    currentGwStatus !== null &&
+    (currentGwStatus.state === "LIVE" || currentGwStatus.state === "AWAITING_RESULTS");
 
   // Position au classement Starligue de chaque club — affichée discrètement (entre
   // parenthèses) à côté des logos dans les strips championnat ci-dessous (demande
@@ -174,6 +187,28 @@ export default async function HomePage({
           <ClubLogoLink key={club.id} club={club} />
         ))}
       </div>
+
+      {/* Journée de championnat EN COURS — mise en avant : tous les matchs de la
+          journée (joués + en direct + à venir) d'un coup d'œil. */}
+      {showCurrentGwBand && (
+        <section className="pixel-corners border border-accent-secondary/60 bg-accent-secondary/[0.06] p-3 shadow-glow-amber sm:p-4">
+          <div className="mb-2.5 flex flex-wrap items-center gap-2">
+            <GameweekStateBadge state={currentGwStatus!.state} tone={currentGwStatus!.tone} />
+            <p className="font-display text-base uppercase tracking-wide text-text">
+              {t("home.currentGameweekBand", { number: currentGwStrip!.gameweekNumber })}
+            </p>
+          </div>
+          <MatchesStrip
+            variant="results"
+            gameweekNumber={null}
+            matches={currentGwStrip!.matches}
+            size="wide"
+            rankByClubId={rankByClubId}
+            showDate
+            hideHeader
+          />
+        </section>
+      )}
 
       {/* Actus au centre (colonne dominante) ; résultats + classement à gauche,
           matchs à venir/équipe type/leaders à droite. Sur mobile : actus en

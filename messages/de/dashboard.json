@@ -46,7 +46,8 @@
     "ctaGuest": "Mein Fantasy-Team erstellen →",
     "footerDisclaimer": "Privates Projekt, ohne offizielle Verbindung zur LNH oder der Daikin StarLigue.",
     "footerPrivacyLink": "Datenschutz & Cookies",
-    "footerSupportLink": "Support"
+    "footerSupportLink": "Support",
+    "currentGameweekBand": "Spieltag {number} läuft"
   },
   "page": {
     "title": "Community",
