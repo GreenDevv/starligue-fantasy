@@ -1,0 +1,28 @@
+{
+  "state": {
+    "LIVE": {
+      "badge": "Live",
+      "detail": "Kampe i gang — live-point"
+    },
+    "AWAITING_RESULTS": {
+      "badge": "Afventer",
+      "detail": "Henter resultater"
+    },
+    "PROVISIONAL": {
+      "badge": "Foreløbig",
+      "detail": "Point bekræftes efter LNH-karaktergennemgang (tirsdag)"
+    },
+    "CONFIRMED": {
+      "badge": "Bekræftet",
+      "detail": "Endelige point"
+    }
+  },
+  "matchesProgress": "{finished}/{total} kampe",
+  "pointsMayChange": "Disse point kan stadig ændre sig",
+  "correction": "Karakterer justeret af LNH den {date} — point genberegnet",
+  "standings": {
+    "provisional": "Foreløbig stilling — runde {number} afventer bekræftelse",
+    "confirmed": "Stilling bekræftet til og med runde {number}",
+    "live": "Live-stilling — runde {number} i gang"
+  }
+}

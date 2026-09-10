@@ -9,8 +9,10 @@ import { prisma } from "@/lib/db";
 import { resolveSeasonMode, resolveActiveTeamContext } from "@/lib/team/active-team-context";
 import { getPendingGameweekRecaps } from "@/lib/team/pending-gameweek-recap";
 import { getGameweekChecklist } from "@/lib/team/gameweek-checklist";
+import { getCurrentGameweekStatus } from "@/lib/gameweek/get-gameweek-status";
 import { MyTeamSection } from "@/components/team/MyTeamSection";
 import { GameweekPanel } from "@/components/team/GameweekPanel";
+import { GameweekStateBanner } from "@/components/gameweek/GameweekStateBanner";
 import { GameweekRecapModal } from "@/components/dashboard/GameweekRecapModal";
 import type { BonusType } from "@/components/BonusPicker";
 
@@ -67,9 +69,10 @@ export default async function TeamPage({
     return null;
   }
 
-  const [pendingRecaps, checklist] = await Promise.all([
+  const [pendingRecaps, checklist, currentGwStatus] = await Promise.all([
     getPendingGameweekRecaps(userId, mode, ctx.seasonId),
     mode === "live" ? getGameweekChecklist(ctx.seasonId, ctx.teamId) : Promise.resolve(null),
+    mode === "live" ? getCurrentGameweekStatus(ctx.seasonId) : Promise.resolve(null),
   ]);
 
   const captain = team.captainId ? team.squad.find((s) => s.playerId === team.captainId) : null;
@@ -78,6 +81,20 @@ export default async function TeamPage({
   return (
     <>
       <GameweekRecapModal recaps={pendingRecaps} />
+      {currentGwStatus && (
+        <GameweekStateBanner
+          context="team"
+          data={{
+            number: currentGwStatus.number,
+            state: currentGwStatus.state,
+            tone: currentGwStatus.tone,
+            matchesFinished: currentGwStatus.matchesFinished,
+            matchesTotal: currentGwStatus.matchesTotal,
+            hasCorrection: currentGwStatus.hasCorrection,
+            correctionAt: currentGwStatus.correctionAt?.toISOString() ?? null,
+          }}
+        />
+      )}
       {checklist && (
         <GameweekPanel
           gameweekNumber={checklist.gameweekNumber}

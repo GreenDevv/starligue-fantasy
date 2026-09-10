@@ -19,6 +19,9 @@ export interface WeeklyCorrectionsResult {
     batchId: string | null;
   }[];
   adminsEmailed: number;
+  // Journées passées au 🟢 : la LNH a relu ses notes (via ce run), les points ne
+  // bougeront plus. Voir Gameweek.confirmedAt / src/lib/gameweek/state.ts.
+  confirmedGameweeks: number[];
 }
 
 async function lastScoredGameweekNumbers(seasonId: string, count: number): Promise<number[]> {
@@ -43,9 +46,13 @@ export async function runWeeklyCorrectionsCheck(opts?: {
 
   const batches: WeeklyCorrectionsResult["batches"] = [];
   const recapBatches: AdminRecapBatch[] = [];
+  // Une journée relue sans erreur (0 correction OU corrections appliquées) est
+  // marquée confirmée en fin de run.
+  const reviewedGameweeks: number[] = [];
 
   for (const gwNum of gameweekNumbers) {
     const analysis = await analyzeGameweekCorrections(gwNum);
+    reviewedGameweeks.push(gwNum);
     if (analysis.totalCorrections === 0) continue;
 
     const keys = analysis.matches.flatMap((m) => m.corrections.map((c) => c.key));
@@ -71,6 +78,26 @@ export async function runWeeklyCorrectionsCheck(opts?: {
     }
   }
 
+  // Passage au 🟢 : les journées relues ici (avec ou sans correction) et déjà
+  // scorées deviennent "confirmées" — la LNH a eu sa fenêtre de révision.
+  const toConfirm = await prisma.gameweek.findMany({
+    where: {
+      seasonId: season.id,
+      number: { in: reviewedGameweeks },
+      isScored: true,
+      confirmedAt: null,
+    },
+    select: { number: true },
+    orderBy: { number: "asc" },
+  });
+  const confirmedGameweeks = toConfirm.map((g) => g.number);
+  if (confirmedGameweeks.length > 0) {
+    await prisma.gameweek.updateMany({
+      where: { seasonId: season.id, number: { in: confirmedGameweeks } },
+      data: { confirmedAt: new Date() },
+    });
+  }
+
   let adminsEmailed = 0;
   if (recapBatches.length > 0) {
     const admins = await prisma.user.findMany({
@@ -93,5 +120,5 @@ export async function runWeeklyCorrectionsCheck(opts?: {
     }
   }
 
-  return { checkedGameweeks: gameweekNumbers, batches, adminsEmailed };
+  return { checkedGameweeks: gameweekNumbers, batches, adminsEmailed, confirmedGameweeks };
 }

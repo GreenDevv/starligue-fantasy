@@ -17,6 +17,7 @@ import {
   SwitchToTeamButton,
 } from "@/components/leagues/LeagueDetailActions";
 import { LeagueChat } from "@/components/leagues/LeagueChat";
+import { GameweekStandingsBanner } from "@/components/gameweek/GameweekStandingsBanner";
 import { LinkButton } from "@/components/ui/Button";
 
 export default async function LeagueDetailPage({ params }: { params: { id: string; locale: string } }) {
@@ -113,8 +114,9 @@ export default async function LeagueDetailPage({ params }: { params: { id: strin
       )}
 
       {/* Classement de la ligue */}
-      <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">{t("detail.leagueLeaderboardTitle")}</p>
+      <div className="flex flex-col gap-2">
+        <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">{t("detail.leagueLeaderboardTitle")}</p>
+        {mode === "live" && <GameweekStandingsBanner />}
         <LeaderboardList
           entries={league.standings}
           currentUserId={userId}

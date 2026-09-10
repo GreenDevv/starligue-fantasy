@@ -1,0 +1,28 @@
+{
+  "state": {
+    "LIVE": {
+      "badge": "Ao vivo",
+      "detail": "Jogos a decorrer — pontos ao vivo"
+    },
+    "AWAITING_RESULTS": {
+      "badge": "A aguardar",
+      "detail": "A obter resultados"
+    },
+    "PROVISIONAL": {
+      "badge": "Provisória",
+      "detail": "Pontos confirmados após revisão das notas da LNH (terça)"
+    },
+    "CONFIRMED": {
+      "badge": "Confirmada",
+      "detail": "Pontos definitivos"
+    }
+  },
+  "matchesProgress": "{finished}/{total} jogos",
+  "pointsMayChange": "Estes pontos ainda podem mudar",
+  "correction": "Notas ajustadas pela LNH em {date} — pontos recalculados",
+  "standings": {
+    "provisional": "Classificação provisória — J{number} a aguardar validação",
+    "confirmed": "Classificação confirmada até à J{number}",
+    "live": "Classificação ao vivo — J{number} a decorrer"
+  }
+}

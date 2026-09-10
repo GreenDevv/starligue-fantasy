@@ -1,0 +1,28 @@
+{
+  "state": {
+    "LIVE": {
+      "badge": "Live",
+      "detail": "Matches in progress — live points"
+    },
+    "AWAITING_RESULTS": {
+      "badge": "Awaiting",
+      "detail": "Fetching results"
+    },
+    "PROVISIONAL": {
+      "badge": "Provisional",
+      "detail": "Points confirmed after LNH ratings review (Tuesday)"
+    },
+    "CONFIRMED": {
+      "badge": "Confirmed",
+      "detail": "Final points"
+    }
+  },
+  "matchesProgress": "{finished}/{total} matches",
+  "pointsMayChange": "These points can still change",
+  "correction": "Ratings adjusted by the LNH on {date} — points recalculated",
+  "standings": {
+    "provisional": "Provisional standings — GW{number} awaiting confirmation",
+    "confirmed": "Standings confirmed through GW{number}",
+    "live": "Live standings — GW{number} in progress"
+  }
+}
