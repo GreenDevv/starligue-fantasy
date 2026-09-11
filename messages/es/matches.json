@@ -20,7 +20,11 @@
     "savePercentage": "% Paradas",
     "rating": "Nota",
     "h2hHistory": "Historial de enfrentamientos",
-    "points": "Pts"
+    "points": "Pts",
+    "eventsTitle": "Cronología del partido",
+    "noEvents": "Aún no hay eventos.",
+    "live": "En directo · {minute}’",
+    "halfTime": "Descanso"
   },
   "panel": {
     "recentResults": "Últimos resultados",

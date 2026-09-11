@@ -68,6 +68,18 @@ export interface MatchTeamBoxscore {
   fieldPlayers: MatchBoxscorePlayerRow[];
 }
 
+export interface MatchLiveEventRow {
+  id: string;
+  sequence: number;
+  period: string;
+  minute: number;
+  icon: string;
+  homeScore: number;
+  awayScore: number;
+  text: string;
+  player: { id: string; firstName: string; lastName: string; photoUrl: string | null; position: Position } | null;
+}
+
 export interface MatchDetail {
   id: string;
   gameweekNumber: number;
@@ -75,8 +87,15 @@ export interface MatchDetail {
   kickoffAt: Date;
   homeScore: number | null;
   awayScore: number | null;
+  status: string;
+  liveMinute: number | null;
+  livePeriod: string | null;
   home: MatchTeamBoxscore;
   away: MatchTeamBoxscore;
+  // Le plus récent en premier (lecture "fil d'actu") — vide hors direct/juste après
+  // (pas de suivi événement par événement pour les matchs plus anciens, feature
+  // ajoutée le 11/09).
+  liveEvents: MatchLiveEventRow[];
 }
 
 function toRow(playerId: string, p: { firstName: string; lastName: string; photoUrl: string | null; position: Position }, s: {
@@ -221,9 +240,13 @@ export async function getMatchDetail(matchId: string): Promise<MatchDetail | nul
   if (!match) return null;
 
   const isSimulation = match.season.label === SIMULATION_SEASON_LABEL;
+  // LIVE en plus de FINISHED : un match en cours doit rester visible (score,
+  // événements en direct) — seul un match pas encore commencé (SCHEDULED) n'a rien
+  // à montrer. Ne change rien à la simulation (curseur admin seul fait foi, cf.
+  // commentaire en tête de fichier).
   const isDecided = isSimulation
     ? match.gameweek.number <= match.season.currentSimulationGameweekNumber
-    : match.status === "FINISHED";
+    : match.status === "FINISHED" || match.status === "LIVE";
   if (!isDecided) return null;
 
   let stats = await prisma.playerMatchStat.findMany({
@@ -231,13 +254,25 @@ export async function getMatchDetail(matchId: string): Promise<MatchDetail | nul
     include: { player: { select: { id: true, firstName: true, lastName: true, photoUrl: true, position: true, clubId: true } } },
   });
 
-  if (stats.length === 0) {
+  // Le boxscore lnh.fr n'existe qu'après le coup de sifflet final — inutile de
+  // tenter un scrape à la demande pendant qu'un match est encore LIVE (rien à
+  // trouver, juste une requête gâchée). La page affiche le tableau vide
+  // ("Statistiques indisponibles") + la timeline d'événements en attendant.
+  if (stats.length === 0 && match.status !== "LIVE") {
     await scrapeAndIngestBoxscore(match, match.homeClub, match.awayClub, match.season.label);
     stats = await prisma.playerMatchStat.findMany({
       where: { matchId },
       include: { player: { select: { id: true, firstName: true, lastName: true, photoUrl: true, position: true, clubId: true } } },
     });
   }
+
+  const liveEventRows = await prisma.matchLiveEvent.findMany({
+    where: { matchId },
+    orderBy: { sequence: "desc" },
+    include: {
+      player: { select: { id: true, firstName: true, lastName: true, photoUrl: true, position: true } },
+    },
+  });
 
   const { homeClub, awayClub } = match;
 
@@ -275,7 +310,21 @@ export async function getMatchDetail(matchId: string): Promise<MatchDetail | nul
     kickoffAt: match.kickoffAt,
     homeScore: match.homeScore,
     awayScore: match.awayScore,
+    status: match.status,
+    liveMinute: match.liveMinute,
+    livePeriod: match.livePeriod,
     home: buildTeam(match.homeClub),
     away: buildTeam(match.awayClub),
+    liveEvents: liveEventRows.map((e) => ({
+      id: e.id,
+      sequence: e.sequence,
+      period: e.period,
+      minute: e.minute,
+      icon: e.icon,
+      homeScore: e.homeScore,
+      awayScore: e.awayScore,
+      text: e.text,
+      player: e.player,
+    })),
   };
 }

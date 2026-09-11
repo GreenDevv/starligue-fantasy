@@ -20,7 +20,11 @@
     "savePercentage": "% Arrêts",
     "rating": "Note",
     "h2hHistory": "Historique des confrontations",
-    "points": "Pts"
+    "points": "Pts",
+    "eventsTitle": "Fil du match",
+    "noEvents": "Aucun événement pour l'instant.",
+    "live": "En direct · {minute}’",
+    "halfTime": "Mi-temps"
   },
   "panel": {
     "recentResults": "Derniers résultats",

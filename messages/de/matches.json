@@ -20,7 +20,11 @@
     "savePercentage": "% Paraden",
     "rating": "Bewertung",
     "h2hHistory": "Duell-Historie",
-    "points": "Pkt"
+    "points": "Pkt",
+    "eventsTitle": "Spielverlauf",
+    "noEvents": "Noch keine Ereignisse.",
+    "live": "Live · {minute}’",
+    "halfTime": "Halbzeit"
   },
   "panel": {
     "recentResults": "Letzte Ergebnisse",

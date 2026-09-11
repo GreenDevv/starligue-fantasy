@@ -20,7 +20,11 @@
     "savePercentage": "Save %",
     "rating": "Rating",
     "h2hHistory": "Head-to-head history",
-    "points": "Pts"
+    "points": "Pts",
+    "eventsTitle": "Match timeline",
+    "noEvents": "No events yet.",
+    "live": "Live · {minute}’",
+    "halfTime": "Half-time"
   },
   "panel": {
     "recentResults": "Recent results",

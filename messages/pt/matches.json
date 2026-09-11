@@ -20,7 +20,11 @@
     "savePercentage": "% Defesas",
     "rating": "Nota",
     "h2hHistory": "Histórico de confrontos",
-    "points": "Pts"
+    "points": "Pts",
+    "eventsTitle": "Cronologia do jogo",
+    "noEvents": "Ainda sem eventos.",
+    "live": "Ao vivo · {minute}’",
+    "halfTime": "Intervalo"
   },
   "panel": {
     "recentResults": "Últimos resultados",

@@ -20,7 +20,11 @@
     "savePercentage": "% Redninger",
     "rating": "Karakter",
     "h2hHistory": "Indbyrdes historik",
-    "points": "Pt"
+    "points": "Pt",
+    "eventsTitle": "Kamptidslinje",
+    "noEvents": "Endnu ingen begivenheder.",
+    "live": "Direkte · {minute}’",
+    "halfTime": "Pause"
   },
   "panel": {
     "recentResults": "Seneste resultater",
