@@ -642,6 +642,7 @@ export function parseLiveMatchFeedHtml(html: string): ScrapedLiveMatchState | nu
 // pas le détail événement par événement (pas dispo via cet endpoint).
 export interface ScrapedLiveIndexEntry {
   calendarsId: string;
+  channelId: string | null; // id du lien "Voir le Live" (?channel=N), voir fetchLiveEventsFeed
   homeScore: number;
   awayScore: number;
   minute: number; // minutes écoulées dans le match (0-60), continu sur les 2 périodes
@@ -680,8 +681,11 @@ export function parseLiveIndexHtml(html: string): ScrapedLiveIndexEntry[] {
     const parsed = parseLivePeriodText(periodTextMatch[1]!);
     if (!parsed) continue;
 
+    const channelMatch = raw.match(/matchs\/live\/voir\?channel=(\d+)/);
+
     results.push({
       calendarsId: idMatch[1]!,
+      channelId: channelMatch?.[1] ?? null,
       homeScore: parseInt(scoreMatch[1]!, 10),
       awayScore: parseInt(scoreMatch[2]!, 10),
       minute: parsed.minute,
@@ -689,6 +693,50 @@ export function parseLiveIndexHtml(html: string): ScrapedLiveIndexEntry[] {
     });
   }
   return results;
+}
+
+// Détail événement par événement (buts nominatifs, cartons, arrêts…) d'un match en
+// direct — PAS via view_tab_live (cassé pendant un vrai match, voir ci-dessus) mais
+// via la vraie page "live" de lnh.fr (/matchs/live/voir?channel=N), validée en
+// direct le 11/09 sur Saint-Raphaël-Dunkerque (channel=50, 61 événements nominatifs
+// récupérés en cours de match). Mécanisme (déduit de scripts/apps.js,
+// `cronRefreshLivesViewLarge`/`makeRefreshLivesViewLarge`) :
+//   1. GET /matchs/live/voir?channel=N (page HTML) → contient un formulaire caché
+//      #live-form avec un champ `filename` (hash de cache, stable pour tout le match,
+//      différent par channel) — voir fetchLiveChannelFilename.
+//   2. POST /ajaxlive avec tabs=tab_events&channels_id=N&manual_mode=0&filename=<hash>
+//      (PAS de contents_controller/contents_action — contrairement à /ajaxpost1, ce
+//      sont exactement les champs de #live-form sérialisés) → renvoie le même
+//      tableau `table-stats events` que view_tab_live (event-icon/minute/score/
+//      cell-event), réutilisable tel quel avec parseLiveFeedRows.
+// Un `filename` invalide/expiré renvoie 400 — à re-résoudre via (1) dans ce cas.
+export interface ScrapedLiveEvent {
+  icon: string;
+  period: "1H" | "2H";
+  minute: number; // minutes écoulées dans la période (0-30)
+  homeScore: number;
+  awayScore: number;
+  text: string;
+}
+
+// Convertit les lignes brutes (plus récentes en premier) en liste chronologique
+// (plus ancien en premier, ordre d'insertion en base) avec la période déduite :
+// tout ce qui suit un "periods_finish" de fin de 1ère mi-temps passe en "2H".
+function toChronologicalLiveEvents(rows: LiveFeedRow[]): ScrapedLiveEvent[] {
+  const chronological = [...rows].reverse();
+  let period: ScrapedLiveEvent["period"] = "1H";
+  const out: ScrapedLiveEvent[] = [];
+  for (const r of chronological) {
+    out.push({ icon: r.icon, period, minute: r.minute, homeScore: r.home, awayScore: r.away, text: r.event });
+    if (r.icon === "periods_finish" && /mi-?temps/i.test(r.event) && !/fin du match/i.test(r.event)) {
+      period = "2H";
+    }
+  }
+  return out;
+}
+
+export function parseLiveEventsHtml(html: string): ScrapedLiveEvent[] {
+  return toChronologicalLiveEvents(parseLiveFeedRows(html));
 }
 
 // Infère l'année d'une date de calendrier sans année ("ven. 05 sept." / "sam. 06 juin") :
@@ -1407,6 +1455,52 @@ export class LnhScraperProvider implements StarligueDataProvider {
     }
 
     return parseLiveIndexHtml(await res.text());
+  }
+
+  // Résout le `filename` (hash de cache) requis par fetchLiveEventsFeed, en lisant
+  // le formulaire caché #live-form de la page /matchs/live/voir?channel=N. Stable
+  // pour toute la durée du match (validé : 3 fetches successifs → même hash) donc à
+  // résoudre une seule fois par match puis mettre en cache côté appelant
+  // (Match.externalIds), pas à chaque poll.
+  async fetchLiveChannelFilename(channelId: string): Promise<string | null> {
+    const res = await this.fetchWithTimeout(`${LNH_BASE}/matchs/live/voir?channel=${channelId}`, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; StarligueFantasyBot/1.0)" },
+    });
+    if (!res) {
+      throw new IngestionError(`LNH Scraper : impossible de récupérer la page live du channel ${channelId}`, this.name, true);
+    }
+    const html = await res.text();
+    return html.match(/name="filename"[^>]*value="([^"]+)"/)?.[1] ?? null;
+  }
+
+  // Détail événement par événement d'un match en direct — voir ScrapedLiveEvent
+  // ci-dessus pour le mécanisme complet (/ajaxlive, PAS /ajaxpost1). Renvoie null si
+  // le `filename` est invalide/expiré (réponse 400) : à l'appelant de ré-résoudre
+  // via fetchLiveChannelFilename et réessayer.
+  async fetchLiveEventsFeed(channelId: string, filename: string): Promise<ScrapedLiveEvent[] | null> {
+    const body = new URLSearchParams({
+      tabs: "tab_events",
+      channels_id: channelId,
+      manual_mode: "0",
+      filename,
+    });
+
+    const res = await fetch(`${LNH_BASE}/ajaxlive`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-Requested-With": "XMLHttpRequest",
+        "User-Agent": "Mozilla/5.0 (compatible; StarligueFantasyBot/1.0)",
+      },
+      body: body.toString(),
+      signal: AbortSignal.timeout(15000),
+    });
+    if (res.status === 400) return null; // filename expiré
+    if (!res.ok) {
+      throw new IngestionError(`LNH Scraper : impossible de récupérer les événements live du channel ${channelId} (HTTP ${res.status})`, this.name, true);
+    }
+
+    return parseLiveEventsHtml(await res.text());
   }
 
   // Récupère les boxscores de plusieurs matchs déjà joués (ex : les ~8 matchs d'une

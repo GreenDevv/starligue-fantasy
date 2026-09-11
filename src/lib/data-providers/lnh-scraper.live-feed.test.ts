@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseLiveMatchFeedHtml, parseLiveIndexHtml } from "./lnh-scraper.provider";
+import { parseLiveMatchFeedHtml, parseLiveIndexHtml, parseLiveEventsHtml } from "./lnh-scraper.provider";
 
 // Structure fidèle au HTML réel capturé le 2026-09-11 (scripts/probe-lnh-live-feed.ts,
 // J02 Limoges–Saran, contents_action=view_tab_live) : table `table-stats events`,
@@ -81,7 +81,7 @@ describe("parseLiveMatchFeedHtml", () => {
 // Structure fidèle au HTML réel capturé en direct le 2026-09-11
 // (eStatsChannels/index_ajax, Saint-Raphaël-Dunkerque, `view_tab_live` étant resté
 // vide malgré le match bien en cours — voir lnh-scraper.provider.ts).
-function indexItem(opts: { id: string; period: string; home: number; away: number; homeName: string; awayName: string }): string {
+function indexItem(opts: { id: string; period: string; home: number; away: number; homeName: string; awayName: string; channel?: string }): string {
   return `
   <div class="calendars-listing-item listing-item live  lmsl"
     id="${opts.id}">
@@ -108,6 +108,7 @@ function indexItem(opts: { id: string; period: string; home: number; away: numbe
             </div>
         </div>
     </div>
+    ${opts.channel ? `<div class="row-icons by1"><a class="icon-item" href="https://www.lnh.fr/matchs/live/voir?channel=${opts.channel}">Voir le Live</a></div>` : ""}
   </div>`;
 }
 
@@ -143,21 +144,21 @@ describe("parseLiveIndexHtml", () => {
   it("match en 1ère mi-temps", () => {
     const html = indexItem({ id: "12012", period: "1ère mi-temps&nbsp;&nbsp;19:17", home: 7, away: 5, homeName: "Saint-Raphaël", awayName: "Dunkerque" });
     expect(parseLiveIndexHtml(html)).toEqual([
-      { calendarsId: "12012", homeScore: 7, awayScore: 5, minute: 19, period: "1H" },
+      { calendarsId: "12012", channelId: null, homeScore: 7, awayScore: 5, minute: 19, period: "1H" },
     ]);
   });
 
   it("mi-temps (pause)", () => {
     const html = indexItem({ id: "12012", period: "Mi-temps", home: 15, away: 14, homeName: "Saint-Raphaël", awayName: "Dunkerque" });
     expect(parseLiveIndexHtml(html)).toEqual([
-      { calendarsId: "12012", homeScore: 15, awayScore: 14, minute: 30, period: "HT" },
+      { calendarsId: "12012", channelId: null, homeScore: 15, awayScore: 14, minute: 30, period: "HT" },
     ]);
   });
 
   it("2ème mi-temps : minute cumulée = 30 + minute de période", () => {
     const html = indexItem({ id: "12012", period: "2ème mi-temps&nbsp;&nbsp;12:05", home: 22, away: 20, homeName: "Saint-Raphaël", awayName: "Dunkerque" });
     expect(parseLiveIndexHtml(html)).toEqual([
-      { calendarsId: "12012", homeScore: 22, awayScore: 20, minute: 42, period: "2H" },
+      { calendarsId: "12012", channelId: null, homeScore: 22, awayScore: 20, minute: 42, period: "2H" },
     ]);
   });
 
@@ -174,5 +175,32 @@ describe("parseLiveIndexHtml", () => {
     const result = parseLiveIndexHtml(html);
     expect(result).toHaveLength(2);
     expect(result.map((r) => r.calendarsId)).toEqual(["12012", "12015"]);
+  });
+
+  it("extrait le channelId du lien « Voir le Live »", () => {
+    const html = indexItem({ id: "12012", period: "1ère mi-temps&nbsp;&nbsp;19:17", home: 7, away: 5, homeName: "Saint-Raphaël", awayName: "Dunkerque", channel: "50" });
+    expect(parseLiveIndexHtml(html)[0]?.channelId).toBe("50");
+  });
+});
+
+// Structure fidèle au HTML réel capturé en direct le 2026-09-11 sur /ajaxlive
+// (Saint-Raphaël-Dunkerque, channel=50) — même tableau `table-stats events` que
+// view_tab_live, réutilise donc les helpers row()/feed() ci-dessus.
+describe("parseLiveEventsHtml", () => {
+  it("ordonne chronologiquement (le flux est du plus récent au plus ancien) et déduit la période", () => {
+    const html = feed([
+      row({ icon: "goals", min: "12:05", home: 3, away: 2, event: "But de X" }),
+      row({ icon: "periods_finish", min: "30:00", home: 15, away: 14, event: "Fin de la première mi-temps" }),
+      row({ icon: "goals_7m", min: "01:02", home: 1, away: 0, event: "Penalty réussi de Y" }),
+    ]);
+    expect(parseLiveEventsHtml(html)).toEqual([
+      { icon: "goals_7m", period: "1H", minute: 1, homeScore: 1, awayScore: 0, text: "Penalty réussi de Y" },
+      { icon: "periods_finish", period: "1H", minute: 30, homeScore: 15, awayScore: 14, text: "Fin de la première mi-temps" },
+      { icon: "goals", period: "2H", minute: 12, homeScore: 3, awayScore: 2, text: "But de X" },
+    ]);
+  });
+
+  it("feed vide → []", () => {
+    expect(parseLiveEventsHtml("<div>rien</div>")).toEqual([]);
   });
 });

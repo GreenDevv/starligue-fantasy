@@ -606,19 +606,44 @@ model Match {
   // (page d'abonnement/calendrier), pas un lien direct vers CE match précis.
   broadcasterName  String?
   broadcasterUrl   String?
-  // Suivi minute par minute pendant le match (feed lnh.fr /ajaxpost1
-  // contents_action=view_tab_live, src/lib/ingestion/live-feed.ts) — null hors
-  // direct. liveMinute = minutes écoulées dans la période courante (0-30),
-  // livePeriod = "1H" | "HT" | "2H" | "FT". homeScore/awayScore et status sont
-  // aussi rafraîchis depuis ce feed pendant le direct.
+  // Suivi minute par minute pendant le match (index lnh.fr eStatsChannels,
+  // src/lib/ingestion/live-feed.ts) — null hors direct. liveMinute = minutes
+  // écoulées dans la période courante (0-30), livePeriod = "1H" | "HT" | "2H" | "FT".
+  // homeScore/awayScore et status sont aussi rafraîchis depuis ce feed pendant le
+  // direct.
   liveMinute       Int?
   livePeriod       String?
   liveUpdatedAt    DateTime?
   externalIds      Json              @default("{}")
   playerStats      PlayerMatchStat[]
   predictionMarket PredictionMarket?
+  liveEvents       MatchLiveEvent[]
 
   @@index([gameweekId])
+}
+
+// Détail événement par événement d'un match en direct (buts nominatifs, cartons,
+// arrêts, exclusions…) — feed lnh.fr /ajaxlive (contents_controller=cache,
+// contents_action=render, type=eStatsChannels), voir src/lib/ingestion/live-feed.ts.
+// `sequence` = position chronologique (0 = premier événement du match, croissant) —
+// le feed lnh.fr renvoie l'historique complet à chaque poll (du plus récent au plus
+// ancien) donc l'ingestion ne fait qu'ajouter les nouvelles lignes (sequence au-delà
+// du dernier stocké), jamais de create nu sur un événement déjà vu.
+model MatchLiveEvent {
+  id        String   @id @default(cuid())
+  matchId   String
+  match     Match    @relation(fields: [matchId], references: [id])
+  sequence  Int
+  period    String // "1H" | "2H"
+  minute    Int // minutes écoulées dans la période (0-30)
+  icon      String // ex: goals, goals_7m, two_min, yellow_card, red_card, alert, stops, blocked, missed, timeout, periods_start, periods_finish
+  homeScore Int
+  awayScore Int
+  text      String // libellé lnh.fr, ex: "But de Micke Brasseleur (Saint-Raphaël)"
+  createdAt DateTime @default(now())
+
+  @@unique([matchId, sequence])
+  @@index([matchId])
 }
 
 // Stats détaillées issues du boxscore lnh.fr (feuille de match). Toutes nullable :
