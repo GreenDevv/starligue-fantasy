@@ -19,7 +19,8 @@
     "saves": "Arrêts",
     "savePercentage": "% Arrêts",
     "rating": "Note",
-    "h2hHistory": "Historique des confrontations"
+    "h2hHistory": "Historique des confrontations",
+    "points": "Pts"
   },
   "panel": {
     "recentResults": "Derniers résultats",

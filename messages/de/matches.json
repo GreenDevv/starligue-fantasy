@@ -19,7 +19,8 @@
     "saves": "Paraden",
     "savePercentage": "% Paraden",
     "rating": "Bewertung",
-    "h2hHistory": "Duell-Historie"
+    "h2hHistory": "Duell-Historie",
+    "points": "Pkt"
   },
   "panel": {
     "recentResults": "Letzte Ergebnisse",

@@ -17,6 +17,19 @@ function ratingCell(value: number | null) {
   );
 }
 
+// Points fantasy que la ligne rapporte à un titulaire (§2.3) — affichés à côté de
+// la note LNH pour rendre le scoring lisible (demande utilisateur : « rendre
+// visible » sans changer le modèle).
+function pointsCell(value: number | null) {
+  if (value === null) return <span className="text-text-muted">—</span>;
+  return (
+    <span className={value > 0 ? "text-points-pos" : value < 0 ? "text-points-neg" : "text-text-muted"}>
+      {value > 0 ? "+" : ""}
+      {value}
+    </span>
+  );
+}
+
 function statCell(value: number | null, category: "bonus" | "malus") {
   if (value === null) return <span className="text-text-muted">—</span>;
   if (category === "malus" && value > 0) return <span className="text-points-neg">{value}</span>;
@@ -28,13 +41,14 @@ function GoalkeepersTable({ rows, t }: { rows: MatchBoxscorePlayerRow[]; t: Tran
   const sorted = [...rows].sort((a, b) => (b.lnhRating ?? -1) - (a.lnhRating ?? -1));
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[360px] border-collapse text-xs">
+      <table className="w-full min-w-[420px] border-collapse text-xs">
         <thead>
           <tr className="text-[10px] uppercase tracking-wide text-text-muted">
             <th className="py-1 text-left font-normal">{t("detail.goalkeeper")}</th>
             <th className="w-16 py-1 text-right font-normal">{t("detail.saves")}</th>
             <th className="w-14 py-1 text-right font-normal">{t("detail.savePercentage")}</th>
             <th className="w-14 py-1 text-right font-normal">{t("detail.rating")}</th>
+            <th className="w-14 py-1 text-right font-normal">{t("detail.points")}</th>
           </tr>
         </thead>
         <tbody>
@@ -56,6 +70,7 @@ function GoalkeepersTable({ rows, t }: { rows: MatchBoxscorePlayerRow[]; t: Tran
                 {p.savePercentage !== null ? `${p.savePercentage.toFixed(0)}%` : "—"}
               </td>
               <td className="py-1.5 text-right tabular-nums">{ratingCell(p.lnhRating)}</td>
+              <td className="py-1.5 text-right font-arcade tabular-nums">{pointsCell(p.fantasyPoints)}</td>
             </tr>
           ))}
         </tbody>
@@ -69,11 +84,12 @@ function FieldPlayersTable({ rows, t, tLabels }: { rows: MatchBoxscorePlayerRow[
   const sorted = [...rows].sort((a, b) => (b.lnhRating ?? -1) - (a.lnhRating ?? -1));
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[980px] border-collapse text-xs">
+      <table className="w-full min-w-[1040px] border-collapse text-xs">
         <thead>
           <tr className="text-[10px] uppercase tracking-wide text-text-muted">
             <th className="py-1 text-left font-normal">{t("detail.player")}</th>
             <th className="w-14 py-1 text-right font-normal">{t("detail.rating")}</th>
+            <th className="w-14 py-1 text-right font-normal">{t("detail.points")}</th>
             {STAT_LINES.map((l) => (
               <th key={l.key} className="w-16 py-1 text-right font-normal">
                 {tLabels(`statLine.${l.key}`)}
@@ -93,6 +109,7 @@ function FieldPlayersTable({ rows, t, tLabels }: { rows: MatchBoxscorePlayerRow[
                 </Link>
               </td>
               <td className="py-1.5 text-right tabular-nums">{ratingCell(p.lnhRating)}</td>
+              <td className="py-1.5 text-right font-arcade tabular-nums">{pointsCell(p.fantasyPoints)}</td>
               {STAT_LINES.map((l) => (
                 <td key={l.key} className="py-1.5 text-right tabular-nums">
                   {statCell(p[l.key as keyof MatchBoxscorePlayerRow] as number | null, l.category)}
