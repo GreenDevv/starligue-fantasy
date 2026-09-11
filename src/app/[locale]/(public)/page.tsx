@@ -228,11 +228,17 @@ export default async function HomePage({
                     </Link>
                     <ClubLogo club={e.club} size="xs" />
                     {e.lnhRating !== null && (
-                      <span className="text-xs tabular-nums text-text-muted">{e.lnhRating.toFixed(1)}</span>
+                      <span
+                        className={`w-8 shrink-0 text-right font-arcade text-base tabular-nums ${
+                          e.lnhRating >= 7 ? "text-points-pos" : e.lnhRating < 5 ? "text-points-neg" : "text-text"
+                        }`}
+                      >
+                        {e.lnhRating.toFixed(1)}
+                      </span>
                     )}
-                    <span className="w-9 shrink-0 text-right font-arcade text-sm tabular-nums text-points-pos">
+                    <span className="w-10 shrink-0 text-right text-[11px] tabular-nums text-text-muted">
                       {e.points > 0 ? "+" : ""}
-                      {e.points}
+                      {e.points} pts
                     </span>
                   </li>
                 ))}
