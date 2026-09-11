@@ -16,6 +16,7 @@ self.addEventListener("push", (event) => {
       body: payload.body,
       icon: "/icon-192.png",
       badge: "/icon-192.png",
+      image: payload.image,
       data: { url: payload.url },
       tag: payload.tag,
     })

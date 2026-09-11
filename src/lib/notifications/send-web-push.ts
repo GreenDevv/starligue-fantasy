@@ -21,6 +21,7 @@ export interface WebPushPayload {
   body: string;
   url: string;
   tag?: string;
+  image?: string;
 }
 
 export interface WebPushSubscriptionKeys {
