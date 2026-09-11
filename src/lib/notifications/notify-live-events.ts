@@ -38,6 +38,9 @@ export async function notifyWebPushForLiveEvents(
   if (candidates.length === 0) return;
 
   const url = `/matches/${matchId}`;
+  // Bannière écusson vs écusson (voir src/app/api/og/live-event/route.tsx) — un seul
+  // appel généré une fois par match, pas par événement.
+  const image = `/api/og/live-event?home=${homeClubId}&away=${awayClubId}`;
 
   for (const event of events) {
     for (const user of candidates) {
@@ -47,7 +50,7 @@ export async function notifyWebPushForLiveEvents(
         if (!owns) continue;
       }
 
-      const payload = { title: "Starligue Fantasy", body: event.text, url, tag: `match-${matchId}` };
+      const payload = { title: "Starligue Fantasy", body: event.text, url, tag: `match-${matchId}`, image };
       for (const sub of user.webPushSubscriptions) {
         const { expired } = await sendWebPush(sub, payload);
         if (expired) {
