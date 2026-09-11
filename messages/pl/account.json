@@ -10,7 +10,13 @@
     "enabledLabel": "Otrzymuj powiadomienia na żywo",
     "onlyMyPlayersLabel": "Tylko moi zawodnicy",
     "clubsLabel": "Obserwowane kluby (brak = wszystkie)",
-    "clubsHint": "Jeśli wybierzesz kluby, otrzymasz tylko wydarzenia z ich meczów."
+    "clubsHint": "Jeśli wybierzesz kluby, otrzymasz tylko wydarzenia z ich meczów.",
+    "webPushEnable": "Włącz na tym urządzeniu",
+    "webPushDisable": "Wyłącz na tym urządzeniu",
+    "webPushDenied": "Odmówiono zgody — zezwól na powiadomienia dla tej strony w ustawieniach przeglądarki.",
+    "webPushError": "Nie udało się włączyć powiadomień, spróbuj ponownie później.",
+    "webPushUnsupported": "Powiadomienia przeglądarki nie są tu dostępne. Na iPhone/iPad dodaj najpierw stronę do ekranu głównego (Udostępnij → Dodaj do ekranu głównego), a następnie otwórz ją z tej ikony.",
+    "webPushHint": "Otrzymuj wydarzenia na żywo nawet przy zamkniętej karcie."
   },
   "savedMessage": "Zapisano! Pseudonim widoczny u góry zaktualizuje się przy następnym logowaniu.",
   "saving": "Zapisywanie…",

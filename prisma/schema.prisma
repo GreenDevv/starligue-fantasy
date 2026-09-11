@@ -131,6 +131,7 @@ model User {
   leagueChatMessages  LeagueChatMessage[]
   passwordResetTokens PasswordResetToken[]
   pushTokens          PushToken[]
+  webPushSubscriptions WebPushSubscription[]
   chatMessageReports  ChatMessageReport[]
   blockedUsers        BlockedUser[]        @relation("Blocker")
   blockedByUsers      BlockedUser[]        @relation("Blocked")
@@ -165,6 +166,23 @@ model PushToken {
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
   user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Abonnement Web Push (navigateur, ARCHITECTURE.md §24) — pendant de PushToken mais
+// pour le site installé en PWA (iOS Safari n'autorise les notifications web QUE
+// depuis un site "Ajouté à l'écran d'accueil", voir src/app/manifest.ts) plutôt que
+// l'app mobile Capacitor. `endpoint` identifie l'abonnement de façon unique (un
+// endpoint = un navigateur/device précis) ; `p256dh`/`auth` sont les clés de
+// chiffrement requises par le protocole Web Push standard (RFC 8291), fournies par
+// le navigateur à la souscription (PushSubscription.toJSON().keys).
+model WebPushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
 }
 
 // Dédoublonnage des rappels de deadline entre deux runs de

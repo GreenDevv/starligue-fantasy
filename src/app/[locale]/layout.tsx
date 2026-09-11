@@ -56,6 +56,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
+  themeColor: "#0E1116",
 };
 
 export async function generateMetadata({
@@ -103,6 +104,15 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
+    },
+    // "Ajouter à l'écran d'accueil" en plein écran (standalone) sur iOS Safari —
+    // requis pour que les notifications Web Push fonctionnent (voir manifest.ts).
+    // Sans effet sur l'app mobile Capacitor (WKWebView natif, ne lit pas ces
+    // balises de la même façon).
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "black-translucent",
+      title: t("siteName"),
     },
   };
 }

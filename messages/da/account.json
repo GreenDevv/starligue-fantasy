@@ -10,7 +10,13 @@
     "enabledLabel": "Modtag live-notifikationer",
     "onlyMyPlayersLabel": "Kun mine spillere",
     "clubsLabel": "Fulgte klubber (ingen = alle)",
-    "clubsHint": "Hvis du vælger klubber, får du kun begivenheder fra deres kampe."
+    "clubsHint": "Hvis du vælger klubber, får du kun begivenheder fra deres kampe.",
+    "webPushEnable": "Aktivér på denne enhed",
+    "webPushDisable": "Deaktivér på denne enhed",
+    "webPushDenied": "Tilladelse afvist — tillad notifikationer for dette site i din browsers indstillinger.",
+    "webPushError": "Kunne ikke aktivere notifikationer, prøv igen senere.",
+    "webPushUnsupported": "Browser-notifikationer er ikke tilgængelige her. På iPhone/iPad skal du først føje siden til hjemmeskærmen (Del → Føj til hjemmeskærm) og derefter åbne den igen fra det ikon.",
+    "webPushHint": "Få live-begivenheder selv med fanen lukket."
   },
   "savedMessage": "Gemt! Brugernavnet øverst opdateres ved næste login.",
   "saving": "Gemmer…",

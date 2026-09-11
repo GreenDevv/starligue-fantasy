@@ -10,7 +10,13 @@
     "enabledLabel": "Rebre notificacions en directe",
     "onlyMyPlayersLabel": "Només els meus jugadors",
     "clubsLabel": "Clubs seguits (cap = tots)",
-    "clubsHint": "Si selecciones clubs, només rebràs esdeveniments dels seus partits."
+    "clubsHint": "Si selecciones clubs, només rebràs esdeveniments dels seus partits.",
+    "webPushEnable": "Activa en aquest dispositiu",
+    "webPushDisable": "Desactiva en aquest dispositiu",
+    "webPushDenied": "Permís denegat — permet les notificacions per a aquest lloc als ajustos del navegador.",
+    "webPushError": "No s'han pogut activar les notificacions, torna-ho a provar més tard.",
+    "webPushUnsupported": "Les notificacions del navegador no estan disponibles aquí. A iPhone/iPad, afegeix primer el lloc a la pantalla d'inici (Comparteix → Afegeix a la pantalla d'inici) i torna a obrir-lo des d'aquesta icona.",
+    "webPushHint": "Rep els esdeveniments en directe encara que la pestanya estigui tancada."
   },
   "savedMessage": "Desat! El nom d'usuari que es mostra a dalt s'actualitzarà la propera vegada que iniciïs sessió.",
   "saving": "Desant…",
