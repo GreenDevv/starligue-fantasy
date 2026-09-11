@@ -20,7 +20,11 @@
     "savePercentage": "% Obron",
     "rating": "Ocena",
     "h2hHistory": "Historia meczów",
-    "points": "Pkt"
+    "points": "Pkt",
+    "eventsTitle": "Oś czasu meczu",
+    "noEvents": "Brak wydarzeń.",
+    "live": "Na żywo · {minute}’",
+    "halfTime": "Przerwa"
   },
   "panel": {
     "recentResults": "Ostatnie wyniki",

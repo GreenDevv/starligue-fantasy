@@ -20,7 +20,11 @@
     "savePercentage": "% Aturades",
     "rating": "Nota",
     "h2hHistory": "Historial d'enfrontaments",
-    "points": "Pts"
+    "points": "Pts",
+    "eventsTitle": "Cronologia del partit",
+    "noEvents": "Encara no hi ha esdeveniments.",
+    "live": "En directe · {minute}’",
+    "halfTime": "Descans"
   },
   "panel": {
     "recentResults": "Últims resultats",

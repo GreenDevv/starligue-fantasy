@@ -15,6 +15,10 @@ import { cn } from "@/lib/utils";
 const POLL_MS = 15_000;
 const TOAST_DURATION_MS = 7_000;
 const MAX_VISIBLE = 3;
+// Un poll peut ramener plusieurs événements d'un coup (rattrapage après un tick
+// manqué, plusieurs buts en 15s...) — les faire apparaître un par un plutôt qu'en
+// bloc donne une sensation bien plus fluide qu'un "dump" simultané de 3 toasts.
+const REVEAL_STAGGER_MS = 550;
 
 interface ClubInfo {
   id: string;
@@ -67,8 +71,8 @@ function Toast({ event, onDismiss }: { event: LiveEvent; onDismiss: () => void }
       layout
       initial={{ opacity: 0, y: -16, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
-      transition={{ type: "spring", stiffness: 420, damping: 26 }}
+      exit={{ opacity: 0, y: -8, scale: 0.97, transition: { duration: 0.25, ease: "easeIn" } }}
+      transition={{ type: "spring", stiffness: 300, damping: 28 }}
       role="status"
       onClick={onDismiss}
       className={cn(
@@ -103,6 +107,20 @@ export function LiveEventToaster() {
   const [toasts, setToasts] = useState<LiveEvent[]>([]);
   const sinceRef = useRef<string | null>(null);
   const timer = useRef<number | null>(null);
+  // File d'attente : les events arrivés en trop (poll groupé) attendent ici plutôt
+  // que d'apparaître tous en même temps — voir revealNext ci-dessous.
+  const queueRef = useRef<LiveEvent[]>([]);
+  const revealTimer = useRef<number | null>(null);
+
+  const scheduleReveal = useCallback(() => {
+    if (revealTimer.current) return; // déjà programmé
+    revealTimer.current = window.setTimeout(() => {
+      revealTimer.current = null;
+      const next = queueRef.current.shift();
+      if (next) setToasts((prev) => [...prev, next].slice(-MAX_VISIBLE));
+      if (queueRef.current.length > 0) scheduleReveal();
+    }, REVEAL_STAGGER_MS);
+  }, []);
 
   const poll = useCallback(async () => {
     try {
@@ -113,12 +131,13 @@ export function LiveEventToaster() {
       if (!json.data) return;
       sinceRef.current = json.data.serverTime;
       if (json.data.events.length > 0) {
-        setToasts((prev) => [...prev, ...json.data!.events].slice(-MAX_VISIBLE));
+        queueRef.current.push(...json.data.events);
+        scheduleReveal();
       }
     } catch {
       /* on réessaie au prochain tick */
     }
-  }, []);
+  }, [scheduleReveal]);
 
   useEffect(() => {
     void poll();
@@ -127,6 +146,7 @@ export function LiveEventToaster() {
     }, POLL_MS);
     return () => {
       if (timer.current) window.clearInterval(timer.current);
+      if (revealTimer.current) window.clearTimeout(revealTimer.current);
     };
   }, [poll]);
 
