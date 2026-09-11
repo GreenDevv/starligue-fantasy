@@ -33,6 +33,13 @@ export interface TodayMatchRow {
   awayScore: number | null;
   kickoffAt: Date;
   href?: string;
+  // Championnat (suivi live, src/lib/ingestion/live-feed.ts) : status réel + minute
+  // courante. Warm Up/Coupe de France/EHF (pas de suivi live) : status dérivé du
+  // score seul ("FINISHED" si renseigné, "SCHEDULED" sinon, liveMinute toujours
+  // null) — comportement historique inchangé pour ces compétitions.
+  status: "SCHEDULED" | "LIVE" | "FINISHED" | "POSTPONED" | "CANCELLED";
+  liveMinute: number | null;
+  livePeriod: string | null;
 }
 
 function todayRange(): { start: Date; end: Date } {
@@ -66,6 +73,11 @@ async function getFriendlyToday(
     homeScore: m.homeScore,
     awayScore: m.awayScore,
     kickoffAt: m.kickoffAt,
+    // Pas de suivi live pour ces compétitions — même déduction qu'avant (score
+    // renseigné = terminé).
+    status: m.homeScore !== null && m.awayScore !== null ? "FINISHED" : "SCHEDULED",
+    liveMinute: null,
+    livePeriod: null,
     href:
       competitionKey === "championsLeague" || competitionKey === "europeanLeague"
         ? m.groupLabel
@@ -101,6 +113,9 @@ export async function getTodayMatches(seasonId: string): Promise<TodayMatchRow[]
     homeScore: m.homeScore,
     awayScore: m.awayScore,
     kickoffAt: m.kickoffAt,
+    status: m.status,
+    liveMinute: m.liveMinute,
+    livePeriod: m.livePeriod,
     href: `/matches/${m.id}`,
   }));
 

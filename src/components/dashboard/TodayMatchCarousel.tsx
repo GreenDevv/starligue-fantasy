@@ -56,6 +56,13 @@ export function TodayMatchCarousel({ matches }: { matches: TodayMatchRow[] }) {
 
   const m = matches[index % matches.length]!;
   const hasScore = m.homeScore !== null && m.awayScore !== null;
+  const isLive = m.status === "LIVE";
+  const liveLabel =
+    isLive && m.livePeriod === "HT"
+      ? t("matchesStrip.halfTime")
+      : isLive && typeof m.liveMinute === "number"
+        ? t("todayMatches.live", { minute: m.liveMinute })
+        : null;
 
   // Tooltip toujours renseigné (pas seulement pour les clubs hors DB) — même
   // format 2 lignes que ClubMatchesPanel ("compétition\nclub (division)") : utile
@@ -87,9 +94,21 @@ export function TodayMatchCarousel({ matches }: { matches: TodayMatchRow[] }) {
       </div>
       <div className="flex flex-col items-end gap-0.5 text-right text-xs uppercase leading-tight tracking-wide text-text-muted">
         <span>{tMatches(COMPETITION_SHORT_KEY[m.competitionKey])}</span>
-        <span>
-          {hasScore ? t("todayMatches.finished") : format.dateTime(new Date(m.kickoffAt), { hour: "2-digit", minute: "2-digit" })}
-        </span>
+        {liveLabel ? (
+          <span className="flex items-center gap-1 font-semibold text-points-neg">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-points-neg opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-points-neg" />
+            </span>
+            {liveLabel}
+          </span>
+        ) : (
+          <span>
+            {m.status === "FINISHED"
+              ? t("todayMatches.finished")
+              : format.dateTime(new Date(m.kickoffAt), { hour: "2-digit", minute: "2-digit" })}
+          </span>
+        )}
       </div>
     </div>
   );
