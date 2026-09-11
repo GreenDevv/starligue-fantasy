@@ -25,8 +25,9 @@ Ne touche pas la base de données directement — appelle juste l'endpoint HTTP 
 
 ## Déploiement
 
-⚠️ Déployé le 2026-09-11 via `railway up workers/live-sync -s live-sync-worker`
-(upload direct depuis le poste local), **pas encore connecté au repo GitHub** — un
-changement de `worker.mjs` ne se redéploie pas tout seul au push, il faut relancer
-`railway up` manuellement (ou finir de connecter le service au repo avec Root
-Directory = `workers/live-sync` depuis le dashboard Railway).
+Service Railway `live-sync-worker`, connecté au repo GitHub (branche `main`,
+auto-déploie au push comme le service `web`) avec **Root Directory =
+`workers/live-sync`** et **Start Command = `node worker.mjs`** (réglés via l'API
+GraphQL Railway — `serviceInstanceUpdate` sur `ServiceInstanceUpdateInput`, pas de
+flag CLI pour ça). `CRON_SECRET` référencé depuis le service `web`
+(`${{web.CRON_SECRET}}`).
