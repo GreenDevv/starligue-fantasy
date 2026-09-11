@@ -200,6 +200,7 @@
   "todayMatches": {
     "badgeTitle": "Kampdag",
     "championship": "Daikin Starligue",
-    "finished": "Slut"
+    "finished": "Slut",
+    "live": "Direkte · {minute}’"
   }
 }

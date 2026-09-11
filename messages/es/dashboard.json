@@ -200,6 +200,7 @@
   "todayMatches": {
     "badgeTitle": "Día de partido",
     "championship": "Daikin Starligue",
-    "finished": "Finalizado"
+    "finished": "Finalizado",
+    "live": "En directo · {minute}’"
   }
 }
