@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-// Icône PWA 512×512 — voir icon-192/route.tsx.
+// Icône PWA 512×512 — voir icon-192.png/route.tsx.
 export const runtime = "edge";
 
 export async function GET() {
