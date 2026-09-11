@@ -5,10 +5,16 @@ export const dynamic = "force-dynamic";
 // infos match + clubs, sentiment (positive/negative/neutral), joueur résolu
 // (photo, poste) si un nom a matché dans le texte lnh.fr, et `owned` (le joueur
 // est dans l'effectif de l'utilisateur connecté, toutes ligues confondues) si
-// authentifié. Accessible sans connexion (juste sans `owned`/mise en avant).
+// authentifié. Accessible sans connexion (juste sans `owned`/mise en avant, et sans
+// filtrage préférences puisqu'il n'y a pas de compte à filtrer).
 // `since` permet un polling léger côté client (même convention que
 // /api/leagues/[id]/chat) — sans lui, ne renvoie que les ~2 dernières minutes pour
 // éviter de déverser tout l'historique au premier chargement.
+//
+// Filtrage par préférences (User.liveNotifications*, voir schema.prisma) appliqué
+// ICI côté serveur, jamais côté client — un visiteur connecté qui a coupé les
+// notifs live, filtré sur ses clubs suivis, ou sur "mes joueurs seulement" ne doit
+// jamais recevoir les events exclus, même un instant.
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
@@ -23,8 +29,35 @@ export async function GET(request: Request) {
   const sinceParam = url.searchParams.get("since");
   const since = sinceParam && !Number.isNaN(Date.parse(sinceParam)) ? new Date(sinceParam) : new Date(Date.now() - DEFAULT_LOOKBACK_MS);
 
+  let prefs: { liveNotificationsEnabled: boolean; liveNotificationsOnlyMyPlayers: boolean; liveNotificationsClubIds: string[] } | null =
+    null;
+  if (session?.user?.id) {
+    prefs = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { liveNotificationsEnabled: true, liveNotificationsOnlyMyPlayers: true, liveNotificationsClubIds: true },
+    });
+  }
+
+  // Notifs coupées : curseur renvoyé quand même (pour que le prochain poll parte
+  // du bon `since`), mais aucun événement.
+  if (prefs && !prefs.liveNotificationsEnabled) {
+    return NextResponse.json({ data: { serverTime: new Date().toISOString(), events: [] } });
+  }
+
+  const clubFilter =
+    prefs && prefs.liveNotificationsClubIds.length > 0
+      ? {
+          match: {
+            OR: [
+              { homeClubId: { in: prefs.liveNotificationsClubIds } },
+              { awayClubId: { in: prefs.liveNotificationsClubIds } },
+            ],
+          },
+        }
+      : {};
+
   const events = await prisma.matchLiveEvent.findMany({
-    where: { createdAt: { gt: since } },
+    where: { createdAt: { gt: since }, ...clubFilter },
     orderBy: { createdAt: "asc" },
     take: MAX_EVENTS,
     include: {
@@ -59,10 +92,13 @@ export async function GET(request: Request) {
     ownedPlayerIds = new Set(owned.map((o) => o.playerId));
   }
 
+  const onlyMyPlayers = prefs?.liveNotificationsOnlyMyPlayers ?? false;
+  const filtered = onlyMyPlayers ? events.filter((e) => e.playerId && ownedPlayerIds.has(e.playerId)) : events;
+
   return NextResponse.json({
     data: {
       serverTime: new Date().toISOString(),
-      events: events.map((e) => ({
+      events: filtered.map((e) => ({
         id: e.id,
         matchId: e.matchId,
         homeClub: e.match.homeClub,

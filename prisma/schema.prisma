@@ -113,6 +113,15 @@ model User {
   // vers Club (les 16 Starligue).
   homeClubId          String?
   homeClub            HandballClub?        @relation("HomeClub", fields: [homeClubId], references: [id])
+  // Réglages des notifications live (toasts web + push mobile, ARCHITECTURE.md §24) —
+  // filtrent GET /api/live/events côté serveur, jamais côté client (évite qu'un
+  // visiteur déconnecté voie un instant les events avant filtrage). clubIds vide =
+  // aucun filtre club (tous les matchs) ; onlyMyPlayers restreint en plus aux
+  // événements dont le joueur résolu est dans l'effectif de l'utilisateur (toutes
+  // ligues confondues).
+  liveNotificationsEnabled       Boolean       @default(true)
+  liveNotificationsOnlyMyPlayers Boolean       @default(false)
+  liveNotificationsClubIds       String[]      @default([])
   createdAt           DateTime             @default(now())
   fantasyTeams        FantasyTeam[]
   leagueMembers       LeagueMember[]

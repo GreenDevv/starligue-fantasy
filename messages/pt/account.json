@@ -5,6 +5,13 @@
   "favoritePlayerLabel": "Jogador preferido",
   "optional": "(facultativo)",
   "favoritePlayerLocked": "Definitivo, não pode ser alterado depois de escolhido.",
+  "liveNotifications": {
+    "title": "Notificações ao vivo",
+    "enabledLabel": "Receber notificações ao vivo",
+    "onlyMyPlayersLabel": "Apenas os meus jogadores",
+    "clubsLabel": "Clubes seguidos (nenhum = todos)",
+    "clubsHint": "Se selecionares clubes, só receberás eventos dos jogos deles."
+  },
   "savedMessage": "Guardado! A alcunha exibida no topo atualiza-se no próximo login.",
   "saving": "A guardar…",
   "deleteSection": {

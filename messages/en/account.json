@@ -5,6 +5,13 @@
   "favoritePlayerLabel": "Favorite player",
   "optional": "(optional)",
   "favoritePlayerLocked": "Final choice, can't be changed once set.",
+  "liveNotifications": {
+    "title": "Live notifications",
+    "enabledLabel": "Receive live notifications",
+    "onlyMyPlayersLabel": "Only my players",
+    "clubsLabel": "Followed clubs (none = all)",
+    "clubsHint": "If you select clubs, you'll only get events from their matches."
+  },
   "savedMessage": "Saved! Your displayed username will update next time you log in.",
   "saving": "Saving…",
   "deleteSection": {

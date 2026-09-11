@@ -5,6 +5,13 @@
   "favoritePlayerLabel": "Ulubiony zawodnik",
   "optional": "(opcjonalnie)",
   "favoritePlayerLocked": "Wybór jest ostateczny i nie można go zmienić po zapisaniu.",
+  "liveNotifications": {
+    "title": "Powiadomienia na żywo",
+    "enabledLabel": "Otrzymuj powiadomienia na żywo",
+    "onlyMyPlayersLabel": "Tylko moi zawodnicy",
+    "clubsLabel": "Obserwowane kluby (brak = wszystkie)",
+    "clubsHint": "Jeśli wybierzesz kluby, otrzymasz tylko wydarzenia z ich meczów."
+  },
   "savedMessage": "Zapisano! Pseudonim widoczny u góry zaktualizuje się przy następnym logowaniu.",
   "saving": "Zapisywanie…",
   "deleteSection": {
