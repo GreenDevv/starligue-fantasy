@@ -1,19 +1,16 @@
-// "Meilleures perfs so far" de la journée EN COURS — top joueurs par points
-// fantasy sur les matchs déjà joués de la journée, sans attendre qu'elle soit
-// notée. Affiché dans la bande « journée en cours » de la home (mode Starligue).
-//
-// Distinct de getPerformancesCard (src/lib/news/get-weekly-cards.ts) qui lit une
-// actu générée APRÈS la clôture de la journée. Ici c'est calculé à la volée depuis
-// PlayerMatchStat, partiel par nature.
+// "Meilleures notes de la journée" — les joueurs les mieux notés par la LNH sur
+// les matchs déjà joués de la journée en cours (classement par note LNH, pas par
+// points fantasy — demande utilisateur). Affiché dans la bande « journée en
+// cours » de la home. Partiel par nature (ne voit que les matchs déjà notés).
 import { prisma } from "@/lib/db";
-import { computeBestPerformances } from "@/lib/players/compute-best-performances";
+import { computePlayerPoints, parseScoringConfig } from "@/lib/scoring/engine";
 import type { PerformancesCardData } from "@/lib/news/get-weekly-cards";
 import type { Position } from "@/lib/squad/validation";
 
 export async function getCurrentGameweekPerformances(
   seasonId: string,
   now: Date = new Date(),
-  limit = 5
+  limit = 6
 ): Promise<PerformancesCardData | null> {
   const gameweek = await prisma.gameweek.findFirst({
     where: { seasonId, deadlineAt: { lte: now }, confirmedAt: null },
@@ -22,45 +19,50 @@ export async function getCurrentGameweekPerformances(
   });
   if (!gameweek) return null;
 
-  // Au moins un match de la journée doit avoir des notes, sinon rien à classer.
-  const hasStats = await prisma.playerMatchStat.findFirst({
-    where: { match: { gameweekId: gameweek.id } },
-    select: { id: true },
-  });
-  if (!hasStats) return null;
-
-  const perfs = await computeBestPerformances(gameweek.id, limit);
-  if (perfs.length === 0) return null;
-
-  const players = await prisma.player.findMany({
-    where: { id: { in: perfs.map((p) => p.playerId) } },
+  const stats = await prisma.playerMatchStat.findMany({
+    where: {
+      match: { gameweekId: gameweek.id },
+      played: true,
+      lnhRating: { not: null },
+    },
+    orderBy: { lnhRating: "desc" },
+    take: limit,
     select: {
-      id: true,
-      firstName: true,
-      lastName: true,
-      position: true,
-      photoUrl: true,
-      club: { select: { shortName: true, logoUrl: true } },
+      lnhRating: true,
+      player: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          position: true,
+          photoUrl: true,
+          club: { select: { shortName: true, logoUrl: true } },
+        },
+      },
     },
   });
-  const byId = new Map(players.map((p) => [p.id, p]));
+  if (stats.length === 0) return null;
 
-  const entries = perfs
-    .map((e) => {
-      const p = byId.get(e.playerId);
-      if (!p) return null;
-      return {
-        playerId: e.playerId,
-        firstName: p.firstName,
-        lastName: p.lastName,
-        position: p.position as Position,
-        photoUrl: p.photoUrl,
-        club: p.club,
-        points: e.points,
-        lnhRating: e.lnhRating,
-      };
-    })
-    .filter((e): e is NonNullable<typeof e> => e !== null);
+  const configs = await prisma.gameConfig.findMany();
+  const scoringConfig = parseScoringConfig(Object.fromEntries(configs.map((c) => [c.key, c.value])));
+
+  const entries = stats.map((s) => {
+    const rating = Number(s.lnhRating);
+    return {
+      playerId: s.player.id,
+      firstName: s.player.firstName,
+      lastName: s.player.lastName,
+      position: s.player.position as Position,
+      photoUrl: s.player.photoUrl,
+      club: s.player.club,
+      // Points fantasy que cette ligne rapporte à un titulaire (formule §2.3).
+      points: computePlayerPoints(
+        { lnhRating: rating, played: true, role: "STARTER", teamWon: false },
+        scoringConfig
+      ),
+      lnhRating: rating,
+    };
+  });
 
   return { gameweekNumber: gameweek.number, entries };
 }
