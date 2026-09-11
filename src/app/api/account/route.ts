@@ -34,13 +34,23 @@ export async function GET() {
       favoritePlayer: { select: { id: true, firstName: true, lastName: true, club: { select: { shortName: true } } } },
       homeClubId: true,
       homeClub: homeClubSelect,
+      liveNotificationsEnabled: true,
+      liveNotificationsOnlyMyPlayers: true,
+      liveNotificationsClubIds: true,
     },
   });
   if (!user) {
     return NextResponse.json({ error: { code: "NOT_FOUND" } }, { status: 404 });
   }
 
-  return NextResponse.json({ data: user });
+  // Les 16 clubs Starligue — pour le sélecteur "clubs suivis" des réglages
+  // notifications live, évite un aller-retour séparé depuis la page compte.
+  const allClubs = await prisma.club.findMany({
+    select: { id: true, name: true, shortName: true, logoUrl: true },
+    orderBy: { name: "asc" },
+  });
+
+  return NextResponse.json({ data: { ...user, allClubs } });
 }
 
 const updateSchema = z.object({
@@ -50,6 +60,11 @@ const updateSchema = z.object({
   // { clubId } | { newClub } | null (retire). undefined = ne pas toucher.
   // Modifiable librement (pas de verrou, contrairement au joueur préféré) — §23.
   homeClub: homeClubInputSchema.optional(),
+  // Réglages notifications live — voir commentaire du modèle User. Tous optionnels,
+  // modifiables librement (pas de verrou contrairement au joueur préféré).
+  liveNotificationsEnabled: z.boolean().optional(),
+  liveNotificationsOnlyMyPlayers: z.boolean().optional(),
+  liveNotificationsClubIds: z.array(z.string().min(1)).optional(),
 });
 
 export async function PUT(req: Request) {
@@ -67,7 +82,8 @@ export async function PUT(req: Request) {
     );
   }
 
-  const { name, favoritePlayerId, homeClub } = parsed.data;
+  const { name, favoritePlayerId, homeClub, liveNotificationsEnabled, liveNotificationsOnlyMyPlayers, liveNotificationsClubIds } =
+    parsed.data;
 
   let homeClubId: string | null | undefined;
   let createdHomeClubId: string | null = null;
@@ -113,6 +129,9 @@ export async function PUT(req: Request) {
       ...(name !== undefined ? { name } : {}),
       ...(favoritePlayerId !== undefined ? { favoritePlayerId: favoritePlayerId || null } : {}),
       ...(homeClubId !== undefined ? { homeClubId } : {}),
+      ...(liveNotificationsEnabled !== undefined ? { liveNotificationsEnabled } : {}),
+      ...(liveNotificationsOnlyMyPlayers !== undefined ? { liveNotificationsOnlyMyPlayers } : {}),
+      ...(liveNotificationsClubIds !== undefined ? { liveNotificationsClubIds } : {}),
     },
     select: {
       name: true,
@@ -121,6 +140,9 @@ export async function PUT(req: Request) {
       favoritePlayer: { select: { id: true, firstName: true, lastName: true, club: { select: { shortName: true } } } },
       homeClubId: true,
       homeClub: homeClubSelect,
+      liveNotificationsEnabled: true,
+      liveNotificationsOnlyMyPlayers: true,
+      liveNotificationsClubIds: true,
     },
   });
 

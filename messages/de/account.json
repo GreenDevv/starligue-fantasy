@@ -5,6 +5,13 @@
   "favoritePlayerLabel": "Lieblingsspieler",
   "optional": "(optional)",
   "favoritePlayerLocked": "Endgültig, nach der Angabe nicht mehr änderbar.",
+  "liveNotifications": {
+    "title": "Live-Benachrichtigungen",
+    "enabledLabel": "Live-Benachrichtigungen erhalten",
+    "onlyMyPlayersLabel": "Nur meine Spieler",
+    "clubsLabel": "Verfolgte Vereine (keiner = alle)",
+    "clubsHint": "Wenn du Vereine auswählst, erhältst du nur Ereignisse aus deren Spielen."
+  },
   "savedMessage": "Gespeichert! Der oben angezeigte Benutzername wird bei der nächsten Anmeldung aktualisiert.",
   "saving": "Wird gespeichert…",
   "deleteSection": {

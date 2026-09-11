@@ -6,6 +6,14 @@ import { signOut } from "next-auth/react";
 import { resolveApiError } from "@/lib/api/error-messages";
 import { PlayerSearch, type PlayerSearchOption } from "@/components/players/PlayerSearch";
 import { HomeClubPicker, homeClubValueToPayload, type HomeClubValue } from "@/components/clubs/HomeClubPicker";
+import { ClubLogo } from "@/components/ui/ClubLogo";
+
+interface AccountClub {
+  id: string;
+  name: string;
+  shortName: string;
+  logoUrl: string | null;
+}
 
 interface AccountData {
   name: string;
@@ -13,6 +21,10 @@ interface AccountData {
   favoritePlayerId: string | null;
   favoritePlayer: { id: string; firstName: string; lastName: string; club: { shortName: string } } | null;
   homeClub: { id: string; name: string; city: string | null; country: string; verified: boolean } | null;
+  liveNotificationsEnabled: boolean;
+  liveNotificationsOnlyMyPlayers: boolean;
+  liveNotificationsClubIds: string[];
+  allClubs: AccountClub[];
 }
 
 export default function AccountPage() {
@@ -33,6 +45,10 @@ export default function AccountPage() {
   const [homeClub, setHomeClub] = useState<HomeClubValue>(null);
   const [homeClubDirty, setHomeClubDirty] = useState(false);
   const [players, setPlayers] = useState<PlayerSearchOption[]>([]);
+  const [allClubs, setAllClubs] = useState<AccountClub[]>([]);
+  const [notifEnabled, setNotifEnabled] = useState(true);
+  const [notifOnlyMyPlayers, setNotifOnlyMyPlayers] = useState(false);
+  const [notifClubIds, setNotifClubIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +78,10 @@ export default function AccountPage() {
               ? { kind: "existing", club: accountJson.data.homeClub }
               : null,
           );
+          setNotifEnabled(accountJson.data.liveNotificationsEnabled);
+          setNotifOnlyMyPlayers(accountJson.data.liveNotificationsOnlyMyPlayers);
+          setNotifClubIds(accountJson.data.liveNotificationsClubIds);
+          setAllClubs(accountJson.data.allClubs ?? []);
         }
         setPlayers(playersJson.data?.players ?? []);
         setLoading(false);
@@ -84,6 +104,9 @@ export default function AccountPage() {
         ...(lockedFavoritePlayer ? {} : { favoritePlayerId: favoritePlayerId || null }),
         // Club d'origine : envoyé seulement s'il a changé.
         ...(homeClubDirty ? { homeClub: homeClub ? homeClubValueToPayload(homeClub) : null } : {}),
+        liveNotificationsEnabled: notifEnabled,
+        liveNotificationsOnlyMyPlayers: notifOnlyMyPlayers,
+        liveNotificationsClubIds: notifClubIds,
       }),
     });
     const json = (await res.json()) as { error?: { code?: string; message: string }; data?: AccountData };
@@ -189,6 +212,67 @@ export default function AccountPage() {
             }}
           />
           <p className="mt-1 text-[11px] text-text-muted">{tCommunity("homeClub.hint")}</p>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs uppercase tracking-widest text-text-muted">
+            {tAccount("liveNotifications.title")}
+          </label>
+          <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg px-4 py-3">
+            <label className="flex items-center justify-between gap-3 text-sm text-text">
+              {tAccount("liveNotifications.enabledLabel")}
+              <input
+                type="checkbox"
+                checked={notifEnabled}
+                onChange={(e) => {
+                  setNotifEnabled(e.target.checked);
+                  setSaved(false);
+                }}
+                className="h-4 w-4 accent-accent"
+              />
+            </label>
+            <label className="flex items-center justify-between gap-3 text-sm text-text">
+              {tAccount("liveNotifications.onlyMyPlayersLabel")}
+              <input
+                type="checkbox"
+                disabled={!notifEnabled}
+                checked={notifOnlyMyPlayers}
+                onChange={(e) => {
+                  setNotifOnlyMyPlayers(e.target.checked);
+                  setSaved(false);
+                }}
+                className="h-4 w-4 accent-accent disabled:opacity-50"
+              />
+            </label>
+            <div>
+              <p className="mb-1.5 text-xs text-text-muted">{tAccount("liveNotifications.clubsLabel")}</p>
+              <div className="flex flex-wrap gap-2">
+                {allClubs.map((c) => {
+                  const active = notifClubIds.includes(c.id);
+                  return (
+                    <button
+                      type="button"
+                      key={c.id}
+                      disabled={!notifEnabled}
+                      onClick={() => {
+                        setNotifClubIds((prev) => (active ? prev.filter((id) => id !== c.id) : [...prev, c.id]));
+                        setSaved(false);
+                      }}
+                      className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors disabled:opacity-50 ${
+                        active
+                          ? "border-accent bg-accent/10 text-accent"
+                          : "border-border text-text-muted hover:bg-surface"
+                      }`}
+                    >
+                      <ClubLogo club={c} size="xs" />
+                      {c.shortName}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-1.5 text-[11px] text-text-muted">{tAccount("liveNotifications.clubsHint")}</p>
+            </div>
+          </div>
         </div>
 
         {error && <p className="rounded-lg bg-points-neg/10 px-4 py-2 text-sm text-points-neg">{error}</p>}

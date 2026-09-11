@@ -5,6 +5,13 @@
   "favoritePlayerLabel": "Yndlingsspiller",
   "optional": "(valgfrit)",
   "favoritePlayerLocked": "Endelig, kan ikke ændres når den først er valgt.",
+  "liveNotifications": {
+    "title": "Live-notifikationer",
+    "enabledLabel": "Modtag live-notifikationer",
+    "onlyMyPlayersLabel": "Kun mine spillere",
+    "clubsLabel": "Fulgte klubber (ingen = alle)",
+    "clubsHint": "Hvis du vælger klubber, får du kun begivenheder fra deres kampe."
+  },
   "savedMessage": "Gemt! Brugernavnet øverst opdateres ved næste login.",
   "saving": "Gemmer…",
   "deleteSection": {
