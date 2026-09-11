@@ -19,7 +19,8 @@
     "saves": "Saves",
     "savePercentage": "Save %",
     "rating": "Rating",
-    "h2hHistory": "Head-to-head history"
+    "h2hHistory": "Head-to-head history",
+    "points": "Pts"
   },
   "panel": {
     "recentResults": "Recent results",

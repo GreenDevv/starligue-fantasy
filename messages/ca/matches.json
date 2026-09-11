@@ -19,7 +19,8 @@
     "saves": "Aturades",
     "savePercentage": "% Aturades",
     "rating": "Nota",
-    "h2hHistory": "Historial d'enfrontaments"
+    "h2hHistory": "Historial d'enfrontaments",
+    "points": "Pts"
   },
   "panel": {
     "recentResults": "Últims resultats",

@@ -19,7 +19,8 @@
     "saves": "Redninger",
     "savePercentage": "% Redninger",
     "rating": "Karakter",
-    "h2hHistory": "Indbyrdes historik"
+    "h2hHistory": "Indbyrdes historik",
+    "points": "Pt"
   },
   "panel": {
     "recentResults": "Seneste resultater",

@@ -17,6 +17,7 @@
 // admin (Season.currentSimulationGameweekNumber) fait foi.
 import { prisma } from "@/lib/db";
 import type { Position } from "@/lib/squad/validation";
+import { computePlayerPoints, parseScoringConfig } from "@/lib/scoring/engine";
 import {
   createLnhScraperProvider,
   boxscoreRowToStatFields,
@@ -36,6 +37,10 @@ export interface MatchBoxscorePlayerRow {
   position: Position;
   played: boolean;
   lnhRating: number | null;
+  // Points fantasy que cette ligne rapporte à un TITULAIRE non capitaine (formule
+  // §2.3 : (note−5)×4). Le capitaine double, le remplaçant divise par 2, le bonus
+  // « leader de journée » (calculé sur toute la journée) n'est pas inclus ici.
+  fantasyPoints: number | null;
   saves: number | null;
   shotsFaced: number | null;
   savePercentage: number | null;
@@ -96,7 +101,7 @@ function toRow(playerId: string, p: { firstName: string; lastName: string; photo
   turnovers: number | null;
   twoMinTaken: number | null;
   disqualified: number | null;
-}): MatchBoxscorePlayerRow {
+}, fantasyPoints: number | null): MatchBoxscorePlayerRow {
   return {
     playerId,
     firstName: p.firstName,
@@ -105,6 +110,7 @@ function toRow(playerId: string, p: { firstName: string; lastName: string; photo
     position: p.position,
     played: s.played,
     lnhRating: s.lnhRating !== null && s.lnhRating !== undefined ? Number(s.lnhRating) : null,
+    fantasyPoints,
     saves: s.saves,
     shotsFaced: s.shotsFaced,
     savePercentage: s.savePercentage !== null && s.savePercentage !== undefined ? Number(s.savePercentage) : null,
@@ -235,10 +241,26 @@ export async function getMatchDetail(matchId: string): Promise<MatchDetail | nul
 
   const { homeClub, awayClub } = match;
 
+  const scoringConfig = parseScoringConfig(
+    Object.fromEntries((await prisma.gameConfig.findMany()).map((c) => [c.key, c.value]))
+  );
+  const homeWon = match.homeScore !== null && match.awayScore !== null && match.homeScore > match.awayScore;
+  const awayWon = match.homeScore !== null && match.awayScore !== null && match.awayScore > match.homeScore;
+
   function buildTeam(club: typeof homeClub | typeof awayClub): MatchTeamBoxscore {
+    const teamWon = club.id === homeClub.id ? homeWon : awayWon;
     const rows = stats
       .filter((s) => s.player.clubId === club.id)
-      .map((s) => toRow(s.player.id, s.player, s));
+      .map((s) => {
+        const rating = s.lnhRating !== null && s.lnhRating !== undefined ? Number(s.lnhRating) : null;
+        const fantasyPoints =
+          rating !== null && s.played
+            ? computePlayerPoints({ lnhRating: rating, played: true, role: "STARTER", teamWon }, scoringConfig)
+            : s.played
+              ? 0
+              : null;
+        return toRow(s.player.id, s.player, s, fantasyPoints);
+      });
     return {
       club: { id: club.id, name: club.name, shortName: club.shortName, logoUrl: club.logoUrl },
       goalkeepers: rows.filter((r) => r.position === "GK"),
