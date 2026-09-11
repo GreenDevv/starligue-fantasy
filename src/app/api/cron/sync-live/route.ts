@@ -65,7 +65,7 @@ export async function POST(req: Request) {
     if (!recoverable) return NextResponse.json({ error: { code: "SCRAPER_ERROR", message: String(err) } }, { status: 502 });
   }
 
-  // Suivi minute par minute (feed view_tab_live) — score + chrono des matchs en cours.
+  // Suivi minute par minute (index eStatsChannels) — score + chrono des matchs en cours.
   try {
     out.liveFeed = await syncLiveMatchFeeds(season.id, LNH_SEASONS_ID);
   } catch (err) {
