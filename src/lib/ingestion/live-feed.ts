@@ -34,6 +34,7 @@ import { createLnhScraperProvider } from "@/lib/data-providers/lnh-scraper.provi
 import { IngestionError } from "@/lib/data-providers/lnh-scraper.provider";
 import type { LnhScraperProvider } from "@/lib/data-providers/lnh-scraper.provider";
 import { resolveEventPlayerId, type EventPlayerCandidate } from "@/lib/live/resolve-event-player";
+import { notifyWebPushForLiveEvents } from "@/lib/notifications/notify-live-events";
 
 const WINDOW_BEFORE_MS = 15 * 60 * 1000;
 const WINDOW_AFTER_MS = 2.75 * 60 * 60 * 1000;
@@ -55,7 +56,9 @@ async function syncMatchEvents(
   matchId: string,
   channelId: string,
   externalIds: Record<string, string>,
-  rosterCandidates: EventPlayerCandidate[]
+  rosterCandidates: EventPlayerCandidate[],
+  homeClubId: string,
+  awayClubId: string
 ): Promise<{ inserted: number; errors: string[] }> {
   const errors: string[] = [];
   let filename = externalIds.lnh_live_channel_filename;
@@ -93,20 +96,25 @@ async function syncMatchEvents(
   const newOnes = events.slice(existingCount);
   if (newOnes.length === 0) return { inserted: 0, errors };
 
-  const { count } = await prisma.matchLiveEvent.createMany({
-    data: newOnes.map((e, i) => ({
-      matchId,
-      sequence: existingCount + i,
-      period: e.period,
-      minute: e.minute,
-      icon: e.icon,
-      homeScore: e.homeScore,
-      awayScore: e.awayScore,
-      text: e.text,
-      playerId: resolveEventPlayerId(e.text, rosterCandidates),
-    })),
-    skipDuplicates: true,
-  });
+  const rows = newOnes.map((e, i) => ({
+    matchId,
+    sequence: existingCount + i,
+    period: e.period,
+    minute: e.minute,
+    icon: e.icon,
+    homeScore: e.homeScore,
+    awayScore: e.awayScore,
+    text: e.text,
+    playerId: resolveEventPlayerId(e.text, rosterCandidates),
+  }));
+
+  const { count } = await prisma.matchLiveEvent.createMany({ data: rows, skipDuplicates: true });
+
+  // Best-effort, ne bloque jamais la synchro du score : envoyé en tâche de fond,
+  // erreurs avalées (déjà gérées/loggées dans notifyWebPushForLiveEvents/sendWebPush).
+  void notifyWebPushForLiveEvents(matchId, homeClubId, awayClubId, rows).catch((err) =>
+    console.warn(`[live-feed] notify(${matchId}):`, String(err))
+  );
 
   return { inserted: count, errors };
 }
@@ -196,7 +204,15 @@ export async function syncLiveMatchFeeds(seasonId: string, _seasonsId: string): 
         ...(rosterByClub.get(match.homeClubId) ?? []),
         ...(rosterByClub.get(match.awayClubId) ?? []),
       ];
-      const { inserted, errors } = await syncMatchEvents(provider, match.id, entry.channelId, externalIds ?? {}, rosterCandidates);
+      const { inserted, errors } = await syncMatchEvents(
+        provider,
+        match.id,
+        entry.channelId,
+        externalIds ?? {},
+        rosterCandidates,
+        match.homeClubId,
+        match.awayClubId
+      );
       newEvents = inserted;
       result.errors.push(...errors);
     }

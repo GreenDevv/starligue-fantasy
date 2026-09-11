@@ -10,7 +10,13 @@
     "enabledLabel": "Live-Benachrichtigungen erhalten",
     "onlyMyPlayersLabel": "Nur meine Spieler",
     "clubsLabel": "Verfolgte Vereine (keiner = alle)",
-    "clubsHint": "Wenn du Vereine auswählst, erhältst du nur Ereignisse aus deren Spielen."
+    "clubsHint": "Wenn du Vereine auswählst, erhältst du nur Ereignisse aus deren Spielen.",
+    "webPushEnable": "Auf diesem Gerät aktivieren",
+    "webPushDisable": "Auf diesem Gerät deaktivieren",
+    "webPushDenied": "Berechtigung verweigert — erlaube Benachrichtigungen für diese Seite in deinen Browsereinstellungen.",
+    "webPushError": "Benachrichtigungen konnten nicht aktiviert werden, versuch es später erneut.",
+    "webPushUnsupported": "Browser-Benachrichtigungen sind hier nicht verfügbar. Füge die Seite auf iPhone/iPad zuerst zum Home-Bildschirm hinzu (Teilen → Zum Home-Bildschirm) und öffne sie dann über dieses Symbol erneut.",
+    "webPushHint": "Erhalte Live-Ereignisse auch bei geschlossenem Tab."
   },
   "savedMessage": "Gespeichert! Der oben angezeigte Benutzername wird bei der nächsten Anmeldung aktualisiert.",
   "saving": "Wird gespeichert…",

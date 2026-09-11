@@ -10,7 +10,13 @@
     "enabledLabel": "Receive live notifications",
     "onlyMyPlayersLabel": "Only my players",
     "clubsLabel": "Followed clubs (none = all)",
-    "clubsHint": "If you select clubs, you'll only get events from their matches."
+    "clubsHint": "If you select clubs, you'll only get events from their matches.",
+    "webPushEnable": "Enable on this device",
+    "webPushDisable": "Disable on this device",
+    "webPushDenied": "Permission denied — allow notifications for this site in your browser settings.",
+    "webPushError": "Couldn't enable notifications, try again later.",
+    "webPushUnsupported": "Browser notifications aren't available here. On iPhone/iPad, first add the site to your home screen (Share → Add to Home Screen), then reopen it from that icon.",
+    "webPushHint": "Get live events even with the tab closed."
   },
   "savedMessage": "Saved! Your displayed username will update next time you log in.",
   "saving": "Saving…",

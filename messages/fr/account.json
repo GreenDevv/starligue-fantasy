@@ -10,7 +10,13 @@
     "enabledLabel": "Recevoir les notifications live",
     "onlyMyPlayersLabel": "Seulement mes joueurs",
     "clubsLabel": "Clubs suivis (aucun = tous)",
-    "clubsHint": "Si tu sélectionnes des clubs, tu ne recevras que les événements de leurs matchs."
+    "clubsHint": "Si tu sélectionnes des clubs, tu ne recevras que les événements de leurs matchs.",
+    "webPushEnable": "Activer sur cet appareil",
+    "webPushDisable": "Désactiver sur cet appareil",
+    "webPushDenied": "Permission refusée — autorise les notifications pour ce site dans les réglages de ton navigateur.",
+    "webPushError": "Impossible d'activer les notifications, réessaie plus tard.",
+    "webPushUnsupported": "Notifications navigateur non disponibles ici. Sur iPhone/iPad, ajoute d'abord le site à l'écran d'accueil (Partager → Sur l'écran d'accueil), puis reviens depuis l'icône ajoutée.",
+    "webPushHint": "Reçois les événements live même onglet fermé."
   },
   "savedMessage": "Enregistré ! Le pseudo affiché en haut se met à jour à la prochaine connexion.",
   "saving": "Enregistrement…",

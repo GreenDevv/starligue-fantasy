@@ -7,6 +7,7 @@ import { resolveApiError } from "@/lib/api/error-messages";
 import { PlayerSearch, type PlayerSearchOption } from "@/components/players/PlayerSearch";
 import { HomeClubPicker, homeClubValueToPayload, type HomeClubValue } from "@/components/clubs/HomeClubPicker";
 import { ClubLogo } from "@/components/ui/ClubLogo";
+import { WebPushSettings } from "@/components/notifications/WebPushSettings";
 
 interface AccountClub {
   id: string;
@@ -272,6 +273,7 @@ export default function AccountPage() {
               </div>
               <p className="mt-1.5 text-[11px] text-text-muted">{tAccount("liveNotifications.clubsHint")}</p>
             </div>
+            <WebPushSettings />
           </div>
         </div>
 
