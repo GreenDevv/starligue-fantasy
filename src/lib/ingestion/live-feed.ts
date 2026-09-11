@@ -1,12 +1,19 @@
 // Suivi minute par minute des matchs Starligue en direct. Appelé par le cron
 // sync-live pendant les créneaux de match. Idempotent.
 //
-// Source : `eStatsChannels/index_ajax` (LnhScraperProvider.fetchLiveIndex, un seul
-// appel pour tous les matchs du jour). L'ancien flux par match (view_tab_live,
+// Source du score/chrono : `eStatsChannels/index_ajax` (LnhScraperProvider.fetchLiveIndex,
+// un seul appel pour tous les matchs du jour). L'ancien flux par match (view_tab_live,
 // LnhScraperProvider.fetchLiveMatchState) s'est avéré ne PAS se remplir pendant un
 // match réellement en cours (validé en direct le 11/09) — probablement une
 // reconstitution post-match, pas un vrai flux temps réel. L'index donne le score et
-// la période/minute de façon fiable, mais pas le détail événement par événement.
+// la période/minute de façon fiable.
+//
+// Source du détail événement par événement : /matchs/live/voir?channel=N + /ajaxlive
+// (LnhScraperProvider.fetchLiveChannelFilename/fetchLiveEventsFeed), validé en direct
+// le 11/09 (61 événements nominatifs récupérés en cours de match). Le `channelId` par
+// match vient de l'index (même appel que le score), le `filename` (hash de cache,
+// stable pour tout le match) est résolu une fois puis mis en cache dans
+// Match.externalIds.lnh_live_channel_filename.
 //
 // Pour chaque match dans la fenêtre live (coup d'envoi dans [now-2h45, now+15min],
 // statut SCHEDULED/LIVE) présent dans l'index, met à jour :
@@ -15,12 +22,16 @@
 //   - Match.status  → LIVE (le passage à FINISHED reste géré par la synchro
 //     calendrier habituelle, qui détecte `scores is-finish` — l'index live ne liste
 //     que les matchs en cours et ne donne pas de signal de fin fiable)
+//   - MatchLiveEvent  → une ligne par événement lnh.fr, ajout seul (jamais de
+//     doublon : sequence = position chronologique, on n'insère que ce qui dépasse
+//     le dernier sequence déjà stocké)
 //
 // N'ingère PAS le boxscore (notes joueurs) : les notes ne sont publiées qu'après le
 // match, c'est le rôle de sync-ratings / settle-gameweek.
 import { prisma } from "@/lib/db";
 import { createLnhScraperProvider } from "@/lib/data-providers/lnh-scraper.provider";
 import { IngestionError } from "@/lib/data-providers/lnh-scraper.provider";
+import type { LnhScraperProvider } from "@/lib/data-providers/lnh-scraper.provider";
 
 const WINDOW_BEFORE_MS = 15 * 60 * 1000;
 const WINDOW_AFTER_MS = 2.75 * 60 * 60 * 1000;
@@ -28,8 +39,70 @@ const WINDOW_AFTER_MS = 2.75 * 60 * 60 * 1000;
 export interface LiveFeedSyncResult {
   checked: number;
   updated: number;
-  matches: { matchId: string; minute: number; period: string; score: string; finished: boolean }[];
+  matches: { matchId: string; minute: number; period: string; score: string; finished: boolean; newEvents: number }[];
   errors: string[];
+}
+
+// Résout/rafraîchit les événements d'un match et les insère en base (delta only).
+// Retourne le nombre de nouvelles lignes insérées. Ne jette jamais — une erreur ici
+// ne doit pas empêcher la mise à jour du score (fonctionnalité secondaire).
+async function syncMatchEvents(
+  provider: LnhScraperProvider,
+  matchId: string,
+  channelId: string,
+  externalIds: Record<string, string>
+): Promise<{ inserted: number; errors: string[] }> {
+  const errors: string[] = [];
+  let filename = externalIds.lnh_live_channel_filename;
+
+  async function fetchEvents() {
+    if (!filename) return null;
+    try {
+      return await provider.fetchLiveEventsFeed(channelId, filename);
+    } catch (err) {
+      errors.push(`events(${matchId}): ${String(err)}`);
+      return null;
+    }
+  }
+
+  let events = await fetchEvents();
+  if (events === null) {
+    // filename absent ou expiré (400) → (ré)résoudre puis réessayer une fois.
+    try {
+      const resolved = await provider.fetchLiveChannelFilename(channelId);
+      if (resolved && resolved !== filename) {
+        filename = resolved;
+        await prisma.match.update({
+          where: { id: matchId },
+          data: { externalIds: { ...externalIds, lnh_live_channel_filename: resolved, lnh_live_channel_id: channelId } },
+        });
+        events = await fetchEvents();
+      }
+    } catch (err) {
+      errors.push(`filename(${matchId}): ${String(err)}`);
+    }
+  }
+  if (!events || events.length === 0) return { inserted: 0, errors };
+
+  const existingCount = await prisma.matchLiveEvent.count({ where: { matchId } });
+  const newOnes = events.slice(existingCount);
+  if (newOnes.length === 0) return { inserted: 0, errors };
+
+  const { count } = await prisma.matchLiveEvent.createMany({
+    data: newOnes.map((e, i) => ({
+      matchId,
+      sequence: existingCount + i,
+      period: e.period,
+      minute: e.minute,
+      icon: e.icon,
+      homeScore: e.homeScore,
+      awayScore: e.awayScore,
+      text: e.text,
+    })),
+    skipDuplicates: true,
+  });
+
+  return { inserted: count, errors };
 }
 
 export async function syncLiveMatchFeeds(seasonId: string, _seasonsId: string): Promise<LiveFeedSyncResult> {
@@ -61,7 +134,8 @@ export async function syncLiveMatchFeeds(seasonId: string, _seasonsId: string): 
   const byCalendarsId = new Map(index.map((entry) => [entry.calendarsId, entry]));
 
   for (const match of candidates) {
-    const calendarsId = (match.externalIds as Record<string, string>)?.lnh_calendars_id;
+    const externalIds = match.externalIds as Record<string, string>;
+    const calendarsId = externalIds?.lnh_calendars_id;
     if (!calendarsId) continue;
     result.checked++;
 
@@ -86,6 +160,14 @@ export async function syncLiveMatchFeeds(seasonId: string, _seasonsId: string): 
         ...(match.status === "FINISHED" ? {} : { status: "LIVE" as const }),
       },
     });
+
+    let newEvents = 0;
+    if (entry.channelId) {
+      const { inserted, errors } = await syncMatchEvents(provider, match.id, entry.channelId, externalIds ?? {});
+      newEvents = inserted;
+      result.errors.push(...errors);
+    }
+
     result.updated++;
     result.matches.push({
       matchId: match.id,
@@ -93,6 +175,7 @@ export async function syncLiveMatchFeeds(seasonId: string, _seasonsId: string): 
       period: entry.period,
       score: `${entry.homeScore}-${entry.awayScore}`,
       finished: false,
+      newEvents,
     });
   }
 
