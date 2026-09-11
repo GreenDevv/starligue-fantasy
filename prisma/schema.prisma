@@ -361,6 +361,7 @@ model Player {
   newsItems              NewsItem[]
   favoritedBy            User[]                          @relation("FavoritePlayer")
   auctionBids            AuctionBid[]
+  liveEvents             MatchLiveEvent[]
 
   @@unique([seasonId, clubId, firstName, lastName])
   @@index([seasonId, position])
@@ -640,6 +641,13 @@ model MatchLiveEvent {
   homeScore Int
   awayScore Int
   text      String // libellé lnh.fr, ex: "But de Micke Brasseleur (Saint-Raphaël)"
+  // Joueur retrouvé par recherche du nom complet ("Prénom Nom") dans `text` parmi
+  // l'effectif des 2 clubs du match (src/lib/live/resolve-event-player.ts) — null si
+  // aucun nom trouvé (ex: "Fin du match", "Temps mort"). Résolu une fois à
+  // l'ingestion, pas à la lecture (évite de refaire le matching à chaque poll du
+  // toast live).
+  playerId  String?
+  player    Player?  @relation(fields: [playerId], references: [id])
   createdAt DateTime @default(now())
 
   @@unique([matchId, sequence])

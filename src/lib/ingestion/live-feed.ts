@@ -13,7 +13,8 @@
 // le 11/09 (61 événements nominatifs récupérés en cours de match). Le `channelId` par
 // match vient de l'index (même appel que le score), le `filename` (hash de cache,
 // stable pour tout le match) est résolu une fois puis mis en cache dans
-// Match.externalIds.lnh_live_channel_filename.
+// Match.externalIds.lnh_live_channel_filename. Chaque événement est associé (best
+// effort) à un joueur de l'effectif des 2 clubs du match, voir resolveEventPlayerId.
 //
 // Pour chaque match dans la fenêtre live (coup d'envoi dans [now-2h45, now+15min],
 // statut SCHEDULED/LIVE) présent dans l'index, met à jour :
@@ -32,6 +33,7 @@ import { prisma } from "@/lib/db";
 import { createLnhScraperProvider } from "@/lib/data-providers/lnh-scraper.provider";
 import { IngestionError } from "@/lib/data-providers/lnh-scraper.provider";
 import type { LnhScraperProvider } from "@/lib/data-providers/lnh-scraper.provider";
+import { resolveEventPlayerId, type EventPlayerCandidate } from "@/lib/live/resolve-event-player";
 
 const WINDOW_BEFORE_MS = 15 * 60 * 1000;
 const WINDOW_AFTER_MS = 2.75 * 60 * 60 * 1000;
@@ -43,14 +45,17 @@ export interface LiveFeedSyncResult {
   errors: string[];
 }
 
-// Résout/rafraîchit les événements d'un match et les insère en base (delta only).
-// Retourne le nombre de nouvelles lignes insérées. Ne jette jamais — une erreur ici
-// ne doit pas empêcher la mise à jour du score (fonctionnalité secondaire).
+// Résout/rafraîchit les événements d'un match et les insère en base (delta only),
+// en associant chaque nouvelle ligne à un joueur de `rosterCandidates` (best effort,
+// null si aucun nom reconnu). Retourne le nombre de nouvelles lignes insérées. Ne
+// jette jamais — une erreur ici ne doit pas empêcher la mise à jour du score
+// (fonctionnalité secondaire).
 async function syncMatchEvents(
   provider: LnhScraperProvider,
   matchId: string,
   channelId: string,
-  externalIds: Record<string, string>
+  externalIds: Record<string, string>,
+  rosterCandidates: EventPlayerCandidate[]
 ): Promise<{ inserted: number; errors: string[] }> {
   const errors: string[] = [];
   let filename = externalIds.lnh_live_channel_filename;
@@ -98,6 +103,7 @@ async function syncMatchEvents(
       homeScore: e.homeScore,
       awayScore: e.awayScore,
       text: e.text,
+      playerId: resolveEventPlayerId(e.text, rosterCandidates),
     })),
     skipDuplicates: true,
   });
@@ -113,7 +119,16 @@ export async function syncLiveMatchFeeds(seasonId: string, _seasonsId: string): 
       status: { in: ["SCHEDULED", "LIVE"] },
       kickoffAt: { gte: new Date(now - WINDOW_AFTER_MS), lte: new Date(now + WINDOW_BEFORE_MS) },
     },
-    select: { id: true, status: true, homeScore: true, awayScore: true, externalIds: true, kickoffAt: true },
+    select: {
+      id: true,
+      status: true,
+      homeScore: true,
+      awayScore: true,
+      externalIds: true,
+      kickoffAt: true,
+      homeClubId: true,
+      awayClubId: true,
+    },
   });
 
   const result: LiveFeedSyncResult = { checked: 0, updated: 0, matches: [], errors: [] };
@@ -132,6 +147,20 @@ export async function syncLiveMatchFeeds(seasonId: string, _seasonsId: string): 
     return result;
   }
   const byCalendarsId = new Map(index.map((entry) => [entry.calendarsId, entry]));
+
+  // Effectif des clubs concernés, chargé une seule fois pour tout le tick (plutôt
+  // qu'une requête par match) — sert à resolveEventPlayerId.
+  const clubIds = [...new Set(candidates.flatMap((m) => [m.homeClubId, m.awayClubId]))];
+  const rosterPlayers = await prisma.player.findMany({
+    where: { seasonId, clubId: { in: clubIds } },
+    select: { id: true, firstName: true, lastName: true, clubId: true },
+  });
+  const rosterByClub = new Map<string, EventPlayerCandidate[]>();
+  for (const p of rosterPlayers) {
+    const arr = rosterByClub.get(p.clubId) ?? [];
+    arr.push({ id: p.id, firstName: p.firstName, lastName: p.lastName });
+    rosterByClub.set(p.clubId, arr);
+  }
 
   for (const match of candidates) {
     const externalIds = match.externalIds as Record<string, string>;
@@ -163,7 +192,11 @@ export async function syncLiveMatchFeeds(seasonId: string, _seasonsId: string): 
 
     let newEvents = 0;
     if (entry.channelId) {
-      const { inserted, errors } = await syncMatchEvents(provider, match.id, entry.channelId, externalIds ?? {});
+      const rosterCandidates = [
+        ...(rosterByClub.get(match.homeClubId) ?? []),
+        ...(rosterByClub.get(match.awayClubId) ?? []),
+      ];
+      const { inserted, errors } = await syncMatchEvents(provider, match.id, entry.channelId, externalIds ?? {}, rosterCandidates);
       newEvents = inserted;
       result.errors.push(...errors);
     }
