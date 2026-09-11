@@ -33,4 +33,9 @@ describe("resolveEventPlayerId", () => {
   it("liste de candidats vide → null", () => {
     expect(resolveEventPlayerId("But de Micke Brasseleur", [])).toBeNull();
   });
+
+  it("insensible à la casse — Player.lastName tout en majuscules en base (cas réel du 11/09, LUCIANI)", () => {
+    const upperCaseCandidates = [{ id: "p5", firstName: "Julien", lastName: "LUCIANI" }];
+    expect(resolveEventPlayerId("Perte de balle de Julien Luciani (Chartres)", upperCaseCandidates)).toBe("p5");
+  });
 });
