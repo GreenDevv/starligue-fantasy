@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseLiveMatchFeedHtml } from "./lnh-scraper.provider";
+import { parseLiveMatchFeedHtml, parseLiveIndexHtml } from "./lnh-scraper.provider";
 
 // Structure fidèle au HTML réel capturé le 2026-09-11 (scripts/probe-lnh-live-feed.ts,
 // J02 Limoges–Saran, contents_action=view_tab_live) : table `table-stats events`,
@@ -75,5 +75,104 @@ describe("parseLiveMatchFeedHtml", () => {
     expect(s).toMatchObject({ period: "FT", minute: 60, finished: true, homeScore: 28, awayScore: 30 });
     expect(s?.lastEvent).toBe("Fin du match");
     expect(s?.eventCount).toBe(3);
+  });
+});
+
+// Structure fidèle au HTML réel capturé en direct le 2026-09-11
+// (eStatsChannels/index_ajax, Saint-Raphaël-Dunkerque, `view_tab_live` étant resté
+// vide malgré le match bien en cours — voir lnh-scraper.provider.ts).
+function indexItem(opts: { id: string; period: string; home: number; away: number; homeName: string; awayName: string }): string {
+  return `
+  <div class="calendars-listing-item listing-item live  lmsl"
+    id="${opts.id}">
+    <div class="row">
+        <div class="col-infos">
+            <div class="col-competitions">
+                <span class="competition">
+                    Daikin StarLigue - J02                </span>
+                <br>
+                ${opts.period}            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-teams">
+            <div class="teams-logos">
+                <div class="team-logo">
+                    <div class="team-name">${opts.homeName}</div>
+                </div>
+                <div class="scores is-live">
+                    ${opts.home} - ${opts.away}                </div>
+                <div class="team-logo">
+                    <div class="team-name">${opts.awayName}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>`;
+}
+
+function upcomingItem(id: string, dateLabel: string, homeName: string, awayName: string): string {
+  return `
+  <div class="calendars-listing-item listing-item"
+    id="${id}">
+    <div class="row">
+        <div class="col-infos">
+            <div class="col-competitions">
+                <span class="competition">
+                    Daikin StarLigue - J02                </span>
+                <br>
+                ${dateLabel}            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-teams">
+            <div class="teams-logos">
+                <div class="team-logo">
+                    <div class="team-name">${homeName}</div>
+                </div>
+                <div class="team-logo">
+                    <div class="team-name">${awayName}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>`;
+}
+
+describe("parseLiveIndexHtml", () => {
+  it("match en 1ère mi-temps", () => {
+    const html = indexItem({ id: "12012", period: "1ère mi-temps&nbsp;&nbsp;19:17", home: 7, away: 5, homeName: "Saint-Raphaël", awayName: "Dunkerque" });
+    expect(parseLiveIndexHtml(html)).toEqual([
+      { calendarsId: "12012", homeScore: 7, awayScore: 5, minute: 19, period: "1H" },
+    ]);
+  });
+
+  it("mi-temps (pause)", () => {
+    const html = indexItem({ id: "12012", period: "Mi-temps", home: 15, away: 14, homeName: "Saint-Raphaël", awayName: "Dunkerque" });
+    expect(parseLiveIndexHtml(html)).toEqual([
+      { calendarsId: "12012", homeScore: 15, awayScore: 14, minute: 30, period: "HT" },
+    ]);
+  });
+
+  it("2ème mi-temps : minute cumulée = 30 + minute de période", () => {
+    const html = indexItem({ id: "12012", period: "2ème mi-temps&nbsp;&nbsp;12:05", home: 22, away: 20, homeName: "Saint-Raphaël", awayName: "Dunkerque" });
+    expect(parseLiveIndexHtml(html)).toEqual([
+      { calendarsId: "12012", homeScore: 22, awayScore: 20, minute: 42, period: "2H" },
+    ]);
+  });
+
+  it("match pas encore commencé (date affichée au lieu d'une période) → ignoré", () => {
+    const html = upcomingItem("12017", "sam. 12 sept. 19h00", "Nantes", "Aix");
+    expect(parseLiveIndexHtml(html)).toEqual([]);
+  });
+
+  it("plusieurs matchs : ne garde que ceux effectivement en cours", () => {
+    const html =
+      indexItem({ id: "12012", period: "1ère mi-temps&nbsp;&nbsp;19:17", home: 7, away: 5, homeName: "Saint-Raphaël", awayName: "Dunkerque" }) +
+      indexItem({ id: "12015", period: "1ère mi-temps&nbsp;&nbsp;00:00", home: 0, away: 0, homeName: "Chartres", awayName: "Tremblay" }) +
+      upcomingItem("12017", "sam. 12 sept. 19h00", "Nantes", "Aix");
+    const result = parseLiveIndexHtml(html);
+    expect(result).toHaveLength(2);
+    expect(result.map((r) => r.calendarsId)).toEqual(["12012", "12015"]);
   });
 });

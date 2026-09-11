@@ -629,6 +629,68 @@ export function parseLiveMatchFeedHtml(html: string): ScrapedLiveMatchState | nu
   };
 }
 
+// ⚠️ `parseLiveMatchFeedHtml` (view_tab_live, ci-dessus) s'est avéré NE PAS se
+// remplir pendant un match réellement en cours (validé en direct le 11/09 sur
+// Saint-Raphaël-Dunkerque, calendars_id=12012 : "Aucun événement" en continu de
+// 17h44 à 17h51 UTC alors que le score passait de 4-1 à 6-3 sur lnh.fr) — le feed
+// semble être une reconstitution post-match, pas un vrai flux temps réel. Le score
+// live fiable vient en fait de l'index `eStatsChannels/index_ajax` (déjà connu du
+// Lot 1 côté classement club, cf. lnh_standings_ajax_endpoint) : chaque match du jour
+// y apparaît en `calendars-listing-item`, avec un score `scores is-live` et un texte
+// de période ("1ère mi-temps  19:17", `&nbsp;` entre le libellé et le chrono mm:ss)
+// mis à jour en direct. `parseLiveIndexHtml` ci-dessous en extrait le score/minute —
+// pas le détail événement par événement (pas dispo via cet endpoint).
+export interface ScrapedLiveIndexEntry {
+  calendarsId: string;
+  homeScore: number;
+  awayScore: number;
+  minute: number; // minutes écoulées dans le match (0-60), continu sur les 2 périodes
+  period: "1H" | "HT" | "2H";
+}
+
+// Texte brut après le `<br>` du bloc `.col-competitions` : soit une date à venir
+// ("sam. 12 sept. 19h00", match pas encore commencé — ignoré ici), soit une période
+// de match en cours ("1ère/2ème mi-temps  MM:SS", ou "Mi-temps" seul pendant la
+// pause). Le format "1ère mi-temps  00:00" apparaît aussi juste avant le coup
+// d'envoi réel (placeholder) — inoffensif : le match n'est de toute façon interrogé
+// que dans la fenêtre de coup d'envoi (cf. syncLiveMatchFeeds).
+function parseLivePeriodText(raw: string): { period: ScrapedLiveIndexEntry["period"]; minute: number } | null {
+  const text = raw.replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+  const halfMatch = text.match(/^(\d)(?:ère|ème|nde)\s*mi-temps\s+(\d{1,2}):(\d{2})/i);
+  if (halfMatch) {
+    const half = halfMatch[1];
+    const mm = Math.min(parseInt(halfMatch[2]!, 10), 30);
+    if (half === "1") return { period: "1H", minute: mm };
+    if (half === "2") return { period: "2H", minute: Math.min(30 + mm, 60) };
+    return null;
+  }
+  if (/^mi-temps$/i.test(text)) return { period: "HT", minute: 30 };
+  return null; // date à venir, "terminé", ou format non reconnu
+}
+
+export function parseLiveIndexHtml(html: string): ScrapedLiveIndexEntry[] {
+  const results: ScrapedLiveIndexEntry[] = [];
+  const items = html.split('<div class="calendars-listing-item').slice(1);
+  for (const raw of items) {
+    const idMatch = raw.match(/^[^>]*\bid="(\d+)"/s);
+    const scoreMatch = raw.match(/class="scores is-live">\s*(\d+)\s*-\s*(\d+)\s*</);
+    const periodTextMatch = raw.match(/<\/span>\s*<br>\s*([^<]+?)\s*<\/div>/);
+    if (!idMatch || !scoreMatch || !periodTextMatch) continue;
+
+    const parsed = parseLivePeriodText(periodTextMatch[1]!);
+    if (!parsed) continue;
+
+    results.push({
+      calendarsId: idMatch[1]!,
+      homeScore: parseInt(scoreMatch[1]!, 10),
+      awayScore: parseInt(scoreMatch[2]!, 10),
+      minute: parsed.minute,
+      period: parsed.period,
+    });
+  }
+  return results;
+}
+
 // Infère l'année d'une date de calendrier sans année ("ven. 05 sept." / "sam. 06 juin") :
 // août→décembre = 1ère année de la saison, janvier→juillet = 2ème année.
 // seasonStartYear = ex 2025 pour la saison "2025-2026".
@@ -1319,6 +1381,32 @@ export class LnhScraperProvider implements StarligueDataProvider {
     }
 
     return parseLiveMatchFeedHtml(await res.text());
+  }
+
+  // Score/minute en direct de TOUS les matchs Daikin StarLigue du moment, en un seul
+  // appel (eStatsChannels/index_ajax — voir parseLiveIndexHtml). Source fiable
+  // validée en direct le 11/09, contrairement à fetchLiveMatchState/view_tab_live.
+  async fetchLiveIndex(): Promise<ScrapedLiveIndexEntry[]> {
+    const body = new URLSearchParams({
+      contents_controller: "eStatsChannels",
+      contents_action: "index_ajax",
+      univers: "d1-26623",
+    });
+
+    const res = await this.fetchWithTimeout(AJAX_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-Requested-With": "XMLHttpRequest",
+        "User-Agent": "Mozilla/5.0 (compatible; StarligueFantasyBot/1.0)",
+      },
+      body: body.toString(),
+    });
+    if (!res) {
+      throw new IngestionError("LNH Scraper : impossible de récupérer l'index live", this.name, true);
+    }
+
+    return parseLiveIndexHtml(await res.text());
   }
 
   // Récupère les boxscores de plusieurs matchs déjà joués (ex : les ~8 matchs d'une
