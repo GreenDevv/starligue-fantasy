@@ -9,6 +9,14 @@ import type { LiveGameweekPerformances, LiveGameweekPerformanceEntry } from "@/l
 // (demande explicite : plus stylée, plus détaillée). Même principe que
 // StatLeaderCard (leader mis en avant, le reste en petit) pour rester cohérent
 // avec le reste du site — voir ARCHITECTURE.md §32.
+//
+// v2 (13/09, retour direct "beaucoup trop d'espace perdu sur desktop") : les
+// entrées 2-6 étaient une liste de lignes pleine largeur avec un grand vide
+// entre le nom et la note — remplacées par une grille de mini-cartes (même
+// rythme de colonnes que le strip de matchs "wide" juste au-dessus,
+// grid-cols-2 sm:grid-cols-3 md:grid-cols-4, voir MatchesStrip.tsx), le
+// leader occupant une cellule deux fois plus large plutôt qu'une ligne
+// pleine largeur à part.
 const HIGHLIGHT_LABEL: Record<HighlightStatKey, string> = {
   goals: "but",
   assists: "passe",
@@ -35,17 +43,17 @@ function HighlightChips({ entry, compact = false }: { entry: LiveGameweekPerform
   );
 }
 
-function MatchLine({ entry }: { entry: LiveGameweekPerformanceEntry }) {
+function MatchLine({ entry, compact = false }: { entry: LiveGameweekPerformanceEntry; compact?: boolean }) {
   const { match } = entry;
   const finished = match.status === "FINISHED";
   const hasScore = match.homeScore !== null && match.awayScore !== null;
   return (
-    <div className="flex items-center gap-1 text-[11px] text-text-muted">
-      <span>vs</span>
+    <div className={`flex min-w-0 items-center gap-1 text-text-muted ${compact ? "text-[10px]" : "text-[11px]"}`}>
+      <span className="shrink-0">vs</span>
       <ClubLogo club={match.opponentClub} size="xs" />
       <span className="truncate">{match.opponentClub.shortName}</span>
       {hasScore && (
-        <span className={`tabular-nums ${finished ? "" : "text-points-neg"}`}>
+        <span className={`shrink-0 tabular-nums ${finished ? "" : "text-points-neg"}`}>
           ({entry.match.isHome ? `${match.homeScore}-${match.awayScore}` : `${match.awayScore}-${match.homeScore}`})
         </span>
       )}
@@ -59,6 +67,38 @@ function RatingBadge({ rating, size = "base" }: { rating: number; size?: "base" 
     <span className={`font-arcade tabular-nums leading-none ${color} ${size === "lg" ? "text-3xl" : "text-base"}`}>
       {rating.toFixed(1)}
     </span>
+  );
+}
+
+// Mini-carte d'une perf (2ᵉ à 6ᵉ) — autonome (bordée) plutôt qu'une ligne pleine
+// largeur, pour bien se comporter dans une grille à plusieurs colonnes.
+function PerformerCard({ entry, rank }: { entry: LiveGameweekPerformanceEntry; rank: number }) {
+  return (
+    <Link
+      href={`/players/${entry.playerId}`}
+      className="pixel-corners-sm flex flex-col gap-1.5 border border-points-neg/15 bg-bg/40 p-2 transition-colors hover:bg-border/10"
+    >
+      <div className="flex items-center gap-2">
+        <span className="w-3 shrink-0 text-center text-[10px] text-text-muted">{rank}</span>
+        <PlayerAvatar player={entry} size="xs" variant="photo" focus="head" />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-xs text-text">
+            {entry.firstName} {entry.lastName}
+          </p>
+          <MatchLine entry={entry} compact />
+        </div>
+      </div>
+      <div className="flex items-center justify-between gap-2 pl-5">
+        <HighlightChips entry={entry} compact />
+        <div className="flex shrink-0 items-center gap-1.5">
+          <RatingBadge rating={entry.lnhRating} />
+          <span className="text-[11px] font-semibold tabular-nums text-points-pos">
+            {entry.points > 0 ? "+" : ""}
+            {entry.points}
+          </span>
+        </div>
+      </div>
+    </Link>
   );
 }
 
@@ -76,59 +116,36 @@ export function LivePerformancesCard({ gameweekNumber, entries }: LiveGameweekPe
         Meilleures perfs en direct · J{gameweekNumber}
       </p>
 
-      {leader && (
-        <Link
-          href={`/players/${leader.playerId}`}
-          className="flex items-center gap-3 rounded-md p-1 transition-colors hover:bg-border/10"
-        >
-          <PlayerAvatar player={leader} size="lg" variant="photo" focus="head" />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-text">
-              {leader.firstName} {leader.lastName}
-            </p>
-            <MatchLine entry={leader} />
-            <div className="mt-1">
-              <HighlightChips entry={leader} />
-            </div>
-          </div>
-          <div className="flex shrink-0 flex-col items-end gap-0.5">
-            <RatingBadge rating={leader.lnhRating} size="lg" />
-            <span className="text-xs font-semibold tabular-nums text-points-pos">
-              {leader.points > 0 ? "+" : ""}
-              {leader.points} pts
-            </span>
-          </div>
-        </Link>
-      )}
-
-      {rest.length > 0 && (
-        <div className="mt-2 flex flex-col gap-1.5 border-t border-points-neg/15 pt-2">
-          {rest.map((e, i) => (
-            <Link
-              key={e.playerId}
-              href={`/players/${e.playerId}`}
-              className="flex items-center gap-2 rounded-md px-1 py-0.5 text-xs transition-colors hover:bg-border/10"
-            >
-              <span className="w-3 shrink-0 text-center text-text-muted">{i + 2}</span>
-              <PlayerAvatar player={e} size="xs" variant="photo" focus="head" />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-text">
-                  {e.firstName} {e.lastName}
-                </p>
-                <div className="flex items-center gap-1.5">
-                  <ClubLogo club={e.club} size="xs" />
-                  <HighlightChips entry={e} compact />
-                </div>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+        {leader && (
+          <Link
+            href={`/players/${leader.playerId}`}
+            className="pixel-corners-sm col-span-2 flex items-center gap-3 border border-points-neg/25 bg-points-neg/[0.06] p-2 transition-colors hover:bg-border/10"
+          >
+            <PlayerAvatar player={leader} size="lg" variant="photo" focus="head" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-text">
+                {leader.firstName} {leader.lastName}
+              </p>
+              <MatchLine entry={leader} />
+              <div className="mt-1">
+                <HighlightChips entry={leader} />
               </div>
-              <RatingBadge rating={e.lnhRating} />
-              <span className="w-10 shrink-0 text-right tabular-nums text-text-muted">
-                {e.points > 0 ? "+" : ""}
-                {e.points}
+            </div>
+            <div className="flex shrink-0 flex-col items-end gap-0.5">
+              <RatingBadge rating={leader.lnhRating} size="lg" />
+              <span className="text-xs font-semibold tabular-nums text-points-pos">
+                {leader.points > 0 ? "+" : ""}
+                {leader.points} pts
               </span>
-            </Link>
-          ))}
-        </div>
-      )}
+            </div>
+          </Link>
+        )}
+
+        {rest.map((e, i) => (
+          <PerformerCard key={e.playerId} entry={e} rank={i + 2} />
+        ))}
+      </div>
     </div>
   );
 }
