@@ -1,17 +1,10 @@
 import { getTranslations } from "next-intl/server";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import type { ClubStandingsResult } from "@/lib/standings/get";
-import { computePointsGroupIndices, hasPendingMatchThisRound } from "@/lib/standings/points-groups";
-
-// Fond très légèrement teinté sur un groupe de points sur deux — voir le même
-// helper dans ClubStandingsWidget.tsx.
-function groupBg(groupIndex: number): string {
-  return groupIndex % 2 === 1 ? "bg-border/10" : "";
-}
+import { hasPendingMatchThisRound } from "@/lib/standings/pending-match";
 
 export async function StandingsSection({ gameweekNumber, rows, liveMatchesCounted }: ClubStandingsResult) {
   const t = await getTranslations("dashboard");
-  const groupIndices = computePointsGroupIndices(rows);
   return (
     <div className="pixel-corners border border-border bg-surface p-3">
       <div className="mb-2 flex items-center justify-between gap-2">
@@ -45,23 +38,21 @@ export async function StandingsSection({ gameweekNumber, rows, liveMatchesCounte
               </tr>
             </thead>
             <tbody>
-              {rows.map((r, i) => (
-                <tr key={r.clubId} className={`border-t border-border/60 ${groupBg(groupIndices[i]!)}`}>
+              {rows.map((r) => (
+                <tr key={r.clubId} className="border-t border-border/60">
                   <td className="py-1.5 text-text-muted">{r.rank}</td>
                   <td className="py-1.5">
                     <div className="flex items-center gap-1.5">
                       <ClubLogo club={{ shortName: r.clubShortName, name: r.clubName, logoUrl: r.logoUrl }} size="xs" />
+                      {hasPendingMatchThisRound(r.played, gameweekNumber) && (
+                        <span className="shrink-0 text-[10px] font-bold text-points-neg" title="N'a pas encore joué cette journée">
+                          -1
+                        </span>
+                      )}
                       <span className="truncate text-text">{r.clubShortName}</span>
                     </div>
                   </td>
-                  <td className="py-1.5 text-right tabular-nums text-text-muted">
-                    {r.played}
-                    {hasPendingMatchThisRound(r.played, gameweekNumber) && (
-                      <span className="ml-1 font-bold text-points-neg" title="N'a pas encore joué cette journée">
-                        -1
-                      </span>
-                    )}
-                  </td>
+                  <td className="py-1.5 text-right tabular-nums text-text-muted">{r.played}</td>
                   <td className="py-1.5 text-right tabular-nums text-text-muted">
                     {r.goalAvg > 0 ? "+" : ""}
                     {r.goalAvg}
