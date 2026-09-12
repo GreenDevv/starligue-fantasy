@@ -3179,3 +3179,51 @@ l'un l'autre).
 ### Rollout
 
 Aucune migration Prisma. Déploiement direct.
+
+## 34. Retrait des leaders stats "en direct" (hors carte perfs) + page /ranking
+
+Ajouté le 13/09.
+
+### 34.1 Retrait du direct sur les leaders buteurs/passeurs
+
+Retour explicite : « aucune raison d'afficher les leaders de stats sur la
+journée [en direct], seulement les chiffres cumulés de la saison et par
+journée — je ne parle pas des perfs de la journée [`LivePerformancesCard`],
+celle-là reste ». Retiré :
+- `mergeLiveGoals`/`hasLiveUpdates` de `get-stat-leaders.ts` (tenté au §26,
+  retiré ici) — `StatLeaderCard`/`StatLeadersPanel` redeviennent des chiffres
+  purement post-match (`PlayerMatchStat`), saison/journée/moyenne comme
+  avant, sans injection de buts en direct ni polling ni badge "Live".
+- `src/lib/stats/live-goal-leaders.ts` supprimé (devenu totalement inutilisé).
+
+`LivePerformancesCard` (§32) reste inchangée : c'est désormais le SEUL
+endroit du site qui montre du direct match par match — plus de doublon de
+"ce qui est en direct" entre deux composants différents.
+
+### 34.2 Page /ranking : classement complet "tout-en-un"
+
+Demande explicite : « une page /ranking pour afficher le classement complet,
+avec les états de forme des équipes... peut-être même leur prochain
+adversaire, un classement un peu tout-en-un ». Page publique
+`(public)/(browse)/ranking`, même registre `resolveSeasonMode`/
+`resolveModeSeason` que `/stats` (fonctionne aussi en Mode Simulation).
+
+`getFullRanking(seasonId)` (`src/lib/standings/full-ranking.ts`) enrichit
+`getClubStandings` (déjà complet, jamais tronqué) avec, en deux requêtes en
+bloc (pas une par club) :
+- **Forme** : 5 derniers résultats V/N/D (`matchOutcomeForTeam`, §32), plus
+  ancien à gauche, plus récent à droite.
+- **Prochain adversaire** : prochain match `SCHEDULED`/`LIVE`, domicile ou
+  extérieur, avec la date.
+
+`RankingTable` (`src/components/starligue/RankingTable.tsx`) réutilise le
+badge V/N/D — extrait de `LivePerformancesCard` vers un composant partagé
+`src/components/ui/OutcomeBadge.tsx` — et le badge "-1" (§31, match pas
+encore joué cette journée). Lien "Voir le classement complet →" ajouté au
+bas de `StandingsSection` (home) vers `/ranking`.
+
+Nouveau namespace i18n `ranking` (8 locales, `src/i18n/request.ts`).
+
+### Rollout
+
+Aucune migration Prisma. Déploiement direct.

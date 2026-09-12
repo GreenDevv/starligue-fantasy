@@ -1,0 +1,19 @@
+{
+  "title": "Classificació",
+  "noActiveSeason": "Cap temporada activa per ara.",
+  "notAvailable": "Classificació encara no disponible.",
+  "live": "En directe",
+  "afterGameweek": "Després de J{number}",
+  "pendingMatchTitle": "Encara no ha jugat aquesta jornada",
+  "col": {
+    "club": "Club",
+    "played": "J",
+    "wins": "V",
+    "draws": "E",
+    "losses": "D",
+    "diff": "Dif",
+    "points": "Pts",
+    "form": "Forma",
+    "nextOpponent": "Proper rival"
+  }
+}

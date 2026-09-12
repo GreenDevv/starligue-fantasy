@@ -75,7 +75,6 @@
     "counter": "Sim J{current}/{total}"
   },
   "statLeaderCard": {
-    "live": "En vivo",
     "removeAriaLabel": "Quitar {label} del dashboard",
     "ownedByTeams": "En {teams}",
     "noData": "Todavía no hay datos."
@@ -143,7 +142,8 @@
       "played": "J",
       "diff": "+/-",
       "points": "Pts"
-    }
+    },
+    "seeFullRanking": "Ver la clasificación completa"
   },
   "bestXICard": {
     "subtitle": "Equipo tipo · jornada {number}"

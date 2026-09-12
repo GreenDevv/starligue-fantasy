@@ -75,7 +75,6 @@
     "counter": "Simu J{current}/{total}"
   },
   "statLeaderCard": {
-    "live": "Ao vivo",
     "removeAriaLabel": "Remover {label} do painel",
     "ownedByTeams": "Em {teams}",
     "noData": "Ainda não há dados."
@@ -143,7 +142,8 @@
       "played": "J",
       "diff": "+/-",
       "points": "Pts"
-    }
+    },
+    "seeFullRanking": "Ver a classificação completa"
   },
   "bestXICard": {
     "subtitle": "Equipa tipo · jornada {number}"

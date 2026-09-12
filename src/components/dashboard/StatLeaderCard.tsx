@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { Position } from "@/lib/squad/validation";
@@ -24,11 +24,6 @@ interface LeaderApiRow {
   position: Position;
   club: { shortName: string; logoUrl: string | null };
   value: number;
-}
-
-interface LeadersApiResponse {
-  leaders: LeaderApiRow[];
-  hasLiveUpdates: boolean;
 }
 
 type StatScope = "gameweek" | "season" | "average";
@@ -85,54 +80,26 @@ export function StatLeaderCard({
   const showPhotos = !compact;
   const [scope, setScope] = useState<StatScope>("gameweek");
   const [leaders, setLeaders] = useState<LeaderApiRow[]>([]);
-  const [hasLiveUpdates, setHasLiveUpdates] = useState(false);
   const [loading, setLoading] = useState(true);
   const [myTeams, setMyTeams] = useState<MyTeam[]>([]);
 
-  // "goalsTotal" (buteurs) est la seule ligne alimentable en direct : le feed live
-  // lnh.fr ne donne que le buteur, jamais la passe décisive (voir get-stat-leaders.ts)
-  // — inutile de reponder les autres lignes, elles ne bougent qu'après le match.
-  // scope=average exclu (moyenne par match joué, pas de sens avant que le match ne
-  // soit comptabilisé comme joué — voir la même exclusion côté serveur).
-  const isLiveEligible = statKey === "goalsTotal" && scope !== "average";
-
-  const fetchLeaders = useCallback(
-    (isCancelled: () => boolean, opts: { showLoading: boolean }) => {
-      if (opts.showLoading) setLoading(true);
-      fetch(`/api/stats/leaders?statKey=${statKey}&scope=${scope}&seasonId=${seasonId}`)
-        .then((r) => r.json())
-        .then((json: { data?: LeadersApiResponse }) => {
-          if (isCancelled()) return;
-          setLeaders(json.data?.leaders ?? []);
-          setHasLiveUpdates(json.data?.hasLiveUpdates ?? false);
-          if (opts.showLoading) setLoading(false);
-        })
-        .catch(() => {
-          if (!isCancelled() && opts.showLoading) setLoading(false);
-        });
-    },
-    [statKey, scope, seasonId]
-  );
-
   useEffect(() => {
     let cancelled = false;
-    const isCancelled = () => cancelled;
-    fetchLeaders(isCancelled, { showLoading: true });
-
-    if (!isLiveEligible) {
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    const id = window.setInterval(() => {
-      if (!document.hidden) fetchLeaders(isCancelled, { showLoading: false });
-    }, 30_000);
+    setLoading(true);
+    fetch(`/api/stats/leaders?statKey=${statKey}&scope=${scope}&seasonId=${seasonId}`)
+      .then((r) => r.json())
+      .then((json: { data?: { leaders: LeaderApiRow[] } }) => {
+        if (cancelled) return;
+        setLeaders(json.data?.leaders ?? []);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!cancelled) setLoading(false);
+      });
     return () => {
       cancelled = true;
-      window.clearInterval(id);
     };
-  }, [fetchLeaders, isLiveEligible]);
+  }, [statKey, scope, seasonId]);
 
   // Une seule fois (indépendant de statKey/scope) : mes équipes + leurs effectifs,
   // pour surligner "je le possède déjà" sur chaque ligne. Non bloquant pour
@@ -161,14 +128,7 @@ export function StatLeaderCard({
     <div className="pixel-corners border border-border bg-surface p-3">
       <div className="mb-2 flex flex-col gap-1.5">
         <div className="flex items-start justify-between gap-2">
-          <p className="line-clamp-2 min-h-[2.5rem] text-sm font-medium text-text">
-            {tLabels(`statLine.${line.key}`)}
-            {hasLiveUpdates && (
-              <span className="pixel-corners-sm ml-1.5 inline-block bg-points-neg/20 px-1.5 py-0.5 align-middle text-[9px] font-bold uppercase text-points-neg shadow-glow-red">
-                {t("statLeaderCard.live")}
-              </span>
-            )}
-          </p>
+          <p className="line-clamp-2 min-h-[2.5rem] text-sm font-medium text-text">{tLabels(`statLine.${line.key}`)}</p>
           {showRemove && (
             <button
               onClick={onRemove}

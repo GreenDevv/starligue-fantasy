@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import type { ClubStandingsResult } from "@/lib/standings/get";
 import { hasPendingMatchThisRound } from "@/lib/standings/pending-match";
@@ -66,6 +67,13 @@ export async function StandingsSection({ gameweekNumber, rows, liveMatchesCounte
           </table>
         </div>
       )}
+
+      <Link
+        href="/ranking"
+        className="mt-2 block text-right text-[10px] uppercase tracking-wide text-accent hover:underline"
+      >
+        {t("standingsSection.seeFullRanking")} →
+      </Link>
     </div>
   );
 }

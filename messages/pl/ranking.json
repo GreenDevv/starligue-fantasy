@@ -1,0 +1,19 @@
+{
+  "title": "Tabela",
+  "noActiveSeason": "Obecnie brak aktywnego sezonu.",
+  "notAvailable": "Tabela niedostępna jeszcze.",
+  "live": "Na żywo",
+  "afterGameweek": "Po K{number}",
+  "pendingMatchTitle": "Jeszcze nie rozegrał tej kolejki",
+  "col": {
+    "club": "Klub",
+    "played": "M",
+    "wins": "W",
+    "draws": "R",
+    "losses": "P",
+    "diff": "Bil",
+    "points": "Pkt",
+    "form": "Forma",
+    "nextOpponent": "Następny przeciwnik"
+  }
+}
