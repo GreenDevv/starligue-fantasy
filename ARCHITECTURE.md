@@ -2839,3 +2839,46 @@ rafraîchissement serveur existant (`<LiveRefresher/>`, déjà en place).
 ### 26.4 Rollout
 
 Aucune migration Prisma. Déploiement direct.
+
+## 27. Notifications live : total de buts + boutons discrets
+
+Ajouté le 12/09, sur les notifications Web Push existantes (buts,
+exclusions… + moments de match du §24, `notify-live-events.ts`).
+
+### 27.1 Total de buts du buteur dans le match
+
+Quand un but est marqué (icônes `goals`/`goals_7m`), le corps de la
+notification affiche maintenant le total du buteur dans CE match, ex. "But de
+X (Club) — 3e but du match". `tallyGoalsBySequence()`
+(`src/lib/live/goal-tally.ts`, fonction pure testée) numérote chaque but par
+joueur dans l'ordre chronologique (`MatchLiveEvent.sequence`) — recalculé sur
+tout l'historique du match à chaque nouveau batch d'événements (pas seulement
+le batch courant), pour rester correct même si un joueur a déjà marqué avant
+ce tick de cron. Gèle plusieurs buts du même joueur dans un seul batch
+(rattrapage après un cron raté) : chacun reçoit son propre rang, pas le total
+final répété.
+
+### 27.2 Boutons discrets sur chaque notification
+
+`STANDARD_ACTIONS` (`notify-live-events.ts`) : deux actions natives
+Notification API sur **toute** notification live (but, mi-temps, fin de
+match, rappel coup d'envoi, coup d'envoi) — "Voir le match" (rejoint le fil
+du match, `/matches/[id]#match-events`, ancre ajoutée sur `EventsTimeline`)
+et "Réglages" (`/account#live-notifications`, ancre ajoutée sur la section
+notifs live du compte). Gérées dans `public/sw.js`
+(`showNotification({ actions })` + `notificationclick` routant sur
+`event.action`).
+
+⚠️ Ce sont des boutons natifs du système/navigateur (Notification API), pas
+du HTML à nous : impossible d'en changer le style, "discret" vient du fait
+que ce sont de simples libellés texte sans emphase — pas de notre ressort
+d'aller plus loin visuellement. Support partiel : fonctionne sur
+Chrome/Firefox desktop et Android ; **ignoré silencieusement sur iOS Safari**
+(pas de support des actions de notification), qui affiche la notif sans
+bouton mais reste cliquable normalement (comportement inchangé).
+
+### 27.3 Rollout
+
+Aucune migration Prisma. Déploiement direct (le nouveau champ `actions` du
+payload Web Push est ignoré par les abonnements déjà enregistrés avant ce
+déploiement — rien à backfiller, le prochain envoi l'inclut automatiquement).

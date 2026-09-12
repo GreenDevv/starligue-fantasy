@@ -22,6 +22,10 @@ export interface WebPushPayload {
   url: string;
   tag?: string;
   image?: string;
+  // Boutons d'action affichés par l'OS/navigateur sur la notification (2 max
+  // affichés de façon fiable, voir public/sw.js) — dégrade silencieusement sur les
+  // plateformes qui ne les supportent pas (iOS Safari notamment).
+  actions?: { action: string; title: string }[];
 }
 
 export interface WebPushSubscriptionKeys {
