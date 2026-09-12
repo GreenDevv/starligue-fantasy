@@ -18,8 +18,9 @@ import { prisma } from "@/lib/db";
 import { verifyCronAuth } from "@/lib/cron-auth";
 import { IngestionError } from "@/lib/data-providers/lnh-scraper.provider";
 import { syncCalendarsIdsForSeason } from "@/lib/ingestion/boxscore";
-import { syncLiveMatchFeeds } from "@/lib/ingestion/live-feed";
+import { syncLiveMatchFeeds, notifyMatchKickoffMilestones } from "@/lib/ingestion/live-feed";
 import { syncLiveClubStandings } from "@/lib/standings/live-sync";
+import { parseLiveKickoffReminderMinutes } from "@/lib/notifications/config";
 
 const LNH_SEASONS_ID = "40";
 const SEASON_START_YEAR = 2026;
@@ -54,7 +55,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ data: { skipped: true, reason: "aucun match dans le créneau" } });
   }
 
-  const out: { results?: unknown; liveFeed?: unknown; standings?: unknown; errors: string[] } = { errors: [] };
+  const out: { results?: unknown; liveFeed?: unknown; kickoffMilestones?: unknown; standings?: unknown; errors: string[] } = {
+    errors: [],
+  };
 
   try {
     out.results = await syncCalendarsIdsForSeason(season.id, LNH_SEASONS_ID, SEASON_START_YEAR);
@@ -71,6 +74,17 @@ export async function POST(req: Request) {
   } catch (err) {
     console.warn("[sync-live] liveFeed:", String(err));
     out.errors.push(`liveFeed: ${String(err)}`);
+  }
+
+  // Notifications "moment de match" (rappel avant coup d'envoi + coup d'envoi) —
+  // ARCHITECTURE.md §24. Best-effort, ne doit jamais faire échouer la synchro.
+  try {
+    const configs = await prisma.gameConfig.findMany();
+    const reminderLeadMinutes = parseLiveKickoffReminderMinutes(Object.fromEntries(configs.map((c) => [c.key, c.value])));
+    out.kickoffMilestones = await notifyMatchKickoffMilestones(season.id, reminderLeadMinutes);
+  } catch (err) {
+    console.warn("[sync-live] kickoffMilestones:", String(err));
+    out.errors.push(`kickoffMilestones: ${String(err)}`);
   }
 
   // Journée en cours = dernière avec au moins un match terminé (0 en pré-saison).
