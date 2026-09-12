@@ -2666,7 +2666,72 @@ es, ca, de, pt, da, pl) : libellés du picker, étape d'inscription, section
 7. Option non retenue en v1 : prompt doux « D'où viens-tu ? » sur le dashboard à
    la prochaine visite (même pattern que la modal de récap de journée).
 
-## 24. Classement général Starligue actualisé pendant les matchs
+## 24. Notifications de moments de match (rappel, coup d'envoi, mi-temps, fin)
+
+Ajouté le 12/09, en complément des notifications Web Push d'événements live déjà
+en place (buts, exclusions… — §21 des PR #39/#41/#43, `notify-live-events.ts`).
+Quatre moments couverts, tous soumis aux mêmes préférences que le reste des
+notifs live (`User.liveNotificationsEnabled`/`liveNotificationsClubIds`, réglables
+sur `/account`) — aucune nouvelle case à cocher nécessaire, ces notifications
+héritent simplement du même filtrage :
+
+1. **Rappel 5 min avant le coup d'envoi.**
+2. **Coup d'envoi.**
+3. **Mi-temps**, avec le score dans le corps de la notif (l'image bannière
+   écusson-vs-écusson existait déjà, voir `/api/og/live-event`).
+4. **Fin du match**, avec le score.
+
+### 24.1 Mi-temps / fin de match : enrichissement du pipeline existant
+
+Ces deux moments arrivent déjà comme `MatchLiveEvent` (icône `periods_finish`,
+texte lnh.fr "Fin de la première mi-temps" / "Fin du match") et étaient donc déjà
+notifiés — il manquait juste le score dans le corps du message. Dans
+`notify-live-events.ts`, `milestoneFromEvent()` détecte ces deux cas par le texte
+et remplace le corps par `"{club court} {score} - {score} {club court}"` (les
+noms courts ne sont chargés que si un tel événement est présent, pour ne pas
+alourdir le cas courant des buts/exclusions).
+
+### 24.2 Rappel + coup d'envoi : nouveau, piloté par `Match`
+
+Contrairement aux événements ci-dessus, rien dans le feed lnh.fr ne signale
+fiablement "5 min avant" ou l'instant précis du coup d'envoi (le flux
+événement par événement n'est interrogé qu'une fois le match confirmé démarré,
+voir `syncLiveMatchFeeds`). Ajout de deux colonnes `Match.kickoffReminderSentAt`
+/ `Match.kickoffNotifiedAt` (posées une fois envoyées) et d'une fonction dédiée
+`notifyMatchKickoffMilestones(seasonId, reminderLeadMinutes)`
+(`src/lib/ingestion/live-feed.ts`), appelée depuis `/api/cron/sync-live` juste
+après `syncLiveMatchFeeds` :
+
+- Rappel : tout match `SCHEDULED` dont `kickoffAt` tombe dans les
+  `reminderLeadMinutes` prochaines minutes et jamais rappelé.
+- Coup d'envoi : tout match déjà passé en `LIVE` (posé par `syncLiveMatchFeeds`
+  dès que l'index lnh.fr confirme un coup d'envoi réel) et jamais notifié.
+
+Volontairement **auto-guérissant** plutôt que basé sur une détection de
+transition de statut au tick exact : à chaque appel on relance tout ce qui est
+dans la fenêtre et pas encore marqué envoyé, donc un run de cron raté/décalé
+(fréquent avec GitHub Actions, voir `cron-live.yml`) ne fait perdre que
+quelques minutes de fraîcheur, jamais la notification elle-même.
+
+`GameConfig["LIVE_KICKOFF_REMINDER_MINUTES"]` (défaut 5, `parseLiveKickoffReminderMinutes`,
+pattern `parseNotificationLeadMinutes`) — délai du rappel, jamais codé en dur
+(règle CLAUDE.md).
+
+### 24.3 `notifyWebPushForMatchMilestone` — nouvelle fonction, pas de nouveau réglage
+
+Contrairement à `notifyWebPushForLiveEvents` (filtre "mes joueurs" = l'événement
+concerne précisément un joueur de mon effectif), un rappel/coup d'envoi n'a pas
+d'événement/joueur précis à comparer : `liveNotificationsOnlyMyPlayers` est donc
+interprété comme "un joueur de mon effectif joue ce match" (n'importe quel
+joueur du club domicile ou extérieur). Réutilise l'image `/api/og/live-event`
+(écussons des deux clubs) et le même filtrage par club suivi.
+
+### 24.4 Rollout
+
+1. `pnpm prisma migrate dev` (`Match.kickoffReminderSentAt`/`kickoffNotifiedAt`).
+2. Merge + déploiement Railway (migration prod, cron `sync-live` inchangé
+   niveau planification — même route, appel supplémentaire à l'intérieur).
+## 25. Classement général Starligue actualisé pendant les matchs
 
 Ajouté le 12/09. Avant ça, le classement des clubs (widget dashboard "Classement
 Starligue", section `/` `StandingsSection`, rang affiché à côté des logos sur
@@ -2677,7 +2742,7 @@ minute par minute, `syncLiveMatchFeeds`). Seul le classement fantasy (managers)
 avait déjà cette fraîcheur (`live-fantasy-leaderboard.ts`, `<LiveLeaderboard/>`
 sur `/leaderboard`) — pas le classement sportif Starligue lui-même.
 
-### 24.1 Projection plutôt que recalcul complet
+### 25.1 Projection plutôt que recalcul complet
 
 Le classement live 2026/27 fait autorité LNH (copie brute de
 `daikin-starligue/classement`, `live-sync.ts`) plutôt que d'être recalculé par
@@ -2705,7 +2770,7 @@ un instant de la projection (ni `LIVE` ni encore dans le snapshot) — quelques
 minutes maximum, cohérent avec la fraîcheur du reste du direct (cron toutes les
 ~2-8 min).
 
-### 24.2 UI
+### 25.2 UI
 
 Badge "Live" (même style que le badge match en cours sur `/matches`,
 `bg-points-neg/20 text-points-neg shadow-glow-red`) à côté du titre dans
@@ -2714,6 +2779,6 @@ Badge "Live" (même style que le badge match en cours sur `/matches`,
 dans la projection) pour que le widget se mette à jour sans rechargement
 manuel — la home l'avait déjà via sa fenêtre horaire `liveWindowActive`.
 
-### 24.3 Rollout
+### 25.3 Rollout
 
 Aucune migration (pas de nouveau champ Prisma). Déploiement direct.

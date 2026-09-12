@@ -2,7 +2,7 @@
 // (gameweekNumber max), club-joint. Utilisé par le widget dashboard (mode-aware :
 // même fonction pour la saison live et la saison de simulation, seul seasonId change).
 // Si des matchs sont actuellement LIVE, le snapshot est complété par une projection
-// en direct (voir live-projection.ts, ARCHITECTURE.md §24) — sans ça le classement
+// en direct (voir live-projection.ts, ARCHITECTURE.md §25) — sans ça le classement
 // n'évolue qu'une fois la LNH ayant publié le résultat officiel, jamais pendant le
 // match. `liveMatchesCounted > 0` signale à l'UI qu'il s'agit d'un classement
 // provisoire (pas encore l'ordre officiel LNH pour ces rencontres).

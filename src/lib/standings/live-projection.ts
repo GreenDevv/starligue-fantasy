@@ -1,5 +1,5 @@
 // Projection "en direct" du classement général Starligue (fonction pure, testée)
-// — voir ARCHITECTURE.md §24. Le classement live 2026/27 fait normalement autorité
+// — voir ARCHITECTURE.md §25. Le classement live 2026/27 fait normalement autorité
 // LNH (copie brute de daikin-starligue/classement, cf. live-sync.ts), mais cette
 // page officielle ne se met à jour qu'une fois un match terminé et publié par la
 // LNH — pas pendant qu'il se joue. Pour donner un classement qui bouge pendant les

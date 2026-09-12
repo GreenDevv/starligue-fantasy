@@ -34,7 +34,7 @@ import { createLnhScraperProvider } from "@/lib/data-providers/lnh-scraper.provi
 import { IngestionError } from "@/lib/data-providers/lnh-scraper.provider";
 import type { LnhScraperProvider } from "@/lib/data-providers/lnh-scraper.provider";
 import { resolveEventPlayerId, type EventPlayerCandidate } from "@/lib/live/resolve-event-player";
-import { notifyWebPushForLiveEvents } from "@/lib/notifications/notify-live-events";
+import { notifyWebPushForLiveEvents, notifyWebPushForMatchMilestone } from "@/lib/notifications/notify-live-events";
 
 const WINDOW_BEFORE_MS = 15 * 60 * 1000;
 const WINDOW_AFTER_MS = 2.75 * 60 * 60 * 1000;
@@ -229,4 +229,72 @@ export async function syncLiveMatchFeeds(seasonId: string, _seasonsId: string): 
   }
 
   return result;
+}
+
+export interface KickoffMilestonesResult {
+  reminders: number;
+  kickoffs: number;
+}
+
+// Notifications "moment de match" indépendantes du feed d'événements nominatifs
+// (ARCHITECTURE.md §24) : rappel avant coup d'envoi + notification au coup d'envoi.
+// Auto-guérissant (pas besoin de détecter une transition de statut au bon tick) :
+// à chaque appel, on relance tout ce qui est dans la fenêtre et pas encore marqué
+// envoyé (`kickoffReminderSentAt`/`kickoffNotifiedAt`), qu'un run de cron ait été
+// raté ou décalé n'a donc pas d'impact — au pire quelques minutes de retard.
+// Appelée depuis /api/cron/sync-live, après syncLiveMatchFeeds.
+export async function notifyMatchKickoffMilestones(
+  seasonId: string,
+  reminderLeadMinutes: number
+): Promise<KickoffMilestonesResult> {
+  const now = Date.now();
+  const reminderWindowEnd = new Date(now + reminderLeadMinutes * 60_000);
+
+  const dueForReminder = await prisma.match.findMany({
+    where: {
+      seasonId,
+      status: "SCHEDULED",
+      kickoffReminderSentAt: null,
+      kickoffAt: { gt: new Date(now), lte: reminderWindowEnd },
+    },
+    select: {
+      id: true,
+      homeClubId: true,
+      awayClubId: true,
+      homeClub: { select: { shortName: true } },
+      awayClub: { select: { shortName: true } },
+    },
+  });
+
+  for (const match of dueForReminder) {
+    await notifyWebPushForMatchMilestone(match.id, match.homeClubId, match.awayClubId, {
+      title: `Coup d'envoi dans ${reminderLeadMinutes} min`,
+      body: `${match.homeClub.shortName} - ${match.awayClub.shortName}`,
+    });
+    await prisma.match.update({ where: { id: match.id }, data: { kickoffReminderSentAt: new Date() } });
+  }
+
+  // Le passage à LIVE est déjà posé par syncLiveMatchFeeds (ci-dessus) dès que
+  // l'index lnh.fr confirme un coup d'envoi réel — il suffit de rattraper ici tout
+  // match LIVE pas encore notifié.
+  const dueForKickoff = await prisma.match.findMany({
+    where: { seasonId, status: "LIVE", kickoffNotifiedAt: null },
+    select: {
+      id: true,
+      homeClubId: true,
+      awayClubId: true,
+      homeClub: { select: { shortName: true } },
+      awayClub: { select: { shortName: true } },
+    },
+  });
+
+  for (const match of dueForKickoff) {
+    await notifyWebPushForMatchMilestone(match.id, match.homeClubId, match.awayClubId, {
+      title: "Coup d'envoi",
+      body: `${match.homeClub.shortName} - ${match.awayClub.shortName} : c'est parti !`,
+    });
+    await prisma.match.update({ where: { id: match.id }, data: { kickoffNotifiedAt: new Date() } });
+  }
+
+  return { reminders: dueForReminder.length, kickoffs: dueForKickoff.length };
 }
