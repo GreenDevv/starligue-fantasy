@@ -32,6 +32,7 @@ import { BestXIWidget } from "@/components/dashboard/widgets/BestXIWidget";
 import { ClubStandingsWidget } from "@/components/dashboard/widgets/ClubStandingsWidget";
 import { HomeClubsMapWidget } from "@/components/dashboard/widgets/HomeClubsMapWidget";
 import { ClubFantasyRankingWidget } from "@/components/dashboard/widgets/ClubFantasyRankingWidget";
+import { LiveRefresher } from "@/components/live/LiveRefresher";
 import type { DashboardStrips } from "@/lib/matches/dashboard-strips";
 import type { BestXIEntry } from "@/lib/players/compute-best-xi";
 import type { ClubStandingsResult } from "@/lib/standings/get";
@@ -168,6 +169,10 @@ export function DashboardView({
 
   return (
     <div className="flex flex-col gap-4 pb-8">
+      {/* Au moins un match Starligue en direct : le classement général (projection
+          live, voir getClubStandings) doit continuer à bouger sans que l'utilisateur
+          ait à recharger la page. */}
+      <LiveRefresher active={clubStandings.liveMatchesCounted > 0} />
       <GameweekRecapModal recaps={pendingRecaps} />
 
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -378,6 +383,7 @@ function renderWidget(
         <ClubStandingsWidget
           standings={ctx.clubStandings.rows}
           gameweekNumber={ctx.clubStandings.gameweekNumber}
+          liveMatchesCounted={ctx.clubStandings.liveMatchesCounted}
           size={widget.size}
         />
       );

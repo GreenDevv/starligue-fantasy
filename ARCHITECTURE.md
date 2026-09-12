@@ -2731,3 +2731,54 @@ joueur du club domicile ou extérieur). Réutilise l'image `/api/og/live-event`
 1. `pnpm prisma migrate dev` (`Match.kickoffReminderSentAt`/`kickoffNotifiedAt`).
 2. Merge + déploiement Railway (migration prod, cron `sync-live` inchangé
    niveau planification — même route, appel supplémentaire à l'intérieur).
+## 25. Classement général Starligue actualisé pendant les matchs
+
+Ajouté le 12/09. Avant ça, le classement des clubs (widget dashboard "Classement
+Starligue", section `/` `StandingsSection`, rang affiché à côté des logos sur
+`/matches`, `/clubs/[id]`…) ne bougeait qu'une fois la LNH ayant publié le
+classement officiel mis à jour — donc jamais **pendant** qu'un match se joue,
+même si `Match.homeScore`/`awayScore` sont déjà rafraîchis en direct (§ suivi
+minute par minute, `syncLiveMatchFeeds`). Seul le classement fantasy (managers)
+avait déjà cette fraîcheur (`live-fantasy-leaderboard.ts`, `<LiveLeaderboard/>`
+sur `/leaderboard`) — pas le classement sportif Starligue lui-même.
+
+### 25.1 Projection plutôt que recalcul complet
+
+Le classement live 2026/27 fait autorité LNH (copie brute de
+`daikin-starligue/classement`, `live-sync.ts`) plutôt que d'être recalculé par
+nos soins, précisément pour ne pas diverger de leur tie-break officiel
+(confrontations directes etc., non reproduit dans notre tie-break simplifié —
+voir le commentaire de `compute.ts`). On ne veut donc pas basculer les rondes
+déjà terminées sur un calcul maison.
+
+À la place, `projectLiveStandings()` (`src/lib/standings/live-projection.ts`,
+fonction pure testée) part du dernier snapshot **confirmé** (`ClubStanding`,
+qui inclut déjà les matchs de la ronde en cours déjà terminés — `live-sync.ts`
+se redéclenche dès qu'au moins un match est fini) et y superpose uniquement
+les rencontres actuellement `LIVE`, comme si elles se terminaient au score
+courant (mêmes règles 2/1/0 pts, même tie-break simplifié que `compute.ts`,
+appliqué à des lignes déjà agrégées). `getClubStandings()` (`get.ts`) applique
+cette projection automatiquement dès qu'un match `LIVE` existe pour la saison —
+tous les appelants (widget dashboard, page d'accueil, `/matches`, pages club)
+en bénéficient sans rien changer, et `ClubStandingsResult.liveMatchesCounted`
+indique à l'UI qu'il s'agit d'un classement provisoire (badge "Live").
+
+⚠️ Fenêtre de flou courte et acceptée : entre l'instant où un match passe
+`FINISHED` (calendrier/boxscore) et le prochain passage de `syncLiveClubStandings`
+qui republie le snapshot officiel avec ce résultat inclus, ce match disparaît
+un instant de la projection (ni `LIVE` ni encore dans le snapshot) — quelques
+minutes maximum, cohérent avec la fraîcheur du reste du direct (cron toutes les
+~2-8 min).
+
+### 25.2 UI
+
+Badge "Live" (même style que le badge match en cours sur `/matches`,
+`bg-points-neg/20 text-points-neg shadow-glow-red`) à côté du titre dans
+`ClubStandingsWidget` et `StandingsSection` quand `liveMatchesCounted > 0`.
+`<LiveRefresher/>` ajouté sur `DashboardView` (actif dès qu'un match compte
+dans la projection) pour que le widget se mette à jour sans rechargement
+manuel — la home l'avait déjà via sa fenêtre horaire `liveWindowActive`.
+
+### 25.3 Rollout
+
+Aucune migration (pas de nouveau champ Prisma). Déploiement direct.

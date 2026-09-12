@@ -92,6 +92,7 @@
   },
   "clubStandingsWidget": {
     "title": "Classificação Starligue",
+    "live": "Ao vivo",
     "beforeGameweek1": "Antes da J1",
     "afterGameweek": "Depois da J{number}",
     "notAvailable": "Classificação ainda não disponível.",
@@ -134,6 +135,7 @@
   },
   "standingsSection": {
     "title": "Classificação",
+    "live": "Ao vivo",
     "gameweek": "Jornada {number}",
     "notAvailable": "Classificação ainda não disponível.",
     "col": {

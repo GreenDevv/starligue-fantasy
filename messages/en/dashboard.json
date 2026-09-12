@@ -92,6 +92,7 @@
   },
   "clubStandingsWidget": {
     "title": "Starligue standings",
+    "live": "Live",
     "beforeGameweek1": "Before MD1",
     "afterGameweek": "After MD{number}",
     "notAvailable": "Standings not available yet.",
@@ -134,6 +135,7 @@
   },
   "standingsSection": {
     "title": "Standings",
+    "live": "Live",
     "gameweek": "Matchday {number}",
     "notAvailable": "Standings not available yet.",
     "col": {

@@ -92,6 +92,7 @@
   },
   "clubStandingsWidget": {
     "title": "Tabela Starligue",
+    "live": "Na żywo",
     "beforeGameweek1": "Przed K1",
     "afterGameweek": "Po K{number}",
     "notAvailable": "Tabela niedostępna jeszcze.",
@@ -134,6 +135,7 @@
   },
   "standingsSection": {
     "title": "Tabela",
+    "live": "Na żywo",
     "gameweek": "Kolejka {number}",
     "notAvailable": "Tabela niedostępna jeszcze.",
     "col": {
