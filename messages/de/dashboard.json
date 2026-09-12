@@ -47,8 +47,7 @@
     "footerDisclaimer": "Privates Projekt, ohne offizielle Verbindung zur LNH oder der Daikin StarLigue.",
     "footerPrivacyLink": "Datenschutz & Cookies",
     "footerSupportLink": "Support",
-    "currentGameweekBand": "Spieltag {number} läuft",
-    "currentGameweekPerfs": "Beste Leistungen des Spieltags"
+    "currentGameweekBand": "Spieltag {number} läuft"
   },
   "page": {
     "title": "Community",

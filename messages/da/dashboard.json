@@ -47,8 +47,7 @@
     "footerDisclaimer": "Personligt projekt, uden officiel tilknytning til LNH eller Daikin StarLigue.",
     "footerPrivacyLink": "Privatliv & cookies",
     "footerSupportLink": "Support",
-    "currentGameweekBand": "Runde {number} i gang",
-    "currentGameweekPerfs": "Rundens bedste præstationer"
+    "currentGameweekBand": "Runde {number} i gang"
   },
   "page": {
     "title": "Fællesskab",

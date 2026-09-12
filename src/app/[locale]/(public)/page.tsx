@@ -22,13 +22,12 @@ import { GameweekStateBadge } from "@/components/gameweek/GameweekStateBadge";
 import { TodayMatchCarousel } from "@/components/dashboard/TodayMatchCarousel";
 import { LiveRefresher } from "@/components/live/LiveRefresher";
 import { ClubLogoLink } from "@/components/starligue/ClubLogoLink";
-import { ClubLogo } from "@/components/ui/ClubLogo";
-import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { StandingsSection } from "@/components/starligue/StandingsSection";
 import { NewsFeed } from "@/components/starligue/NewsFeed";
 import { StarligueBestXICard } from "@/components/starligue/StarligueBestXICard";
 import { StarliguePerformancesCard } from "@/components/starligue/StarliguePerformancesCard";
 import { LiveMatchesBanner } from "@/components/starligue/LiveMatchesBanner";
+import { LivePerformancesCard } from "@/components/starligue/LivePerformancesCard";
 import { StatLeadersPanel } from "@/components/dashboard/StatLeadersPanel";
 import { ComingSoon } from "@/components/ComingSoon";
 import { IntroSplash } from "@/components/intro/IntroSplash";
@@ -212,38 +211,7 @@ export default async function HomePage({
             hideHeader
           />
 
-          {currentGwPerfs && currentGwPerfs.entries.length > 0 && (
-            <div className="mt-3 border-t border-accent-secondary/25 pt-2.5">
-              <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-accent-secondary">
-                {t("home.currentGameweekPerfs")}
-              </p>
-              <ol className="flex flex-col gap-1.5">
-                {currentGwPerfs.entries.map((e, i) => (
-                  <li key={e.playerId} className="flex items-center gap-2 text-sm">
-                    <span className="w-3 shrink-0 text-center font-arcade text-xs text-text-muted">{i + 1}</span>
-                    <PlayerAvatar player={e} size="xs" variant="photo" focus="head" />
-                    <Link href={`/players/${e.playerId}`} className="min-w-0 flex-1 truncate text-text hover:text-accent">
-                      {e.firstName} {e.lastName}
-                    </Link>
-                    <ClubLogo club={e.club} size="xs" />
-                    {e.lnhRating !== null && (
-                      <span
-                        className={`w-8 shrink-0 text-right font-arcade text-base tabular-nums ${
-                          e.lnhRating >= 7 ? "text-points-pos" : e.lnhRating < 5 ? "text-points-neg" : "text-text"
-                        }`}
-                      >
-                        {e.lnhRating.toFixed(1)}
-                      </span>
-                    )}
-                    <span className="w-10 shrink-0 text-right text-[11px] tabular-nums text-text-muted">
-                      {e.points > 0 ? "+" : ""}
-                      {e.points} pts
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
+          {currentGwPerfs && <LivePerformancesCard gameweekNumber={currentGwPerfs.gameweekNumber} entries={currentGwPerfs.entries} />}
         </section>
       )}
 

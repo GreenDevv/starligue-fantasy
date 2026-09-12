@@ -47,8 +47,7 @@
     "footerDisclaimer": "Projekt osobisty, niezwiązany oficjalnie z LNH ani z Daikin StarLigue.",
     "footerPrivacyLink": "Prywatność i pliki cookie",
     "footerSupportLink": "Wsparcie",
-    "currentGameweekBand": "Kolejka {number} w toku",
-    "currentGameweekPerfs": "Najlepsze występy kolejki"
+    "currentGameweekBand": "Kolejka {number} w toku"
   },
   "page": {
     "title": "Społeczność",
