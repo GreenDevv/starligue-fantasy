@@ -3139,6 +3139,16 @@ ligne à part.
   **terminé** seulement — un score en cours peut encore changer, pas de
   résultat définitif à afficher avant.
 
-### 32.4 Rollout
+### 32.4 v4 (13/09) : 7ᵉ entrée + badge V/N/D en pastille
+
+- `getCurrentGameweekPerformances` : `limit` par défaut 6 → 7. Complète
+  exactement la grille `md:grid-cols-4` (leader sur 2 colonnes + 2 puis
+  4 entrées = 6 cases, pas de case vide sur la 2ᵉ ligne).
+- Badge V/N/D : une lettre colorée noyée dans la ligne grise du match ne se
+  voyait pas assez ("plus en évidence") — devient une pastille pleine (fond +
+  texte, `OutcomeBadge`) placée en tête de la ligne de match plutôt qu'après
+  le score.
+
+### 32.5 Rollout
 
 Aucune migration Prisma. Déploiement direct.

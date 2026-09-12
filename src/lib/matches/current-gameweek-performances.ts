@@ -36,10 +36,13 @@ export interface LiveGameweekPerformances {
   entries: LiveGameweekPerformanceEntry[];
 }
 
+// limit=7 : le leader + 6 dans la grille de LivePerformancesCard remplit
+// exactement les 2 lignes de la grille md (grid-cols-4, leader sur 2
+// colonnes) — 2 entrées sur la 1ʳᵉ ligne + 4 sur la 2ᵉ, sans case vide.
 export async function getCurrentGameweekPerformances(
   seasonId: string,
   now: Date = new Date(),
-  limit = 6
+  limit = 7
 ): Promise<LiveGameweekPerformances | null> {
   const gameweek = await prisma.gameweek.findFirst({
     where: { seasonId, deadlineAt: { lte: now }, confirmedAt: null },
