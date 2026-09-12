@@ -26,6 +26,11 @@ interface LeaderApiRow {
   value: number;
 }
 
+interface LeadersApiResponse {
+  leaders: LeaderApiRow[];
+  hasLiveUpdates: boolean;
+}
+
 type StatScope = "gameweek" | "season" | "average";
 
 interface MyTeam {
@@ -80,6 +85,7 @@ export function StatLeaderCard({
   const showPhotos = !compact;
   const [scope, setScope] = useState<StatScope>("gameweek");
   const [leaders, setLeaders] = useState<LeaderApiRow[]>([]);
+  const [hasLiveUpdates, setHasLiveUpdates] = useState(false);
   const [loading, setLoading] = useState(true);
   const [myTeams, setMyTeams] = useState<MyTeam[]>([]);
 
@@ -95,9 +101,10 @@ export function StatLeaderCard({
       if (opts.showLoading) setLoading(true);
       fetch(`/api/stats/leaders?statKey=${statKey}&scope=${scope}&seasonId=${seasonId}`)
         .then((r) => r.json())
-        .then((json: { data?: { leaders: LeaderApiRow[] } }) => {
+        .then((json: { data?: LeadersApiResponse }) => {
           if (isCancelled()) return;
           setLeaders(json.data?.leaders ?? []);
+          setHasLiveUpdates(json.data?.hasLiveUpdates ?? false);
           if (opts.showLoading) setLoading(false);
         })
         .catch(() => {
@@ -154,7 +161,14 @@ export function StatLeaderCard({
     <div className="pixel-corners border border-border bg-surface p-3">
       <div className="mb-2 flex flex-col gap-1.5">
         <div className="flex items-start justify-between gap-2">
-          <p className="line-clamp-2 min-h-[2.5rem] text-sm font-medium text-text">{tLabels(`statLine.${line.key}`)}</p>
+          <p className="line-clamp-2 min-h-[2.5rem] text-sm font-medium text-text">
+            {tLabels(`statLine.${line.key}`)}
+            {hasLiveUpdates && (
+              <span className="pixel-corners-sm ml-1.5 inline-block bg-points-neg/20 px-1.5 py-0.5 align-middle text-[9px] font-bold uppercase text-points-neg shadow-glow-red">
+                {t("statLeaderCard.live")}
+              </span>
+            )}
+          </p>
           {showRemove && (
             <button
               onClick={onRemove}

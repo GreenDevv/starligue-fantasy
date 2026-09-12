@@ -76,6 +76,7 @@
     "counter": "Sim J{current}/{total}"
   },
   "statLeaderCard": {
+    "live": "En directe",
     "removeAriaLabel": "Treure {label} del dashboard",
     "ownedByTeams": "A {teams}",
     "noData": "Encara no hi ha dades."
@@ -205,5 +206,8 @@
     "championship": "Daikin Starligue",
     "finished": "Finalitzat",
     "live": "En directe · {minute}’"
+  },
+  "liveMatchesBanner": {
+    "title": "Partits en directe"
   }
 }

@@ -8,7 +8,6 @@ import { getCurrentGameweekStatus } from "@/lib/gameweek/get-gameweek-status";
 import { getCurrentGameweekPerformances } from "@/lib/matches/current-gameweek-performances";
 import { getNewsFeed } from "@/lib/news/get-feed";
 import { getTeamOfWeekCard, getPerformancesCard } from "@/lib/news/get-weekly-cards";
-import { getWeeklyStatLeaders } from "@/lib/stats/get-weekly-leaders";
 import {
   getWarmupMatches,
   getCoupeDeFranceMatches,
@@ -29,7 +28,8 @@ import { StandingsSection } from "@/components/starligue/StandingsSection";
 import { NewsFeed } from "@/components/starligue/NewsFeed";
 import { StarligueBestXICard } from "@/components/starligue/StarligueBestXICard";
 import { StarliguePerformancesCard } from "@/components/starligue/StarliguePerformancesCard";
-import { StatLeadersSection } from "@/components/starligue/StatLeadersSection";
+import { LiveMatchesBanner } from "@/components/starligue/LiveMatchesBanner";
+import { StatLeadersPanel } from "@/components/dashboard/StatLeadersPanel";
 import { ComingSoon } from "@/components/ComingSoon";
 import { IntroSplash } from "@/components/intro/IntroSplash";
 import type { NewsCategory } from "@prisma/client";
@@ -102,7 +102,6 @@ export default async function HomePage({
     newsFeed,
     teamOfWeek,
     performances,
-    leaders,
     warmupMatches,
     coupeDeFranceMatches,
     championsLeagueMatches,
@@ -119,7 +118,6 @@ export default async function HomePage({
     getNewsFeed(season.id, { category: category ?? undefined, page }),
     getTeamOfWeekCard(season.id),
     getPerformancesCard(season.id),
-    getWeeklyStatLeaders(season.id),
     getWarmupMatches(season.id),
     getCoupeDeFranceMatches(season.id),
     getChampionsLeagueMatches(season.id),
@@ -155,6 +153,7 @@ export default async function HomePage({
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-4 px-4 pb-16 pt-6 sm:px-6">
       <LiveRefresher active={liveWindowActive} />
       <IntroSplash clubs={clubs} />
+      <LiveMatchesBanner matches={todayMatches} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-1">
           <p className="font-arcade text-sm uppercase tracking-[0.3em] text-accent-secondary">
@@ -258,6 +257,19 @@ export default async function HomePage({
         </div>
 
         <div className="flex flex-col gap-4 lg:col-start-3 lg:row-start-1">
+          {/* Équipe type + meilleures perfs + leaders stats en direct EN PREMIER
+              dans la colonne (avant les strips de matchs à venir/coupes) — restait
+              tout en bas avant, jamais vu sans scroller (demande explicite de
+              l'utilisateur, 12/09). StatLeadersPanel (plutôt que l'ancien
+              StatLeadersSection figé) : mêmes cartes personnalisables que le
+              dashboard (leader mis en avant + le reste en petit, "+ Ajouter une
+              stat", badge Live sur les buteurs pendant un match — voir
+              StatLeaderCard.tsx), au lieu d'un doublon dédié à la home. */}
+          {teamOfWeek && <StarligueBestXICard gameweekNumber={teamOfWeek.gameweekNumber} entries={teamOfWeek.entries} />}
+          {performances && (
+            <StarliguePerformancesCard gameweekNumber={performances.gameweekNumber} entries={performances.entries} />
+          )}
+          <StatLeadersPanel seasonId={season.id} context="live" />
           <MatchesStrip
             variant="upcoming"
             gameweekNumber={matchStrips.upcoming.gameweekNumber}
@@ -335,15 +347,6 @@ export default async function HomePage({
               defaultOpen={false}
             />
           )}
-          {teamOfWeek && <StarligueBestXICard gameweekNumber={teamOfWeek.gameweekNumber} entries={teamOfWeek.entries} />}
-          {performances && (
-            <StarliguePerformancesCard gameweekNumber={performances.gameweekNumber} entries={performances.entries} />
-          )}
-          <StatLeadersSection
-            gameweekNumber={leaders.gameweekNumber}
-            categories={leaders.categories}
-            hasLiveUpdates={leaders.hasLiveUpdates}
-          />
         </div>
 
         <div className="flex flex-col gap-4 lg:col-start-1 lg:row-start-1">

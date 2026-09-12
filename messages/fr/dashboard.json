@@ -76,6 +76,7 @@
     "counter": "Simu J{current}/{total}"
   },
   "statLeaderCard": {
+    "live": "Live",
     "removeAriaLabel": "Retirer {label} du tableau de bord",
     "ownedByTeams": "Dans {teams}",
     "noData": "Aucune donnée pour l'instant."
@@ -205,5 +206,8 @@
     "championship": "Daikin Starligue",
     "finished": "Terminé",
     "live": "En direct · {minute}’"
+  },
+  "liveMatchesBanner": {
+    "title": "Matchs en direct"
   }
 }
