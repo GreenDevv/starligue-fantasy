@@ -3,6 +3,25 @@
 // stratégie de fetch custom — seulement les deux événements requis par le
 // protocole Web Push standard : `push` (affiche la notif reçue) et
 // `notificationclick` (ouvre/focus l'app au clic).
+//
+// skipWaiting/clients.claim : sans ça, un abonné qui a déjà un service worker
+// installé peut rester des jours sur une VIEILLE version (le navigateur ne
+// revérifie /sw.js que ~1x/24h, et une nouvelle version installée reste "en
+// attente" tant qu'aucun onglet de l'ancienne n'est fermé) — ex. réel du 12/09 :
+// notifs reçues sans les boutons/le score ajoutés ce jour-là, alors que le code
+// serveur était déjà à jour. Ici, la nouvelle version prend la main dès qu'elle
+// est installée + active, sans attendre la fermeture des onglets ouverts. Voir
+// aussi src/components/notifications/WebPushServiceWorkerUpdater.tsx (force une
+// vérification à chaque chargement de page plutôt que d'attendre le cycle
+// spontané du navigateur).
+self.addEventListener("install", () => {
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
 self.addEventListener("push", (event) => {
   let payload = { title: "Starligue Fantasy", body: "", url: "/" };
   try {

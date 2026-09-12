@@ -2944,3 +2944,58 @@ managers en erreur sur un vrai calcul de points — pas fait pour cette raison.
 Ce qui existe déjà et reste la référence légitime : `StatLeaderCard` avec
 `statKey="fantasyPoints"` (points fantasy réels, calculés dès que la note du
 match est publiée — pas pendant, mais dès que disponible).
+
+## 29. Correctifs notifications live : score/minute manquants + service worker figé
+
+Ajouté le 12/09, suite à un retour terrain (« pas de boutons, pas de score, pas
+de logo, pas de temps » sur une notif reçue).
+
+### 29.1 Score et minute manquants du corps de la notif — vrai bug
+
+Un événement live "classique" (but, exclusion…) n'affichait que le texte brut
+lnh.fr ("But de X (Club)"), sans le score ni la minute — seuls les moments de
+match mi-temps/fin les avaient. Corrigé dans `notify-live-events.ts` : le
+corps affiche maintenant `"{texte} · {score} · {minute}'"` (même convention
+d'affichage — minute écoulée dans la période en cours, pas cumulée sur le
+match — que `EventsTimeline` sur `/matches/[id]`).
+
+### 29.2 Service worker qui ne se met jamais à jour tout seul — cause probable des boutons/logo manquants
+
+Un navigateur ne revérifie `/sw.js` que ~1×/24h tant que rien ne le lui
+demande explicitement (spec Service Worker), et une nouvelle version détectée
+reste "en attente" tant qu'aucun onglet de l'ancienne n'est fermé — un
+abonné de longue date pouvait donc rester des jours sur une VIEILLE version
+du service worker (antérieure aux boutons/à l'image ajoutés le 12/09) sans
+jamais recevoir la mise à jour, même si le code serveur était déjà à jour.
+
+- `public/sw.js` : `self.skipWaiting()` à l'install + `clients.claim()` à
+  l'activation — la nouvelle version prend la main dès qu'elle est installée,
+  sans attendre la fermeture des onglets ouverts.
+- `WebPushServiceWorkerUpdater` (`src/components/notifications/`, monté
+  globalement dans `Providers.tsx`) : force une vérification (`registration.update()`)
+  à chaque chargement de page plutôt que d'attendre le cycle spontané du
+  navigateur.
+
+⚠️ Un abonné avec un service worker déjà bloqué doit revisiter le site au
+moins une fois après ce déploiement pour que la mise à jour soit détectée et
+prenne effet (le fix ne peut pas s'auto-déclencher côté navigateur sans
+qu'une page du site soit chargée) — pas de rattrapage possible autrement,
+comportement normal des service workers.
+
+### 29.3 Logo/boutons : limitations de plateforme réelles, pas forcément un bug
+
+Même une fois le service worker à jour, deux options de la Notification API
+ont un support navigateur/OS très inégal, en dehors de notre contrôle :
+- `image` (bannière écusson-vs-écusson) : **pas rendue par Chrome/Edge sur
+  desktop** ni par Firefox (implémentée seulement sur Chrome Android à ce
+  jour) — `icon`/`badge` (logo générique de l'app, 192×192) restent affichés
+  partout, mais pas l'image des clubs.
+- `actions` (boutons) : nécessite un navigateur qui les supporte
+  (Chrome/Firefox desktop, Android — pas iOS Safari) **et**, sur macOS, que
+  le style de notification de l'app soit réglé sur "Alertes" plutôt que
+  "Bannières" dans Réglages Système → Notifications (les bannières,
+  auto-masquées, n'affichent jamais de boutons quel que soit le code envoyé).
+
+### 29.4 Rollout
+
+Aucune migration Prisma. Déploiement direct.
