@@ -143,7 +143,7 @@ const SENTIMENT_DOT: Record<ReturnType<typeof classifyLiveEventSentiment>, strin
 function EventsTimeline({ events, t }: { events: MatchLiveEventRow[]; t: Translator }) {
   if (events.length === 0) return null;
   return (
-    <div>
+    <div id="match-events">
       <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">{t("detail.eventsTitle")}</p>
       <div className="pixel-corners flex flex-col gap-2 border border-border bg-surface p-3">
         {events.map((e) => (

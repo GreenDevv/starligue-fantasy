@@ -19,13 +19,21 @@ self.addEventListener("push", (event) => {
       image: payload.image,
       data: { url: payload.url },
       tag: payload.tag,
+      // Discrets mais présents sur chaque notif (voir notify-live-events.ts
+      // STANDARD_ACTIONS) : rejoindre le fil du match, ou les réglages de notifs.
+      // Ignoré silencieusement par les navigateurs qui ne supportent pas les
+      // actions (ex: iOS Safari) — la notif reste utilisable, juste sans bouton.
+      actions: payload.actions,
     })
   );
 });
 
+// action "settings" → réglages de notifs (/account#live-notifications), quel que
+// soit le match concerné ; sinon (clic sur le corps, ou action "view-match") → le
+// fil du match (payload.url).
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = event.notification.data?.url ?? "/";
+  const url = event.action === "settings" ? "/account#live-notifications" : (event.notification.data?.url ?? "/");
 
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {

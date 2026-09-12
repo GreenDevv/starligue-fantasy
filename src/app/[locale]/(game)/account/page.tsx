@@ -215,7 +215,7 @@ export default function AccountPage() {
           <p className="mt-1 text-[11px] text-text-muted">{tCommunity("homeClub.hint")}</p>
         </div>
 
-        <div>
+        <div id="live-notifications">
           <label className="mb-1 block text-xs uppercase tracking-widest text-text-muted">
             {tAccount("liveNotifications.title")}
           </label>

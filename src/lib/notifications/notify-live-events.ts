@@ -6,6 +6,7 @@
 // échouer la synchro du score (fonctionnalité tertiaire).
 import { prisma } from "@/lib/db";
 import { sendWebPush } from "./send-web-push";
+import { tallyGoalsBySequence, frenchOrdinal } from "@/lib/live/goal-tally";
 
 interface NewLiveEventForNotif {
   text: string;
@@ -13,7 +14,19 @@ interface NewLiveEventForNotif {
   playerId: string | null;
   homeScore: number;
   awayScore: number;
+  sequence: number;
 }
+
+const GOAL_ICONS = new Set(["goals", "goals_7m"]);
+
+// Boutons présents sur chaque notification (ARCHITECTURE.md §27) : rejoindre le fil
+// du match (même URL que le clic sur le corps de la notif) et accéder aux réglages
+// de notifications live. 2 actions = le maximum affiché de façon fiable par les
+// navigateurs qui les supportent ; dégrade silencieusement ailleurs (iOS Safari).
+const STANDARD_ACTIONS = [
+  { action: "view-match", title: "Voir le match" },
+  { action: "settings", title: "Réglages" },
+];
 
 // Sélection commune : abonnés Web Push dont les préférences matchent ce match
 // (notifs live activées, club filtré ou aucun filtre). `onlyMyPlayers` est
@@ -45,7 +58,7 @@ async function pushToSubscriber(
   payload: { title: string; body: string; url: string; tag: string; image: string }
 ) {
   for (const sub of user.webPushSubscriptions) {
-    const { expired } = await sendWebPush(sub, payload);
+    const { expired } = await sendWebPush(sub, { ...payload, actions: STANDARD_ACTIONS });
     if (expired) {
       await prisma.webPushSubscription.delete({ where: { id: sub.id } }).catch(() => {});
     }
@@ -74,7 +87,7 @@ export async function notifyWebPushForLiveEvents(
   const candidates = await findLiveNotificationSubscribers(homeClubId, awayClubId);
   if (candidates.length === 0) return;
 
-  const url = `/matches/${matchId}`;
+  const url = `/matches/${matchId}#match-events`;
   // Bannière écusson vs écusson (voir src/app/api/og/live-event/route.tsx) — un seul
   // appel généré une fois par match, pas par événement.
   const image = `/api/og/live-event?home=${homeClubId}&away=${awayClubId}`;
@@ -92,12 +105,27 @@ export async function notifyWebPushForLiveEvents(
     awayShortName = clubs.find((c) => c.id === awayClubId)?.shortName ?? "";
   }
 
+  // Total de buts du buteur dans CE match, pour l'ajouter au corps de la notif
+  // ("3e but du match") — recalculé sur tout l'historique du match (pas seulement
+  // ce batch), un joueur peut avoir marqué avant ce tick de cron.
+  let goalTallyBySequence = new Map<number, number>();
+  if (events.some((e) => GOAL_ICONS.has(e.icon) && e.playerId)) {
+    const allGoalEvents = await prisma.matchLiveEvent.findMany({
+      where: { matchId, icon: { in: [...GOAL_ICONS] } },
+      select: { sequence: true, playerId: true },
+    });
+    goalTallyBySequence = tallyGoalsBySequence(allGoalEvents);
+  }
+
   for (const event of events) {
     const milestone = milestoneFromEvent(event);
     const title = milestone === "halftime" ? "Mi-temps" : milestone === "fulltime" ? "Fin du match" : "Starligue Fantasy";
+    const goalRank = GOAL_ICONS.has(event.icon) && event.playerId ? goalTallyBySequence.get(event.sequence) : undefined;
     const body = milestone
       ? `${homeShortName} ${event.homeScore} - ${event.awayScore} ${awayShortName}`
-      : event.text;
+      : goalRank
+        ? `${event.text} — ${frenchOrdinal(goalRank)} but du match`
+        : event.text;
 
     for (const user of candidates) {
       if (user.liveNotificationsOnlyMyPlayers) {
@@ -125,7 +153,7 @@ export async function notifyWebPushForMatchMilestone(
   const candidates = await findLiveNotificationSubscribers(homeClubId, awayClubId);
   if (candidates.length === 0) return;
 
-  const url = `/matches/${matchId}`;
+  const url = `/matches/${matchId}#match-events`;
   const image = `/api/og/live-event?home=${homeClubId}&away=${awayClubId}`;
 
   for (const user of candidates) {
