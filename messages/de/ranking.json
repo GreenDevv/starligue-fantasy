@@ -1,0 +1,19 @@
+{
+  "title": "Tabelle",
+  "noActiveSeason": "Momentan keine aktive Saison.",
+  "notAvailable": "Tabelle noch nicht verfügbar.",
+  "live": "Live",
+  "afterGameweek": "Nach ST{number}",
+  "pendingMatchTitle": "Hat diesen Spieltag noch nicht gespielt",
+  "col": {
+    "club": "Verein",
+    "played": "Sp",
+    "wins": "S",
+    "draws": "U",
+    "losses": "N",
+    "diff": "Diff",
+    "points": "Pkt",
+    "form": "Form",
+    "nextOpponent": "Nächster Gegner"
+  }
+}

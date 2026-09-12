@@ -75,7 +75,6 @@
     "counter": "Sim R{current}/{total}"
   },
   "statLeaderCard": {
-    "live": "Live",
     "removeAriaLabel": "Fjern {label} fra dashboardet",
     "ownedByTeams": "Hos {teams}",
     "noData": "Ingen data endnu."
@@ -143,7 +142,8 @@
       "played": "K",
       "diff": "+/-",
       "points": "Point"
-    }
+    },
+    "seeFullRanking": "Se hele stillingen"
   },
   "bestXICard": {
     "subtitle": "Ideelt hold · runde {number}"

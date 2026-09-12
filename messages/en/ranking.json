@@ -1,0 +1,19 @@
+{
+  "title": "Standings",
+  "noActiveSeason": "No active season for now.",
+  "notAvailable": "Standings not available yet.",
+  "live": "Live",
+  "afterGameweek": "After MD{number}",
+  "pendingMatchTitle": "Hasn't played this matchday yet",
+  "col": {
+    "club": "Club",
+    "played": "P",
+    "wins": "W",
+    "draws": "D",
+    "losses": "L",
+    "diff": "Diff",
+    "points": "Pts",
+    "form": "Form",
+    "nextOpponent": "Next opponent"
+  }
+}

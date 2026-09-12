@@ -75,7 +75,6 @@
     "counter": "Sim MD{current}/{total}"
   },
   "statLeaderCard": {
-    "live": "Live",
     "removeAriaLabel": "Remove {label} from dashboard",
     "ownedByTeams": "In {teams}",
     "noData": "No data yet."
@@ -143,7 +142,8 @@
       "played": "P",
       "diff": "+/-",
       "points": "Pts"
-    }
+    },
+    "seeFullRanking": "See full standings"
   },
   "bestXICard": {
     "subtitle": "Team of the week · matchday {number}"

@@ -4,14 +4,15 @@
 // être réutilisé aussi par la génération d'image des posts Instagram automatiques
 // (src/app/api/og/stat-leaders/route.tsx) — pas de fetch HTTP interne, appel direct.
 //
-// statKey="goalsTotal" (season/gameweek) : complété en direct avec les buts déjà
-// marqués dans les matchs LIVE (mergeLiveGoals, ARCHITECTURE.md §26) — pas possible
-// pour "assists", le feed live lnh.fr ne remonte que le buteur, jamais la passe
-// décisive.
+// Chiffres cumulés POST-match uniquement (PlayerMatchStat, une fois le boxscore
+// synchronisé) — jamais de buts en direct injectés dans les totaux saison/journée
+// (mergeLiveGoals, tenté le 12/09, retiré le 13/09 sur retour explicite : "aucune
+// raison d'afficher les leaders de stats en direct, seulement les chiffres cumulés
+// de la saison et par journée"). Le seul endroit qui montre du direct reste
+// LivePerformancesCard (ARCHITECTURE.md §32).
 import type { Position } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { computePlayerPoints, parseScoringConfig } from "@/lib/scoring/engine";
-import { mergeLiveGoals } from "./live-goal-leaders";
 
 export interface StatLeaderRow {
   playerId: string;
@@ -35,9 +36,6 @@ export interface GetStatLeadersResult {
   scope: "season" | "gameweek" | "average";
   gameweekNumber: number | null;
   leaders: StatLeaderRow[];
-  // true si au moins un but d'un match actuellement LIVE a été mergé (voir
-  // mergeLiveGoals) — sert à afficher un badge "Live" côté client.
-  hasLiveUpdates: boolean;
 }
 
 export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetStatLeadersResult> {
@@ -59,7 +57,7 @@ export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetS
           select: { id: true, number: true },
         });
     if (!target) {
-      return { statKey, scope, gameweekNumber: null, leaders: [], hasLiveUpdates: false };
+      return { statKey, scope, gameweekNumber: null, leaders: [] };
     }
     gameweekId = target.id;
     gameweekNumber = target.number;
@@ -188,27 +186,6 @@ export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetS
       .filter((r): r is { playerId: string; value: number } => r.value !== null && r.value > 0);
   }
 
-  // Buteurs uniquement (assists n'a pas d'équivalent dans le feed live — la LNH ne
-  // remonte que le buteur, jamais la passe décisive, voir resolve-event-player.ts) :
-  // complète le classement post-match (PlayerMatchStat, qui n'existe qu'une fois le
-  // boxscore synchronisé après le match) avec les buts déjà marqués dans les matchs
-  // actuellement LIVE (MatchLiveEvent, mis à jour à chaque poll du cron sync-live).
-  // Non appliqué à scope=average : mélanger un total en direct à une moyenne par
-  // match joué n'aurait pas de sens tant que le match n'est pas comptabilisé comme joué.
-  let hasLiveUpdates = false;
-  if (statKey === "goalsTotal" && (scope === "season" || scope === "gameweek")) {
-    const liveGoalEvents = await prisma.matchLiveEvent.groupBy({
-      by: ["playerId"],
-      where: { playerId: { not: null }, icon: { in: ["goals", "goals_7m"] }, match: { status: "LIVE", ...matchWhere } },
-      _count: { _all: true },
-    });
-    const liveGoalsByPlayer = new Map(
-      liveGoalEvents.filter((e): e is typeof e & { playerId: string } => e.playerId !== null).map((e) => [e.playerId, e._count._all])
-    );
-    if (liveGoalsByPlayer.size > 0) hasLiveUpdates = true;
-    ranked = mergeLiveGoals(ranked, liveGoalsByPlayer);
-  }
-
   ranked = ranked.sort((a, b) => b.value - a.value).slice(0, 5);
 
   const players = await prisma.player.findMany({
@@ -239,5 +216,5 @@ export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetS
     });
   }
 
-  return { statKey, scope, gameweekNumber, leaders, hasLiveUpdates };
+  return { statKey, scope, gameweekNumber, leaders };
 }

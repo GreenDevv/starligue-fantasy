@@ -75,7 +75,6 @@
     "counter": "Sim ST{current}/{total}"
   },
   "statLeaderCard": {
-    "live": "Live",
     "removeAriaLabel": "{label} vom Dashboard entfernen",
     "ownedByTeams": "In {teams}",
     "noData": "Bisher keine Daten."
@@ -143,7 +142,8 @@
       "played": "Sp",
       "diff": "+/-",
       "points": "Pkt"
-    }
+    },
+    "seeFullRanking": "Vollständige Tabelle ansehen"
   },
   "bestXICard": {
     "subtitle": "Team der Saison · Spieltag {number}"

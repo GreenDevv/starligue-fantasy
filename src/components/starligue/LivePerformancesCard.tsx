@@ -1,8 +1,9 @@
 import { Link } from "@/i18n/navigation";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
+import { OutcomeBadge } from "@/components/ui/OutcomeBadge";
 import { pickHighlightStats, type HighlightStatKey } from "@/lib/players/highlight-stat";
-import { matchOutcomeForTeam, type MatchOutcome } from "@/lib/matches/match-outcome";
+import { matchOutcomeForTeam } from "@/lib/matches/match-outcome";
 import type { LiveGameweekPerformances, LiveGameweekPerformanceEntry } from "@/lib/matches/current-gameweek-performances";
 
 // Carte "meilleures perfs en direct" de la journée en cours — remplace l'ancienne
@@ -58,26 +59,6 @@ function PlayerNameLine({ entry, big = false }: { entry: LiveGameweekPerformance
         {entry.firstName} {entry.lastName}
       </span>
     </p>
-  );
-}
-
-// Pastille pleine (fond + texte), pas juste une lettre colorée noyée dans la
-// ligne grise du match — demande explicite ("plus en évidence").
-const OUTCOME_STYLE: Record<MatchOutcome, string> = {
-  V: "bg-points-pos text-bg",
-  N: "bg-text-muted text-bg",
-  D: "bg-points-neg text-bg",
-};
-
-function OutcomeBadge({ outcome, big = false }: { outcome: MatchOutcome; big?: boolean }) {
-  return (
-    <span
-      className={`pixel-corners-sm shrink-0 text-center font-bold leading-none ${OUTCOME_STYLE[outcome]} ${
-        big ? "px-1.5 py-0.5 text-xs" : "px-1 py-0.5 text-[10px]"
-      }`}
-    >
-      {outcome}
-    </span>
   );
 }
 

@@ -1,0 +1,19 @@
+{
+  "title": "Stilling",
+  "noActiveSeason": "Ingen aktiv sæson lige nu.",
+  "notAvailable": "Stillingen er ikke tilgængelig endnu.",
+  "live": "Live",
+  "afterGameweek": "Efter R{number}",
+  "pendingMatchTitle": "Har ikke spillet denne runde endnu",
+  "col": {
+    "club": "Klub",
+    "played": "K",
+    "wins": "V",
+    "draws": "U",
+    "losses": "T",
+    "diff": "Diff",
+    "points": "Point",
+    "form": "Form",
+    "nextOpponent": "Næste modstander"
+  }
+}
