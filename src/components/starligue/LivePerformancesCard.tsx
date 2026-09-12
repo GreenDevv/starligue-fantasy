@@ -61,11 +61,25 @@ function PlayerNameLine({ entry, big = false }: { entry: LiveGameweekPerformance
   );
 }
 
-const OUTCOME_COLOR: Record<MatchOutcome, string> = {
-  V: "text-points-pos",
-  N: "text-text-muted",
-  D: "text-points-neg",
+// Pastille pleine (fond + texte), pas juste une lettre colorée noyée dans la
+// ligne grise du match — demande explicite ("plus en évidence").
+const OUTCOME_STYLE: Record<MatchOutcome, string> = {
+  V: "bg-points-pos text-bg",
+  N: "bg-text-muted text-bg",
+  D: "bg-points-neg text-bg",
 };
+
+function OutcomeBadge({ outcome, big = false }: { outcome: MatchOutcome; big?: boolean }) {
+  return (
+    <span
+      className={`pixel-corners-sm shrink-0 text-center font-bold leading-none ${OUTCOME_STYLE[outcome]} ${
+        big ? "px-1.5 py-0.5 text-xs" : "px-1 py-0.5 text-[10px]"
+      }`}
+    >
+      {outcome}
+    </span>
+  );
+}
 
 function MatchLine({ entry, compact = false }: { entry: LiveGameweekPerformanceEntry; compact?: boolean }) {
   const { match } = entry;
@@ -74,6 +88,7 @@ function MatchLine({ entry, compact = false }: { entry: LiveGameweekPerformanceE
   const outcome = matchOutcomeForTeam(match.isHome, match.homeScore, match.awayScore, match.status);
   return (
     <div className={`flex min-w-0 items-center gap-1 text-text-muted ${compact ? "text-[10px]" : "text-[11px]"}`}>
+      {outcome && <OutcomeBadge outcome={outcome} big={!compact} />}
       <span className="shrink-0">vs</span>
       <ClubLogo club={match.opponentClub} size="xs" />
       <span className="truncate">{match.opponentClub.shortName}</span>
@@ -82,7 +97,6 @@ function MatchLine({ entry, compact = false }: { entry: LiveGameweekPerformanceE
           ({match.isHome ? `${match.homeScore}-${match.awayScore}` : `${match.awayScore}-${match.homeScore}`})
         </span>
       )}
-      {outcome && <span className={`shrink-0 font-bold ${OUTCOME_COLOR[outcome]}`}>{outcome}</span>}
     </div>
   );
 }
