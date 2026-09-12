@@ -85,14 +85,23 @@ export async function getDashboardMatchStrips(
   // home, demande explicite de l'utilisateur) — sans effet sur les autres appelants
   // (TeamView/SimulationView) qui ne passent pas ce paramètre : comportement par
   // défaut inchangé (auto-détection de la prochaine journée non close).
-  upcomingOverride?: number
+  upcomingOverride?: number,
+  // Même principe côté "résultats" (dropdown de navigation, demande explicite du
+  // 13/09) — sans effet si omis : comportement par défaut inchangé (dernière
+  // journée avec au moins un match terminé).
+  resultsOverride?: number
 ): Promise<DashboardStrips> {
   const [lastFinishedGameweek, upcomingGameweek] = await Promise.all([
-    prisma.gameweek.findFirst({
-      where: { seasonId, matches: { some: { status: "FINISHED" } } },
-      orderBy: { number: "desc" },
-      include: { matches: { include: { homeClub: CLUB_SELECT, awayClub: CLUB_SELECT }, orderBy: { kickoffAt: "asc" } } },
-    }),
+    resultsOverride
+      ? prisma.gameweek.findUnique({
+          where: { seasonId_number: { seasonId, number: resultsOverride } },
+          include: { matches: { include: { homeClub: CLUB_SELECT, awayClub: CLUB_SELECT }, orderBy: { kickoffAt: "asc" } } },
+        })
+      : prisma.gameweek.findFirst({
+          where: { seasonId, matches: { some: { status: "FINISHED" } } },
+          orderBy: { number: "desc" },
+          include: { matches: { include: { homeClub: CLUB_SELECT, awayClub: CLUB_SELECT }, orderBy: { kickoffAt: "asc" } } },
+        }),
     upcomingOverride
       ? prisma.gameweek.findUnique({
           where: { seasonId_number: { seasonId, number: upcomingOverride } },
@@ -118,4 +127,18 @@ export async function getDashboardMatchStrips(
       matches: upcomingGameweek?.matches ?? [],
     },
   };
+}
+
+// Numéros des journées ayant au moins un match terminé — pour le dropdown de
+// navigation du strip "résultats" de la home (demande explicite du 13/09) :
+// contrairement à "prochains matchs" (qui peut pointer vers n'importe quelle
+// journée à venir), naviguer vers une journée sans le moindre résultat n'aurait
+// aucun sens ici.
+export async function getGameweeksWithResults(seasonId: string): Promise<number[]> {
+  const gameweeks = await prisma.gameweek.findMany({
+    where: { seasonId, matches: { some: { status: "FINISHED" } } },
+    orderBy: { number: "asc" },
+    select: { number: true },
+  });
+  return gameweeks.map((g) => g.number);
 }

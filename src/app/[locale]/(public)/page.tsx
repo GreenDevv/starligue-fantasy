@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getClubStandings } from "@/lib/standings/get";
-import { getDashboardMatchStrips, getCurrentGameweekStrip } from "@/lib/matches/dashboard-strips";
+import { getDashboardMatchStrips, getCurrentGameweekStrip, getGameweeksWithResults } from "@/lib/matches/dashboard-strips";
 import { getCurrentGameweekStatus } from "@/lib/gameweek/get-gameweek-status";
 import { getCurrentGameweekPerformances } from "@/lib/matches/current-gameweek-performances";
 import { getNewsFeed } from "@/lib/news/get-feed";
@@ -65,7 +65,7 @@ export async function generateMetadata({
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: { category?: string; page?: string; gw?: string };
+  searchParams: { category?: string; page?: string; gw?: string; resultsGw?: string };
 }) {
   if (process.env.COMING_SOON === "true") {
     return <ComingSoon />;
@@ -85,6 +85,13 @@ export default async function HomePage({
   // getDashboardMatchStrips.
   const gwOverrideParsed = searchParams.gw ? Number(searchParams.gw) : NaN;
   const gwOverride = Number.isInteger(gwOverrideParsed) && gwOverrideParsed > 0 ? gwOverrideParsed : undefined;
+  // Même principe côté "résultats" (dropdown de navigation, demande explicite du
+  // 13/09) — paramètre distinct (`resultsGw`) pour ne pas entrer en collision avec
+  // celui du strip "prochains matchs" (`gw`), les deux pouvant être actifs en même
+  // temps sur la page.
+  const resultsGwOverrideParsed = searchParams.resultsGw ? Number(searchParams.resultsGw) : NaN;
+  const resultsGwOverride =
+    Number.isInteger(resultsGwOverrideParsed) && resultsGwOverrideParsed > 0 ? resultsGwOverrideParsed : undefined;
 
   if (!season) {
     return (
@@ -98,6 +105,7 @@ export default async function HomePage({
     standings,
     matchStrips,
     totalGameweeks,
+    gameweeksWithResults,
     newsFeed,
     teamOfWeek,
     performances,
@@ -112,8 +120,9 @@ export default async function HomePage({
     currentGwPerfs,
   ] = await Promise.all([
     getClubStandings(season.id),
-    getDashboardMatchStrips(season.id, gwOverride),
+    getDashboardMatchStrips(season.id, gwOverride, resultsGwOverride),
     prisma.gameweek.count({ where: { seasonId: season.id } }),
+    getGameweeksWithResults(season.id),
     getNewsFeed(season.id, { category: category ?? undefined, page }),
     getTeamOfWeekCard(season.id),
     getPerformancesCard(season.id),
@@ -329,6 +338,12 @@ export default async function HomePage({
             gridColsClassName="grid-cols-2 lg:grid-cols-1"
             logoSize="sm"
             rankByClubId={rankByClubId}
+            gameweekNav={{
+              total: totalGameweeks,
+              hrefBase: "/",
+              availableGameweeks: gameweeksWithResults,
+              queryParam: "resultsGw",
+            }}
           />
           <StandingsSection
             gameweekNumber={standings.gameweekNumber}

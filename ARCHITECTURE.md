@@ -3152,3 +3152,30 @@ ligne à part.
 ### 32.5 Rollout
 
 Aucune migration Prisma. Déploiement direct.
+
+## 33. Navigation entre journées sur le strip "Résultats" de la home
+
+Ajouté le 13/09, demande explicite : « dans la div Résultats Journée 2, je
+dois pouvoir passer d'une journée à une autre, toute journée dont on a au
+moins 1 résultat doit se retrouver dans un dropdown menu ».
+
+Le dropdown de navigation par journée existait déjà (`GameweekDropdown`,
+câblé sur le strip "prochains matchs" — n'importe quelle journée 1..total,
+logique puisqu'on peut vouloir regarder n'importe quel match à venir). Pour
+"résultats", naviguer vers une journée sans le moindre résultat n'aurait pas
+de sens : `GameweekDropdown` accepte maintenant `availableGameweeks` (sous-
+ensemble explicite, prioritaire sur 1..total) et `queryParam` (les deux
+dropdowns coexistent sur la home avec des paramètres distincts, `gw` pour
+"prochains matchs" et `resultsGw` pour "résultats", pour ne pas s'écraser
+l'un l'autre).
+
+- `getGameweeksWithResults(seasonId)` (`src/lib/matches/dashboard-strips.ts`) :
+  numéros de journées ayant au moins un match `FINISHED`.
+- `getDashboardMatchStrips` gagne un second paramètre optionnel
+  `resultsOverride` (même principe que `upcomingOverride` déjà existant) —
+  sans effet sur les autres appelants (`TeamView`/`SimulationView`) qui ne le
+  passent pas.
+
+### Rollout
+
+Aucune migration Prisma. Déploiement direct.

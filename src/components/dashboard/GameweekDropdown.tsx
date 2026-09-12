@@ -5,21 +5,32 @@ import { createPortal } from "react-dom";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-// Petit dropdown pour naviguer parmi les journées Starligue depuis le strip
-// "prochains matchs" de la home (demande explicite de l'utilisateur). Portal +
-// coords calculées (même pattern que ClubSwitcher/LocaleSwitcher) : le strip
-// parent est en `pixel-corners` (clip-path), qui rognerait un menu simplement
-// `absolute`. `label` est pré-traduit côté page serveur (fonction non
-// sérialisable à travers la frontière RSC).
+// Petit dropdown pour naviguer parmi les journées Starligue depuis un strip de
+// la home ("prochains matchs" : n'importe quelle journée 1..total ; "résultats",
+// demande explicite du 13/09 : seulement celles ayant au moins un résultat, via
+// `availableGameweeks` — naviguer vers une journée sans résultat n'aurait pas de
+// sens dans ce contexte). Portal + coords calculées (même pattern que
+// ClubSwitcher/LocaleSwitcher) : le strip parent est en `pixel-corners`
+// (clip-path), qui rognerait un menu simplement `absolute`. `label` est
+// pré-traduit côté page serveur (fonction non sérialisable à travers la
+// frontière RSC).
 export function GameweekDropdown({
   current,
   total,
+  availableGameweeks,
   hrefBase,
+  queryParam = "gw",
   label,
 }: {
   current: number;
   total: number;
+  // Sous-ensemble explicite de journées à lister, prioritaire sur 1..total.
+  availableGameweeks?: number[];
   hrefBase: string;
+  // Nom du paramètre de requête — deux strips avec un dropdown peuvent coexister
+  // sur la même page (prochains matchs "gw" + résultats "resultsGw", 13/09), il
+  // leur faut chacun leur propre paramètre pour ne pas s'écraser l'un l'autre.
+  queryParam?: string;
   label: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -59,7 +70,7 @@ export function GameweekDropdown({
     setOpen((v) => !v);
   }
 
-  const gameweeks = Array.from({ length: total }, (_, i) => i + 1);
+  const gameweeks = availableGameweeks ?? Array.from({ length: total }, (_, i) => i + 1);
 
   return (
     <>
@@ -95,7 +106,7 @@ export function GameweekDropdown({
             {gameweeks.map((gw) => (
               <Link
                 key={gw}
-                href={`${hrefBase}?gw=${gw}`}
+                href={`${hrefBase}?${queryParam}=${gw}`}
                 onClick={() => setOpen(false)}
                 className={cn(
                   "rounded px-1 py-1.5 text-center text-xs transition-colors",

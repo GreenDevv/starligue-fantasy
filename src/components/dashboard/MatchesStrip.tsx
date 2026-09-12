@@ -106,10 +106,11 @@ interface MatchesStripProps {
   // clubs n'ont pas forcément d'id DB ni de classement Starligue pertinent).
   rankByClubId?: Record<string, number>;
   // Dropdown de navigation par journée (remplace le simple libellé "Journée N" par
-  // un bouton ouvrant la liste de toutes les journées) — demande explicite de
-  // l'utilisateur, seulement câblée sur le strip "prochains matchs" de la home.
-  // Absent par défaut : le libellé reste un texte simple partout ailleurs.
-  gameweekNav?: { total: number; hrefBase: string };
+  // un bouton ouvrant la liste des journées) — demande explicite de l'utilisateur,
+  // câblée sur les strips "prochains matchs" (1..total) et "résultats" (13/09,
+  // availableGameweeks = seulement les journées ayant au moins un résultat) de la
+  // home. Absent par défaut : le libellé reste un texte simple partout ailleurs.
+  gameweekNav?: { total: number; hrefBase: string; availableGameweeks?: number[]; queryParam?: string };
   // true : le contenu (grille de matchs) devient un tiroir ouvrable/fermable via un
   // chevron dédié dans l'en-tête (bouton séparé du gameweekNav pour éviter un
   // bouton imbriqué dans un bouton) — demande explicite de l'utilisateur, câblée
@@ -393,7 +394,9 @@ export function MatchesStrip({
               <GameweekDropdown
                 current={gameweekNumber}
                 total={gameweekNav.total}
+                availableGameweeks={gameweekNav.availableGameweeks}
                 hrefBase={gameweekNav.hrefBase}
+                queryParam={gameweekNav.queryParam}
                 label={t("matchesStrip.gameweek", { number: gameweekNumber })}
               />
             ) : (
