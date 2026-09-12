@@ -16,6 +16,14 @@ interface AccountClub {
   logoUrl: string | null;
 }
 
+type NotifScope = "all" | "myPlayers" | "player";
+
+const NOTIF_SCOPE_LABEL_KEYS: Record<NotifScope, string> = {
+  all: "scopeAll",
+  myPlayers: "scopeMyPlayers",
+  player: "scopeSinglePlayer",
+};
+
 interface AccountData {
   name: string;
   email: string;
@@ -25,6 +33,8 @@ interface AccountData {
   liveNotificationsEnabled: boolean;
   liveNotificationsOnlyMyPlayers: boolean;
   liveNotificationsClubIds: string[];
+  liveNotificationsPlayerId: string | null;
+  liveNotificationsPlayer: { id: string; firstName: string; lastName: string; club: { shortName: string } } | null;
   allClubs: AccountClub[];
 }
 
@@ -48,8 +58,13 @@ export default function AccountPage() {
   const [players, setPlayers] = useState<PlayerSearchOption[]>([]);
   const [allClubs, setAllClubs] = useState<AccountClub[]>([]);
   const [notifEnabled, setNotifEnabled] = useState(true);
-  const [notifOnlyMyPlayers, setNotifOnlyMyPlayers] = useState(false);
+  // "Qui suivre" — un seul choix à la fois (radio) : tous les événements (filtrés
+  // par club le cas échéant), seulement mes joueurs (effectif fantasy), ou
+  // seulement un joueur choisi librement (recherche). Simplifie ce qui était deux
+  // cases à cocher indépendantes + une liste de clubs toujours visible.
+  const [notifScope, setNotifScope] = useState<NotifScope>("all");
   const [notifClubIds, setNotifClubIds] = useState<string[]>([]);
+  const [notifPlayerId, setNotifPlayerId] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,8 +95,15 @@ export default function AccountPage() {
               : null,
           );
           setNotifEnabled(accountJson.data.liveNotificationsEnabled);
-          setNotifOnlyMyPlayers(accountJson.data.liveNotificationsOnlyMyPlayers);
+          setNotifScope(
+            accountJson.data.liveNotificationsPlayerId
+              ? "player"
+              : accountJson.data.liveNotificationsOnlyMyPlayers
+                ? "myPlayers"
+                : "all",
+          );
           setNotifClubIds(accountJson.data.liveNotificationsClubIds);
+          setNotifPlayerId(accountJson.data.liveNotificationsPlayerId ?? "");
           setAllClubs(accountJson.data.allClubs ?? []);
         }
         setPlayers(playersJson.data?.players ?? []);
@@ -106,8 +128,11 @@ export default function AccountPage() {
         // Club d'origine : envoyé seulement s'il a changé.
         ...(homeClubDirty ? { homeClub: homeClub ? homeClubValueToPayload(homeClub) : null } : {}),
         liveNotificationsEnabled: notifEnabled,
-        liveNotificationsOnlyMyPlayers: notifOnlyMyPlayers,
-        liveNotificationsClubIds: notifClubIds,
+        liveNotificationsOnlyMyPlayers: notifScope === "myPlayers",
+        // Clubs suivis n'a de sens qu'en mode "tous les événements" — repart à
+        // vide sinon plutôt que de laisser une valeur cachée agir en coulisses.
+        liveNotificationsClubIds: notifScope === "all" ? notifClubIds : [],
+        liveNotificationsPlayerId: notifScope === "player" ? notifPlayerId || null : null,
       }),
     });
     const json = (await res.json()) as { error?: { code?: string; message: string }; data?: AccountData };
@@ -232,46 +257,74 @@ export default function AccountPage() {
                 className="h-4 w-4 accent-accent"
               />
             </label>
-            <label className="flex items-center justify-between gap-3 text-sm text-text">
-              {tAccount("liveNotifications.onlyMyPlayersLabel")}
-              <input
-                type="checkbox"
-                disabled={!notifEnabled}
-                checked={notifOnlyMyPlayers}
-                onChange={(e) => {
-                  setNotifOnlyMyPlayers(e.target.checked);
-                  setSaved(false);
-                }}
-                className="h-4 w-4 accent-accent disabled:opacity-50"
-              />
-            </label>
             <div>
-              <p className="mb-1.5 text-xs text-text-muted">{tAccount("liveNotifications.clubsLabel")}</p>
-              <div className="flex flex-wrap gap-2">
-                {allClubs.map((c) => {
-                  const active = notifClubIds.includes(c.id);
-                  return (
-                    <button
-                      type="button"
-                      key={c.id}
+              <p className="mb-1.5 text-xs text-text-muted">{tAccount("liveNotifications.scopeLabel")}</p>
+              <div className="flex flex-col gap-1.5">
+                {(["all", "myPlayers", "player"] as const).map((scope) => (
+                  <label
+                    key={scope}
+                    className={`flex items-center gap-2.5 text-sm text-text ${!notifEnabled ? "opacity-50" : ""}`}
+                  >
+                    <input
+                      type="radio"
+                      name="notifScope"
                       disabled={!notifEnabled}
-                      onClick={() => {
-                        setNotifClubIds((prev) => (active ? prev.filter((id) => id !== c.id) : [...prev, c.id]));
+                      checked={notifScope === scope}
+                      onChange={() => {
+                        setNotifScope(scope);
                         setSaved(false);
                       }}
-                      className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors disabled:opacity-50 ${
-                        active
-                          ? "border-accent bg-accent/10 text-accent"
-                          : "border-border text-text-muted hover:bg-surface"
-                      }`}
-                    >
-                      <ClubLogo club={c} size="xs" />
-                      {c.shortName}
-                    </button>
-                  );
-                })}
+                      className="h-4 w-4 accent-accent"
+                    />
+                    {tAccount(`liveNotifications.${NOTIF_SCOPE_LABEL_KEYS[scope]}`)}
+                  </label>
+                ))}
               </div>
-              <p className="mt-1.5 text-[11px] text-text-muted">{tAccount("liveNotifications.clubsHint")}</p>
+
+              {notifScope === "player" && (
+                <div className="mt-2">
+                  <PlayerSearch
+                    players={players}
+                    value={notifPlayerId}
+                    onChange={(id) => {
+                      setNotifPlayerId(id);
+                      setSaved(false);
+                    }}
+                  />
+                  <p className="mt-1.5 text-[11px] text-text-muted">{tAccount("liveNotifications.singlePlayerHint")}</p>
+                </div>
+              )}
+
+              {notifScope === "all" && (
+                <div className="mt-2">
+                  <p className="mb-1.5 text-xs text-text-muted">{tAccount("liveNotifications.clubsLabel")}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {allClubs.map((c) => {
+                      const active = notifClubIds.includes(c.id);
+                      return (
+                        <button
+                          type="button"
+                          key={c.id}
+                          disabled={!notifEnabled}
+                          onClick={() => {
+                            setNotifClubIds((prev) => (active ? prev.filter((id) => id !== c.id) : [...prev, c.id]));
+                            setSaved(false);
+                          }}
+                          className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors disabled:opacity-50 ${
+                            active
+                              ? "border-accent bg-accent/10 text-accent"
+                              : "border-border text-text-muted hover:bg-surface"
+                          }`}
+                        >
+                          <ClubLogo club={c} size="xs" />
+                          {c.shortName}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="mt-1.5 text-[11px] text-text-muted">{tAccount("liveNotifications.clubsHint")}</p>
+                </div>
+              )}
             </div>
             <WebPushSettings />
           </div>

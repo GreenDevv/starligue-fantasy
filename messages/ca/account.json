@@ -8,7 +8,11 @@
   "liveNotifications": {
     "title": "Notificacions en directe",
     "enabledLabel": "Rebre notificacions en directe",
-    "onlyMyPlayersLabel": "Només els meus jugadors",
+    "scopeLabel": "Qui seguir?",
+    "scopeAll": "Tots els esdeveniments",
+    "scopeMyPlayers": "Només els meus jugadors",
+    "scopeSinglePlayer": "Només un jugador",
+    "singlePlayerHint": "Només rebràs els esdeveniments d'aquest jugador.",
     "clubsLabel": "Clubs seguits (cap = tots)",
     "clubsHint": "Si selecciones clubs, només rebràs esdeveniments dels seus partits.",
     "webPushEnable": "Activa en aquest dispositiu",

@@ -30,10 +30,12 @@ const STANDARD_ACTIONS = [
 ];
 
 // Sélection commune : abonnés Web Push dont les préférences matchent ce match
-// (notifs live activées, club filtré ou aucun filtre). `onlyMyPlayers` est
-// interprété différemment par l'appelant selon qu'il s'agit d'un événement précis
-// (notifyWebPushForLiveEvents, filtre par joueur exact) ou d'un moment de match
-// (notifyWebPushForMatchMilestone, filtre par présence d'un joueur de l'effectif).
+// (notifs live activées, club filtré ou aucun filtre — ou joueur unique suivi,
+// auquel cas le filtre club est ignoré : voir §30, dérivé du club du joueur).
+// `onlyMyPlayers`/`playerId` sont interprétés différemment par l'appelant selon
+// qu'il s'agit d'un événement précis (notifyWebPushForLiveEvents, filtre par
+// joueur exact) ou d'un moment de match (notifyWebPushForMatchMilestone, filtre
+// par présence du joueur/effectif dans ce match).
 async function findLiveNotificationSubscribers(homeClubId: string, awayClubId: string) {
   return prisma.user.findMany({
     where: {
@@ -42,10 +44,13 @@ async function findLiveNotificationSubscribers(homeClubId: string, awayClubId: s
       OR: [
         { liveNotificationsClubIds: { isEmpty: true } },
         { liveNotificationsClubIds: { hasSome: [homeClubId, awayClubId] } },
+        { liveNotificationsPlayer: { clubId: { in: [homeClubId, awayClubId] } } },
       ],
     },
     select: {
       liveNotificationsOnlyMyPlayers: true,
+      liveNotificationsPlayerId: true,
+      liveNotificationsPlayer: { select: { clubId: true } },
       webPushSubscriptions: { select: { id: true, endpoint: true, p256dh: true, auth: true } },
       fantasyTeams: { select: { squad: { select: { playerId: true, player: { select: { clubId: true } } } } } },
     },
@@ -53,6 +58,39 @@ async function findLiveNotificationSubscribers(homeClubId: string, awayClubId: s
 }
 
 type LiveNotificationSubscriber = Awaited<ReturnType<typeof findLiveNotificationSubscribers>>[number];
+
+// true si l'utilisateur veut voir CET événement précis, compte tenu de son mode
+// de filtrage par joueur (mutuellement exclusif côté UI, voir AccountPage) :
+// un seul joueur suivi (§30) prime sur "mes joueurs" (effectif fantasy).
+export function passesPlayerFilterForEvent(
+  user: Pick<LiveNotificationSubscriber, "liveNotificationsOnlyMyPlayers" | "liveNotificationsPlayerId" | "fantasyTeams">,
+  eventPlayerId: string | null
+): boolean {
+  if (user.liveNotificationsPlayerId) return eventPlayerId === user.liveNotificationsPlayerId;
+  if (user.liveNotificationsOnlyMyPlayers) {
+    if (!eventPlayerId) return false;
+    return user.fantasyTeams.some((t) => t.squad.some((s) => s.playerId === eventPlayerId));
+  }
+  return true;
+}
+
+// Même principe que ci-dessus, mais pour un moment de match (pas d'événement/
+// joueur précis à comparer) : le joueur suivi (ou un joueur de l'effectif) doit
+// simplement jouer dans CE match (club domicile ou extérieur).
+export function passesPlayerFilterForMatch(
+  user: Pick<LiveNotificationSubscriber, "liveNotificationsOnlyMyPlayers" | "liveNotificationsPlayerId" | "liveNotificationsPlayer" | "fantasyTeams">,
+  homeClubId: string,
+  awayClubId: string
+): boolean {
+  if (user.liveNotificationsPlayerId) {
+    const clubId = user.liveNotificationsPlayer?.clubId;
+    return clubId === homeClubId || clubId === awayClubId;
+  }
+  if (user.liveNotificationsOnlyMyPlayers) {
+    return user.fantasyTeams.some((t) => t.squad.some((s) => s.player.clubId === homeClubId || s.player.clubId === awayClubId));
+  }
+  return true;
+}
 
 async function pushToSubscriber(
   user: Pick<LiveNotificationSubscriber, "webPushSubscriptions">,
@@ -133,11 +171,7 @@ export async function notifyWebPushForLiveEvents(
         : `${event.text} · ${event.homeScore}-${event.awayScore} · ${event.minute}'`;
 
     for (const user of candidates) {
-      if (user.liveNotificationsOnlyMyPlayers) {
-        if (!event.playerId) continue;
-        const owns = user.fantasyTeams.some((t) => t.squad.some((s) => s.playerId === event.playerId));
-        if (!owns) continue;
-      }
+      if (!passesPlayerFilterForEvent(user, event.playerId)) continue;
 
       await pushToSubscriber(user, { title, body, url, tag: `match-${matchId}`, image });
     }
@@ -162,12 +196,7 @@ export async function notifyWebPushForMatchMilestone(
   const image = `/api/og/live-event?home=${homeClubId}&away=${awayClubId}`;
 
   for (const user of candidates) {
-    if (user.liveNotificationsOnlyMyPlayers) {
-      const hasPlayerInMatch = user.fantasyTeams.some((t) =>
-        t.squad.some((s) => s.player.clubId === homeClubId || s.player.clubId === awayClubId)
-      );
-      if (!hasPlayerInMatch) continue;
-    }
+    if (!passesPlayerFilterForMatch(user, homeClubId, awayClubId)) continue;
 
     await pushToSubscriber(user, { ...notification, url, tag: `match-${matchId}`, image });
   }

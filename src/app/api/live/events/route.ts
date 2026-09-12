@@ -13,8 +13,9 @@ export const dynamic = "force-dynamic";
 //
 // Filtrage par préférences (User.liveNotifications*, voir schema.prisma) appliqué
 // ICI côté serveur, jamais côté client — un visiteur connecté qui a coupé les
-// notifs live, filtré sur ses clubs suivis, ou sur "mes joueurs seulement" ne doit
-// jamais recevoir les events exclus, même un instant.
+// notifs live, filtré sur ses clubs suivis, sur "mes joueurs seulement" ou sur un
+// seul joueur suivi (§30) ne doit jamais recevoir les events exclus, même un
+// instant.
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
@@ -29,12 +30,23 @@ export async function GET(request: Request) {
   const sinceParam = url.searchParams.get("since");
   const since = sinceParam && !Number.isNaN(Date.parse(sinceParam)) ? new Date(sinceParam) : new Date(Date.now() - DEFAULT_LOOKBACK_MS);
 
-  let prefs: { liveNotificationsEnabled: boolean; liveNotificationsOnlyMyPlayers: boolean; liveNotificationsClubIds: string[] } | null =
-    null;
+  let prefs:
+    | {
+        liveNotificationsEnabled: boolean;
+        liveNotificationsOnlyMyPlayers: boolean;
+        liveNotificationsClubIds: string[];
+        liveNotificationsPlayerId: string | null;
+      }
+    | null = null;
   if (session?.user?.id) {
     prefs = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { liveNotificationsEnabled: true, liveNotificationsOnlyMyPlayers: true, liveNotificationsClubIds: true },
+      select: {
+        liveNotificationsEnabled: true,
+        liveNotificationsOnlyMyPlayers: true,
+        liveNotificationsClubIds: true,
+        liveNotificationsPlayerId: true,
+      },
     });
   }
 
@@ -44,8 +56,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ data: { serverTime: new Date().toISOString(), events: [] } });
   }
 
-  const clubFilter =
-    prefs && prefs.liveNotificationsClubIds.length > 0
+  // Un seul joueur suivi (§30) prime sur "clubs suivis" (ignoré dans ce mode, voir
+  // AccountPage) : filtre directement sur les événements de CE joueur plutôt que
+  // sur un club.
+  const clubFilter = prefs?.liveNotificationsPlayerId
+    ? { playerId: prefs.liveNotificationsPlayerId }
+    : prefs && prefs.liveNotificationsClubIds.length > 0
       ? {
           match: {
             OR: [
@@ -92,7 +108,9 @@ export async function GET(request: Request) {
     ownedPlayerIds = new Set(owned.map((o) => o.playerId));
   }
 
-  const onlyMyPlayers = prefs?.liveNotificationsOnlyMyPlayers ?? false;
+  // "Seulement mes joueurs" ignoré si un joueur unique est suivi (déjà filtré au
+  // niveau de la requête ci-dessus, clubFilter) — mutuellement exclusifs côté UI.
+  const onlyMyPlayers = !prefs?.liveNotificationsPlayerId && (prefs?.liveNotificationsOnlyMyPlayers ?? false);
   const filtered = onlyMyPlayers ? events.filter((e) => e.playerId && ownedPlayerIds.has(e.playerId)) : events;
 
   return NextResponse.json({
