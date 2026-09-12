@@ -15,6 +15,7 @@ interface NewLiveEventForNotif {
   homeScore: number;
   awayScore: number;
   sequence: number;
+  minute: number;
 }
 
 const GOAL_ICONS = new Set(["goals", "goals_7m"]);
@@ -121,11 +122,15 @@ export async function notifyWebPushForLiveEvents(
     const milestone = milestoneFromEvent(event);
     const title = milestone === "halftime" ? "Mi-temps" : milestone === "fulltime" ? "Fin du match" : "Starligue Fantasy";
     const goalRank = GOAL_ICONS.has(event.icon) && event.playerId ? goalTallyBySequence.get(event.sequence) : undefined;
+    // Score + minute (même convention d'affichage que EventsTimeline sur
+    // /matches/[id] : minute écoulée dans la période en cours, pas cumulée sur le
+    // match) sur chaque notif d'événement — demande explicite de l'utilisateur,
+    // manquait jusqu'ici (seuls les moments de match mi-temps/fin l'avaient).
     const body = milestone
       ? `${homeShortName} ${event.homeScore} - ${event.awayScore} ${awayShortName}`
       : goalRank
-        ? `${event.text} — ${frenchOrdinal(goalRank)} but du match`
-        : event.text;
+        ? `${event.text} · ${event.homeScore}-${event.awayScore} · ${event.minute}' — ${frenchOrdinal(goalRank)} but du match`
+        : `${event.text} · ${event.homeScore}-${event.awayScore} · ${event.minute}'`;
 
     for (const user of candidates) {
       if (user.liveNotificationsOnlyMyPlayers) {
