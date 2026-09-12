@@ -2882,3 +2882,65 @@ bouton mais reste cliquable normalement (comportement inchangé).
 Aucune migration Prisma. Déploiement direct (le nouveau champ `actions` du
 payload Web Push est ignoré par les abonnements déjà enregistrés avant ce
 déploiement — rien à backfiller, le prochain envoi l'inclut automatiquement).
+
+## 28. Home : visibilité du direct + leaders stats personnalisables
+
+Ajouté le 12/09, suite à un retour direct sur la home publique.
+
+### 28.1 Bandeau "Matchs en direct"
+
+`LiveMatchesBanner` (`src/components/starligue/LiveMatchesBanner.tsx`) : bandeau
+pleine largeur tout en haut de la home (avant même le hero), point rouge
+pulsant, dès qu'au moins un match Starligue est `LIVE` (`getTodayMatches`).
+Distinct de deux affichages déjà existants qui ne suffisaient pas à eux
+seuls : le carrousel "Jour de match" (`TodayMatchCarousel`, en haut à droite,
+tourne entre tous les matchs du jour donc peut afficher un match pas encore
+commencé) et la bande "journée en cours" (`showCurrentGwBand`, couvre toute la
+fenêtre deadline→résultats, pas seulement les minutes où ça joue vraiment).
+Seul le championnat a un vrai suivi live (Warm Up/Coupe de France/EHF ne
+passent jamais à `LIVE`), donc `m.id` pointe toujours vers un vrai `Match` —
+lien direct vers `/matches/[id]#match-events`.
+
+### 28.2 Leaders stats : composant personnalisable du dashboard, pas un doublon figé
+
+Remplace `StatLeadersSection`/`getWeeklyStatLeaders` (4 catégories fixes,
+top 3, sans détail par joueur) par `StatLeadersPanel` — **le même composant
+que le dashboard** (`src/components/dashboard/StatLeadersPanel.tsx` +
+`StatLeaderCard.tsx`), déjà :
+- personnalisable ("+ Ajouter une stat", n'importe quelle ligne de
+  `STAT_LINES`/`COMPUTED_STAT_LINES`, persisté en `localStorage` — partagé
+  avec le dashboard, `context="live"` = même clé de stockage, cohérent
+  puisque c'est le même concept sur la même saison) ;
+- mise en page "leader mis en avant, les 4 autres en plus petit" (déjà le
+  design de `StatLeaderCard`, rien à refaire) ;
+- déjà actualisé en direct pour les buteurs (§26) — il manquait juste
+  l'indicateur visuel : `GetStatLeadersResult.hasLiveUpdates` ajouté (même
+  principe que `get-weekly-leaders.ts`), badge "Live" affiché dans
+  `StatLeaderCard` à côté du nom de la ligne.
+
+Repositionné en même temps : le trio équipe type/meilleures perfs/leaders
+stats est remonté en **premier** dans la colonne droite de la home (avant les
+strips "prochains matchs"/Warm Up/Coupe de France/EHF), il restait tout en
+bas et n'était jamais vu sans scroller.
+
+### 28.3 Delta de points fantasy par but marqué — non implémenté, limitation de données
+
+Piste explorée à la demande de l'utilisateur : afficher un delta de points
+fantasy à chaque but marqué en direct ("But de X : +N points"), sur le
+principe que `computePlayerPoints()` (`src/lib/scoring/engine.ts`,
+§2.3, `pointsBruts = (note − 5) × 4`) convertit déjà une note LNH en points.
+
+**Pas réalisable avec les données actuelles** : la note LNH n'est PAS un
+score qui s'incrémente en direct à chaque action — c'est une note technique
+unique, décernée par la LNH pour l'ensemble du match, publiée seulement après
+la rencontre (`PlayerMatchStat.lnhRating`, rempli par `sync-ratings` post-match,
+jamais pendant). Le feed live (`MatchLiveEvent`) donne les buts/exclusions/etc.
+event par event, mais aucune note ne "change" pendant le match au sens propre
+— il n'y a donc pas de delta réel à calculer avant la fin de la rencontre.
+Afficher un chiffre "+N points" par but serait forcément une estimation
+inventée (pas la vraie formule appliquée à CE joueur), risquant d'induire les
+managers en erreur sur un vrai calcul de points — pas fait pour cette raison.
+
+Ce qui existe déjà et reste la référence légitime : `StatLeaderCard` avec
+`statKey="fantasyPoints"` (points fantasy réels, calculés dès que la note du
+match est publiée — pas pendant, mais dès que disponible).

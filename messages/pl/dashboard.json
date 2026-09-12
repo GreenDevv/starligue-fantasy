@@ -76,6 +76,7 @@
     "counter": "Symu K{current}/{total}"
   },
   "statLeaderCard": {
+    "live": "Na żywo",
     "removeAriaLabel": "Usuń {label} z panelu",
     "ownedByTeams": "W drużynach: {teams}",
     "noData": "Brak danych na razie."
@@ -205,5 +206,8 @@
     "championship": "Daikin Starligue",
     "finished": "Zakończony",
     "live": "Na żywo · {minute}’"
+  },
+  "liveMatchesBanner": {
+    "title": "Mecze na żywo"
   }
 }

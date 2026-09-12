@@ -35,6 +35,9 @@ export interface GetStatLeadersResult {
   scope: "season" | "gameweek" | "average";
   gameweekNumber: number | null;
   leaders: StatLeaderRow[];
+  // true si au moins un but d'un match actuellement LIVE a été mergé (voir
+  // mergeLiveGoals) — sert à afficher un badge "Live" côté client.
+  hasLiveUpdates: boolean;
 }
 
 export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetStatLeadersResult> {
@@ -56,7 +59,7 @@ export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetS
           select: { id: true, number: true },
         });
     if (!target) {
-      return { statKey, scope, gameweekNumber: null, leaders: [] };
+      return { statKey, scope, gameweekNumber: null, leaders: [], hasLiveUpdates: false };
     }
     gameweekId = target.id;
     gameweekNumber = target.number;
@@ -192,6 +195,7 @@ export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetS
   // actuellement LIVE (MatchLiveEvent, mis à jour à chaque poll du cron sync-live).
   // Non appliqué à scope=average : mélanger un total en direct à une moyenne par
   // match joué n'aurait pas de sens tant que le match n'est pas comptabilisé comme joué.
+  let hasLiveUpdates = false;
   if (statKey === "goalsTotal" && (scope === "season" || scope === "gameweek")) {
     const liveGoalEvents = await prisma.matchLiveEvent.groupBy({
       by: ["playerId"],
@@ -201,6 +205,7 @@ export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetS
     const liveGoalsByPlayer = new Map(
       liveGoalEvents.filter((e): e is typeof e & { playerId: string } => e.playerId !== null).map((e) => [e.playerId, e._count._all])
     );
+    if (liveGoalsByPlayer.size > 0) hasLiveUpdates = true;
     ranked = mergeLiveGoals(ranked, liveGoalsByPlayer);
   }
 
@@ -234,5 +239,5 @@ export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetS
     });
   }
 
-  return { statKey, scope, gameweekNumber, leaders };
+  return { statKey, scope, gameweekNumber, leaders, hasLiveUpdates };
 }

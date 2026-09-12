@@ -76,6 +76,7 @@
     "counter": "Sim ST{current}/{total}"
   },
   "statLeaderCard": {
+    "live": "Live",
     "removeAriaLabel": "{label} vom Dashboard entfernen",
     "ownedByTeams": "In {teams}",
     "noData": "Bisher keine Daten."
@@ -205,5 +206,8 @@
     "championship": "Daikin Starligue",
     "finished": "Beendet",
     "live": "Live · {minute}’"
+  },
+  "liveMatchesBanner": {
+    "title": "Live-Spiele"
   }
 }
