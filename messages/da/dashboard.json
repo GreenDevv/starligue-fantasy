@@ -152,7 +152,8 @@
     "subtitle": "Bedste præstationer · runde {number}"
   },
   "statLeadersSection": {
-    "subtitle": "Topscorere · runde {number}"
+    "subtitle": "Topscorere · runde {number}",
+    "live": "Live"
   },
   "errors": {
     "SEASON_COMPLETE": "Alle runder i den simulerede sæson er allerede spillet",

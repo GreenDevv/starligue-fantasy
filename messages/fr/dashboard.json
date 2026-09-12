@@ -152,7 +152,8 @@
     "subtitle": "Meilleures performances · journée {number}"
   },
   "statLeadersSection": {
-    "subtitle": "Leaders · journée {number}"
+    "subtitle": "Leaders · journée {number}",
+    "live": "Live"
   },
   "errors": {
     "SEASON_COMPLETE": "Toutes les journées de la saison simulée ont déjà été jouées",

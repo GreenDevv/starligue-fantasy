@@ -152,7 +152,8 @@
     "subtitle": "Mejores rendimientos · jornada {number}"
   },
   "statLeadersSection": {
-    "subtitle": "Líderes · jornada {number}"
+    "subtitle": "Líderes · jornada {number}",
+    "live": "En vivo"
   },
   "errors": {
     "SEASON_COMPLETE": "Ya se han jugado todas las jornadas de la temporada simulada",

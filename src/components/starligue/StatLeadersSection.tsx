@@ -3,7 +3,7 @@ import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import type { WeeklyLeadersResult } from "@/lib/stats/get-weekly-leaders";
 
-export async function StatLeadersSection({ gameweekNumber, categories }: WeeklyLeadersResult) {
+export async function StatLeadersSection({ gameweekNumber, categories, hasLiveUpdates }: WeeklyLeadersResult) {
   const withLeaders = categories.filter((c) => c.leaders.length > 0);
   if (withLeaders.length === 0) return null;
 
@@ -11,9 +11,16 @@ export async function StatLeadersSection({ gameweekNumber, categories }: WeeklyL
 
   return (
     <div className="pixel-corners border border-border bg-surface p-3">
-      <p className="mb-3 text-[10px] uppercase tracking-widest text-text-muted">
-        {t("statLeadersSection.subtitle", { number: gameweekNumber ?? 0 })}
-      </p>
+      <div className="mb-3 flex items-center gap-1.5">
+        <p className="text-[10px] uppercase tracking-widest text-text-muted">
+          {t("statLeadersSection.subtitle", { number: gameweekNumber ?? 0 })}
+        </p>
+        {hasLiveUpdates && (
+          <span className="pixel-corners-sm bg-points-neg/20 px-1.5 py-0.5 text-[9px] font-bold uppercase text-points-neg shadow-glow-red">
+            {t("statLeadersSection.live")}
+          </span>
+        )}
+      </div>
       <div className="flex flex-col gap-3">
         {withLeaders.map((cat) => (
           <div key={cat.key}>

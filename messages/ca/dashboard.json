@@ -152,7 +152,8 @@
     "subtitle": "Millors rendiments · jornada {number}"
   },
   "statLeadersSection": {
-    "subtitle": "Líders · jornada {number}"
+    "subtitle": "Líders · jornada {number}",
+    "live": "En directe"
   },
   "errors": {
     "SEASON_COMPLETE": "Ja s'han jugat totes les jornades de la temporada simulada",

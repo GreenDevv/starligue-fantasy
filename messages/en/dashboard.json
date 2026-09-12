@@ -152,7 +152,8 @@
     "subtitle": "Best performances · matchday {number}"
   },
   "statLeadersSection": {
-    "subtitle": "Leaders · matchday {number}"
+    "subtitle": "Leaders · matchday {number}",
+    "live": "Live"
   },
   "errors": {
     "SEASON_COMPLETE": "All matchdays of the simulated season have already been played",

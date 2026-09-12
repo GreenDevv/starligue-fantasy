@@ -152,7 +152,8 @@
     "subtitle": "Melhores desempenhos · jornada {number}"
   },
   "statLeadersSection": {
-    "subtitle": "Líderes · jornada {number}"
+    "subtitle": "Líderes · jornada {number}",
+    "live": "Ao vivo"
   },
   "errors": {
     "SEASON_COMPLETE": "Todas as jornadas da época simulada já foram jogadas",

@@ -3,9 +3,15 @@
 // (average = season ÷ nombre de matchs joués). Extrait de GET /api/stats/leaders pour
 // être réutilisé aussi par la génération d'image des posts Instagram automatiques
 // (src/app/api/og/stat-leaders/route.tsx) — pas de fetch HTTP interne, appel direct.
+//
+// statKey="goalsTotal" (season/gameweek) : complété en direct avec les buts déjà
+// marqués dans les matchs LIVE (mergeLiveGoals, ARCHITECTURE.md §26) — pas possible
+// pour "assists", le feed live lnh.fr ne remonte que le buteur, jamais la passe
+// décisive.
 import type { Position } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { computePlayerPoints, parseScoringConfig } from "@/lib/scoring/engine";
+import { mergeLiveGoals } from "./live-goal-leaders";
 
 export interface StatLeaderRow {
   playerId: string;
@@ -102,9 +108,7 @@ export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetS
         const value = scope === "average" && matches > 0 ? Math.round((sum / matches) * 10) / 10 : Math.round(sum * 10) / 10;
         return { playerId, value };
       })
-      .filter((r) => r.value > 0)
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 5);
+      .filter((r) => r.value > 0);
   } else if (statKey === "shotPercentage" && (scope === "season" || scope === "average")) {
     // Sommer des pourcentages par match n'a pas de sens (favoriserait les joueurs
     // ayant joué le plus de matchs) — la vraie stat est sum(goalsTotal)/sum(shotsTotal),
@@ -120,9 +124,7 @@ export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetS
       .map((t) => ({
         playerId: t.playerId,
         value: Math.round((100 * (t._sum.goalsTotal ?? 0)) / t._sum.shotsTotal! * 100) / 100,
-      }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 5);
+      }));
   } else if (statKey === "savePercentage" && (scope === "season" || scope === "average")) {
     // Même piège que shotPercentage ci-dessus, version gardiens : sum(saves)/sum(shotsFaced),
     // pas une moyenne de pourcentages par match.
@@ -136,9 +138,7 @@ export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetS
       .map((t) => ({
         playerId: t.playerId,
         value: Math.round((100 * (t._sum.saves ?? 0)) / t._sum.shotsFaced! * 100) / 100,
-      }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 5);
+      }));
   } else {
     // statKey validé par l'enum Zod en frontière d'appel (STAT_LINE_KEYS) — groupBy
     // dynamique, le typage généré par Prisma ne permet pas d'indexer _sum par une
@@ -182,10 +182,29 @@ export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetS
         }
         return { playerId: g.playerId, value: sum };
       })
-      .filter((r): r is { playerId: string; value: number } => r.value !== null && r.value > 0)
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 5);
+      .filter((r): r is { playerId: string; value: number } => r.value !== null && r.value > 0);
   }
+
+  // Buteurs uniquement (assists n'a pas d'équivalent dans le feed live — la LNH ne
+  // remonte que le buteur, jamais la passe décisive, voir resolve-event-player.ts) :
+  // complète le classement post-match (PlayerMatchStat, qui n'existe qu'une fois le
+  // boxscore synchronisé après le match) avec les buts déjà marqués dans les matchs
+  // actuellement LIVE (MatchLiveEvent, mis à jour à chaque poll du cron sync-live).
+  // Non appliqué à scope=average : mélanger un total en direct à une moyenne par
+  // match joué n'aurait pas de sens tant que le match n'est pas comptabilisé comme joué.
+  if (statKey === "goalsTotal" && (scope === "season" || scope === "gameweek")) {
+    const liveGoalEvents = await prisma.matchLiveEvent.groupBy({
+      by: ["playerId"],
+      where: { playerId: { not: null }, icon: { in: ["goals", "goals_7m"] }, match: { status: "LIVE", ...matchWhere } },
+      _count: { _all: true },
+    });
+    const liveGoalsByPlayer = new Map(
+      liveGoalEvents.filter((e): e is typeof e & { playerId: string } => e.playerId !== null).map((e) => [e.playerId, e._count._all])
+    );
+    ranked = mergeLiveGoals(ranked, liveGoalsByPlayer);
+  }
+
+  ranked = ranked.sort((a, b) => b.value - a.value).slice(0, 5);
 
   const players = await prisma.player.findMany({
     where: { id: { in: ranked.map((r) => r.playerId) } },

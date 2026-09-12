@@ -152,7 +152,8 @@
     "subtitle": "Beste Leistungen · Spieltag {number}"
   },
   "statLeadersSection": {
-    "subtitle": "Spitzenreiter · Spieltag {number}"
+    "subtitle": "Spitzenreiter · Spieltag {number}",
+    "live": "Live"
   },
   "errors": {
     "SEASON_COMPLETE": "Alle Spieltage der simulierten Saison wurden bereits gespielt",

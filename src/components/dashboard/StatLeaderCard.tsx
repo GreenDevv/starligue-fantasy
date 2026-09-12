@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { Position } from "@/lib/squad/validation";
@@ -83,23 +83,49 @@ export function StatLeaderCard({
   const [loading, setLoading] = useState(true);
   const [myTeams, setMyTeams] = useState<MyTeam[]>([]);
 
+  // "goalsTotal" (buteurs) est la seule ligne alimentable en direct : le feed live
+  // lnh.fr ne donne que le buteur, jamais la passe décisive (voir get-stat-leaders.ts)
+  // — inutile de reponder les autres lignes, elles ne bougent qu'après le match.
+  // scope=average exclu (moyenne par match joué, pas de sens avant que le match ne
+  // soit comptabilisé comme joué — voir la même exclusion côté serveur).
+  const isLiveEligible = statKey === "goalsTotal" && scope !== "average";
+
+  const fetchLeaders = useCallback(
+    (isCancelled: () => boolean, opts: { showLoading: boolean }) => {
+      if (opts.showLoading) setLoading(true);
+      fetch(`/api/stats/leaders?statKey=${statKey}&scope=${scope}&seasonId=${seasonId}`)
+        .then((r) => r.json())
+        .then((json: { data?: { leaders: LeaderApiRow[] } }) => {
+          if (isCancelled()) return;
+          setLeaders(json.data?.leaders ?? []);
+          if (opts.showLoading) setLoading(false);
+        })
+        .catch(() => {
+          if (!isCancelled() && opts.showLoading) setLoading(false);
+        });
+    },
+    [statKey, scope, seasonId]
+  );
+
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    fetch(`/api/stats/leaders?statKey=${statKey}&scope=${scope}&seasonId=${seasonId}`)
-      .then((r) => r.json())
-      .then((json: { data?: { leaders: LeaderApiRow[] } }) => {
-        if (cancelled) return;
-        setLeaders(json.data?.leaders ?? []);
-        setLoading(false);
-      })
-      .catch(() => {
-        if (!cancelled) setLoading(false);
-      });
+    const isCancelled = () => cancelled;
+    fetchLeaders(isCancelled, { showLoading: true });
+
+    if (!isLiveEligible) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const id = window.setInterval(() => {
+      if (!document.hidden) fetchLeaders(isCancelled, { showLoading: false });
+    }, 30_000);
     return () => {
       cancelled = true;
+      window.clearInterval(id);
     };
-  }, [statKey, scope, seasonId]);
+  }, [fetchLeaders, isLiveEligible]);
 
   // Une seule fois (indépendant de statKey/scope) : mes équipes + leurs effectifs,
   // pour surligner "je le possède déjà" sur chaque ligne. Non bloquant pour

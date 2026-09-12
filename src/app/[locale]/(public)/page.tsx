@@ -9,7 +9,6 @@ import { getCurrentGameweekPerformances } from "@/lib/matches/current-gameweek-p
 import { getNewsFeed } from "@/lib/news/get-feed";
 import { getTeamOfWeekCard, getPerformancesCard } from "@/lib/news/get-weekly-cards";
 import { getWeeklyStatLeaders } from "@/lib/stats/get-weekly-leaders";
-import { getLiveStatLeaders } from "@/lib/stats/get-live-leaders";
 import {
   getWarmupMatches,
   getCoupeDeFranceMatches,
@@ -31,7 +30,6 @@ import { NewsFeed } from "@/components/starligue/NewsFeed";
 import { StarligueBestXICard } from "@/components/starligue/StarligueBestXICard";
 import { StarliguePerformancesCard } from "@/components/starligue/StarliguePerformancesCard";
 import { StatLeadersSection } from "@/components/starligue/StatLeadersSection";
-import { LiveStatLeadersSection } from "@/components/starligue/LiveStatLeadersSection";
 import { ComingSoon } from "@/components/ComingSoon";
 import { IntroSplash } from "@/components/intro/IntroSplash";
 import type { NewsCategory } from "@prisma/client";
@@ -105,7 +103,6 @@ export default async function HomePage({
     teamOfWeek,
     performances,
     leaders,
-    liveLeaders,
     warmupMatches,
     coupeDeFranceMatches,
     championsLeagueMatches,
@@ -123,7 +120,6 @@ export default async function HomePage({
     getTeamOfWeekCard(season.id),
     getPerformancesCard(season.id),
     getWeeklyStatLeaders(season.id),
-    getLiveStatLeaders(season.id),
     getWarmupMatches(season.id),
     getCoupeDeFranceMatches(season.id),
     getChampionsLeagueMatches(season.id),
@@ -343,8 +339,11 @@ export default async function HomePage({
           {performances && (
             <StarliguePerformancesCard gameweekNumber={performances.gameweekNumber} entries={performances.entries} />
           )}
-          <LiveStatLeadersSection categories={liveLeaders} />
-          <StatLeadersSection gameweekNumber={leaders.gameweekNumber} categories={leaders.categories} />
+          <StatLeadersSection
+            gameweekNumber={leaders.gameweekNumber}
+            categories={leaders.categories}
+            hasLiveUpdates={leaders.hasLiveUpdates}
+          />
         </div>
 
         <div className="flex flex-col gap-4 lg:col-start-1 lg:row-start-1">

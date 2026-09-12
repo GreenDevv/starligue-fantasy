@@ -6,6 +6,7 @@
 // donc géré ici en propre plutôt que d'être ajouté à un registre lié au scoring.
 import { prisma } from "@/lib/db";
 import type { Position } from "@/lib/squad/validation";
+import { mergeLiveGoals } from "./live-goal-leaders";
 
 export interface WeeklyLeaderEntry {
   playerId: string;
@@ -26,6 +27,10 @@ export interface WeeklyLeaderCategory {
 export interface WeeklyLeadersResult {
   gameweekNumber: number | null;
   categories: WeeklyLeaderCategory[];
+  // true si au moins un but d'un match actuellement LIVE a été mergé dans "Buteurs"
+  // (voir mergeLiveGoals) — sert à afficher un badge "Live" plutôt qu'une section à
+  // part (ARCHITECTURE.md §26 : un seul composant, pas un doublon "en direct").
+  hasLiveUpdates: boolean;
 }
 
 const CATEGORIES: { key: WeeklyLeaderCategory["key"]; label: string }[] = [
@@ -43,10 +48,11 @@ export async function getWeeklyStatLeaders(seasonId: string): Promise<WeeklyLead
     orderBy: { number: "desc" },
     select: { id: true, number: true },
   });
-  if (!gameweek) return { gameweekNumber: null, categories: [] };
+  if (!gameweek) return { gameweekNumber: null, categories: [], hasLiveUpdates: false };
 
   const matchWhere = { gameweekId: gameweek.id };
 
+  let hasLiveUpdates = false;
   const categories: WeeklyLeaderCategory[] = [];
   for (const { key, label } of CATEGORIES) {
     // Cast en `unknown` puis en forme minimale : même contournement que
@@ -57,11 +63,26 @@ export async function getWeeklyStatLeaders(seasonId: string): Promise<WeeklyLead
       groupByArgs
     )) as Array<{ playerId: string; _sum: Record<string, number | null> }>;
 
-    const ranked: { playerId: string; value: number }[] = grouped
+    let ranked: { playerId: string; value: number }[] = grouped
       .map((g) => ({ playerId: g.playerId, value: g._sum[key] ?? null }))
-      .filter((r): r is { playerId: string; value: number } => r.value !== null && r.value > 0)
-      .sort((a, b) => b.value - a.value)
-      .slice(0, LIMIT);
+      .filter((r): r is { playerId: string; value: number } => r.value !== null && r.value > 0);
+
+    // Buteurs uniquement (voir get-stat-leaders.ts) : le feed live lnh.fr ne remonte
+    // que le buteur, jamais la passe décisive, donc pas d'équivalent pour "assists".
+    if (key === "goalsTotal") {
+      const liveGoalEvents = await prisma.matchLiveEvent.groupBy({
+        by: ["playerId"],
+        where: { playerId: { not: null }, icon: { in: ["goals", "goals_7m"] }, match: { status: "LIVE", ...matchWhere } },
+        _count: { _all: true },
+      });
+      const liveGoalsByPlayer = new Map(
+        liveGoalEvents.filter((e): e is typeof e & { playerId: string } => e.playerId !== null).map((e) => [e.playerId, e._count._all])
+      );
+      if (liveGoalsByPlayer.size > 0) hasLiveUpdates = true;
+      ranked = mergeLiveGoals(ranked, liveGoalsByPlayer);
+    }
+
+    ranked = ranked.sort((a, b) => b.value - a.value).slice(0, LIMIT);
 
     if (ranked.length === 0) {
       categories.push({ key, label, leaders: [] });
@@ -98,5 +119,5 @@ export async function getWeeklyStatLeaders(seasonId: string): Promise<WeeklyLead
     categories.push({ key, label, leaders });
   }
 
-  return { gameweekNumber: gameweek.number, categories };
+  return { gameweekNumber: gameweek.number, categories, hasLiveUpdates };
 }

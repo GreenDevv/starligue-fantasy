@@ -152,7 +152,8 @@
     "subtitle": "Najlepsze wyczyny · kolejka {number}"
   },
   "statLeadersSection": {
-    "subtitle": "Liderzy · kolejka {number}"
+    "subtitle": "Liderzy · kolejka {number}",
+    "live": "Na żywo"
   },
   "errors": {
     "SEASON_COMPLETE": "Wszystkie kolejki symulowanego sezonu zostały już rozegrane",
