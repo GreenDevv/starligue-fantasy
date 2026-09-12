@@ -14,6 +14,7 @@ import { SIMULATION_SEASON_LABEL } from "@/lib/simulation/constants";
 import { homeClubInputSchema, resolveHomeClubId, HomeClubError } from "@/lib/clubs/home-club-input";
 import { ensureHandballClubLogo } from "@/lib/clubs/handball-club-logo";
 import { notifyAdminsNewHomeClub } from "@/lib/notifications/notify-new-home-club";
+import { getActiveClubs } from "@/lib/clubs/get-active-clubs";
 
 const homeClubSelect = {
   select: { id: true, name: true, city: true, country: true, verified: true },
@@ -37,18 +38,20 @@ export async function GET() {
       liveNotificationsEnabled: true,
       liveNotificationsOnlyMyPlayers: true,
       liveNotificationsClubIds: true,
+      liveNotificationsPlayerId: true,
+      liveNotificationsPlayer: { select: { id: true, firstName: true, lastName: true, club: { select: { shortName: true } } } },
     },
   });
   if (!user) {
     return NextResponse.json({ error: { code: "NOT_FOUND" } }, { status: 404 });
   }
 
-  // Les 16 clubs Starligue — pour le sélecteur "clubs suivis" des réglages
-  // notifications live, évite un aller-retour séparé depuis la page compte.
-  const allClubs = await prisma.club.findMany({
-    select: { id: true, name: true, shortName: true, logoUrl: true },
-    orderBy: { name: "asc" },
-  });
+  // Clubs "réellement en Starligue cette saison" (pas la table Club entière, qui
+  // garde aussi d'anciens clubs relégués — voir get-active-clubs.ts) pour le
+  // sélecteur "clubs suivis" des réglages notifications live, évite un
+  // aller-retour séparé depuis la page compte.
+  const season = await prisma.season.findFirst({ where: { isActive: true }, select: { id: true } });
+  const allClubs = season ? await getActiveClubs(season.id) : [];
 
   return NextResponse.json({ data: { ...user, allClubs } });
 }
@@ -65,6 +68,10 @@ const updateSchema = z.object({
   liveNotificationsEnabled: z.boolean().optional(),
   liveNotificationsOnlyMyPlayers: z.boolean().optional(),
   liveNotificationsClubIds: z.array(z.string().min(1)).optional(),
+  // "" = retirer le joueur suivi, undefined = ne pas toucher au champ — §30,
+  // mutuellement exclusif avec onlyMyPlayers côté UI (pas imposé côté API, au cas
+  // où : le premier prime dans notify-live-events.ts si jamais les deux sont vrais).
+  liveNotificationsPlayerId: z.string().min(1).nullable().optional(),
 });
 
 export async function PUT(req: Request) {
@@ -82,8 +89,15 @@ export async function PUT(req: Request) {
     );
   }
 
-  const { name, favoritePlayerId, homeClub, liveNotificationsEnabled, liveNotificationsOnlyMyPlayers, liveNotificationsClubIds } =
-    parsed.data;
+  const {
+    name,
+    favoritePlayerId,
+    homeClub,
+    liveNotificationsEnabled,
+    liveNotificationsOnlyMyPlayers,
+    liveNotificationsClubIds,
+    liveNotificationsPlayerId,
+  } = parsed.data;
 
   let homeClubId: string | null | undefined;
   let createdHomeClubId: string | null = null;
@@ -123,6 +137,13 @@ export async function PUT(req: Request) {
     }
   }
 
+  if (liveNotificationsPlayerId) {
+    const player = await prisma.player.findUnique({ where: { id: liveNotificationsPlayerId }, select: { id: true } });
+    if (!player) {
+      return NextResponse.json({ error: { code: "INVALID_PLAYER", message: "Joueur introuvable" } }, { status: 422 });
+    }
+  }
+
   const user = await prisma.user.update({
     where: { id: session.user.id },
     data: {
@@ -132,6 +153,7 @@ export async function PUT(req: Request) {
       ...(liveNotificationsEnabled !== undefined ? { liveNotificationsEnabled } : {}),
       ...(liveNotificationsOnlyMyPlayers !== undefined ? { liveNotificationsOnlyMyPlayers } : {}),
       ...(liveNotificationsClubIds !== undefined ? { liveNotificationsClubIds } : {}),
+      ...(liveNotificationsPlayerId !== undefined ? { liveNotificationsPlayerId: liveNotificationsPlayerId || null } : {}),
     },
     select: {
       name: true,
@@ -140,6 +162,8 @@ export async function PUT(req: Request) {
       favoritePlayer: { select: { id: true, firstName: true, lastName: true, club: { select: { shortName: true } } } },
       homeClubId: true,
       homeClub: homeClubSelect,
+      liveNotificationsPlayerId: true,
+      liveNotificationsPlayer: { select: { id: true, firstName: true, lastName: true, club: { select: { shortName: true } } } },
       liveNotificationsEnabled: true,
       liveNotificationsOnlyMyPlayers: true,
       liveNotificationsClubIds: true,

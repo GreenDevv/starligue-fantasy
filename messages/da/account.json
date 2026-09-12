@@ -8,7 +8,11 @@
   "liveNotifications": {
     "title": "Live-notifikationer",
     "enabledLabel": "Modtag live-notifikationer",
-    "onlyMyPlayersLabel": "Kun mine spillere",
+    "scopeLabel": "Hvem skal følges?",
+    "scopeAll": "Alle begivenheder",
+    "scopeMyPlayers": "Kun mine spillere",
+    "scopeSinglePlayer": "Kun én spiller",
+    "singlePlayerHint": "Du får kun begivenheder om denne spiller.",
     "clubsLabel": "Fulgte klubber (ingen = alle)",
     "clubsHint": "Hvis du vælger klubber, får du kun begivenheder fra deres kampe.",
     "webPushEnable": "Aktivér på denne enhed",

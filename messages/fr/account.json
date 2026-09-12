@@ -8,7 +8,11 @@
   "liveNotifications": {
     "title": "Notifications live",
     "enabledLabel": "Recevoir les notifications live",
-    "onlyMyPlayersLabel": "Seulement mes joueurs",
+    "scopeLabel": "Qui suivre ?",
+    "scopeAll": "Tous les événements",
+    "scopeMyPlayers": "Seulement mes joueurs",
+    "scopeSinglePlayer": "Seulement un joueur",
+    "singlePlayerHint": "Tu ne recevras que les événements concernant ce joueur.",
     "clubsLabel": "Clubs suivis (aucun = tous)",
     "clubsHint": "Si tu sélectionnes des clubs, tu ne recevras que les événements de leurs matchs.",
     "webPushEnable": "Activer sur cet appareil",

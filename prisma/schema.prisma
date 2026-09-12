@@ -118,10 +118,15 @@ model User {
   // visiteur déconnecté voie un instant les events avant filtrage). clubIds vide =
   // aucun filtre club (tous les matchs) ; onlyMyPlayers restreint en plus aux
   // événements dont le joueur résolu est dans l'effectif de l'utilisateur (toutes
-  // ligues confondues).
+  // ligues confondues). playerId (§30, mutuellement exclusif avec onlyMyPlayers
+  // côté UI) restreint à UN seul joueur choisi librement, pas forcément dans
+  // l'effectif de l'utilisateur — clubIds ignoré dans ce mode (dérivé du club du
+  // joueur suivi).
   liveNotificationsEnabled       Boolean       @default(true)
   liveNotificationsOnlyMyPlayers Boolean       @default(false)
   liveNotificationsClubIds       String[]      @default([])
+  liveNotificationsPlayerId      String?
+  liveNotificationsPlayer        Player?       @relation("LiveNotificationsPlayer", fields: [liveNotificationsPlayerId], references: [id])
   createdAt           DateTime             @default(now())
   fantasyTeams        FantasyTeam[]
   leagueMembers       LeagueMember[]
@@ -387,6 +392,7 @@ model Player {
   simulationTradeOffers  SimulationTradeProposalPlayer[]
   newsItems              NewsItem[]
   favoritedBy            User[]                          @relation("FavoritePlayer")
+  liveNotificationsFor   User[]                          @relation("LiveNotificationsPlayer")
   auctionBids            AuctionBid[]
   liveEvents             MatchLiveEvent[]
 

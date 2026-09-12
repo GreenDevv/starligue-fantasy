@@ -2999,3 +2999,53 @@ ont un support navigateur/OS très inégal, en dehors de notre contrôle :
 ### 29.4 Rollout
 
 Aucune migration Prisma. Déploiement direct.
+
+## 30. Réglages de notifications live : un seul joueur suivi + clubs de la saison + UX
+
+Ajouté le 12/09, retour direct : « autorise à n'avoir les notifications que d'un
+seul joueur avec une fonction de recherche, ne mets pas les clubs qui ne sont
+pas en Starligue cette saison, rends ça un peu plus user friendly ».
+
+### 30.1 Un seul joueur suivi (`User.liveNotificationsPlayerId`)
+
+Nouveau champ, indépendant de `liveNotificationsOnlyMyPlayers` (effectif
+fantasy) — un joueur choisi librement, pas forcément dans son équipe (ex:
+suivre un adversaire, une ancienne idole…). `PlayerSearch` (déjà utilisé pour
+le joueur préféré à l'inscription/`/account`) réutilisé tel quel : même liste
+de joueurs déjà chargée, pas de fetch supplémentaire.
+
+Mutuellement exclusif avec `onlyMyPlayers` **côté UI** (un radio "Qui suivre ?"
+à 3 options : tous les événements / seulement mes joueurs / seulement un
+joueur) mais pas imposé côté API par sécurité — `passesPlayerFilterForEvent`/
+`passesPlayerFilterForMatch` (`notify-live-events.ts`, fonctions pures testées)
+font primer le joueur unique si les deux étaient vrais. `liveNotificationsClubIds`
+ignoré en mode joueur unique (dérivé du club du joueur suivi directement dans
+la requête Prisma, `liveNotificationsPlayer: { clubId: { in: [...] } }`) — la
+sélection UI repart à vide plutôt que de laisser une valeur cachée agir en
+coulisses.
+
+Même filtrage appliqué de façon cohérente aux deux canaux : `notify-live-events.ts`
+(push) et `GET /api/live/events` (toasts en page) — repris du principe déjà en
+place pour `onlyMyPlayers`/`clubIds`.
+
+### 30.2 Clubs "cette saison" uniquement
+
+`GET /api/account` utilisait `prisma.club.findMany()` (toute la table `Club`,
+qui garde aussi d'anciens clubs relégués — partagée avec le Mode Simulation) au
+lieu de `getActiveClubs(seasonId)` (déjà utilisé pour la bande de logos de la
+home, filtre sur un effectif `Player` pour la saison active) — corrigé, même
+fonction réutilisée.
+
+### 30.3 UX
+
+Remplace deux cases à cocher indépendantes ("Recevoir…" + "Seulement mes
+joueurs") + une liste de clubs toujours visible même quand elle ne s'applique
+pas, par : un radio à 3 options clair, la recherche de joueur affichée
+seulement en mode "seulement un joueur", et la liste de clubs affichée
+seulement en mode "tous les événements" (repliée sinon, non pertinente dans
+les deux autres modes).
+
+### 30.4 Rollout
+
+1. `pnpm prisma migrate dev` (`User.liveNotificationsPlayerId`).
+2. Merge + déploiement Railway (migration prod).

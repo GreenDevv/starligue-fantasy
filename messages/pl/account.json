@@ -8,7 +8,11 @@
   "liveNotifications": {
     "title": "Powiadomienia na żywo",
     "enabledLabel": "Otrzymuj powiadomienia na żywo",
-    "onlyMyPlayersLabel": "Tylko moi zawodnicy",
+    "scopeLabel": "Kogo śledzić?",
+    "scopeAll": "Wszystkie wydarzenia",
+    "scopeMyPlayers": "Tylko moi zawodnicy",
+    "scopeSinglePlayer": "Tylko jeden zawodnik",
+    "singlePlayerHint": "Będziesz otrzymywać tylko wydarzenia dotyczące tego zawodnika.",
     "clubsLabel": "Obserwowane kluby (brak = wszystkie)",
     "clubsHint": "Jeśli wybierzesz kluby, otrzymasz tylko wydarzenia z ich meczów.",
     "webPushEnable": "Włącz na tym urządzeniu",
