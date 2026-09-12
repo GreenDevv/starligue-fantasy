@@ -360,7 +360,11 @@ export default async function HomePage({
             logoSize="sm"
             rankByClubId={rankByClubId}
           />
-          <StandingsSection gameweekNumber={standings.gameweekNumber} rows={standings.rows} />
+          <StandingsSection
+            gameweekNumber={standings.gameweekNumber}
+            rows={standings.rows}
+            liveMatchesCounted={standings.liveMatchesCounted}
+          />
         </div>
       </div>
 

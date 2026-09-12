@@ -92,6 +92,7 @@
   },
   "clubStandingsWidget": {
     "title": "Starligue-stilling",
+    "live": "Live",
     "beforeGameweek1": "Før R1",
     "afterGameweek": "Efter R{number}",
     "notAvailable": "Stillingen er ikke tilgængelig endnu.",
@@ -134,6 +135,7 @@
   },
   "standingsSection": {
     "title": "Stilling",
+    "live": "Live",
     "gameweek": "Runde {number}",
     "notAvailable": "Stillingen er ikke tilgængelig endnu.",
     "col": {

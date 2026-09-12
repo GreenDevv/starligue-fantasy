@@ -2,12 +2,19 @@ import { getTranslations } from "next-intl/server";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import type { ClubStandingsResult } from "@/lib/standings/get";
 
-export async function StandingsSection({ gameweekNumber, rows }: ClubStandingsResult) {
+export async function StandingsSection({ gameweekNumber, rows, liveMatchesCounted }: ClubStandingsResult) {
   const t = await getTranslations("dashboard");
   return (
     <div className="pixel-corners border border-border bg-surface p-3">
-      <div className="mb-2 flex items-center justify-between">
-        <p className="text-[10px] uppercase tracking-widest text-text-muted">{t("standingsSection.title")}</p>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5">
+          <p className="text-[10px] uppercase tracking-widest text-text-muted">{t("standingsSection.title")}</p>
+          {liveMatchesCounted > 0 && (
+            <span className="pixel-corners-sm bg-points-neg/20 px-1.5 py-0.5 text-[9px] font-bold uppercase text-points-neg shadow-glow-red">
+              {t("standingsSection.live")}
+            </span>
+          )}
+        </div>
         {gameweekNumber !== null && (
           <p className="text-[10px] uppercase tracking-widest text-text-muted">
             {t("standingsSection.gameweek", { number: gameweekNumber })}
