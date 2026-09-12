@@ -3128,6 +3128,17 @@ même rythme de colonnes que le strip de matchs "wide" juste au-dessus
 leader occupant une cellule deux fois plus large (`col-span-2`) plutôt qu'une
 ligne à part.
 
-### 32.3 Rollout
+### 32.3 v3 (13/09) : logo du club du joueur + résultat V/N/D
+
+- Logo du club du **joueur** (`entry.club`, déjà dans les données mais jamais
+  affiché — seul l'écusson de l'**adversaire**, dans la ligne de match,
+  l'était) : ajouté juste avant son nom (`PlayerNameLine`).
+- Résultat du match (`matchOutcomeForTeam()`, `src/lib/matches/match-outcome.ts`,
+  fonction pure testée) : badge V/N/D coloré (même convention que les colonnes
+  du classement, `ClubStandingsWidget`) après le score, une fois le match
+  **terminé** seulement — un score en cours peut encore changer, pas de
+  résultat définitif à afficher avant.
+
+### 32.4 Rollout
 
 Aucune migration Prisma. Déploiement direct.
