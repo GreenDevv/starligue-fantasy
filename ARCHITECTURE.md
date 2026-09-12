@@ -3050,14 +3050,30 @@ les deux autres modes).
 1. `pnpm prisma migrate dev` (`User.liveNotificationsPlayerId`).
 2. Merge + déploiement Railway (migration prod).
 
-## 31. Classement Starligue : badge match en retard (à côté du logo)
+## 31. Classement Starligue : couleur par palier de points + badge match en retard
 
-Ajouté le 12/09 sur `ClubStandingsWidget`/`StandingsSection`, revu le même jour
-suite à un retour direct : la v1 ajoutait aussi des bandes de fond alternées
-par groupe de points ("couleurs dans le classement") et plaçait le badge dans
-la colonne "J" elle-même — les deux non retenus (pas aimé visuellement pour le
-premier, désalignait la colonne numérique pour le second, un badge à côté du
-nombre cassant l'alignement à droite d'une ligne à l'autre).
+Ajouté le 12/09 sur `ClubStandingsWidget`/`StandingsSection`, itéré deux fois
+le même jour suite à des retours directs : v1 (bandes alternées gris clair/
+gris plus clair — jugé pas assez "couleur", et badge "-1" dans la colonne "J"
+elle-même — désalignait la colonne numérique) → v2 (retrait des couleurs,
+badge à côté du logo mais avant le nom) → v3 (ci-dessous, version retenue :
+vraies couleurs distinctes par palier de points, badge après le nom).
+
+### 31.1 Couleur distincte par palier de points
+
+`computePointsGroupIndices()` (`src/lib/standings/points-color-groups.ts`,
+fonction pure testée) parcourt le classement déjà trié et incrémente un
+compteur de groupe à chaque changement de total de points — deux clubs à
+égalité partagent le même index de groupe. `pointsGroupBgClass()` fait
+correspondre chaque index à une teinte de fond **nettement différente de la
+précédente** (pas juste plus claire/plus foncée), en tournant sur la palette
+de marque déjà existante (`tailwind.config.ts`, ARCHITECTURE.md §8 — teal,
+ambre, vert, rouge, puis un neutre) plutôt que d'introduire de nouvelles
+couleurs hors charte. Boucle au-delà de 5 paliers ; deux groupes non adjacents
+peuvent alors partager une teinte, sans ambiguïté puisque d'autres groupes
+différemment colorés les séparent.
+
+### 31.2 Badge "-1" : match pas encore joué cette journée
 
 Un classement général cumule les points de toute la saison — pendant qu'une
 journée est en cours (répartie sur plusieurs jours), les clubs qui ont déjà
@@ -3068,9 +3084,9 @@ d'un coup d'œil (il faudrait comparer la colonne "J" ligne par ligne).
 (`src/lib/standings/pending-match.ts`, fonction pure testée) : `true` si le
 club a joué strictement moins de matchs que le numéro de la journée
 référencée par le classement (`gameweekNumber`, celle du dernier snapshot —
-voir `get.ts`) — un badge rouge "-1" apparaît alors **à côté du logo du
-club**, jamais dans la colonne "J" (qui reste purement numérique, alignée à
-droite de façon identique sur toutes les lignes).
+voir `get.ts`) — un badge rouge "-1" apparaît alors **après le nom du club**
+(logo → nom → -1), jamais dans la colonne "J" (qui reste purement numérique,
+alignée à droite de façon identique sur toutes les lignes).
 
 ⚠️ N'indique PAS un retard de calendrier général (rattrapage, match reporté
 d'une journée passée) — seulement "n'a pas encore joué LA journée en cours au
