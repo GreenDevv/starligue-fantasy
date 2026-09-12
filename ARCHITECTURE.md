@@ -3118,6 +3118,16 @@ ailleurs, non concernée) :
 - Contexte du match : club adverse (logo), score, si le match est déjà
   terminé ou encore en cours (`Match.status`).
 
-### 32.2 Rollout
+### 32.2 v2 (13/09) : grille plutôt que liste, retour "espace perdu sur desktop"
+
+Les entrées 2-6 étaient des lignes pleine largeur (flex row) avec un grand
+vide entre le nom et la note dès que la bande "journée en cours" est large
+(desktop) — remplacées par une grille de mini-cartes autonomes (bordées),
+même rythme de colonnes que le strip de matchs "wide" juste au-dessus
+(`grid-cols-2 sm:grid-cols-3 md:grid-cols-4`, voir `MatchesStrip.tsx`), le
+leader occupant une cellule deux fois plus large (`col-span-2`) plutôt qu'une
+ligne à part.
+
+### 32.3 Rollout
 
 Aucune migration Prisma. Déploiement direct.
