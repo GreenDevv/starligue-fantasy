@@ -92,6 +92,7 @@
   },
   "clubStandingsWidget": {
     "title": "Classificació Starligue",
+    "live": "En directe",
     "beforeGameweek1": "Abans de J1",
     "afterGameweek": "Després de J{number}",
     "notAvailable": "Classificació encara no disponible.",
@@ -134,6 +135,7 @@
   },
   "standingsSection": {
     "title": "Classificació",
+    "live": "En directe",
     "gameweek": "Jornada {number}",
     "notAvailable": "Classificació encara no disponible.",
     "col": {
@@ -150,7 +152,8 @@
     "subtitle": "Millors rendiments · jornada {number}"
   },
   "statLeadersSection": {
-    "subtitle": "Líders · jornada {number}"
+    "subtitle": "Líders · jornada {number}",
+    "live": "En directe"
   },
   "errors": {
     "SEASON_COMPLETE": "Ja s'han jugat totes les jornades de la temporada simulada",

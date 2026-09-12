@@ -2666,15 +2666,124 @@ es, ca, de, pt, da, pl) : libellés du picker, étape d'inscription, section
 7. Option non retenue en v1 : prompt doux « D'où viens-tu ? » sur le dashboard à
    la prochaine visite (même pattern que la modal de récap de journée).
 
----
+## 24. Notifications de moments de match (rappel, coup d'envoi, mi-temps, fin)
 
-> **Numérotation** — deux autres fonctionnalités live sont en cours sur des
-> branches non encore fusionnées et revendiquent aussi le §24 depuis `main`
-> (notifications de moments de match, classement général en direct) : à
-> fusionner, un conflit sur ce fichier est attendu, se résout en renumérotant
-> à la suite (même situation déjà documentée avant le §23).
+Ajouté le 12/09, en complément des notifications Web Push d'événements live déjà
+en place (buts, exclusions… — §21 des PR #39/#41/#43, `notify-live-events.ts`).
+Quatre moments couverts, tous soumis aux mêmes préférences que le reste des
+notifs live (`User.liveNotificationsEnabled`/`liveNotificationsClubIds`, réglables
+sur `/account`) — aucune nouvelle case à cocher nécessaire, ces notifications
+héritent simplement du même filtrage :
 
-## 24. Buteurs/passeurs (saison + journée en cours) actualisés en direct
+1. **Rappel 5 min avant le coup d'envoi.**
+2. **Coup d'envoi.**
+3. **Mi-temps**, avec le score dans le corps de la notif (l'image bannière
+   écusson-vs-écusson existait déjà, voir `/api/og/live-event`).
+4. **Fin du match**, avec le score.
+
+### 24.1 Mi-temps / fin de match : enrichissement du pipeline existant
+
+Ces deux moments arrivent déjà comme `MatchLiveEvent` (icône `periods_finish`,
+texte lnh.fr "Fin de la première mi-temps" / "Fin du match") et étaient donc déjà
+notifiés — il manquait juste le score dans le corps du message. Dans
+`notify-live-events.ts`, `milestoneFromEvent()` détecte ces deux cas par le texte
+et remplace le corps par `"{club court} {score} - {score} {club court}"` (les
+noms courts ne sont chargés que si un tel événement est présent, pour ne pas
+alourdir le cas courant des buts/exclusions).
+
+### 24.2 Rappel + coup d'envoi : nouveau, piloté par `Match`
+
+Contrairement aux événements ci-dessus, rien dans le feed lnh.fr ne signale
+fiablement "5 min avant" ou l'instant précis du coup d'envoi (le flux
+événement par événement n'est interrogé qu'une fois le match confirmé démarré,
+voir `syncLiveMatchFeeds`). Ajout de deux colonnes `Match.kickoffReminderSentAt`
+/ `Match.kickoffNotifiedAt` (posées une fois envoyées) et d'une fonction dédiée
+`notifyMatchKickoffMilestones(seasonId, reminderLeadMinutes)`
+(`src/lib/ingestion/live-feed.ts`), appelée depuis `/api/cron/sync-live` juste
+après `syncLiveMatchFeeds` :
+
+- Rappel : tout match `SCHEDULED` dont `kickoffAt` tombe dans les
+  `reminderLeadMinutes` prochaines minutes et jamais rappelé.
+- Coup d'envoi : tout match déjà passé en `LIVE` (posé par `syncLiveMatchFeeds`
+  dès que l'index lnh.fr confirme un coup d'envoi réel) et jamais notifié.
+
+Volontairement **auto-guérissant** plutôt que basé sur une détection de
+transition de statut au tick exact : à chaque appel on relance tout ce qui est
+dans la fenêtre et pas encore marqué envoyé, donc un run de cron raté/décalé
+(fréquent avec GitHub Actions, voir `cron-live.yml`) ne fait perdre que
+quelques minutes de fraîcheur, jamais la notification elle-même.
+
+`GameConfig["LIVE_KICKOFF_REMINDER_MINUTES"]` (défaut 5, `parseLiveKickoffReminderMinutes`,
+pattern `parseNotificationLeadMinutes`) — délai du rappel, jamais codé en dur
+(règle CLAUDE.md).
+
+### 24.3 `notifyWebPushForMatchMilestone` — nouvelle fonction, pas de nouveau réglage
+
+Contrairement à `notifyWebPushForLiveEvents` (filtre "mes joueurs" = l'événement
+concerne précisément un joueur de mon effectif), un rappel/coup d'envoi n'a pas
+d'événement/joueur précis à comparer : `liveNotificationsOnlyMyPlayers` est donc
+interprété comme "un joueur de mon effectif joue ce match" (n'importe quel
+joueur du club domicile ou extérieur). Réutilise l'image `/api/og/live-event`
+(écussons des deux clubs) et le même filtrage par club suivi.
+
+### 24.4 Rollout
+
+1. `pnpm prisma migrate dev` (`Match.kickoffReminderSentAt`/`kickoffNotifiedAt`).
+2. Merge + déploiement Railway (migration prod, cron `sync-live` inchangé
+   niveau planification — même route, appel supplémentaire à l'intérieur).
+## 25. Classement général Starligue actualisé pendant les matchs
+
+Ajouté le 12/09. Avant ça, le classement des clubs (widget dashboard "Classement
+Starligue", section `/` `StandingsSection`, rang affiché à côté des logos sur
+`/matches`, `/clubs/[id]`…) ne bougeait qu'une fois la LNH ayant publié le
+classement officiel mis à jour — donc jamais **pendant** qu'un match se joue,
+même si `Match.homeScore`/`awayScore` sont déjà rafraîchis en direct (§ suivi
+minute par minute, `syncLiveMatchFeeds`). Seul le classement fantasy (managers)
+avait déjà cette fraîcheur (`live-fantasy-leaderboard.ts`, `<LiveLeaderboard/>`
+sur `/leaderboard`) — pas le classement sportif Starligue lui-même.
+
+### 25.1 Projection plutôt que recalcul complet
+
+Le classement live 2026/27 fait autorité LNH (copie brute de
+`daikin-starligue/classement`, `live-sync.ts`) plutôt que d'être recalculé par
+nos soins, précisément pour ne pas diverger de leur tie-break officiel
+(confrontations directes etc., non reproduit dans notre tie-break simplifié —
+voir le commentaire de `compute.ts`). On ne veut donc pas basculer les rondes
+déjà terminées sur un calcul maison.
+
+À la place, `projectLiveStandings()` (`src/lib/standings/live-projection.ts`,
+fonction pure testée) part du dernier snapshot **confirmé** (`ClubStanding`,
+qui inclut déjà les matchs de la ronde en cours déjà terminés — `live-sync.ts`
+se redéclenche dès qu'au moins un match est fini) et y superpose uniquement
+les rencontres actuellement `LIVE`, comme si elles se terminaient au score
+courant (mêmes règles 2/1/0 pts, même tie-break simplifié que `compute.ts`,
+appliqué à des lignes déjà agrégées). `getClubStandings()` (`get.ts`) applique
+cette projection automatiquement dès qu'un match `LIVE` existe pour la saison —
+tous les appelants (widget dashboard, page d'accueil, `/matches`, pages club)
+en bénéficient sans rien changer, et `ClubStandingsResult.liveMatchesCounted`
+indique à l'UI qu'il s'agit d'un classement provisoire (badge "Live").
+
+⚠️ Fenêtre de flou courte et acceptée : entre l'instant où un match passe
+`FINISHED` (calendrier/boxscore) et le prochain passage de `syncLiveClubStandings`
+qui republie le snapshot officiel avec ce résultat inclus, ce match disparaît
+un instant de la projection (ni `LIVE` ni encore dans le snapshot) — quelques
+minutes maximum, cohérent avec la fraîcheur du reste du direct (cron toutes les
+~2-8 min).
+
+### 25.2 UI
+
+Badge "Live" (même style que le badge match en cours sur `/matches`,
+`bg-points-neg/20 text-points-neg shadow-glow-red`) à côté du titre dans
+`ClubStandingsWidget` et `StandingsSection` quand `liveMatchesCounted > 0`.
+`<LiveRefresher/>` ajouté sur `DashboardView` (actif dès qu'un match compte
+dans la projection) pour que le widget se mette à jour sans rechargement
+manuel — la home l'avait déjà via sa fenêtre horaire `liveWindowActive`.
+
+### 25.3 Rollout
+
+Aucune migration (pas de nouveau champ Prisma). Déploiement direct.
+
+## 26. Buteurs/passeurs (saison + journée en cours) actualisés en direct
 
 Ajouté le 12/09. Distinct de la fonctionnalité "Leaders en direct" livrée le
 11/09 (PR #37, `get-live-leaders.ts` + `LiveStatLeadersSection.tsx`) qui montre
@@ -2686,7 +2795,7 @@ saison/journée déjà affichés partout ailleurs (widget dashboard
 joue, au lieu d'attendre `sync-ratings` (boxscore officiel, publié après le
 coup de sifflet final).
 
-### 24.1 Buteurs oui, passeurs non — limitation de la source, pas un choix
+### 26.1 Buteurs oui, passeurs non — limitation de la source, pas un choix
 
 Le feed live lnh.fr (`/ajaxlive`, `fetchLiveEventsFeed`) ne trace que le
 buteur d'un but ("But de X (Club)"), jamais la passe décisive — contrairement
@@ -2696,7 +2805,7 @@ passeurs, seulement au prochain passage de `sync-ratings` une fois le match
 officiellement noté. Le top buteurs, lui, est mis à jour en direct — voir
 24.2.
 
-### 24.2 `mergeLiveGoals` — même principe que la projection de classement
+### 26.2 `mergeLiveGoals` — même principe que la projection de classement
 
 `src/lib/stats/live-goal-leaders.ts` (fonction pure, testée) : complète un
 classement de buteurs déjà calculé à partir de `PlayerMatchStat` (officiel,
@@ -2718,7 +2827,7 @@ sens tant qu'un match en cours n'est pas comptabilisé comme joué) :
   — inclut maintenant les buts de la journée en cours si elle a déjà au
   moins un match terminé).
 
-### 24.3 Rafraîchissement côté client
+### 26.3 Rafraîchissement côté client
 
 `StatLeaderCard.tsx` fait déjà son fetch initial ; ajout d'un polling toutes
 les 30s **uniquement** quand `statKey === "goalsTotal"` (les autres lignes —
@@ -2727,6 +2836,6 @@ reponder), en pause si l'onglet est masqué (même garde-fou que
 `LiveEventToaster`/`LiveRefresher`). La section leaders de la home hérite du
 rafraîchissement serveur existant (`<LiveRefresher/>`, déjà en place).
 
-### 24.4 Rollout
+### 26.4 Rollout
 
 Aucune migration Prisma. Déploiement direct.

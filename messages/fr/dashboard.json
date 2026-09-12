@@ -92,6 +92,7 @@
   },
   "clubStandingsWidget": {
     "title": "Classement Starligue",
+    "live": "Live",
     "beforeGameweek1": "Avant J1",
     "afterGameweek": "Après J{number}",
     "notAvailable": "Classement pas encore disponible.",
@@ -134,6 +135,7 @@
   },
   "standingsSection": {
     "title": "Classement",
+    "live": "Live",
     "gameweek": "Journée {number}",
     "notAvailable": "Classement pas encore disponible.",
     "col": {
@@ -150,7 +152,8 @@
     "subtitle": "Meilleures performances · journée {number}"
   },
   "statLeadersSection": {
-    "subtitle": "Leaders · journée {number}"
+    "subtitle": "Leaders · journée {number}",
+    "live": "Live"
   },
   "errors": {
     "SEASON_COMPLETE": "Toutes les journées de la saison simulée ont déjà été jouées",

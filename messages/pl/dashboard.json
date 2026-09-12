@@ -92,6 +92,7 @@
   },
   "clubStandingsWidget": {
     "title": "Tabela Starligue",
+    "live": "Na żywo",
     "beforeGameweek1": "Przed K1",
     "afterGameweek": "Po K{number}",
     "notAvailable": "Tabela niedostępna jeszcze.",
@@ -134,6 +135,7 @@
   },
   "standingsSection": {
     "title": "Tabela",
+    "live": "Na żywo",
     "gameweek": "Kolejka {number}",
     "notAvailable": "Tabela niedostępna jeszcze.",
     "col": {
@@ -150,7 +152,8 @@
     "subtitle": "Najlepsze wyczyny · kolejka {number}"
   },
   "statLeadersSection": {
-    "subtitle": "Liderzy · kolejka {number}"
+    "subtitle": "Liderzy · kolejka {number}",
+    "live": "Na żywo"
   },
   "errors": {
     "SEASON_COMPLETE": "Wszystkie kolejki symulowanego sezonu zostały już rozegrane",

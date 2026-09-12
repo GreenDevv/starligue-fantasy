@@ -1,6 +1,6 @@
 // Merge des buts marqués dans des matchs actuellement LIVE sur un classement de
 // buteurs déjà calculé (fonction pure, testée) — voir get-stat-leaders.ts et
-// ARCHITECTURE.md §24. Les buts comptés en direct viennent de MatchLiveEvent
+// ARCHITECTURE.md §26. Les buts comptés en direct viennent de MatchLiveEvent
 // (icônes "goals"/"goals_7m", scorer résolu par resolve-event-player.ts), pas de
 // PlayerMatchStat qui n'existe qu'une fois le boxscore officiel synchronisé après
 // le match.

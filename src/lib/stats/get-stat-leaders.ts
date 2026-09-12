@@ -5,7 +5,7 @@
 // (src/app/api/og/stat-leaders/route.tsx) — pas de fetch HTTP interne, appel direct.
 //
 // statKey="goalsTotal" (season/gameweek) : complété en direct avec les buts déjà
-// marqués dans les matchs LIVE (mergeLiveGoals, ARCHITECTURE.md §24) — pas possible
+// marqués dans les matchs LIVE (mergeLiveGoals, ARCHITECTURE.md §26) — pas possible
 // pour "assists", le feed live lnh.fr ne remonte que le buteur, jamais la passe
 // décisive.
 import type { Position } from "@prisma/client";

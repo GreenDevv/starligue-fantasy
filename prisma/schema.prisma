@@ -642,6 +642,12 @@ model Match {
   liveMinute       Int?
   livePeriod       String?
   liveUpdatedAt    DateTime?
+  // Notifications de moments de match (ARCHITECTURE.md §24, Web Push) — posées une
+  // fois envoyées pour ne jamais relancer au tick de cron suivant.
+  // kickoffReminderSentAt : rappel "coup d'envoi dans N minutes" (avant le match).
+  // kickoffNotifiedAt : notification "coup d'envoi" (dès le passage en LIVE détecté).
+  kickoffReminderSentAt DateTime?
+  kickoffNotifiedAt     DateTime?
   externalIds      Json              @default("{}")
   playerStats      PlayerMatchStat[]
   predictionMarket PredictionMarket?

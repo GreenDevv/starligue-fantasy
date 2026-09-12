@@ -14,10 +14,12 @@ import type { WidgetSize } from "@/lib/dashboard/layout";
 export function ClubStandingsWidget({
   standings,
   gameweekNumber,
+  liveMatchesCounted = 0,
   size = "wide",
 }: {
   standings: ClubStandingRow[];
   gameweekNumber: number | null;
+  liveMatchesCounted?: number;
   size?: WidgetSize;
 }) {
   const t = useTranslations("dashboard");
@@ -28,8 +30,15 @@ export function ClubStandingsWidget({
 
   return (
     <div className="pixel-corners border border-border bg-surface p-3">
-      <div className="mb-2 flex items-center justify-between">
-        <p className="text-[10px] uppercase tracking-widest text-text-muted">{t("clubStandingsWidget.title")}</p>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5">
+          <p className="text-[10px] uppercase tracking-widest text-text-muted">{t("clubStandingsWidget.title")}</p>
+          {liveMatchesCounted > 0 && (
+            <span className="pixel-corners-sm bg-points-neg/20 px-1.5 py-0.5 text-[9px] font-bold uppercase text-points-neg shadow-glow-red">
+              {t("clubStandingsWidget.live")}
+            </span>
+          )}
+        </div>
         {gameweekNumber !== null &&
           (gameweekNumber === 0 ? (
             <span className="pixel-corners-sm bg-accent-secondary/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-accent-secondary">
