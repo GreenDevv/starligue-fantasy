@@ -3049,3 +3049,41 @@ les deux autres modes).
 
 1. `pnpm prisma migrate dev` (`User.liveNotificationsPlayerId`).
 2. Merge + déploiement Railway (migration prod).
+
+## 31. Classement Starligue : groupes de points + match(s) en retard
+
+Ajouté le 12/09, demande explicite sur `ClubStandingsWidget`/`StandingsSection`.
+
+### 31.1 Bandes de fond par groupe de points
+
+`computePointsGroupIndices()` (`src/lib/standings/points-groups.ts`, fonction
+pure testée) parcourt le classement déjà trié et incrémente un compteur de
+groupe à chaque changement de total de points — deux clubs à égalité
+partagent donc le même index de groupe. Les composants alternent une teinte
+de fond très légère (`bg-border/10`) un groupe sur deux : les égalités de
+points restent visuellement continues (même fond, ou son absence, d'une ligne
+à l'autre), seul un changement de points fait basculer la teinte. Appliqué à
+`ClubStandingsWidget` (tailles mini/carré/long) et `StandingsSection`.
+
+### 31.2 Badge "-1" : match pas encore joué cette journée
+
+Un classement général cumule les points de toute la saison — pendant qu'une
+journée est en cours (répartie sur plusieurs jours), les clubs qui ont déjà
+joué leur match du jour et ceux qui ne l'ont pas encore joué ont
+mécaniquement un total de matchs joués différent, sans que ce soit visible
+d'un coup d'œil (il faudrait comparer la colonne "J" ligne par ligne).
+`hasPendingMatchThisRound(played, gameweekNumber)` (même fichier, fonction
+pure testée) : `true` si le club a joué strictement moins de matchs que le
+numéro de la journée référencée par le classement (`gameweekNumber`, celle du
+dernier snapshot — voir `get.ts`) — un badge rouge "-1" apparaît alors à côté
+du nombre de matchs joués (à côté du nom du club sur les tailles sans colonne
+"J" dédiée, ex. `ClubStandingsWidget` en taille carré).
+
+⚠️ N'indique PAS un retard de calendrier général (rattrapage, match reporté
+d'une journée passée) — seulement "n'a pas encore joué LA journée en cours au
+moment de ce snapshot". Redevient `false` tout seul dès que le match est joué
+(le compteur `played` du club rattrape alors `gameweekNumber`).
+
+### 31.3 Rollout
+
+Aucune migration Prisma. Déploiement direct.

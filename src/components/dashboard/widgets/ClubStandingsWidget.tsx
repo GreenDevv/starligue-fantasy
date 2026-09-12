@@ -5,6 +5,25 @@ import { Link } from "@/i18n/navigation";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import type { ClubStandingRow } from "@/lib/standings/get";
 import type { WidgetSize } from "@/lib/dashboard/layout";
+import { computePointsGroupIndices, hasPendingMatchThisRound } from "@/lib/standings/points-groups";
+
+// Fond très légèrement teinté sur un groupe de points sur deux — les égalités de
+// points restent visuellement continues (même teinte ou son absence d'une ligne
+// à l'autre), seul un changement de total de points fait basculer la teinte.
+function groupBg(groupIndex: number): string {
+  return groupIndex % 2 === 1 ? "bg-border/10" : "";
+}
+
+// Petit badge rouge "-1" : ce club n'a pas encore joué la journée en cours (voir
+// hasPendingMatchThisRound) — un match en moins que les clubs déjà passés cette
+// journée-là, donc son total de points n'est pas encore à jour par rapport aux autres.
+function PendingMatchBadge() {
+  return (
+    <span className="ml-1 font-bold text-points-neg" title="N'a pas encore joué cette journée">
+      -1
+    </span>
+  );
+}
 
 // Mini : logos seuls (plus gros, pas de colonnes, pas de lignes de séparation —
 // l'ordre déjà trié par rang porte l'info, un numéro serait redondant). Carré :
@@ -27,6 +46,7 @@ export function ClubStandingsWidget({
   // Carré : Pts avant Diff (l'inverse du Long) — la stat qui compte le plus en
   // dernier lu, donc en premier ici où il n'y a que ces deux-là à comparer.
   const ptsBeforeDiff = size === "square";
+  const groupIndices = computePointsGroupIndices(standings);
 
   return (
     <div className="pixel-corners border border-border bg-surface p-3">
@@ -62,11 +82,11 @@ export function ClubStandingsWidget({
           )}
           {size === "mini" ? (
             <div className="flex flex-col gap-2">
-              {standings.map((s) => (
+              {standings.map((s, i) => (
                 <Link
                   key={s.clubId}
                   href={`/clubs/${s.clubId}`}
-                  className="flex items-center gap-2 transition-opacity hover:opacity-80"
+                  className={`flex items-center gap-2 rounded transition-opacity hover:opacity-80 ${groupBg(groupIndices[i]!)}`}
                 >
                   <span className="w-4 shrink-0 text-right text-[10px] tabular-nums text-text-muted">{s.rank}</span>
                   <ClubLogo club={{ shortName: s.clubShortName, name: s.clubName, logoUrl: s.logoUrl }} size="sm" />
@@ -104,18 +124,22 @@ export function ClubStandingsWidget({
                   </tr>
                 </thead>
                 <tbody>
-                  {standings.map((s) => (
-                    <tr key={s.clubId} className="border-t border-border/60">
+                  {standings.map((s, i) => (
+                    <tr key={s.clubId} className={`border-t border-border/60 ${groupBg(groupIndices[i]!)}`}>
                       <td className="py-1.5 text-text-muted tabular-nums">{s.rank}</td>
                       <td className="py-1.5">
                         <Link href={`/clubs/${s.clubId}`} className="flex items-center gap-1.5 hover:text-accent">
                           <ClubLogo club={{ shortName: s.clubShortName, name: s.clubName, logoUrl: s.logoUrl }} size="xs" />
                           <span className="truncate text-text">{s.clubShortName}</span>
+                          {!showDetailedColumns && hasPendingMatchThisRound(s.played, gameweekNumber) && <PendingMatchBadge />}
                         </Link>
                       </td>
                       {showDetailedColumns && (
                         <>
-                          <td className="py-1.5 text-right tabular-nums text-text-muted">{s.played}</td>
+                          <td className="py-1.5 text-right tabular-nums text-text-muted">
+                            {s.played}
+                            {hasPendingMatchThisRound(s.played, gameweekNumber) && <PendingMatchBadge />}
+                          </td>
                           <td className="py-1.5 text-right tabular-nums text-text-muted">{s.wins}</td>
                           <td className="py-1.5 text-right tabular-nums text-text-muted">{s.draws}</td>
                           <td className="py-1.5 text-right tabular-nums text-text-muted">{s.losses}</td>
