@@ -2665,3 +2665,68 @@ es, ca, de, pt, da, pl) : libellés du picker, étape d'inscription, section
 6. Lot 2 (widgets carte + classement clubs sur le dashboard) puis lot 3 (club à l'honneur) livrés séparément.
 7. Option non retenue en v1 : prompt doux « D'où viens-tu ? » sur le dashboard à
    la prochaine visite (même pattern que la modal de récap de journée).
+
+---
+
+> **Numérotation** — deux autres fonctionnalités live sont en cours sur des
+> branches non encore fusionnées et revendiquent aussi le §24 depuis `main`
+> (notifications de moments de match, classement général en direct) : à
+> fusionner, un conflit sur ce fichier est attendu, se résout en renumérotant
+> à la suite (même situation déjà documentée avant le §23).
+
+## 24. Buteurs/passeurs (saison + journée en cours) actualisés en direct
+
+Ajouté le 12/09. Distinct de la fonctionnalité "Leaders en direct" livrée le
+11/09 (PR #37, `get-live-leaders.ts` + `LiveStatLeadersSection.tsx`) qui montre
+un encart séparé "qui marque/arrête là, maintenant" pendant un match en cours,
+indépendant des compteurs saison/journée. Ici, ce sont les compteurs
+saison/journée déjà affichés partout ailleurs (widget dashboard
+`StatLeaderCard`/`StatLeadersPanel`, `/stats`, section leaders de la home
+`getWeeklyStatLeaders`) qui doivent eux-mêmes bouger pendant qu'un match se
+joue, au lieu d'attendre `sync-ratings` (boxscore officiel, publié après le
+coup de sifflet final).
+
+### 24.1 Buteurs oui, passeurs non — limitation de la source, pas un choix
+
+Le feed live lnh.fr (`/ajaxlive`, `fetchLiveEventsFeed`) ne trace que le
+buteur d'un but ("But de X (Club)"), jamais la passe décisive — contrairement
+au boxscore post-match qui a un champ `assists`. Déjà constaté et documenté
+par PR #37. Impossible à contourner : pas de mise à jour live du top
+passeurs, seulement au prochain passage de `sync-ratings` une fois le match
+officiellement noté. Le top buteurs, lui, est mis à jour en direct — voir
+24.2.
+
+### 24.2 `mergeLiveGoals` — même principe que la projection de classement
+
+`src/lib/stats/live-goal-leaders.ts` (fonction pure, testée) : complète un
+classement de buteurs déjà calculé à partir de `PlayerMatchStat` (officiel,
+n'existe qu'une fois le boxscore synchronisé) avec les buts déjà marqués dans
+les matchs actuellement `LIVE` (`MatchLiveEvent`, icônes `goals`/`goals_7m`,
+scorer déjà résolu par `resolve-event-player.ts`). Un joueur qui marque en
+direct mais n'a pas encore de ligne dans le classement officiel (pas encore
+marqué cette saison/journée) peut apparaître comme nouvelle entrée — le
+merge opère sur le classement complet, pas seulement le top 5/3 déjà tronqué,
+pour ne pas rater un buteur qui doublerait un lanterne rouge du top grâce à
+ses buts en direct.
+
+Branché à trois endroits, tous pour `statKey`/`key` = `goalsTotal`
+uniquement et scope `season`/`gameweek` (jamais `average`, qui n'a pas de
+sens tant qu'un match en cours n'est pas comptabilisé comme joué) :
+
+- `get-stat-leaders.ts` (`GET /api/stats/leaders`, widget dashboard + `/stats`).
+- `get-weekly-leaders.ts` (section leaders de la home, dernière journée notée
+  — inclut maintenant les buts de la journée en cours si elle a déjà au
+  moins un match terminé).
+
+### 24.3 Rafraîchissement côté client
+
+`StatLeaderCard.tsx` fait déjà son fetch initial ; ajout d'un polling toutes
+les 30s **uniquement** quand `statKey === "goalsTotal"` (les autres lignes —
+passeurs compris — ne peuvent pas bouger pendant un match, inutile de les
+reponder), en pause si l'onglet est masqué (même garde-fou que
+`LiveEventToaster`/`LiveRefresher`). La section leaders de la home hérite du
+rafraîchissement serveur existant (`<LiveRefresher/>`, déjà en place).
+
+### 24.4 Rollout
+
+Aucune migration Prisma. Déploiement direct.
