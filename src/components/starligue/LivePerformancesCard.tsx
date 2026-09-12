@@ -2,6 +2,7 @@ import { Link } from "@/i18n/navigation";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { pickHighlightStats, type HighlightStatKey } from "@/lib/players/highlight-stat";
+import { matchOutcomeForTeam, type MatchOutcome } from "@/lib/matches/match-outcome";
 import type { LiveGameweekPerformances, LiveGameweekPerformanceEntry } from "@/lib/matches/current-gameweek-performances";
 
 // Carte "meilleures perfs en direct" de la journée en cours — remplace l'ancienne
@@ -17,6 +18,12 @@ import type { LiveGameweekPerformances, LiveGameweekPerformanceEntry } from "@/l
 // grid-cols-2 sm:grid-cols-3 md:grid-cols-4, voir MatchesStrip.tsx), le
 // leader occupant une cellule deux fois plus large plutôt qu'une ligne
 // pleine largeur à part.
+//
+// v3 (13/09, "rajoute le logo du club... a-t-il gagné ou perdu son match") :
+// logo du club du joueur à côté de son nom (jusque-là seul l'écusson de
+// l'adversaire, dans MatchLine, était affiché) + badge V/N/D (même convention
+// que les colonnes du classement, voir ClubStandingsWidget) une fois le match
+// terminé — matchOutcomeForTeam(), fonction pure testée.
 const HIGHLIGHT_LABEL: Record<HighlightStatKey, string> = {
   goals: "but",
   assists: "passe",
@@ -43,10 +50,28 @@ function HighlightChips({ entry, compact = false }: { entry: LiveGameweekPerform
   );
 }
 
+function PlayerNameLine({ entry, big = false }: { entry: LiveGameweekPerformanceEntry; big?: boolean }) {
+  return (
+    <p className={`flex items-center gap-1.5 text-text ${big ? "text-sm font-semibold" : "text-xs"}`}>
+      <ClubLogo club={entry.club} size="xs" />
+      <span className="truncate">
+        {entry.firstName} {entry.lastName}
+      </span>
+    </p>
+  );
+}
+
+const OUTCOME_COLOR: Record<MatchOutcome, string> = {
+  V: "text-points-pos",
+  N: "text-text-muted",
+  D: "text-points-neg",
+};
+
 function MatchLine({ entry, compact = false }: { entry: LiveGameweekPerformanceEntry; compact?: boolean }) {
   const { match } = entry;
   const finished = match.status === "FINISHED";
   const hasScore = match.homeScore !== null && match.awayScore !== null;
+  const outcome = matchOutcomeForTeam(match.isHome, match.homeScore, match.awayScore, match.status);
   return (
     <div className={`flex min-w-0 items-center gap-1 text-text-muted ${compact ? "text-[10px]" : "text-[11px]"}`}>
       <span className="shrink-0">vs</span>
@@ -54,9 +79,10 @@ function MatchLine({ entry, compact = false }: { entry: LiveGameweekPerformanceE
       <span className="truncate">{match.opponentClub.shortName}</span>
       {hasScore && (
         <span className={`shrink-0 tabular-nums ${finished ? "" : "text-points-neg"}`}>
-          ({entry.match.isHome ? `${match.homeScore}-${match.awayScore}` : `${match.awayScore}-${match.homeScore}`})
+          ({match.isHome ? `${match.homeScore}-${match.awayScore}` : `${match.awayScore}-${match.homeScore}`})
         </span>
       )}
+      {outcome && <span className={`shrink-0 font-bold ${OUTCOME_COLOR[outcome]}`}>{outcome}</span>}
     </div>
   );
 }
@@ -82,9 +108,7 @@ function PerformerCard({ entry, rank }: { entry: LiveGameweekPerformanceEntry; r
         <span className="w-3 shrink-0 text-center text-[10px] text-text-muted">{rank}</span>
         <PlayerAvatar player={entry} size="xs" variant="photo" focus="head" />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-xs text-text">
-            {entry.firstName} {entry.lastName}
-          </p>
+          <PlayerNameLine entry={entry} />
           <MatchLine entry={entry} compact />
         </div>
       </div>
@@ -124,9 +148,7 @@ export function LivePerformancesCard({ gameweekNumber, entries }: LiveGameweekPe
           >
             <PlayerAvatar player={leader} size="lg" variant="photo" focus="head" />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-text">
-                {leader.firstName} {leader.lastName}
-              </p>
+              <PlayerNameLine entry={leader} big />
               <MatchLine entry={leader} />
               <div className="mt-1">
                 <HighlightChips entry={leader} />
