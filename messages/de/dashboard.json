@@ -146,7 +146,8 @@
     "seeFullRanking": "Vollständige Tabelle ansehen"
   },
   "bestXICard": {
-    "subtitle": "Team der Saison · Spieltag {number}"
+    "subtitle": "Team der Saison · Spieltag {number}",
+    "subtitleSeason": "Team der Saison · Gesamt"
   },
   "performancesCard": {
     "subtitle": "Beste Leistungen · Spieltag {number}"
