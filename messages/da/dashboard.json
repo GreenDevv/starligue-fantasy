@@ -146,7 +146,8 @@
     "seeFullRanking": "Se hele stillingen"
   },
   "bestXICard": {
-    "subtitle": "Ideelt hold · runde {number}"
+    "subtitle": "Ideelt hold · runde {number}",
+    "subtitleSeason": "Ideelt hold · sæson"
   },
   "performancesCard": {
     "subtitle": "Bedste præstationer · runde {number}"

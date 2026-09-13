@@ -146,7 +146,8 @@
     "seeFullRanking": "Ver la clasificación completa"
   },
   "bestXICard": {
-    "subtitle": "Equipo tipo · jornada {number}"
+    "subtitle": "Equipo tipo · jornada {number}",
+    "subtitleSeason": "Equipo tipo · temporada"
   },
   "performancesCard": {
     "subtitle": "Mejores rendimientos · jornada {number}"

@@ -7,7 +7,12 @@ import { getDashboardMatchStrips, getCurrentGameweekStrip, getGameweeksWithResul
 import { getCurrentGameweekStatus } from "@/lib/gameweek/get-gameweek-status";
 import { getCurrentGameweekPerformances } from "@/lib/matches/current-gameweek-performances";
 import { getNewsFeed } from "@/lib/news/get-feed";
-import { getTeamOfWeekCard, getPerformancesCard } from "@/lib/news/get-weekly-cards";
+import {
+  getTeamOfWeekCard,
+  getTeamOfWeekCardForGameweek,
+  getSeasonBestXICard,
+  getPerformancesCard,
+} from "@/lib/news/get-weekly-cards";
 import {
   getWarmupMatches,
   getCoupeDeFranceMatches,
@@ -65,7 +70,7 @@ export async function generateMetadata({
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: { category?: string; page?: string; gw?: string; resultsGw?: string };
+  searchParams: { category?: string; page?: string; gw?: string; resultsGw?: string; teamGw?: string };
 }) {
   if (process.env.COMING_SOON === "true") {
     return <ComingSoon />;
@@ -136,6 +141,27 @@ export default async function HomePage({
     getCurrentGameweekStatus(season.id),
     getCurrentGameweekPerformances(season.id),
   ]);
+
+  // Dropdown "équipe type" (demande explicite du 13/09) : journée sélectionnée
+  // (`teamGw=<N>`, recalculée en direct via computeGameweekBestXI — pas depuis le
+  // NewsItem figé) ou "Saison" (`teamGw=season`, computeBestXI, même calcul que le
+  // widget dashboard privé). Absent/invalide → comportement par défaut inchangé
+  // (dernière journée notée, depuis le NewsItem généré).
+  let teamOfWeekDisplay = teamOfWeek;
+  let isSeasonTeam = false;
+  if (searchParams.teamGw === "season") {
+    const seasonCard = await getSeasonBestXICard(season.id);
+    if (seasonCard) {
+      teamOfWeekDisplay = { gameweekNumber: teamOfWeek?.gameweekNumber ?? 0, entries: seasonCard.entries };
+      isSeasonTeam = true;
+    }
+  } else if (searchParams.teamGw) {
+    const n = Number(searchParams.teamGw);
+    if (Number.isInteger(n) && n > 0) {
+      const gwCard = await getTeamOfWeekCardForGameweek(season.id, n);
+      if (gwCard) teamOfWeekDisplay = gwCard;
+    }
+  }
 
   // Bande "journée de championnat en cours" — mise en avant quand la J en cours
   // n'est pas confirmée et qu'il reste des matchs à jouer / en train de se jouer.
@@ -242,7 +268,14 @@ export default async function HomePage({
               dashboard (leader mis en avant + le reste en petit, "+ Ajouter une
               stat", badge Live sur les buteurs pendant un match — voir
               StatLeaderCard.tsx), au lieu d'un doublon dédié à la home. */}
-          {teamOfWeek && <StarligueBestXICard gameweekNumber={teamOfWeek.gameweekNumber} entries={teamOfWeek.entries} />}
+          {teamOfWeekDisplay && (
+            <StarligueBestXICard
+              gameweekNumber={teamOfWeekDisplay.gameweekNumber}
+              entries={teamOfWeekDisplay.entries}
+              isSeason={isSeasonTeam}
+              nav={{ total: totalGameweeks, availableGameweeks: gameweeksWithResults, hrefBase: "/", queryParam: "teamGw" }}
+            />
+          )}
           {performances && (
             <StarliguePerformancesCard gameweekNumber={performances.gameweekNumber} entries={performances.entries} />
           )}

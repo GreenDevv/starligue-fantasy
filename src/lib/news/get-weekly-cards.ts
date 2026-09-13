@@ -5,6 +5,8 @@
 import { prisma } from "@/lib/db";
 import { TeamOfWeekPayloadSchema, PerformancesPayloadSchema } from "./payload";
 import { getLatestGeneratedNews } from "./get-feed";
+import { computeGameweekBestXI } from "@/lib/players/compute-gameweek-best-xi";
+import { computeBestXI } from "@/lib/players/compute-best-xi";
 import type { Position } from "@/lib/squad/validation";
 
 export interface TeamOfWeekCardData {
@@ -24,6 +26,39 @@ export async function getTeamOfWeekCard(seasonId: string): Promise<TeamOfWeekCar
   const newsItem = await getLatestGeneratedNews(seasonId, "TEAM_OF_WEEK");
   if (!newsItem) return null;
   return resolveTeamOfWeekCard(newsItem.payload);
+}
+
+// Pour la navigation par dropdown de la carte publique (StarligueBestXICard, home) :
+// contrairement à getTeamOfWeekCard (qui lit le dernier NewsItem généré, figé au
+// moment du scoring), ici on recalcule en direct via computeGameweekBestXI —
+// fonctionne pour N'IMPORTE QUELLE journée déjà notée, pas seulement la dernière,
+// et reste à jour si un joueur change de photo/club après coup. BestXIEntry a
+// déjà exactement la forme de TeamOfWeekCardData["entries"].
+export async function getTeamOfWeekCardForGameweek(
+  seasonId: string,
+  gameweekNumber: number
+): Promise<TeamOfWeekCardData | null> {
+  const gameweek = await prisma.gameweek.findUnique({
+    where: { seasonId_number: { seasonId, number: gameweekNumber } },
+    select: { id: true },
+  });
+  if (!gameweek) return null;
+  const entries = await computeGameweekBestXI(gameweek.id);
+  if (entries.length === 0) return null;
+  return { gameweekNumber, entries };
+}
+
+export interface SeasonBestXICardData {
+  entries: TeamOfWeekCardData["entries"];
+}
+
+// Équipe type de la saison — même calcul que le widget dashboard privé
+// (BestXIWidget, computeBestXI), exposé ici pour l'option "Saison" de la carte
+// publique.
+export async function getSeasonBestXICard(seasonId: string): Promise<SeasonBestXICardData | null> {
+  const entries = await computeBestXI(seasonId);
+  if (entries.length === 0) return null;
+  return { entries };
 }
 
 /** Résout un payload TEAM_OF_WEEK brut (d'un NewsItem précis) → carte — page /starligue/[id]. */

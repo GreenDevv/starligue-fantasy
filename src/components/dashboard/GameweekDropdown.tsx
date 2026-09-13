@@ -14,6 +14,9 @@ import { cn } from "@/lib/utils";
 // (clip-path), qui rognerait un menu simplement `absolute`. `label` est
 // pré-traduit côté page serveur (fonction non sérialisable à travers la
 // frontière RSC).
+// `extraOption` (13/09, carte équipe type) : une entrée non-journée en tête de
+// liste (ex. "Saison") — `current` devient alors une string ("season") plutôt
+// qu'un number, comparée par égalité stricte à `extraOption.value`.
 export function GameweekDropdown({
   current,
   total,
@@ -21,8 +24,9 @@ export function GameweekDropdown({
   hrefBase,
   queryParam = "gw",
   label,
+  extraOption,
 }: {
-  current: number;
+  current: number | string;
   total: number;
   // Sous-ensemble explicite de journées à lister, prioritaire sur 1..total.
   availableGameweeks?: number[];
@@ -32,6 +36,7 @@ export function GameweekDropdown({
   // leur faut chacun leur propre paramètre pour ne pas s'écraser l'un l'autre.
   queryParam?: string;
   label: string;
+  extraOption?: { value: string; label: string };
 }) {
   const [open, setOpen] = useState(false);
   const [coords, setCoords] = useState({ top: 0, right: 0 });
@@ -103,6 +108,20 @@ export function GameweekDropdown({
             style={{ position: "fixed", top: coords.top, right: coords.right, zIndex: 100 }}
             className="pixel-corners-sm grid max-h-64 w-32 grid-cols-4 gap-0.5 overflow-y-auto border border-border bg-surface p-1 shadow-lg"
           >
+            {extraOption && (
+              <Link
+                href={`${hrefBase}?${queryParam}=${extraOption.value}`}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  "col-span-4 mb-0.5 rounded px-1 py-1.5 text-center text-[11px] uppercase tracking-wide transition-colors",
+                  current === extraOption.value
+                    ? "bg-accent/10 text-accent"
+                    : "text-text-muted hover:bg-border/20 hover:text-text"
+                )}
+              >
+                {extraOption.label}
+              </Link>
+            )}
             {gameweeks.map((gw) => (
               <Link
                 key={gw}

@@ -146,7 +146,8 @@
     "seeFullRanking": "Zobacz pełną tabelę"
   },
   "bestXICard": {
-    "subtitle": "Najlepsza siódemka · kolejka {number}"
+    "subtitle": "Najlepsza siódemka · kolejka {number}",
+    "subtitleSeason": "Najlepsza siódemka · sezon"
   },
   "performancesCard": {
     "subtitle": "Najlepsze wyczyny · kolejka {number}"
