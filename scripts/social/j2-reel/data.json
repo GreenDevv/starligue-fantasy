@@ -1,8 +1,8 @@
 {
-  "gameweek": 2,
-  "source": "computeGameweekPlayerPoints(J1)",
-  "standingGw": 1,
-  "generatedAt": "2026-09-09T12:46:00.974Z",
+  "gameweek": 3,
+  "source": "computeGameweekPlayerPoints(J2)",
+  "standingGw": 2,
+  "generatedAt": "2026-09-17T11:31:12.588Z",
   "club": {
     "MHB": {
       "color": "#F0801F",
@@ -87,70 +87,70 @@
   },
   "fixtures": [
     {
-      "home": "LIMOGES",
-      "away": "SARAN",
-      "day": "Jeudi 10 sept.",
+      "home": "FENIX",
+      "away": "SAHB",
+      "day": "Jeudi 17 sept.",
+      "time": "20h30",
+      "tv": "Handball TV"
+    },
+    {
+      "home": "USDK",
+      "away": "CSMBH",
+      "day": "Vendredi 18 sept.",
       "time": "20h00",
       "tv": "Handball TV"
     },
     {
-      "home": "SRVH",
-      "away": "USDK",
-      "day": "Vendredi 11 sept.",
-      "time": "19h30",
+      "home": "SARAN",
+      "away": "USAM",
+      "day": "Vendredi 18 sept.",
+      "time": "20h00",
       "tv": "Handball TV"
     },
     {
-      "home": "CCMHB",
-      "away": "TREMBLAY",
-      "day": "Vendredi 11 sept.",
+      "home": "TREMBLAY",
+      "away": "SRVH",
+      "day": "Vendredi 18 sept.",
       "time": "20h00",
       "tv": "beIN Sport"
     },
     {
-      "home": "SAHB",
-      "away": "CSMBH",
-      "day": "Vendredi 11 sept.",
+      "home": "CAEN",
+      "away": "LIMOGES",
+      "day": "Vendredi 18 sept.",
       "time": "20h30",
       "tv": "Handball TV"
     },
     {
-      "home": "FENIX",
-      "away": "CAEN",
-      "day": "Vendredi 11 sept.",
-      "time": "20h30",
-      "tv": "Handball TV"
-    },
-    {
-      "home": "HBCN",
+      "home": "CRMHB",
       "away": "PAUC",
-      "day": "Samedi 12 sept.",
+      "day": "Samedi 19 sept.",
       "time": "19h00",
       "tv": "beIN Sport"
     },
     {
-      "home": "PSG",
-      "away": "CRMHB",
-      "day": "Samedi 12 sept.",
-      "time": "20h00",
-      "tv": "Handball TV"
-    },
-    {
-      "home": "USAM",
-      "away": "MHB",
-      "day": "Dimanche 13 sept.",
+      "home": "MHB",
+      "away": "HBCN",
+      "day": "Dimanche 20 sept.",
       "time": "17h00",
       "tv": "beIN Sport"
+    },
+    {
+      "home": "PSG",
+      "away": "CCMHB",
+      "day": "Dimanche 20 sept.",
+      "time": "17h00",
+      "tv": "Handball TV"
     }
   ],
   "picks": {
     "MHB": {
-      "name": "Charles BOLZINGER",
-      "last": "BOLZINGER",
-      "first": "Charles",
-      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_bolzinger-charles__picture__2026-2027-3841-17804.png",
+      "name": "Rémi DESBONNET",
+      "last": "DESBONNET",
+      "first": "Rémi",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_desbonnet-remi__picture__2026-2027-972-17811.png",
       "pos": "GK",
-      "points": 70
+      "points": 45.6
     },
     "USAM": {
       "name": "Hugo KAMTCHOP BARIL",
@@ -158,55 +158,55 @@
       "first": "Hugo",
       "photoUrl": "https://www.lnh.fr/medias/sports_players/small_kamtchop-baril-hugo__picture__2026-2027-2242-17873.png",
       "pos": "PV",
-      "points": 56
+      "points": 51.6
     },
     "LIMOGES": {
-      "name": "Jules LIGNIÈRES",
-      "last": "LIGNIÈRES",
-      "first": "Jules",
-      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_lignieres-jules__picture__2026-2027-7732-17786.png",
-      "pos": "CB",
-      "points": 69.2
+      "name": "Valentin KIEFFER",
+      "last": "KIEFFER",
+      "first": "Valentin",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_kieffer-valentin__picture__2026-2027-3090-17785.png",
+      "pos": "GK",
+      "points": 38.4
     },
     "CCMHB": {
-      "name": "Koussay BEN FRAJ",
-      "last": "BEN FRAJ",
-      "first": "Koussay",
-      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_ben-fraj-koussay__picture__2026-2027-8323-17716.png",
-      "pos": "LB",
-      "points": 22.8
+      "name": "Gaël TRIBILLON",
+      "last": "TRIBILLON",
+      "first": "Gaël",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_tribillon-gael__picture__2026-2027-2781-17744.png",
+      "pos": "LW",
+      "points": 58
     },
     "SAHB": {
-      "name": "Tobias JORGENSEN",
-      "last": "JORGENSEN",
-      "first": "Tobias",
-      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_jorgensen-tobias__picture__2026-2027-7682-17974.png",
+      "name": "Tom VINATIER",
+      "last": "VINATIER",
+      "first": "Tom",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_vinatier-tom__picture__2026-2027-6838-17995.png",
       "pos": "CB",
-      "points": 32.8
+      "points": 48.8
     },
     "TREMBLAY": {
-      "name": "Wesley PARDIN",
-      "last": "PARDIN",
-      "first": "Wesley",
-      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_pardin-wesley__picture__2026-2027-3-18037.png",
-      "pos": "GK",
-      "points": 37.6
+      "name": "Kylian RIGAULT",
+      "last": "RIGAULT",
+      "first": "Kylian",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_rigault-kylian__picture__2026-2027-3862-18041.png",
+      "pos": "LB",
+      "points": 44
     },
     "CRMHB": {
-      "name": "Alex MORAN",
-      "last": "MORAN",
-      "first": "Alex",
-      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_moran-alex__picture__2026-2027-2994-17676.png",
-      "pos": "RW",
-      "points": 40.4
+      "name": "Egon HANUSZ",
+      "last": "HANUSZ",
+      "first": "Egon",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_hanusz-egon__picture__2026-2027-9068-17668.png",
+      "pos": "CB",
+      "points": 47.2
     },
     "HBCN": {
-      "name": "Christoffer BONDE",
-      "last": "BONDE",
-      "first": "Christoffer",
-      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_bonde-christoffer__picture__2026-2027-10245-17832.png",
-      "pos": "GK",
-      "points": 54.8
+      "name": "Ian TARRAFETA",
+      "last": "TARRAFETA",
+      "first": "Ian",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_tarrafeta-ian__picture__2026-2027-5361-17852.png",
+      "pos": "CB",
+      "points": 34
     },
     "SARAN": {
       "name": "Zoran RADIC",
@@ -214,63 +214,63 @@
       "first": "Zoran",
       "photoUrl": "https://www.lnh.fr/medias/sports_players/small_radic-zoran__picture__2026-2027-5282-17956.png",
       "pos": "GK",
-      "points": 54
+      "points": 65.2
     },
     "PAUC": {
-      "name": "Joze BAZNIK",
-      "last": "BAZNIK",
-      "first": "Joze",
-      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_baznik-joze__picture__2026-2027-3624-17602.png",
-      "pos": "GK",
-      "points": 70
+      "name": "Hugo BROUZET",
+      "last": "BROUZET",
+      "first": "Hugo",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_brouzet-hugo__picture__2026-2027-3613-17603.png",
+      "pos": "PV",
+      "points": 32.8
     },
     "CSMBH": {
-      "name": "Roberto RODRÍGUEZ LARIO",
-      "last": "RODRÍGUEZ LARIO",
-      "first": "Roberto",
-      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_rodriguez-lario-roberto__picture__2026-2027-8884-17705.png",
-      "pos": "GK",
-      "points": 60
+      "name": "Lucas VANEGUE",
+      "last": "VANEGUE",
+      "first": "Lucas",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_vanegue-lucas__picture__2026-2027-4977-17710.png",
+      "pos": "CB",
+      "points": 37.2
     },
     "SRVH": {
-      "name": "Johannes MARESCOT",
-      "last": "MARESCOT",
-      "first": "Johannes",
-      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_marescot-johannes__picture__2026-2027-1176-17925.png",
-      "pos": "PV",
-      "points": 44
+      "name": "Alexandre DEMAILLE",
+      "last": "DEMAILLE",
+      "first": "Alexandre",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_demaille-alexandre__picture__2026-2027-1037-17917.png",
+      "pos": "GK",
+      "points": 40.4
     },
     "CAEN": {
-      "name": "Milos MOCEVIC",
-      "last": "MOCEVIC",
-      "first": "Milos",
-      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_mocevic-milos__picture__2026-2027-5259-17649.png",
-      "pos": "GK",
-      "points": 78
+      "name": "Adam GNAGO",
+      "last": "GNAGO",
+      "first": "Adam",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_gnago-adam__picture__2026-2027-5988-17641.png",
+      "pos": "LB",
+      "points": 46.8
     },
     "FENIX": {
-      "name": "Nemanja ILIC",
-      "last": "ILIC",
-      "first": "Nemanja",
-      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_ilic-nemanja__picture__2026-2027-1292-18004.png",
-      "pos": "LW",
-      "points": 55.2
+      "name": "Uros KOJADINOVIC",
+      "last": "KOJADINOVIC",
+      "first": "Uros",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_kojadinovic-uros__picture__2026-2027-8614-18008.png",
+      "pos": "RB",
+      "points": 36.4
     },
     "USDK": {
-      "name": "Taras MINOTSKYI",
-      "last": "MINOTSKYI",
-      "first": "Taras",
-      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_minotskyi-taras__picture__2026-2027-5571-17763.png",
-      "pos": "LB",
-      "points": 32.4
+      "name": "Diogo DE ABREU OLIVEIRA",
+      "last": "DE ABREU OLIVEIRA",
+      "first": "Diogo",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_de-abreu-oliveira-diogo__picture__2026-2027-6778-17764.png",
+      "pos": "CB",
+      "points": 81.2
     },
     "PSG": {
-      "name": "Elohim PRANDI",
-      "last": "PRANDI",
-      "first": "Elohim",
-      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_prandi-elohim__picture__2026-2027-2573-17904.png",
-      "pos": "LB",
-      "points": 38
+      "name": "Mikkel LOVKVIST",
+      "last": "LOVKVIST",
+      "first": "Mikkel",
+      "photoUrl": "https://www.lnh.fr/medias/sports_players/small_lovkvist-mikkel__picture__2026-2027-9487-17899.png",
+      "pos": "GK",
+      "points": 51.6
     }
   },
   "teamState": {
@@ -280,60 +280,88 @@
         {
           "r": "W",
           "opp": "CCMHB"
+        },
+        {
+          "r": "W",
+          "opp": "USAM"
         }
       ]
     },
     "USAM": {
-      "rank": 5,
+      "rank": 8,
       "form": [
         {
           "r": "W",
           "opp": "CRMHB"
-        }
-      ]
-    },
-    "LIMOGES": {
-      "rank": 3,
-      "form": [
-        {
-          "r": "W",
-          "opp": "SRVH"
-        }
-      ]
-    },
-    "CCMHB": {
-      "rank": 16,
-      "form": [
+        },
         {
           "r": "L",
           "opp": "MHB"
         }
       ]
     },
-    "SAHB": {
+    "LIMOGES": {
+      "rank": 6,
+      "form": [
+        {
+          "r": "W",
+          "opp": "SRVH"
+        },
+        {
+          "r": "L",
+          "opp": "SARAN"
+        }
+      ]
+    },
+    "CCMHB": {
       "rank": 9,
       "form": [
         {
           "r": "L",
-          "opp": "PAUC"
-        }
-      ]
-    },
-    "TREMBLAY": {
-      "rank": 15,
-      "form": [
+          "opp": "MHB"
+        },
         {
-          "r": "L",
-          "opp": "HBCN"
+          "r": "W",
+          "opp": "TREMBLAY"
         }
       ]
     },
-    "CRMHB": {
+    "SAHB": {
       "rank": 10,
       "form": [
         {
           "r": "L",
+          "opp": "PAUC"
+        },
+        {
+          "r": "W",
+          "opp": "CSMBH"
+        }
+      ]
+    },
+    "TREMBLAY": {
+      "rank": 16,
+      "form": [
+        {
+          "r": "L",
+          "opp": "HBCN"
+        },
+        {
+          "r": "L",
+          "opp": "CCMHB"
+        }
+      ]
+    },
+    "CRMHB": {
+      "rank": 15,
+      "form": [
+        {
+          "r": "L",
           "opp": "USAM"
+        },
+        {
+          "r": "L",
+          "opp": "PSG"
         }
       ]
     },
@@ -343,78 +371,114 @@
         {
           "r": "W",
           "opp": "TREMBLAY"
+        },
+        {
+          "r": "W",
+          "opp": "PAUC"
         }
       ]
     },
     "SARAN": {
-      "rank": 7,
+      "rank": 4,
       "form": [
         {
           "r": "W",
           "opp": "FENIX"
-        }
-      ]
-    },
-    "PAUC": {
-      "rank": 6,
-      "form": [
+        },
         {
           "r": "W",
-          "opp": "SAHB"
-        }
-      ]
-    },
-    "CSMBH": {
-      "rank": 13,
-      "form": [
-        {
-          "r": "L",
-          "opp": "PSG"
-        }
-      ]
-    },
-    "SRVH": {
-      "rank": 14,
-      "form": [
-        {
-          "r": "L",
           "opp": "LIMOGES"
         }
       ]
     },
-    "CAEN": {
-      "rank": 8,
+    "PAUC": {
+      "rank": 7,
       "form": [
+        {
+          "r": "W",
+          "opp": "SAHB"
+        },
+        {
+          "r": "L",
+          "opp": "HBCN"
+        }
+      ]
+    },
+    "CSMBH": {
+      "rank": 14,
+      "form": [
+        {
+          "r": "L",
+          "opp": "PSG"
+        },
+        {
+          "r": "L",
+          "opp": "SAHB"
+        }
+      ]
+    },
+    "SRVH": {
+      "rank": 11,
+      "form": [
+        {
+          "r": "L",
+          "opp": "LIMOGES"
+        },
         {
           "r": "W",
           "opp": "USDK"
         }
       ]
     },
+    "CAEN": {
+      "rank": 5,
+      "form": [
+        {
+          "r": "W",
+          "opp": "USDK"
+        },
+        {
+          "r": "W",
+          "opp": "FENIX"
+        }
+      ]
+    },
     "FENIX": {
-      "rank": 11,
+      "rank": 12,
       "form": [
         {
           "r": "L",
           "opp": "SARAN"
-        }
-      ]
-    },
-    "USDK": {
-      "rank": 12,
-      "form": [
+        },
         {
           "r": "L",
           "opp": "CAEN"
         }
       ]
     },
+    "USDK": {
+      "rank": 13,
+      "form": [
+        {
+          "r": "L",
+          "opp": "CAEN"
+        },
+        {
+          "r": "L",
+          "opp": "SRVH"
+        }
+      ]
+    },
     "PSG": {
-      "rank": 4,
+      "rank": 3,
       "form": [
         {
           "r": "W",
           "opp": "CSMBH"
+        },
+        {
+          "r": "W",
+          "opp": "CRMHB"
         }
       ]
     }

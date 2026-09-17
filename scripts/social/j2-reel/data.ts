@@ -57,16 +57,16 @@ const CLUB: Record<string, { color: string; salle: string; ville: string }> = {
 // depuis le calendrier lnh.fr (jour + heure + diffuseur : hd1/hd3/4max => beIN
 // Sport, htvsmall => Handball TV). Un garde-fou plus bas compare les affiches à
 // celles de la base pour éviter d'utiliser un FIXTURES périmé.
-// -- J02, vérifié le 2026-09-09 --
+// -- J03, vérifié le 2026-09-17 (calendrier AJAX lnh.fr, croisé avec Match en base) --
 const FIXTURES = [
-  { home: "LIMOGES", away: "SARAN",    day: "Jeudi 10 sept.",   time: "20h00", tv: "Handball TV" },
-  { home: "SRVH",    away: "USDK",     day: "Vendredi 11 sept.", time: "19h30", tv: "Handball TV" },
-  { home: "CCMHB",   away: "TREMBLAY", day: "Vendredi 11 sept.", time: "20h00", tv: "beIN Sport"  },
-  { home: "SAHB",    away: "CSMBH",    day: "Vendredi 11 sept.", time: "20h30", tv: "Handball TV" },
-  { home: "FENIX",   away: "CAEN",     day: "Vendredi 11 sept.", time: "20h30", tv: "Handball TV" },
-  { home: "HBCN",    away: "PAUC",     day: "Samedi 12 sept.",   time: "19h00", tv: "beIN Sport"  },
-  { home: "PSG",     away: "CRMHB",    day: "Samedi 12 sept.",   time: "20h00", tv: "Handball TV" },
-  { home: "USAM",    away: "MHB",      day: "Dimanche 13 sept.", time: "17h00", tv: "beIN Sport"  },
+  { home: "FENIX",   away: "SAHB",     day: "Jeudi 17 sept.",    time: "20h30", tv: "Handball TV" },
+  { home: "USDK",    away: "CSMBH",    day: "Vendredi 18 sept.", time: "20h00", tv: "Handball TV" },
+  { home: "SARAN",   away: "USAM",     day: "Vendredi 18 sept.", time: "20h00", tv: "Handball TV" },
+  { home: "TREMBLAY", away: "SRVH",    day: "Vendredi 18 sept.", time: "20h00", tv: "beIN Sport"  },
+  { home: "CAEN",    away: "LIMOGES",  day: "Vendredi 18 sept.", time: "20h30", tv: "Handball TV" },
+  { home: "CRMHB",   away: "PAUC",     day: "Samedi 19 sept.",   time: "19h00", tv: "beIN Sport"  },
+  { home: "MHB",     away: "HBCN",     day: "Dimanche 20 sept.", time: "17h00", tv: "beIN Sport"  },
+  { home: "PSG",     away: "CCMHB",    day: "Dimanche 20 sept.", time: "17h00", tv: "Handball TV" },
 ];
 
 async function main() {
