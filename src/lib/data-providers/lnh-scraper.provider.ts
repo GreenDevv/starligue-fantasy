@@ -999,9 +999,10 @@ export function parseStandingsFromHtml(html: string): ScrapedStanding[] {
     // tds[0] = 1ère cellule (rang+logo, texte ignoré), tds[1] = cellule nom club (ignorée)
     const points = parseInt(tds[2] ?? "", 10);
     const played = parseInt(tds[3] ?? "", 10);
+    // Ordre lnh.fr : « vict. déf. nul » (vérifié le 27/09) — pas V/N/D.
     const wins = parseInt(tds[4] ?? "", 10);
-    const draws = parseInt(tds[5] ?? "", 10);
-    const losses = parseInt(tds[6] ?? "", 10);
+    const losses = parseInt(tds[5] ?? "", 10);
+    const draws = parseInt(tds[6] ?? "", 10);
     const goalsFor = parseInt(tds[7] ?? "", 10);
     const goalsAgainst = parseInt(tds[8] ?? "", 10);
     const goalAvg = parseInt(tds[9] ?? "", 10);

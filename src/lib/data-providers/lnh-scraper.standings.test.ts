@@ -3,7 +3,7 @@ import { parseStandingsFromHtml } from "./lnh-scraper.provider";
 
 // Fragment fidèle à la structure réelle capturée sur daikin-starligue/classement
 // (contents_controller=sportsStandings, seasons_id=39, saison 2025/2026 terminée) —
-// vérifié le 2026-07-20. thead : pts, mj, vict., nul, déf., buts pour, buts contre,
+// vérifié le 2026-07-20. thead : pts, mj, vict., déf., nul (ordre revérifié le 2026-09-27 — V/D/N, pas V/N/D), buts pour, buts contre,
 // goal avg, part.pts, part.goals (les 2 dernières ignorées par le parseur, pas
 // demandées par le jeu).
 function row(opts: {
@@ -45,9 +45,9 @@ function row(opts: {
             <td>
                 ${opts.wins}            </td>
             <td>
-                ${opts.draws}            </td>
-            <td>
                 ${opts.losses}            </td>
+            <td>
+                ${opts.draws}            </td>
 
             <td>
                 ${opts.goalsFor}            </td>
