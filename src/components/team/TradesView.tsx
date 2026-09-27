@@ -11,6 +11,7 @@ import { PositionBadge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 import type { SeasonMode } from "@/lib/team/active-team-context";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 interface SquadPlayerRow {
   id: string;
@@ -23,7 +24,7 @@ interface SquadPlayerRow {
   photoOffsetY?: number;
   photoZoom?: number;
   isActive: boolean;
-  club: { shortName: string; logoUrl?: string | null };
+  club: { shortName: string; displayName?: string | null; logoUrl?: string | null };
 }
 
 interface StandingEntry {
@@ -359,7 +360,7 @@ function SquadPicker({
                   </p>
                   <p className="flex items-center gap-1 text-xs text-text-muted">
                     <ClubLogo club={p.club} size="xs" />
-                    {p.club.shortName}
+                    {clubDisplayName(p.club)}
                   </p>
                 </div>
                 <PositionBadge position={p.position} className="shrink-0" />

@@ -80,8 +80,8 @@ export async function GET(request: Request) {
       match: {
         select: {
           id: true,
-          homeClub: { select: { id: true, name: true, shortName: true, logoUrl: true } },
-          awayClub: { select: { id: true, name: true, shortName: true, logoUrl: true } },
+          homeClub: { select: { id: true, name: true, shortName: true, displayName: true, logoUrl: true } },
+          awayClub: { select: { id: true, name: true, shortName: true, displayName: true, logoUrl: true } },
         },
       },
       player: {

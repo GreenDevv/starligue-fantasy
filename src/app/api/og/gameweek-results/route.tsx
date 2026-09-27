@@ -8,6 +8,7 @@ import path from "node:path";
 import { ImageResponse } from "next/og";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 export const dynamic = "force-dynamic";
 
@@ -62,8 +63,8 @@ export async function GET(request: Request) {
         matches: {
           orderBy: { kickoffAt: "asc" },
           include: {
-            homeClub: { select: { shortName: true, logoUrl: true } },
-            awayClub: { select: { shortName: true, logoUrl: true } },
+            homeClub: { select: { shortName: true, displayName: true, logoUrl: true } },
+            awayClub: { select: { shortName: true, displayName: true, logoUrl: true } },
           },
         },
       },
@@ -175,7 +176,7 @@ export async function GET(request: Request) {
                       color: homeWin ? TEXT : MUTED,
                     }}
                   >
-                    {r.home.shortName}
+                    {clubDisplayName(r.home)}
                   </div>
                 </div>
 
@@ -220,7 +221,7 @@ export async function GET(request: Request) {
                       color: awayWin ? TEXT : MUTED,
                     }}
                   >
-                    {r.away.shortName}
+                    {clubDisplayName(r.away)}
                   </div>
                   {r.awayLogo ? (
                     // eslint-disable-next-line @next/next/no-img-element

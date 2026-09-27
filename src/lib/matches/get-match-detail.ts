@@ -64,7 +64,7 @@ export interface MatchBoxscorePlayerRow {
 }
 
 export interface MatchTeamBoxscore {
-  club: { id: string; name: string; shortName: string; logoUrl: string | null };
+  club: { id: string; name: string; shortName: string; displayName?: string | null; logoUrl: string | null };
   goalkeepers: MatchBoxscorePlayerRow[];
   fieldPlayers: MatchBoxscorePlayerRow[];
 }
@@ -220,8 +220,8 @@ export async function getMatchDetail(matchId: string): Promise<MatchDetail | nul
     include: {
       season: { select: { label: true, currentSimulationGameweekNumber: true } },
       gameweek: { select: { number: true } },
-      homeClub: { select: { id: true, name: true, shortName: true, logoUrl: true, externalIds: true } },
-      awayClub: { select: { id: true, name: true, shortName: true, logoUrl: true, externalIds: true } },
+      homeClub: { select: { id: true, name: true, shortName: true, displayName: true, logoUrl: true, externalIds: true } },
+      awayClub: { select: { id: true, name: true, shortName: true, displayName: true, logoUrl: true, externalIds: true } },
     },
   });
   if (!match) return null;
@@ -289,7 +289,7 @@ export async function getMatchDetail(matchId: string): Promise<MatchDetail | nul
         return toRow(s.player.id, s.player, s, fantasyPoints);
       });
     return {
-      club: { id: club.id, name: club.name, shortName: club.shortName, logoUrl: club.logoUrl },
+      club: { id: club.id, name: club.name, shortName: club.shortName, displayName: club.displayName, logoUrl: club.logoUrl },
       goalkeepers: rows.filter((r) => r.position === "GK"),
       fieldPlayers: rows.filter((r) => r.position !== "GK"),
     };

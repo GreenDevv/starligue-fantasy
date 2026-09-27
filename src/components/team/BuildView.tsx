@@ -16,6 +16,7 @@ import { AuctionBuildView } from "@/components/team/AuctionBuildView";
 import { cn } from "@/lib/utils";
 import type { SeasonMode } from "@/lib/team/active-team-context";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 interface Player {
   id: string;
@@ -25,7 +26,7 @@ interface Player {
   marketValue: number;
   valuationPending?: boolean;
   photoUrl?: string | null;
-  club: { id: string; shortName: string; name: string; logoUrl?: string | null };
+  club: { id: string; shortName: string; displayName?: string | null; name: string; logoUrl?: string | null };
 }
 
 type SquadState = Record<Position, [Player | null, Player | null]>;
@@ -157,7 +158,7 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
           p.position === activePos &&
           !selectedIds.has(p.id) &&
           (search === "" ||
-            `${p.firstName} ${p.lastName} ${p.club.shortName}`
+            `${p.firstName} ${p.lastName} ${clubDisplayName(p.club)} ${clubDisplayName(p.club)}`
               .toLowerCase()
               .includes(search.toLowerCase()))
       ),
@@ -230,7 +231,8 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
       } else {
         const clubIssue = data.error?.details?.find((d) => d.code === "TOO_MANY_PLAYERS_FROM_CLUB");
         if (clubIssue) {
-          const clubName = allPlayers.find((p) => p.club.id === clubIssue.clubId)?.club.shortName ?? t("build.unknownClub");
+          const issueClub = allPlayers.find((p) => p.club.id === clubIssue.clubId)?.club;
+          const clubName = issueClub ? clubDisplayName(issueClub) : t("build.unknownClub");
           setError(t("build.tooManyFromClub", { club: clubName, count: clubIssue.count ?? 0, max: clubIssue.max ?? 0 }));
         } else {
           setError(resolveApiError(tRoot, "team", data.error?.code));
@@ -407,7 +409,7 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
                             </p>
                             <p className="flex items-center gap-1 text-xs text-text-muted">
                               <ClubLogo club={player.club} size="xs" />
-                              {player.club.shortName}
+                              {clubDisplayName(player.club)}
                               {clubCount > 0 && (
                                 <span className={wouldExceedClubLimit ? "text-points-neg" : "text-text-muted"}>
                                   · {clubCount}/{maxPlayersPerClub}

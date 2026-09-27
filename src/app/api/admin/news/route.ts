@@ -36,7 +36,7 @@ export async function GET() {
     where: { seasonId: season.id, deletedAt: null },
     orderBy: { publishedAt: "desc" },
     take: 200,
-    include: { club: { select: { shortName: true } }, player: { select: { firstName: true, lastName: true } } },
+    include: { club: { select: { shortName: true, displayName: true } }, player: { select: { firstName: true, lastName: true } } },
   });
 
   return NextResponse.json({
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
       clubId: clubId || null,
       playerId: playerId || null,
     },
-    include: { club: { select: { shortName: true } }, player: { select: { firstName: true, lastName: true } } },
+    include: { club: { select: { shortName: true, displayName: true } }, player: { select: { firstName: true, lastName: true } } },
   });
 
   return NextResponse.json({

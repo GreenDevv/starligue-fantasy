@@ -33,7 +33,7 @@ export interface TeamWithSquad {
       photoOffsetY: number;
       photoZoom: unknown;
       marketValue: unknown;
-      club: { shortName: string; logoUrl: string | null };
+      club: { shortName: string; displayName?: string | null; logoUrl: string | null };
     };
   }>;
 }

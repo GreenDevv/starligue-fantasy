@@ -155,6 +155,8 @@
     "playersLabel": "jugadors",
     "fullNameLabel": "Nom complet",
     "shortNameLabel": "Codi curt",
+    "displayNameLabel": "Nom mostrat",
+    "displayNameHelp": "Nom que es mostra a tot el web i als visuals (p. ex. «Chambéry»). Buit = abreviatura.",
     "logoUrlLabel": "URL del logotip",
     "lnhSlugLabel": "Slug LNH",
     "lnhSlugPlaceholder": "ex: montpellier, paris, nantes…",

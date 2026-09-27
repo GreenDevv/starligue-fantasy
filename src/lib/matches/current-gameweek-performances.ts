@@ -15,7 +15,7 @@ export interface LiveGameweekPerformanceEntry {
   lastName: string;
   position: Position;
   photoUrl: string | null;
-  club: { shortName: string; logoUrl: string | null };
+  club: { shortName: string; displayName?: string | null; logoUrl: string | null };
   points: number;
   lnhRating: number;
   goalsTotal: number | null;
@@ -23,7 +23,7 @@ export interface LiveGameweekPerformanceEntry {
   saves: number | null;
   match: {
     id: string;
-    opponentClub: { shortName: string; logoUrl: string | null };
+    opponentClub: { shortName: string; displayName?: string | null; logoUrl: string | null };
     isHome: boolean;
     homeScore: number | null;
     awayScore: number | null;
@@ -72,7 +72,7 @@ export async function getCurrentGameweekPerformances(
           position: true,
           photoUrl: true,
           clubId: true,
-          club: { select: { shortName: true, logoUrl: true } },
+          club: { select: { shortName: true, displayName: true, logoUrl: true } },
         },
       },
       match: {
@@ -83,8 +83,8 @@ export async function getCurrentGameweekPerformances(
           awayScore: true,
           homeClubId: true,
           awayClubId: true,
-          homeClub: { select: { shortName: true, logoUrl: true } },
-          awayClub: { select: { shortName: true, logoUrl: true } },
+          homeClub: { select: { shortName: true, displayName: true, logoUrl: true } },
+          awayClub: { select: { shortName: true, displayName: true, logoUrl: true } },
         },
       },
     },

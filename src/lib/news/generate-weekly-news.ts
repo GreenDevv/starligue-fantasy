@@ -12,6 +12,7 @@ import { computeBestPerformances } from "@/lib/players/compute-best-performances
 import type { Position } from "@/lib/squad/validation";
 import type { TeamOfWeekPayload, PerformancesPayload } from "./payload";
 import { teamOfWeekCopy, performancesCopy } from "./weekly-news-copy";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 export async function generateWeeklyNews(seasonId: string, gameweekId: string, gameweekNumber: number): Promise<void> {
   const [bestXI, performances] = await Promise.all([
@@ -30,7 +31,7 @@ export async function generateWeeklyNews(seasonId: string, gameweekId: string, g
         position: e.position as Position,
         firstName: e.firstName,
         lastName: e.lastName,
-        clubShortName: e.club.shortName,
+        clubShortName: clubDisplayName(e.club), // libellé dans le texte de l'actu
         points: e.points,
       })),
     });
@@ -55,7 +56,7 @@ export async function generateWeeklyNews(seasonId: string, gameweekId: string, g
   if (performances.length > 0) {
     const players = await prisma.player.findMany({
       where: { id: { in: performances.map((e) => e.playerId) } },
-      select: { id: true, firstName: true, lastName: true, club: { select: { shortName: true } } },
+      select: { id: true, firstName: true, lastName: true, club: { select: { shortName: true, displayName: true } } },
     });
     const byId = new Map(players.map((p) => [p.id, p]));
 
@@ -70,7 +71,7 @@ export async function generateWeeklyNews(seasonId: string, gameweekId: string, g
         return {
           firstName: p?.firstName ?? "",
           lastName: p?.lastName ?? "",
-          clubShortName: p?.club.shortName ?? "",
+          clubShortName: p ? clubDisplayName(p.club) : "",
           points: e.points,
           lnhRating: e.lnhRating,
         };

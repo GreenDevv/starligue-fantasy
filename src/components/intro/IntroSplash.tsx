@@ -9,6 +9,7 @@ const STORAGE_KEY = "sf-intro-seen";
 interface IntroClub {
   id: string;
   shortName: string;
+  displayName?: string | null;
   name: string;
   logoUrl: string | null;
 }

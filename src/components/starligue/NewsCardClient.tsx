@@ -5,6 +5,7 @@ import { useTranslations, useFormatter } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import type { NewsFeedItem } from "@/lib/news/get-feed";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 const CATEGORY_COLOR: Record<NewsFeedItem["category"], string> = {
   TRANSFER: "text-accent-secondary",
@@ -39,7 +40,7 @@ export function NewsCardClient({ item }: { item: NewsFeedItem }) {
         <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest">
           <span className={CATEGORY_COLOR[item.category]}>{t(`newsCategory.${item.category}`)}</span>
           <span className="text-text-muted/70">{formattedDate}</span>
-          {item.club && <span className="truncate text-text-muted/70">· {item.club.shortName}</span>}
+          {item.club && <span className="truncate text-text-muted/70">· {clubDisplayName(item.club)}</span>}
         </div>
         <p className="mt-1 line-clamp-2 text-sm text-text">{item.title}</p>
         {item.excerpt && <p className="mt-0.5 line-clamp-1 text-xs text-text-muted">{item.excerpt}</p>}

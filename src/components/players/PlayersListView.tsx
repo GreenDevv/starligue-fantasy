@@ -13,6 +13,7 @@ import { SkeletonRow } from "@/components/ui/Skeleton";
 import { ClubFilterDropdown } from "@/components/players/ClubFilterDropdown";
 import type { ActiveClub } from "@/lib/clubs/get-active-clubs";
 import type { SeasonMode } from "@/lib/team/active-team-context";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 interface Player {
   id: string;
@@ -23,7 +24,7 @@ interface Player {
   photoOffsetX?: number;
   photoOffsetY?: number;
   photoZoom?: number;
-  club: { id: string; shortName: string; name: string; logoUrl?: string | null };
+  club: { id: string; shortName: string; displayName?: string | null; name: string; logoUrl?: string | null };
 }
 
 const listVariants = {
@@ -66,7 +67,7 @@ export function PlayersListView({ mode, clubs }: { mode: SeasonMode; clubs: Acti
       if (clubFilter && p.club.id !== clubFilter) return false;
       if (
         search &&
-        !`${p.firstName} ${p.lastName} ${p.club.shortName}`.toLowerCase().includes(search.toLowerCase())
+        !`${p.firstName} ${p.lastName} ${clubDisplayName(p.club)} ${clubDisplayName(p.club)}`.toLowerCase().includes(search.toLowerCase())
       )
         return false;
       return true;
@@ -140,7 +141,7 @@ export function PlayersListView({ mode, clubs }: { mode: SeasonMode; clubs: Acti
                       </span>
                       <span className="flex items-center gap-1.5 text-xs text-text-muted">
                         <ClubLogo club={player.club} size="xs" />
-                        {player.club.shortName}
+                        {clubDisplayName(player.club)}
                       </span>
                     </div>
                     <PositionBadge position={player.position} className="shrink-0" />

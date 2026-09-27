@@ -66,7 +66,7 @@ export async function GET(
   const [players, rawStats, configs] = await Promise.all([
     prisma.player.findMany({
       where: { id: { in: playerIds } },
-      include: { club: { select: { id: true, shortName: true, logoUrl: true } } },
+      include: { club: { select: { id: true, shortName: true, displayName: true, logoUrl: true } } },
     }),
     isScored
       ? prisma.playerMatchStat.findMany({

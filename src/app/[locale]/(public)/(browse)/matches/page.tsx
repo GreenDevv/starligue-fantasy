@@ -6,6 +6,7 @@ import { GameweekTimeline } from "@/components/matches/GameweekTimeline";
 import { getClubStandings } from "@/lib/standings/get";
 import { getGameweekState } from "@/lib/gameweek/state";
 import { GameweekStateBadge } from "@/components/gameweek/GameweekStateBadge";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 interface Props {
   searchParams: { gw?: string };
@@ -61,8 +62,8 @@ export default async function MatchesPage({ searchParams }: Props) {
       include: {
         matches: {
           include: {
-            homeClub: { select: { id: true, shortName: true, name: true, logoUrl: true } },
-            awayClub: { select: { id: true, shortName: true, name: true, logoUrl: true } },
+            homeClub: { select: { id: true, shortName: true, displayName: true, name: true, logoUrl: true } },
+            awayClub: { select: { id: true, shortName: true, displayName: true, name: true, logoUrl: true } },
           },
           orderBy: { kickoffAt: "asc" },
         },
@@ -158,7 +159,7 @@ export default async function MatchesPage({ searchParams }: Props) {
                     className="flex min-w-0 flex-1 items-center justify-end gap-2 text-right transition-colors hover:text-accent"
                   >
                     <p className={`truncate text-sm ${homeWin ? "font-semibold text-text" : "text-text-muted"}`}>
-                      {m.homeClub.shortName}
+                      {clubDisplayName(m.homeClub)}
                       {rankByClubId[m.homeClub.id] !== undefined && (
                         <span className="text-text-muted/70"> ({rankByClubId[m.homeClub.id]})</span>
                       )}
@@ -206,7 +207,7 @@ export default async function MatchesPage({ searchParams }: Props) {
                   >
                     <ClubLogo club={m.awayClub} size="sm" />
                     <p className={`truncate text-sm ${awayWin ? "font-semibold text-text" : "text-text-muted"}`}>
-                      {m.awayClub.shortName}
+                      {clubDisplayName(m.awayClub)}
                       {rankByClubId[m.awayClub.id] !== undefined && (
                         <span className="text-text-muted/70"> ({rankByClubId[m.awayClub.id]})</span>
                       )}

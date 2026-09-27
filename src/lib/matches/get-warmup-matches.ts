@@ -35,6 +35,7 @@ export const EUROPEAN_LEAGUE_LABELS = [EHF_EUROPEAN_LEAGUE_LABEL];
 
 export interface WarmupMatchClub {
   shortName: string; // pour ClubLogo (tronqué à 3 lettres si pas de logo) — nom scrapé si club inconnu
+  displayName?: string | null;
   name: string;
   logoUrl: string | null;
   // Renseigné seulement pour un club hors DB dont on a une info de division (segment
@@ -60,7 +61,7 @@ export interface WarmupMatchRow {
 
 // Exportée pour get-today-matches.ts (même normalisation club connu/scrapé).
 export function toDisplayClub(
-  known: { shortName: string; name: string; logoUrl: string | null } | null,
+  known: { shortName: string; displayName?: string | null; name: string; logoUrl: string | null } | null,
   fallbackName: string,
   logoUrl: string | null,
   division: string | null
@@ -73,8 +74,8 @@ async function getFriendlyMatches(seasonId: string, competitionLabels: string[])
   const matches = await prisma.friendlyMatch.findMany({
     where: { seasonId, competitionLabel: { in: competitionLabels } },
     include: {
-      homeClub: { select: { shortName: true, name: true, logoUrl: true } },
-      awayClub: { select: { shortName: true, name: true, logoUrl: true } },
+      homeClub: { select: { shortName: true, displayName: true, name: true, logoUrl: true } },
+      awayClub: { select: { shortName: true, displayName: true, name: true, logoUrl: true } },
     },
     orderBy: { kickoffAt: "asc" },
   });
@@ -127,8 +128,8 @@ async function getClubFriendlyMatches(
   const matches = await prisma.friendlyMatch.findMany({
     where: { seasonId, competitionLabel: { in: competitionLabels }, OR: [{ homeClubId: clubId }, { awayClubId: clubId }] },
     include: {
-      homeClub: { select: { shortName: true, name: true, logoUrl: true } },
-      awayClub: { select: { shortName: true, name: true, logoUrl: true } },
+      homeClub: { select: { shortName: true, displayName: true, name: true, logoUrl: true } },
+      awayClub: { select: { shortName: true, displayName: true, name: true, logoUrl: true } },
     },
     orderBy: { kickoffAt: "asc" },
   });

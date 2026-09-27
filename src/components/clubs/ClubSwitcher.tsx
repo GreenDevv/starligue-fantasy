@@ -15,6 +15,7 @@ interface SwitcherClub {
   id: string;
   name: string;
   shortName: string;
+  displayName?: string | null;
   logoUrl: string | null;
 }
 

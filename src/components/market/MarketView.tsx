@@ -13,6 +13,7 @@ import { Sparkline } from "@/components/ui/Sparkline";
 import { SkeletonRow } from "@/components/ui/Skeleton";
 import type { SeasonMode } from "@/lib/team/active-team-context";
 import type { MarketPlayer } from "@/lib/players/market-list";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 type SortKey = "pointsPerMillion" | "seasonPoints" | "marketValue" | "lastName";
 
@@ -57,7 +58,7 @@ export function MarketView({ mode }: { mode: SeasonMode }) {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     const rows = byPosition.filter(
-      (p) => !q || `${p.firstName} ${p.lastName} ${p.club.shortName}`.toLowerCase().includes(q)
+      (p) => !q || `${p.firstName} ${p.lastName} ${clubDisplayName(p.club)} ${clubDisplayName(p.club)}`.toLowerCase().includes(q)
     );
     return rows.sort((a, b) => {
       switch (sortBy) {
@@ -157,7 +158,7 @@ export function MarketView({ mode }: { mode: SeasonMode }) {
                 </span>
                 <span className="flex items-center gap-1 text-[10px] text-text-muted">
                   <ClubLogo club={p.club} size="xs" />
-                  {p.club.shortName} · {tLabels(`positionShort.${p.position}`)}
+                  {clubDisplayName(p.club)} · {tLabels(`positionShort.${p.position}`)}
                 </span>
                 <span className="font-arcade text-xl leading-none text-accent drop-shadow-[0_0_6px_currentColor]">
                   {p.pointsPerMillion.toFixed(1)}
@@ -197,7 +198,7 @@ export function MarketView({ mode }: { mode: SeasonMode }) {
                       </span>
                       <span className="flex items-center gap-1.5 text-xs text-text-muted">
                         <ClubLogo club={player.club} size="xs" />
-                        {player.club.shortName}
+                        {clubDisplayName(player.club)}
                         <PositionBadge position={player.position} className="ml-0.5 scale-90" />
                       </span>
                     </div>

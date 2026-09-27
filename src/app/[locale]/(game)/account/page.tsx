@@ -8,11 +8,13 @@ import { PlayerSearch, type PlayerSearchOption } from "@/components/players/Play
 import { HomeClubPicker, homeClubValueToPayload, type HomeClubValue } from "@/components/clubs/HomeClubPicker";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { WebPushSettings } from "@/components/notifications/WebPushSettings";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 interface AccountClub {
   id: string;
   name: string;
   shortName: string;
+  displayName?: string | null;
   logoUrl: string | null;
 }
 
@@ -28,13 +30,13 @@ interface AccountData {
   name: string;
   email: string;
   favoritePlayerId: string | null;
-  favoritePlayer: { id: string; firstName: string; lastName: string; club: { shortName: string } } | null;
+  favoritePlayer: { id: string; firstName: string; lastName: string; club: { shortName: string; displayName?: string | null } } | null;
   homeClub: { id: string; name: string; city: string | null; country: string; verified: boolean } | null;
   liveNotificationsEnabled: boolean;
   liveNotificationsOnlyMyPlayers: boolean;
   liveNotificationsClubIds: string[];
   liveNotificationsPlayerId: string | null;
-  liveNotificationsPlayer: { id: string; firstName: string; lastName: string; club: { shortName: string } } | null;
+  liveNotificationsPlayer: { id: string; firstName: string; lastName: string; club: { shortName: string; displayName?: string | null } } | null;
   allClubs: AccountClub[];
 }
 
@@ -208,7 +210,7 @@ export default function AccountPage() {
             <>
               <p className="rounded-lg border border-border bg-bg px-4 py-2.5 text-text">
                 {lockedFavoritePlayer.firstName} {lockedFavoritePlayer.lastName}{" "}
-                <span className="text-text-muted">— {lockedFavoritePlayer.club.shortName}</span>
+                <span className="text-text-muted">— {clubDisplayName(lockedFavoritePlayer.club)}</span>
               </p>
               <p className="mt-1 text-[11px] text-text-muted">{tAccount("favoritePlayerLocked")}</p>
             </>
@@ -317,7 +319,7 @@ export default function AccountPage() {
                           }`}
                         >
                           <ClubLogo club={c} size="xs" />
-                          {c.shortName}
+                          {clubDisplayName(c)}
                         </button>
                       );
                     })}

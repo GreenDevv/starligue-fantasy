@@ -17,6 +17,7 @@ import {
   type GameweekRecapImageData,
   type RecapImagePlayer,
 } from "@/lib/social/gameweek-recap-image";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 export const dynamic = "force-dynamic";
 
@@ -121,7 +122,7 @@ export async function GET(request: Request) {
           firstName: top.firstName,
           lastName: top.lastName,
           position: top.position,
-          clubShortName: top.club.shortName,
+          clubShortName: clubDisplayName(top.club), // libellé affiché sur l'image
           clubLogoDataUri: topLogo,
           photoUrl: top.photoUrl,
           points: top.points,

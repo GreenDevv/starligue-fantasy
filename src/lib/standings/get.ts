@@ -8,11 +8,13 @@
 // provisoire (pas encore l'ordre officiel LNH pour ces rencontres).
 import { prisma } from "@/lib/db";
 import { projectLiveStandings } from "./live-projection";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 export interface ClubStandingRow {
   clubId: string;
   clubName: string;
   clubShortName: string;
+  clubDisplayName: string;
   logoUrl: string | null;
   rank: number;
   points: number;
@@ -44,13 +46,14 @@ export async function getClubStandings(seasonId: string): Promise<ClubStandingsR
   const standings = await prisma.clubStanding.findMany({
     where: { seasonId, gameweekNumber },
     orderBy: { rank: "asc" },
-    include: { club: { select: { name: true, shortName: true, logoUrl: true } } },
+    include: { club: { select: { name: true, shortName: true, displayName: true, logoUrl: true } } },
   });
 
   const rows: ClubStandingRow[] = standings.map((s) => ({
     clubId: s.clubId,
     clubName: s.club.name,
     clubShortName: s.club.shortName,
+    clubDisplayName: clubDisplayName(s.club),
     logoUrl: s.club.logoUrl,
     rank: s.rank,
     points: s.points,

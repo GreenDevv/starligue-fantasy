@@ -21,7 +21,7 @@ export async function GET() {
 
   const players = await prisma.player.findMany({
     where: { seasonId: season.id, isActive: true },
-    include: { club: { select: { shortName: true } } },
+    include: { club: { select: { shortName: true, displayName: true } } },
     orderBy: [{ club: { shortName: "asc" } }, { lastName: "asc" }],
   });
 

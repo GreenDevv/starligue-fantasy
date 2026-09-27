@@ -13,6 +13,7 @@
 import type { Position } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { sendInjuryEmail } from "@/lib/email/send-injury-email";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 const DEFAULT_JOKER_QUOTA = 2; // même défaut que POST /api/my-team/transfer si GameConfig absent
 
@@ -27,7 +28,7 @@ interface InjuredPlayerForNotify {
   lastName: string;
   position: Position;
   marketValue: number;
-  club: { shortName: string };
+  club: { shortName: string; displayName?: string | null };
 }
 
 export async function notifyPlayerInjuredOwners(
@@ -80,7 +81,7 @@ export async function notifyPlayerInjuredOwners(
         playerFirstName: player.firstName,
         playerLastName: player.lastName,
         position: player.position,
-        clubShortName: player.club.shortName,
+        clubShortName: clubDisplayName(player.club), // libellé dans l'email
         marketValue: player.marketValue,
         teams,
         transfersUrl,

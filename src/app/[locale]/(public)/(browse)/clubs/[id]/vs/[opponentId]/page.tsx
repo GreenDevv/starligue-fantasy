@@ -11,6 +11,7 @@ import { getClubPageData, getLastFiveForm } from "@/lib/clubs/club-page-data";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { ClubFormBadge } from "@/components/clubs/ClubFormBadge";
 import { getBroadcasterLogoUrl } from "@/lib/matches/broadcaster-logo";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 export default async function ClubCompareVsPage({ params }: { params: { id: string; opponentId: string } }) {
   const tClubs = await getTranslations("clubs");
@@ -33,8 +34,8 @@ export default async function ClubCompareVsPage({ params }: { params: { id: stri
   if (!season) notFound();
 
   const [clubA, clubB] = await Promise.all([
-    prisma.club.findUnique({ where: { id: params.id }, select: { id: true, name: true, shortName: true, logoUrl: true } }),
-    prisma.club.findUnique({ where: { id: params.opponentId }, select: { id: true, name: true, shortName: true, logoUrl: true } }),
+    prisma.club.findUnique({ where: { id: params.id }, select: { id: true, name: true, shortName: true, displayName: true, logoUrl: true } }),
+    prisma.club.findUnique({ where: { id: params.opponentId }, select: { id: true, name: true, shortName: true, displayName: true, logoUrl: true } }),
   ]);
   if (!clubA || !clubB) notFound();
 
@@ -145,10 +146,10 @@ export default async function ClubCompareVsPage({ params }: { params: { id: stri
             <p className="mb-2 text-center text-xs text-text-muted">
               {tClubs("compare.headToHeadSummary", {
                 winsA,
-                clubA: clubA.shortName,
+                clubA: clubDisplayName(clubA),
                 draws,
                 winsB,
-                clubB: clubB.shortName,
+                clubB: clubDisplayName(clubB),
               })}
             </p>
             <div className="overflow-hidden pixel-corners border border-border bg-surface">

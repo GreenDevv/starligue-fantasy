@@ -39,6 +39,7 @@ export async function GET() {
         id: c.id,
         name: c.name,
         shortName: c.shortName,
+        displayName: c.displayName,
         logoUrl: c.logoUrl,
         externalIds: c.externalIds as Record<string, string>,
         playerCount: c._count.players,

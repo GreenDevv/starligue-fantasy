@@ -7,6 +7,7 @@ import { getNewsItemById } from "@/lib/news/get-feed";
 import { resolveTeamOfWeekCard, resolvePerformancesCard } from "@/lib/news/get-weekly-cards";
 import { StarligueBestXICard } from "@/components/starligue/StarligueBestXICard";
 import { StarliguePerformancesCard } from "@/components/starligue/StarliguePerformancesCard";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 // Article lu sur notre propre site — texte intégral extrait côté serveur au scraping
 // (src/lib/news/html-to-text.ts, jamais de HTML stocké/rendu : uniquement du texte,
@@ -45,7 +46,7 @@ export default async function NewsItemPage({ params }: { params: { id: string } 
         <span>· {format.dateTime(item.publishedAt, { day: "2-digit", month: "long", year: "numeric" })}</span>
         {item.club && (
           <span className="flex items-center gap-1">
-            · <ClubLogo club={item.club} size="xs" /> {item.club.shortName}
+            · <ClubLogo club={item.club} size="xs" /> {clubDisplayName(item.club)}
           </span>
         )}
       </div>

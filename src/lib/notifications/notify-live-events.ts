@@ -7,6 +7,7 @@
 import { prisma } from "@/lib/db";
 import { sendWebPush } from "./send-web-push";
 import { tallyGoalsBySequence, frenchOrdinal } from "@/lib/live/goal-tally";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 interface NewLiveEventForNotif {
   text: string;
@@ -138,10 +139,12 @@ export async function notifyWebPushForLiveEvents(
   if (events.some((e) => milestoneFromEvent(e) !== null)) {
     const clubs = await prisma.club.findMany({
       where: { id: { in: [homeClubId, awayClubId] } },
-      select: { id: true, shortName: true },
+      select: { id: true, shortName: true, displayName: true },
     });
-    homeShortName = clubs.find((c) => c.id === homeClubId)?.shortName ?? "";
-    awayShortName = clubs.find((c) => c.id === awayClubId)?.shortName ?? "";
+    const home = clubs.find((c) => c.id === homeClubId);
+    const away = clubs.find((c) => c.id === awayClubId);
+    homeShortName = home ? clubDisplayName(home) : "";
+    awayShortName = away ? clubDisplayName(away) : "";
   }
 
   // Total de buts du buteur dans CE match, pour l'ajouter au corps de la notif

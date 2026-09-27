@@ -329,8 +329,8 @@ export async function notifyMatchKickoffMilestones(
       id: true,
       homeClubId: true,
       awayClubId: true,
-      homeClub: { select: { shortName: true } },
-      awayClub: { select: { shortName: true } },
+      homeClub: { select: { shortName: true, displayName: true } },
+      awayClub: { select: { shortName: true, displayName: true } },
     },
   });
 
@@ -351,8 +351,8 @@ export async function notifyMatchKickoffMilestones(
       id: true,
       homeClubId: true,
       awayClubId: true,
-      homeClub: { select: { shortName: true } },
-      awayClub: { select: { shortName: true } },
+      homeClub: { select: { shortName: true, displayName: true } },
+      awayClub: { select: { shortName: true, displayName: true } },
     },
   });
 

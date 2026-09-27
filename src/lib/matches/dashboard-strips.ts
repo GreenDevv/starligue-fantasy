@@ -4,12 +4,12 @@
 // simulation/page.tsx — pas de route API dédiée, réutilisé par les deux pages.
 import { prisma } from "@/lib/db";
 
-const CLUB_SELECT = { select: { id: true, shortName: true, name: true, logoUrl: true } } as const;
+const CLUB_SELECT = { select: { id: true, shortName: true, displayName: true, name: true, logoUrl: true } } as const;
 
 export interface DashboardStripMatch {
   id: string;
-  homeClub: { id: string; shortName: string; name: string; logoUrl: string | null };
-  awayClub: { id: string; shortName: string; name: string; logoUrl: string | null };
+  homeClub: { id: string; shortName: string; displayName?: string | null; name: string; logoUrl: string | null };
+  awayClub: { id: string; shortName: string; displayName?: string | null; name: string; logoUrl: string | null };
   homeScore: number | null;
   awayScore: number | null;
   kickoffAt: Date;

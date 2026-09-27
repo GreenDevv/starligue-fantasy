@@ -9,12 +9,13 @@ import { ValueHistoryChart } from "@/components/charts/ValueHistoryChart";
 import { PlayerStatsChart } from "@/components/charts/PlayerStatsChart";
 import type { PlayerDetailData, PlayerDetailMatchLogEntry } from "@/lib/players/player-detail";
 import type { Position } from "@/lib/squad/validation";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 interface SearchResult {
   id: string;
   firstName: string;
   lastName: string;
-  club: { shortName: string; name?: string; logoUrl?: string | null };
+  club: { shortName: string; displayName?: string | null; name?: string; logoUrl?: string | null };
 }
 
 // Vue complète de /players/[id] — orchestrateur client unique pour que la
@@ -130,7 +131,7 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
                       <span className="truncate">
                         {p.firstName} {p.lastName}
                       </span>
-                      <span className="ml-auto shrink-0 text-text-muted">{p.club.shortName}</span>
+                      <span className="ml-auto shrink-0 text-text-muted">{clubDisplayName(p.club)}</span>
                     </button>
                   ))}
                 </div>
@@ -191,7 +192,7 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
                   </h2>
                   <p className="mt-0.5 flex items-center justify-center gap-1 text-xs text-text-muted">
                     <ClubLogo club={p.club} size="xs" />
-                    {p.club.shortName}
+                    {clubDisplayName(p.club)}
                   </p>
                 </div>
                 <div>

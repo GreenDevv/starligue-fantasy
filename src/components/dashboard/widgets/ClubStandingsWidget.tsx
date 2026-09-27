@@ -126,7 +126,7 @@ export function ClubStandingsWidget({
                       <td className="py-1.5">
                         <Link href={`/clubs/${s.clubId}`} className="flex items-center gap-1.5 hover:text-accent">
                           <ClubLogo club={{ shortName: s.clubShortName, name: s.clubName, logoUrl: s.logoUrl }} size="xs" />
-                          <span className="truncate text-text">{s.clubShortName}</span>
+                          <span className="truncate text-text">{s.clubDisplayName}</span>
                           {hasPendingMatchThisRound(s.played, gameweekNumber) && <PendingMatchBadge />}
                         </Link>
                       </td>

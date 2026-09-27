@@ -155,6 +155,8 @@
     "playersLabel": "joueurs",
     "fullNameLabel": "Nom complet",
     "shortNameLabel": "Code court",
+    "displayNameLabel": "Nom affiché",
+    "displayNameHelp": "Nom montré partout sur le site et les visuels (ex. « Chambéry »). Vide = abréviation.",
     "logoUrlLabel": "URL du logo",
     "lnhSlugLabel": "Slug LNH",
     "lnhSlugPlaceholder": "ex: montpellier, paris, nantes…",

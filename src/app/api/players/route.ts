@@ -61,7 +61,7 @@ export async function GET(request: Request) {
     prisma.player.count({ where }),
     prisma.player.findMany({
       where,
-      include: { club: { select: { id: true, name: true, shortName: true, logoUrl: true } } },
+      include: { club: { select: { id: true, name: true, shortName: true, displayName: true, logoUrl: true } } },
       orderBy: { [sortBy]: order },
       skip: (page - 1) * perPage,
       take: perPage,

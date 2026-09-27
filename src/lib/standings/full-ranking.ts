@@ -14,6 +14,7 @@ const FORM_LENGTH = 5;
 export interface RankingOpponent {
   clubId: string;
   shortName: string;
+  displayName?: string | null;
   logoUrl: string | null;
   kickoffAt: Date;
   isHome: boolean;
@@ -58,8 +59,8 @@ export async function getFullRanking(seasonId: string): Promise<FullRanking> {
         homeClubId: true,
         awayClubId: true,
         kickoffAt: true,
-        homeClub: { select: { shortName: true, logoUrl: true } },
-        awayClub: { select: { shortName: true, logoUrl: true } },
+        homeClub: { select: { shortName: true, displayName: true, logoUrl: true } },
+        awayClub: { select: { shortName: true, displayName: true, logoUrl: true } },
       },
     }),
   ]);
@@ -90,6 +91,7 @@ export async function getFullRanking(seasonId: string): Promise<FullRanking> {
       nextOpponentByClub.set(clubId, {
         clubId: opponentId,
         shortName: opponent.shortName,
+        displayName: opponent.displayName,
         logoUrl: opponent.logoUrl,
         kickoffAt: m.kickoffAt,
         isHome,

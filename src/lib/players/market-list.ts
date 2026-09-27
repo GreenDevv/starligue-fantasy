@@ -24,7 +24,7 @@ export interface MarketPlayer {
   photoOffsetX: number;
   photoOffsetY: number;
   photoZoom: number;
-  club: { id: string; shortName: string; name: string; logoUrl: string | null };
+  club: { id: string; shortName: string; displayName?: string | null; name: string; logoUrl: string | null };
   seasonPoints: number;
   /** points fantasy / valeur marchande — rendement. 0 tant qu'aucune journée notée. */
   pointsPerMillion: number;
@@ -39,7 +39,7 @@ export async function getMarketPlayers(mode: SeasonMode): Promise<MarketPlayer[]
   const [players, seasonPoints] = await Promise.all([
     prisma.player.findMany({
       where: { seasonId: season.id, isActive: true },
-      include: { club: { select: { id: true, name: true, shortName: true, logoUrl: true } } },
+      include: { club: { select: { id: true, name: true, shortName: true, displayName: true, logoUrl: true } } },
       orderBy: { marketValue: "desc" },
     }),
     computeSeasonPlayerPoints(season.id),

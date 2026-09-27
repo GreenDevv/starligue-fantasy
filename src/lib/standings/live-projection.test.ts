@@ -7,6 +7,7 @@ function row(overrides: Partial<ClubStandingRow>): ClubStandingRow {
     clubId: "c1",
     clubName: "Club 1",
     clubShortName: "C1",
+    clubDisplayName: "Club 1",
     logoUrl: null,
     rank: 1,
     points: 0,

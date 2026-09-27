@@ -101,7 +101,7 @@ export interface BestXIEntry {
   firstName: string;
   lastName: string;
   photoUrl: string | null;
-  club: { shortName: string; logoUrl: string | null };
+  club: { shortName: string; displayName?: string | null; logoUrl: string | null };
   points: number;
 }
 
@@ -118,7 +118,7 @@ export async function computeBestXI(seasonId: string): Promise<BestXIEntry[]> {
       lastName: true,
       position: true,
       photoUrl: true,
-      club: { select: { shortName: true, logoUrl: true } },
+      club: { select: { shortName: true, displayName: true, logoUrl: true } },
     },
   });
 

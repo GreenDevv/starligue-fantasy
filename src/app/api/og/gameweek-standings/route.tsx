@@ -7,6 +7,7 @@ import path from "node:path";
 import { ImageResponse } from "next/og";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 export const dynamic = "force-dynamic";
 
@@ -58,7 +59,7 @@ export async function GET(request: Request) {
     prisma.clubStanding.findMany({
       where: { seasonId, gameweekNumber },
       orderBy: { rank: "asc" },
-      include: { club: { select: { shortName: true, logoUrl: true } } },
+      include: { club: { select: { shortName: true, displayName: true, logoUrl: true } } },
     }),
     loadFonts(),
   ]);
@@ -67,6 +68,7 @@ export async function GET(request: Request) {
     standing.map(async (s) => ({
       rank: s.rank,
       shortName: s.club.shortName,
+      label: clubDisplayName(s.club),
       played: s.played,
       goalAvg: s.goalAvg,
       points: s.points,
@@ -182,7 +184,7 @@ export async function GET(request: Request) {
                   <img src={r.logo} width={38} height={38} style={{ objectFit: "contain", marginRight: 16 }} />
                 ) : null}
                 <div style={{ display: "flex", fontFamily: "display", fontSize: 32, fontWeight: 700, color: TEXT }}>
-                  {r.shortName}
+                  {r.label}
                 </div>
               </div>
               <div style={{ display: "flex", width: 70, justifyContent: "center", fontSize: 24, color: MUTED }}>

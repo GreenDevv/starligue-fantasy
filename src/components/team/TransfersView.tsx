@@ -12,6 +12,7 @@ import { Skeleton, SkeletonRow } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 import type { SeasonMode } from "@/lib/team/active-team-context";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 interface MarketPlayer {
   id: string;
@@ -20,7 +21,7 @@ interface MarketPlayer {
   position: Position;
   marketValue: number;
   photoUrl?: string | null;
-  club: { id: string; shortName: string; name: string; logoUrl?: string | null };
+  club: { id: string; shortName: string; displayName?: string | null; name: string; logoUrl?: string | null };
 }
 
 interface SquadPlayer extends MarketPlayer {
@@ -84,7 +85,7 @@ export function TransfersView({ mode }: { mode: SeasonMode }) {
       .filter(
         (p) =>
           search === "" ||
-          `${p.firstName} ${p.lastName} ${p.club.shortName}`.toLowerCase().includes(search.toLowerCase())
+          `${p.firstName} ${p.lastName} ${clubDisplayName(p.club)} ${clubDisplayName(p.club)}`.toLowerCase().includes(search.toLowerCase())
       )
       .sort((a, b) => b.marketValue - a.marketValue);
   }, [market, sellPlayer, squadIds, search]);
@@ -205,7 +206,7 @@ export function TransfersView({ mode }: { mode: SeasonMode }) {
                   </p>
                   <p className="flex items-center gap-1 text-xs text-text-muted">
                     <ClubLogo club={p.club} size="xs" />
-                    {p.club.shortName}
+                    {clubDisplayName(p.club)}
                   </p>
                 </div>
                 <PositionBadge position={p.position} className="shrink-0" />
@@ -260,7 +261,7 @@ export function TransfersView({ mode }: { mode: SeasonMode }) {
                       </p>
                       <p className="flex items-center gap-1 text-xs text-text-muted">
                         <ClubLogo club={p.club} size="xs" />
-                        {p.club.shortName}
+                        {clubDisplayName(p.club)}
                       </p>
                     </div>
                     <span

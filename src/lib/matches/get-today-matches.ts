@@ -59,8 +59,8 @@ async function getFriendlyToday(
   const matches = await prisma.friendlyMatch.findMany({
     where: { seasonId, competitionLabel: { in: competitionLabels }, kickoffAt: { gte: range.start, lt: range.end } },
     include: {
-      homeClub: { select: { shortName: true, name: true, logoUrl: true } },
-      awayClub: { select: { shortName: true, name: true, logoUrl: true } },
+      homeClub: { select: { shortName: true, displayName: true, name: true, logoUrl: true } },
+      awayClub: { select: { shortName: true, displayName: true, name: true, logoUrl: true } },
     },
     orderBy: { kickoffAt: "asc" },
   });
@@ -94,8 +94,8 @@ export async function getTodayMatches(seasonId: string): Promise<TodayMatchRow[]
     prisma.match.findMany({
       where: { seasonId, kickoffAt: { gte: range.start, lt: range.end } },
       include: {
-        homeClub: { select: { shortName: true, name: true, logoUrl: true } },
-        awayClub: { select: { shortName: true, name: true, logoUrl: true } },
+        homeClub: { select: { shortName: true, displayName: true, name: true, logoUrl: true } },
+        awayClub: { select: { shortName: true, displayName: true, name: true, logoUrl: true } },
       },
       orderBy: { kickoffAt: "asc" },
     }),

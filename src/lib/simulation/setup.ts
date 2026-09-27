@@ -15,7 +15,7 @@ const HOUR = 60 * 60 * 1000;
 // Clubs qui ne sont plus en Daikin StarLigue 2026/27 (relégués) mais qui apparaissent
 // dans les saisons passées — fallback si le slug n'est pas déjà connu via
 // Club.externalIds.lnh. Complète LNH_SLUG_MAP de src/app/api/admin/import/lnh-roster.
-const RELEGATED_CLUB_FALLBACK: Record<string, { shortName: string; fullName: string }> = {
+const RELEGATED_CLUB_FALLBACK: Record<string, { shortName: string; displayName?: string | null; fullName: string }> = {
   istres: { shortName: "IPH", fullName: "Istres Provence Handball" },
   dijon: { shortName: "GDH", fullName: "Grand Dijon Handball" },
 };
@@ -171,7 +171,7 @@ export async function setupSimulationSeason(opts: {
 
   const seasonPlayers = await prisma.player.findMany({
     where: { seasonId: season.id },
-    include: { club: { select: { shortName: true } } },
+    include: { club: { select: { shortName: true, displayName: true } } },
   });
 
   const scoreRows: ScrapedScoreRow[] = priorScores.map((s) => ({

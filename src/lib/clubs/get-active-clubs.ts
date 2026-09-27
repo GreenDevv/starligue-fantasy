@@ -9,13 +9,14 @@ export interface ActiveClub {
   id: string;
   name: string;
   shortName: string;
+  displayName?: string | null;
   logoUrl: string | null;
 }
 
 export async function getActiveClubs(seasonId: string): Promise<ActiveClub[]> {
   return prisma.club.findMany({
     where: { players: { some: { seasonId } } },
-    select: { id: true, name: true, shortName: true, logoUrl: true },
+    select: { id: true, name: true, shortName: true, displayName: true, logoUrl: true },
     orderBy: { name: "asc" },
   });
 }

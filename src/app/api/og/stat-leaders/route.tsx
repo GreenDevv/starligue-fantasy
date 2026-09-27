@@ -16,6 +16,7 @@ import { ImageResponse } from "next/og";
 import { z } from "zod";
 import { STAT_LINE_KEYS, getStatLine } from "@/lib/stats/stat-lines";
 import { getStatLeaders, type StatLeaderRow } from "@/lib/stats/get-stat-leaders";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 export const dynamic = "force-dynamic";
 
@@ -273,7 +274,7 @@ export async function GET(request: Request) {
                       style={{ objectFit: "contain", marginRight: 12 }}
                     />
                   ) : null}
-                  <div style={{ display: "flex", fontSize: 26, color: "#CBD5E1" }}>{hero.leader.club.shortName}</div>
+                  <div style={{ display: "flex", fontSize: 26, color: "#CBD5E1" }}>{clubDisplayName(hero.leader.club)}</div>
                 </div>
                 <div style={{ display: "flex", fontFamily: "display", fontSize: 84, fontWeight: 700, color: "#F59E0B" }}>
                   {formatValue(hero.leader.value, scope)}
@@ -344,7 +345,7 @@ export async function GET(request: Request) {
                       style={{ objectFit: "contain", marginRight: 8 }}
                     />
                   ) : null}
-                  <div style={{ display: "flex", fontSize: 18, color: "#94A3B8" }}>{leader.club.shortName}</div>
+                  <div style={{ display: "flex", fontSize: 18, color: "#94A3B8" }}>{clubDisplayName(leader.club)}</div>
                 </div>
               </div>
 

@@ -16,6 +16,7 @@ import { computeGroupStandings } from "@/lib/matches/group-standings";
 import { ehfCompetitionLabelFromSlug } from "@/lib/matches/ehf-competition-slugs";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { MatchesStrip } from "@/components/dashboard/MatchesStrip";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 function teamHref(team: GroupTeam): string | null {
   return team.clubId ? `/clubs/${team.clubId}` : null;
@@ -109,7 +110,7 @@ export default async function EhfGroupPage({ params }: { params: { competition: 
                   const nameContent = (
                     <span className="flex min-w-0 items-center gap-1.5">
                       <ClubLogo club={team} size="xs" />
-                      <span className="truncate text-text">{team.shortName}</span>
+                      <span className="truncate text-text">{clubDisplayName(team)}</span>
                     </span>
                   );
                   return (
@@ -161,8 +162,8 @@ export default async function EhfGroupPage({ params }: { params: { competition: 
         showDate
         matches={matches.map((m) => ({
           id: m.id,
-          homeClub: { id: m.home.clubId ?? undefined, shortName: m.home.shortName, name: m.home.name, logoUrl: m.home.logoUrl },
-          awayClub: { id: m.away.clubId ?? undefined, shortName: m.away.shortName, name: m.away.name, logoUrl: m.away.logoUrl },
+          homeClub: { id: m.home.clubId ?? undefined, shortName: m.home.shortName, displayName: m.home.displayName, name: m.home.name, logoUrl: m.home.logoUrl },
+          awayClub: { id: m.away.clubId ?? undefined, shortName: m.away.shortName, displayName: m.away.displayName, name: m.away.name, logoUrl: m.away.logoUrl },
           homeScore: m.homeScore,
           awayScore: m.awayScore,
           kickoffAt: m.kickoffAt,

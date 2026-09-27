@@ -42,14 +42,14 @@ export default async function TeamPage({
       ? await prisma.simulationTeam.findUnique({
           where: { id: ctx.teamId },
           include: {
-            squad: { include: { player: { include: { club: { select: { shortName: true, logoUrl: true } } } } } },
+            squad: { include: { player: { include: { club: { select: { shortName: true, displayName: true, logoUrl: true } } } } } },
             bonusUsages: { select: { type: true } },
           },
         })
       : await prisma.fantasyTeam.findUnique({
           where: { id: ctx.teamId },
           include: {
-            squad: { include: { player: { include: { club: { select: { shortName: true, logoUrl: true } } } } } },
+            squad: { include: { player: { include: { club: { select: { shortName: true, displayName: true, logoUrl: true } } } } } },
             bonusUsages: { select: { type: true } },
           },
         });

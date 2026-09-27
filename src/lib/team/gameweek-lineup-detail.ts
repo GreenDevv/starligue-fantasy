@@ -28,7 +28,7 @@ export interface LineupPlayerDetail {
   photoUrl: string | null;
   position: Position;
   role: "STARTER" | "BENCH";
-  club: { shortName: string; logoUrl: string | null };
+  club: { shortName: string; displayName?: string | null; logoUrl: string | null };
   isCaptain: boolean;
   lnhRating: number | null;
   points: number | null; // null tant que la journée n'est pas notée
@@ -76,7 +76,7 @@ export async function getGameweekLineupDetail(
   const [players, rawStats, configs] = await Promise.all([
     prisma.player.findMany({
       where: { id: { in: playerIds } },
-      include: { club: { select: { shortName: true, logoUrl: true } } },
+      include: { club: { select: { shortName: true, displayName: true, logoUrl: true } } },
     }),
     scoreFromStats
       ? prisma.playerMatchStat.findMany({
@@ -142,7 +142,7 @@ export async function getGameweekLineupDetail(
       photoUrl: p?.photoUrl ?? null,
       position: e.position as Position,
       role: e.role,
-      club: { shortName: p?.club.shortName ?? "", logoUrl: p?.club.logoUrl ?? null },
+      club: { shortName: p?.club.shortName ?? "", displayName: p?.club.displayName ?? null, logoUrl: p?.club.logoUrl ?? null },
       isCaptain: e.isCaptain ?? false,
       lnhRating: stat?.lnhRating ?? null,
       points,

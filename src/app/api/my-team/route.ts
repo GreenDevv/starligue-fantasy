@@ -29,7 +29,7 @@ export async function GET(request: Request) {
 
   const squadInclude = {
     include: {
-      player: { include: { club: { select: { id: true, name: true, shortName: true, logoUrl: true } } } },
+      player: { include: { club: { select: { id: true, name: true, shortName: true, displayName: true, logoUrl: true } } } },
     },
   } as const;
 

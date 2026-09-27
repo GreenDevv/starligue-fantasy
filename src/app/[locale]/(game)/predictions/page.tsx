@@ -7,6 +7,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useTranslations, useFormatter } from "next-intl";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 type PredictionOutcome = "HOME" | "DRAW" | "AWAY";
 
@@ -14,6 +15,7 @@ const OUTCOME_ORDER: PredictionOutcome[] = ["HOME", "DRAW", "AWAY"];
 
 interface ClubInfo {
   shortName: string;
+  displayName?: string | null;
   name: string;
   logoUrl: string | null;
 }
@@ -156,7 +158,7 @@ export default function PredictionsPage() {
             <div key={m.matchId} className="pixel-corners border border-border bg-surface p-3">
               <div className="flex items-center gap-2">
                 <div className="flex min-w-0 flex-1 items-center justify-end gap-2 text-right">
-                  <p className="truncate text-sm text-text">{m.homeClub.shortName}</p>
+                  <p className="truncate text-sm text-text">{clubDisplayName(m.homeClub)}</p>
                   <ClubLogo club={m.homeClub} size="sm" />
                 </div>
                 <span className="shrink-0 text-[10px] text-text-muted">
@@ -170,7 +172,7 @@ export default function PredictionsPage() {
                 </span>
                 <div className="flex min-w-0 flex-1 items-center gap-2">
                   <ClubLogo club={m.awayClub} size="sm" />
-                  <p className="truncate text-sm text-text">{m.awayClub.shortName}</p>
+                  <p className="truncate text-sm text-text">{clubDisplayName(m.awayClub)}</p>
                 </div>
               </div>
 

@@ -69,7 +69,7 @@ export async function POST() {
 
   const players = await prisma.player.findMany({
     where: { seasonId: season.id },
-    include: { club: { select: { shortName: true } } },
+    include: { club: { select: { shortName: true, displayName: true } } },
   });
 
   const { updates, unchanged, unmatched } = matchPlayerPhotoRows(

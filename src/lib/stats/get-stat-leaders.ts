@@ -20,7 +20,7 @@ export interface StatLeaderRow {
   lastName: string;
   photoUrl: string | null;
   position: Position;
-  club: { shortName: string; logoUrl: string | null };
+  club: { shortName: string; displayName?: string | null; logoUrl: string | null };
   value: number;
 }
 
@@ -196,7 +196,7 @@ export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetS
       lastName: true,
       photoUrl: true,
       position: true,
-      club: { select: { shortName: true, logoUrl: true } },
+      club: { select: { shortName: true, displayName: true, logoUrl: true } },
     },
   });
   const playerById = new Map(players.map((p) => [p.id, p]));

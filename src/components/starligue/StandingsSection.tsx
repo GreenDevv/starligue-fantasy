@@ -47,7 +47,7 @@ export async function StandingsSection({ gameweekNumber, rows, liveMatchesCounte
                   <td className="py-1.5">
                     <div className="flex items-center gap-1.5">
                       <ClubLogo club={{ shortName: r.clubShortName, name: r.clubName, logoUrl: r.logoUrl }} size="xs" />
-                      <span className="truncate text-text">{r.clubShortName}</span>
+                      <span className="truncate text-text">{r.clubDisplayName}</span>
                       {hasPendingMatchThisRound(r.played, gameweekNumber) && (
                         <span className="shrink-0 text-[10px] font-bold text-points-neg" title="N'a pas encore joué cette journée">
                           -1

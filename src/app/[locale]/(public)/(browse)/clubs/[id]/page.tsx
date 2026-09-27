@@ -29,7 +29,7 @@ export default async function ClubPage({ params }: { params: { id: string } }) {
 
   const club = await prisma.club.findUnique({
     where: { id: params.id },
-    select: { id: true, name: true, shortName: true, logoUrl: true },
+    select: { id: true, name: true, shortName: true, displayName: true, logoUrl: true },
   });
   if (!club) notFound();
 

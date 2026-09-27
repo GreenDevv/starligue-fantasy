@@ -71,7 +71,7 @@ export async function syncLnhRosterIdentities(opts: RosterIdentitySyncOptions): 
     provider.fetchSeasonScores("40"),
   ]);
 
-  const clubs = await prisma.club.findMany({ select: { id: true, shortName: true, externalIds: true } });
+  const clubs = await prisma.club.findMany({ select: { id: true, shortName: true, displayName: true, externalIds: true } });
   const clubIdBySlug = new Map<string, string>();
   for (const c of clubs) {
     const slug = (c.externalIds as Record<string, string> | null)?.lnh;

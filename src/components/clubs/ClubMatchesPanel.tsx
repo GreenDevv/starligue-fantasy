@@ -15,6 +15,7 @@ export type CompetitionKind = "starligue" | "warmup" | "coupe" | "championsLeagu
 interface ClubHeaderInfo {
   id: string;
   shortName: string;
+  displayName?: string | null;
   name: string;
   logoUrl: string | null;
 }
@@ -36,7 +37,7 @@ export interface UnifiedMatch {
   kickoffAt: Date;
   ownScore: number | null;
   opponentScore: number | null;
-  opponent: { shortName: string; name: string; logoUrl: string | null };
+  opponent: { shortName: string; displayName?: string | null; name: string; logoUrl: string | null };
   href: string | null; // null pour Warm Up/Coupe de France (l'adversaire n'a pas toujours de page /clubs/[id], D2/étranger) ; pour Champions League/European League, pointe vers la page groupe (tous les matchs + classement) dès qu'un groupLabel est connu
   tooltip: string;
   badge: string;

@@ -36,8 +36,8 @@ export async function GET(req: Request) {
       select: {
         id: true,
         kickoffAt: true,
-        homeClub: { select: { shortName: true } },
-        awayClub: { select: { shortName: true } },
+        homeClub: { select: { shortName: true, displayName: true } },
+        awayClub: { select: { shortName: true, displayName: true } },
         gameweek: { select: { number: true } },
         _count: { select: { playerStats: true } },
       },

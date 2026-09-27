@@ -17,6 +17,7 @@ async function requireAdmin() {
 const UpdateSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   shortName: z.string().min(1).max(20).optional(),
+  displayName: z.string().max(40).optional(), // "" = retour à l'abréviation
   logoUrl: z.string().url().optional().or(z.literal("")).optional(),
   lnhSlug: z.string().max(50).optional().or(z.literal("")).optional(),
 });
@@ -37,7 +38,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     return NextResponse.json({ error: { code: "NOT_FOUND" } }, { status: 404 });
   }
 
-  const { name, shortName, logoUrl, lnhSlug } = parsed.data;
+  const { name, shortName, displayName, logoUrl, lnhSlug } = parsed.data;
 
   // Fusionne les externalIds existants avec la nouvelle valeur lnh
   const currentExtIds = (club.externalIds as Record<string, string>) ?? {};
@@ -55,6 +56,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     data: {
       ...(name !== undefined ? { name } : {}),
       ...(shortName !== undefined ? { shortName } : {}),
+      ...(displayName !== undefined ? { displayName: displayName.trim() === "" ? null : displayName.trim() } : {}),
       ...(logoUrl !== undefined ? { logoUrl: logoUrl === "" ? null : logoUrl } : {}),
       externalIds: cleanExtIds,
     },
@@ -65,6 +67,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       id: updated.id,
       name: updated.name,
       shortName: updated.shortName,
+      displayName: updated.displayName,
       logoUrl: updated.logoUrl,
       externalIds: updated.externalIds as Record<string, string>,
     },
