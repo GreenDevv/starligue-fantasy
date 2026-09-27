@@ -31,7 +31,9 @@ export async function computeGameweekScores(gameweekId: string): Promise<{ lineu
     include: {
       matches: {
         include: {
-          playerStats: true,
+          // Notes définitives seulement : les notes provisoires du direct
+          // (isLive=true, cron sync-live) ne comptent pas comme « match noté ».
+          playerStats: { where: { isLive: false } },
           homeClub: true,
           awayClub: true,
         },

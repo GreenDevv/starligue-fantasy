@@ -31,7 +31,7 @@ export async function computeSeasonPlayerPoints(seasonId: string): Promise<Map<s
           awayClubId: true,
           homeScore: true,
           awayScore: true,
-          playerStats: true,
+          playerStats: { where: { isLive: false } },
         },
       },
     },

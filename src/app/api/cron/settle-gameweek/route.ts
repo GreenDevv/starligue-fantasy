@@ -88,7 +88,7 @@ export async function POST(request: Request) {
 
       const matches = await prisma.match.findMany({
         where: { gameweekId: gw.id },
-        select: { status: true, _count: { select: { playerStats: true } } },
+        select: { status: true, _count: { select: { playerStats: { where: { isLive: false } } } } },
       });
       const allSettled = matches.length > 0 && matches.every((m) => SETTLED_STATUSES.has(m.status));
       const allHaveStats = matches.length > 0 && matches.every((m) => m._count.playerStats > 0);
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
       // 4. Calcul des points quand toutes les notes sont là.
       const statsNow = await prisma.match.findMany({
         where: { gameweekId: gw.id },
-        select: { _count: { select: { playerStats: true } } },
+        select: { _count: { select: { playerStats: { where: { isLive: false } } } } },
       });
       const readyToScore =
         statsNow.length > 0 && statsNow.every((m) => m._count.playerStats > 0) && !gw.isScored;

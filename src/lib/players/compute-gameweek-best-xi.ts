@@ -20,7 +20,7 @@ export async function computeGameweekPlayerPoints(gameweekId: string): Promise<M
           awayClubId: true,
           homeScore: true,
           awayScore: true,
-          playerStats: true,
+          playerStats: { where: { isLive: false } },
         },
       },
     },

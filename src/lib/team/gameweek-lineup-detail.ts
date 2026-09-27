@@ -82,7 +82,7 @@ export async function getGameweekLineupDetail(
       ? prisma.playerMatchStat.findMany({
           where: { playerId: { in: playerIds }, match: { gameweekId } },
           include: {
-            match: { select: { homeClubId: true, awayClubId: true, homeScore: true, awayScore: true } },
+            match: { select: { status: true, homeClubId: true, awayClubId: true, homeScore: true, awayScore: true } },
             player: { select: { clubId: true } },
           },
         })
@@ -95,10 +95,17 @@ export async function getGameweekLineupDetail(
 
   const statMap = new Map<string, { lnhRating: number | null; played: boolean; teamWon: boolean }>();
   for (const stat of rawStats) {
+    // Score d'un match LIVE = score courant (sync-live) : pas de bonus de victoire
+    // avant le coup de sifflet final.
+    const finished = stat.match.status === "FINISHED";
     const homeWon =
+      finished &&
       stat.match.homeScore !== null && stat.match.awayScore !== null && stat.match.homeScore > stat.match.awayScore;
     const awayWon =
-      stat.match.homeScore !== null && stat.match.awayScore !== null && stat.match.awayScore > stat.match.homeScore;
+      finished &&
+      stat.match.homeScore !== null &&
+      stat.match.awayScore !== null &&
+      stat.match.awayScore > stat.match.homeScore;
     const isHome = stat.player.clubId === stat.match.homeClubId;
     statMap.set(stat.playerId, {
       lnhRating: stat.lnhRating !== null ? Number(stat.lnhRating) : null,

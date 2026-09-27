@@ -31,6 +31,12 @@ import {
   boxscoreRowToStatFields,
   type ScrapedMatchBoxscoreRow,
 } from "@/lib/data-providers/lnh-scraper.provider";
+import {
+  loadLnhResolutionContext,
+  persistLnhIdentities,
+  resolveLnhRow,
+  type LnhResolutionContext,
+} from "@/lib/ingestion/lnh-player-identity";
 
 export interface CalendarsIdSyncResult {
   resolved: number;
@@ -211,12 +217,14 @@ export interface ScrapedGameweekStats {
   gameweekNumber: number;
   matchesProcessed: number;
   rows: ScrapedGameweekStatRow[];
+  /** Contexte de rapprochement utilisé — pour persistLnhIdentities côté écrivain. */
+  resolution: LnhResolutionContext | null;
 }
 
 /**
  * Scrape les stats détaillées de boxscore de tous les matchs joués d'une journée de
- * la saison en direct et les rapproche des joueurs/matchs en base (club slug → nom
- * court → joueur par nom+club, même résolution que src/lib/simulation/advance.ts).
+ * la saison en direct et les rapproche des joueurs/matchs en base (slug profil
+ * lnh.fr → dernier nom lnh.fr → nom, cf. src/lib/players/lnh-player-resolver.ts).
  * N'ÉCRIT RIEN — brique partagée par syncGameweekBoxscore (qui upsert) et par
  * l'analyse des corrections LNH a posteriori (src/lib/lnh-corrections).
  */
@@ -234,7 +242,7 @@ export async function scrapeGameweekBoxscoreRows(
     .filter((x): x is { match: (typeof gameweek.matches)[number]; calendarsId: string } => Boolean(x.calendarsId));
 
   if (matchesWithCalendarsId.length === 0) {
-    return { gameweekNumber: gameweek.number, matchesProcessed: 0, rows: [] };
+    return { gameweekNumber: gameweek.number, matchesProcessed: 0, rows: [], resolution: null };
   }
 
   const provider = createLnhScraperProvider();
@@ -243,44 +251,32 @@ export async function scrapeGameweekBoxscoreRows(
     lnhSeasonsId
   );
 
-  const dbClubs = await prisma.club.findMany();
-  const clubShortNameBySlug = new Map<string, string>();
-  for (const c of dbClubs) {
-    const extIds = (c.externalIds as Record<string, string>) ?? {};
-    if (extIds.lnh) clubShortNameBySlug.set(extIds.lnh.toLowerCase(), c.shortName);
-  }
-
+  const resolution = await loadLnhResolutionContext(gameweek.seasonId);
   const seasonPlayers = await prisma.player.findMany({
     where: { seasonId: gameweek.seasonId },
-    include: { club: { select: { shortName: true } } },
+    select: { id: true, firstName: true, lastName: true, club: { select: { shortName: true } } },
   });
-  const playerByKey = new Map<string, (typeof seasonPlayers)[number]>();
-  for (const p of seasonPlayers) {
-    const key = `${p.lastName.toLowerCase()}|${p.firstName.toLowerCase()}|${p.club.shortName.toLowerCase()}`;
-    playerByKey.set(key, p);
-  }
+  const playerById = new Map(seasonPlayers.map((p) => [p.id, p]));
 
   const rows: ScrapedGameweekStatRow[] = [];
   for (const { match, calendarsId } of matchesWithCalendarsId) {
     const boxRows = boxscoresByCalendarsId.get(calendarsId) ?? [];
     for (const row of boxRows) {
-      const clubShortName = clubShortNameBySlug.get(row.lnhClubSlug.toLowerCase());
-      if (!clubShortName) continue;
-      const key = `${row.lastName.toLowerCase()}|${row.firstName.toLowerCase()}|${clubShortName.toLowerCase()}`;
-      const player = playerByKey.get(key);
+      const resolved = resolveLnhRow(resolution, row);
+      const player = resolved ? playerById.get(resolved.playerId) : undefined;
       if (!player) continue;
       rows.push({
         matchId: match.id,
         playerId: player.id,
         playerFirstName: player.firstName,
         playerLastName: player.lastName,
-        clubShortName,
+        clubShortName: player.club.shortName,
         row,
       });
     }
   }
 
-  return { gameweekNumber: gameweek.number, matchesProcessed: matchesWithCalendarsId.length, rows };
+  return { gameweekNumber: gameweek.number, matchesProcessed: matchesWithCalendarsId.length, rows, resolution };
 }
 
 /**
@@ -294,7 +290,7 @@ export async function syncGameweekBoxscore(
   gameweekId: string,
   lnhSeasonsId: string
 ): Promise<GameweekBoxscoreSyncResult> {
-  const { gameweekNumber, matchesProcessed, rows } = await scrapeGameweekBoxscoreRows(
+  const { gameweekNumber, matchesProcessed, rows, resolution } = await scrapeGameweekBoxscoreRows(
     gameweekId,
     lnhSeasonsId
   );
@@ -312,6 +308,14 @@ export async function syncGameweekBoxscore(
         });
       })
     );
+    // Notes provisoires du direct (isLive=true) restées sans équivalent dans le
+    // boxscore définitif (joueur absent de la feuille finale) : supprimées pour
+    // qu'aucune note provisoire ne survive au match.
+    await prisma.playerMatchStat.deleteMany({
+      where: { matchId: { in: [...new Set(statUpserts.map((u) => u.matchId))] }, isLive: true },
+    });
+    // Apprend/rafraîchit slug + nom lnh.fr des joueurs rapprochés (renommages LNH).
+    if (resolution) await persistLnhIdentities(resolution, rows);
   }
 
   return {

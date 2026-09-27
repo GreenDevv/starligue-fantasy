@@ -27,10 +27,20 @@
 //     doublon : sequence = position chronologique, on n'insère que ce qui dépasse
 //     le dernier sequence déjà stocké)
 //
-// N'ingère PAS le boxscore (notes joueurs) : les notes ne sont publiées qu'après le
-// match, c'est le rôle de sync-ratings / settle-gameweek.
+//   - PlayerMatchStat (isLive=true) → Score LNH + stats de chaque joueur EN DIRECT,
+//     lus dans la même réponse /ajaxlive que les événements (onglet "Stats match",
+//     validé le 27/09). Notes PROVISOIRES : alimentent le score fantasy provisoire,
+//     le classement live et la page match ; le calcul définitif (settle-gameweek /
+//     computeGameweekScores) les ignore et attend le boxscore définitif, qui
+//     repasse les lignes à isLive=false. Une ligne déjà définitive n'est jamais
+//     réécrite par le live.
 import { prisma } from "@/lib/db";
-import { createLnhScraperProvider } from "@/lib/data-providers/lnh-scraper.provider";
+import {
+  createLnhScraperProvider,
+  boxscoreRowToStatFields,
+  type ScrapedMatchBoxscoreRow,
+} from "@/lib/data-providers/lnh-scraper.provider";
+import { loadLnhResolutionContext, resolveLnhRow, type LnhResolutionContext } from "@/lib/ingestion/lnh-player-identity";
 import { IngestionError } from "@/lib/data-providers/lnh-scraper.provider";
 import type { LnhScraperProvider } from "@/lib/data-providers/lnh-scraper.provider";
 import { resolveEventPlayerId, type EventPlayerCandidate } from "@/lib/live/resolve-event-player";
@@ -42,15 +52,57 @@ const WINDOW_AFTER_MS = 2.75 * 60 * 60 * 1000;
 export interface LiveFeedSyncResult {
   checked: number;
   updated: number;
-  matches: { matchId: string; minute: number; period: string; score: string; finished: boolean; newEvents: number }[];
+  matches: {
+    matchId: string;
+    minute: number;
+    period: string;
+    score: string;
+    finished: boolean;
+    newEvents: number;
+    liveStats: number;
+  }[];
   errors: string[];
 }
 
-// Résout/rafraîchit les événements d'un match et les insère en base (delta only),
-// en associant chaque nouvelle ligne à un joueur de `rosterCandidates` (best effort,
-// null si aucun nom reconnu). Retourne le nombre de nouvelles lignes insérées. Ne
-// jette jamais — une erreur ici ne doit pas empêcher la mise à jour du score
-// (fonctionnalité secondaire).
+// Upsert des notes/stats PROVISOIRES d'un match en cours (isLive=true). Le tableau
+// live n'a pas de lien profil : joueur retrouvé par dernier nom lnh.fr connu puis
+// par notre nom (resolveLnhRow, même résolveur que le boxscore définitif). Si le match a déjà au moins une ligne définitive
+// (isLive=false, boxscore final passé), on ne touche à rien. Retourne le nombre de
+// lignes écrites.
+async function upsertLiveStats(
+  matchId: string,
+  rows: ScrapedMatchBoxscoreRow[],
+  resolution: LnhResolutionContext
+): Promise<number> {
+  if (rows.length === 0) return 0;
+  const definitive = await prisma.playerMatchStat.count({ where: { matchId, isLive: false } });
+  if (definitive > 0) return 0;
+
+  const upserts: { playerId: string; fields: ReturnType<typeof boxscoreRowToStatFields> }[] = [];
+  for (const row of rows) {
+    const resolved = resolveLnhRow(resolution, row);
+    if (!resolved) continue;
+    upserts.push({ playerId: resolved.playerId, fields: { ...boxscoreRowToStatFields(row), isLive: true } });
+  }
+  if (upserts.length === 0) return 0;
+
+  await prisma.$transaction(
+    upserts.map(({ playerId, fields }) =>
+      prisma.playerMatchStat.upsert({
+        where: { matchId_playerId: { matchId, playerId } },
+        create: { matchId, playerId, ...fields },
+        update: fields,
+      })
+    )
+  );
+  return upserts.length;
+}
+
+// Résout/rafraîchit le flux live d'un match (/ajaxlive) : insère les nouveaux
+// événements (delta only, associés best effort à un joueur de `rosterCandidates`)
+// et upsert les notes provisoires des joueurs (upsertLiveStats). Ne jette jamais —
+// une erreur ici ne doit pas empêcher la mise à jour du score (fonctionnalité
+// secondaire).
 async function syncMatchEvents(
   provider: LnhScraperProvider,
   matchId: string,
@@ -58,23 +110,24 @@ async function syncMatchEvents(
   externalIds: Record<string, string>,
   rosterCandidates: EventPlayerCandidate[],
   homeClubId: string,
-  awayClubId: string
-): Promise<{ inserted: number; errors: string[] }> {
+  awayClubId: string,
+  resolution: LnhResolutionContext
+): Promise<{ inserted: number; liveStats: number; errors: string[] }> {
   const errors: string[] = [];
   let filename = externalIds.lnh_live_channel_filename;
 
-  async function fetchEvents() {
+  async function fetchFeed() {
     if (!filename) return null;
     try {
-      return await provider.fetchLiveEventsFeed(channelId, filename);
+      return await provider.fetchLiveChannelFeed(channelId, filename);
     } catch (err) {
       errors.push(`events(${matchId}): ${String(err)}`);
       return null;
     }
   }
 
-  let events = await fetchEvents();
-  if (events === null) {
+  let feed = await fetchFeed();
+  if (feed === null) {
     // filename absent ou expiré (400) → (ré)résoudre puis réessayer une fois.
     try {
       const resolved = await provider.fetchLiveChannelFilename(channelId);
@@ -84,17 +137,27 @@ async function syncMatchEvents(
           where: { id: matchId },
           data: { externalIds: { ...externalIds, lnh_live_channel_filename: resolved, lnh_live_channel_id: channelId } },
         });
-        events = await fetchEvents();
+        feed = await fetchFeed();
       }
     } catch (err) {
       errors.push(`filename(${matchId}): ${String(err)}`);
     }
   }
-  if (!events || events.length === 0) return { inserted: 0, errors };
+  if (!feed) return { inserted: 0, liveStats: 0, errors };
+
+  let liveStats = 0;
+  try {
+    liveStats = await upsertLiveStats(matchId, feed.boxscore, resolution);
+  } catch (err) {
+    errors.push(`liveStats(${matchId}): ${String(err)}`);
+  }
+
+  const events = feed.events;
+  if (events.length === 0) return { inserted: 0, liveStats, errors };
 
   const existingCount = await prisma.matchLiveEvent.count({ where: { matchId } });
   const newOnes = events.slice(existingCount);
-  if (newOnes.length === 0) return { inserted: 0, errors };
+  if (newOnes.length === 0) return { inserted: 0, liveStats, errors };
 
   const rows = newOnes.map((e, i) => ({
     matchId,
@@ -116,7 +179,7 @@ async function syncMatchEvents(
     console.warn(`[live-feed] notify(${matchId}):`, String(err))
   );
 
-  return { inserted: count, errors };
+  return { inserted: count, liveStats, errors };
 }
 
 export async function syncLiveMatchFeeds(seasonId: string, _seasonsId: string): Promise<LiveFeedSyncResult> {
@@ -169,6 +232,7 @@ export async function syncLiveMatchFeeds(seasonId: string, _seasonsId: string): 
     arr.push({ id: p.id, firstName: p.firstName, lastName: p.lastName });
     rosterByClub.set(p.clubId, arr);
   }
+  const resolution = await loadLnhResolutionContext(seasonId, clubIds);
 
   for (const match of candidates) {
     const externalIds = match.externalIds as Record<string, string>;
@@ -199,21 +263,24 @@ export async function syncLiveMatchFeeds(seasonId: string, _seasonsId: string): 
     });
 
     let newEvents = 0;
+    let liveStats = 0;
     if (entry.channelId) {
       const rosterCandidates = [
         ...(rosterByClub.get(match.homeClubId) ?? []),
         ...(rosterByClub.get(match.awayClubId) ?? []),
       ];
-      const { inserted, errors } = await syncMatchEvents(
+      const { inserted, liveStats: statsWritten, errors } = await syncMatchEvents(
         provider,
         match.id,
         entry.channelId,
         externalIds ?? {},
         rosterCandidates,
         match.homeClubId,
-        match.awayClubId
+        match.awayClubId,
+        resolution
       );
       newEvents = inserted;
+      liveStats = statsWritten;
       result.errors.push(...errors);
     }
 
@@ -225,6 +292,7 @@ export async function syncLiveMatchFeeds(seasonId: string, _seasonsId: string): 
       score: `${entry.homeScore}-${entry.awayScore}`,
       finished: false,
       newEvents,
+      liveStats,
     });
   }
 

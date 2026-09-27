@@ -63,6 +63,7 @@ export async function getLiveFantasyLeaderboard(seasonId: string): Promise<LiveF
     where: { gameweekId: gw.id },
     select: {
       id: true,
+      status: true,
       homeClubId: true,
       awayClubId: true,
       homeScore: true,
@@ -79,6 +80,9 @@ export async function getLiveFantasyLeaderboard(seasonId: string): Promise<LiveF
   const statByPlayer = new Map<string, { lnhRating: number | null; played: boolean; teamWon: boolean }>();
   const clubWon = new Map<string, boolean>(); // clubId → a gagné un match fini de la journée
   for (const m of matches) {
+    // Score d'un match LIVE = score courant (sync-live) : pas de bonus de victoire
+    // avant le coup de sifflet final.
+    if (m.status !== "FINISHED") continue;
     const homeWon = m.homeScore !== null && m.awayScore !== null && m.homeScore > m.awayScore;
     const awayWon = m.homeScore !== null && m.awayScore !== null && m.awayScore > m.homeScore;
     if (homeWon) clubWon.set(m.homeClubId, true);

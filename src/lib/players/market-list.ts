@@ -57,6 +57,7 @@ export async function getMarketPlayers(mode: SeasonMode): Promise<MarketPlayer[]
       where: {
         playerId: { in: playerIds },
         lnhRating: { not: null },
+        isLive: false,
         match: { seasonId: season.id, gameweek: { isScored: true } },
       },
       orderBy: { match: { gameweek: { number: "desc" } } },

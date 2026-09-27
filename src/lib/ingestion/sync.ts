@@ -215,6 +215,7 @@ export async function syncRatings(
           lnhRating: stat.lnhRating,
           played: stat.played,
           source,
+          isLive: false,
         },
         create: {
           matchId,

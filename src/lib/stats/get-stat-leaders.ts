@@ -52,7 +52,7 @@ export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetS
           select: { id: true, number: true },
         })
       : await prisma.gameweek.findFirst({
-          where: { seasonId, matches: { some: { playerStats: { some: {} } } } },
+          where: { seasonId, matches: { some: { playerStats: { some: { isLive: false } } } } },
           orderBy: { number: "desc" },
           select: { id: true, number: true },
         });
@@ -78,7 +78,7 @@ export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetS
     const scoringConfig = parseScoringConfig(Object.fromEntries(configs.map((c) => [c.key, c.value])));
 
     const rows = await prisma.playerMatchStat.findMany({
-      where: { match: matchWhere, played: true, lnhRating: { not: null } },
+      where: { match: matchWhere, isLive: false, played: true, lnhRating: { not: null } },
       select: {
         playerId: true,
         lnhRating: true,
@@ -117,7 +117,7 @@ export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetS
     // pour scope=average.
     const totals = await prisma.playerMatchStat.groupBy({
       by: ["playerId"],
-      where: { match: matchWhere },
+      where: { match: matchWhere, isLive: false },
       _sum: { goalsTotal: true, shotsTotal: true },
     });
     ranked = totals
@@ -131,7 +131,7 @@ export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetS
     // pas une moyenne de pourcentages par match.
     const totals = await prisma.playerMatchStat.groupBy({
       by: ["playerId"],
-      where: { match: matchWhere },
+      where: { match: matchWhere, isLive: false },
       _sum: { saves: true, shotsFaced: true },
     });
     ranked = totals
@@ -151,7 +151,7 @@ export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetS
     // avant les vrais leaders — piège vérifié en local sur ce jeu de données.
     const groupByArgs = {
       by: ["playerId"],
-      where: { match: matchWhere },
+      where: { match: matchWhere, isLive: false },
       _sum: { [statKey]: true },
     };
     const grouped = (await (prisma.playerMatchStat.groupBy as (args: unknown) => Promise<unknown>)(
@@ -165,7 +165,7 @@ export async function getStatLeaders(params: GetStatLeadersParams): Promise<GetS
     if (scope === "average") {
       const playedCounts = await prisma.playerMatchStat.groupBy({
         by: ["playerId"],
-        where: { match: matchWhere, played: true },
+        where: { match: matchWhere, isLive: false, played: true },
         _count: { _all: true },
       });
       matchesPlayedByPlayer = new Map(playedCounts.map((c) => [c.playerId, c._count._all]));
