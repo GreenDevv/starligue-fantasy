@@ -106,7 +106,7 @@ export async function computeGameweekBestXI(gameweekId: string): Promise<BestXIE
       lastName: true,
       position: true,
       photoUrl: true,
-      club: { select: { shortName: true, logoUrl: true } },
+      club: { select: { shortName: true, displayName: true, logoUrl: true } },
     },
   });
 

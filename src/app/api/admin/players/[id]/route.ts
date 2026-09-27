@@ -65,7 +65,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         ...(photoUrl !== undefined ? { photoUrl: photoUrl === "" ? null : photoUrl } : {}),
         ...(injuredAt !== undefined ? { injuredAt: injuredAt === null ? null : new Date(injuredAt) } : {}),
       },
-      include: { club: { select: { id: true, name: true, shortName: true } } },
+      include: { club: { select: { id: true, name: true, shortName: true, displayName: true } } },
     });
     // Trace la correction dans l'historique, au même titre que l'import .xlsx en
     // masse (src/app/api/admin/import/player-values/route.ts) — sinon le graphique

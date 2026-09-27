@@ -53,8 +53,8 @@ export async function analyzeGameweekCorrections(gameweekNumber: number): Promis
     include: {
       matches: {
         include: {
-          homeClub: { select: { shortName: true } },
-          awayClub: { select: { shortName: true } },
+          homeClub: { select: { shortName: true, displayName: true } },
+          awayClub: { select: { shortName: true, displayName: true } },
         },
       },
     },

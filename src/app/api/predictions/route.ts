@@ -78,8 +78,8 @@ export async function GET(request: Request) {
   const matches = await prisma.match.findMany({
     where: { gameweekId: gameweek.id },
     include: {
-      homeClub: { select: { shortName: true, name: true, logoUrl: true } },
-      awayClub: { select: { shortName: true, name: true, logoUrl: true } },
+      homeClub: { select: { shortName: true, displayName: true, name: true, logoUrl: true } },
+      awayClub: { select: { shortName: true, displayName: true, name: true, logoUrl: true } },
       predictionMarket: {
         include: { predictions: { where: { fantasyTeamId: ctx.teamId }, select: { outcome: true } } },
       },

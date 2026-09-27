@@ -15,7 +15,7 @@ export interface TeamOfWeekCardData {
     firstName: string;
     lastName: string;
     photoUrl: string | null;
-    club: { shortName: string; logoUrl: string | null };
+    club: { shortName: string; displayName?: string | null; logoUrl: string | null };
     points: number;
   }[];
 }
@@ -38,7 +38,7 @@ export async function resolveTeamOfWeekCard(payload: unknown): Promise<TeamOfWee
       firstName: true,
       lastName: true,
       photoUrl: true,
-      club: { select: { shortName: true, logoUrl: true } },
+      club: { select: { shortName: true, displayName: true, logoUrl: true } },
     },
   });
   const playerById = new Map(players.map((p) => [p.id, p]));
@@ -70,7 +70,7 @@ export interface PerformancesCardData {
     lastName: string;
     position: Position;
     photoUrl: string | null;
-    club: { shortName: string; logoUrl: string | null };
+    club: { shortName: string; displayName?: string | null; logoUrl: string | null };
     points: number;
     lnhRating: number | null;
   }[];
@@ -95,7 +95,7 @@ export async function resolvePerformancesCard(payload: unknown): Promise<Perform
       lastName: true,
       position: true,
       photoUrl: true,
-      club: { select: { shortName: true, logoUrl: true } },
+      club: { select: { shortName: true, displayName: true, logoUrl: true } },
     },
   });
   const playerById = new Map(players.map((p) => [p.id, p]));

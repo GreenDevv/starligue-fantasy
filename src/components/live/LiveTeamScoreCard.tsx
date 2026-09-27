@@ -14,7 +14,7 @@ interface PlayerRow {
   lastName: string;
   position: string;
   role: "STARTER" | "BENCH";
-  club: { shortName: string; logoUrl: string | null };
+  club: { shortName: string; displayName?: string | null; logoUrl: string | null };
   isCaptain: boolean;
   points: number | null;
 }

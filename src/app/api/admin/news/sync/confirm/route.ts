@@ -88,7 +88,7 @@ export async function POST(req: Request) {
       dedupeKey,
       clubId: item.clubId,
     },
-    include: { club: { select: { shortName: true } }, player: { select: { firstName: true, lastName: true } } },
+    include: { club: { select: { shortName: true, displayName: true } }, player: { select: { firstName: true, lastName: true } } },
   });
 
   return NextResponse.json({

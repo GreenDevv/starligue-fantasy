@@ -20,7 +20,7 @@ export interface ClubPageMatch {
   gameweekNumber: number;
   kickoffAt: Date;
   isHome: boolean;
-  opponent: { id: string; shortName: string; name: string; logoUrl: string | null };
+  opponent: { id: string; shortName: string; displayName?: string | null; name: string; logoUrl: string | null };
   ownScore: number | null;
   opponentScore: number | null;
 }
@@ -31,11 +31,11 @@ export interface ClubPageData {
   goalsChartEntries: {
     gameweekNumber: number;
     values: { goalsFor: number; goalsAgainst: number };
-    opponent: { shortName: string; name: string; logoUrl: string | null };
+    opponent: { shortName: string; displayName?: string | null; name: string; logoUrl: string | null };
   }[];
 }
 
-const CLUB_SELECT = { select: { id: true, shortName: true, name: true, logoUrl: true } } as const;
+const CLUB_SELECT = { select: { id: true, shortName: true, displayName: true, name: true, logoUrl: true } } as const;
 
 export async function getClubPageData(clubId: string, seasonId: string, mode: SeasonMode): Promise<ClubPageData> {
   let simulationCursor = 0;

@@ -21,7 +21,7 @@ interface SquadEntry {
   photoOffsetX?: number;
   photoOffsetY?: number;
   photoZoom?: number;
-  club: { shortName: string; logoUrl?: string | null };
+  club: { shortName: string; displayName?: string | null; logoUrl?: string | null };
   role: "STARTER" | "BENCH";
 }
 
@@ -39,7 +39,7 @@ interface TeamResponse {
         photoOffsetX?: number;
         photoOffsetY?: number;
         photoZoom?: number;
-        club: { shortName: string; logoUrl?: string | null };
+        club: { shortName: string; displayName?: string | null; logoUrl?: string | null };
       };
     }>;
   };

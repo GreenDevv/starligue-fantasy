@@ -5,6 +5,7 @@ import type { Position } from "@/lib/squad/validation";
 import { POSITIONS } from "@/lib/squad/validation";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 export interface SlotPlayer {
   id: string;
@@ -12,7 +13,7 @@ export interface SlotPlayer {
   lastName: string;
   position: Position;
   photoUrl?: string | null;
-  club: { shortName: string; logoUrl?: string | null };
+  club: { shortName: string; displayName?: string | null; logoUrl?: string | null };
 }
 
 interface SquadSlotsProps {
@@ -58,7 +59,7 @@ export function SquadSlots({ squad, onSlotClick, activePosition }: SquadSlotsPro
                       </p>
                       <p className="flex items-center gap-1 text-[9px] leading-tight text-text-muted">
                         <ClubLogo club={player.club} size="xs" className="h-2.5 w-2.5" />
-                        {player.club.shortName}
+                        {clubDisplayName(player.club)}
                       </p>
                     </div>
                   </>

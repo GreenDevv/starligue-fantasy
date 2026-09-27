@@ -6,6 +6,7 @@
 // une panne d'écriture d'actu ne doit jamais faire régresser la déclaration de
 // blessure elle-même).
 import { prisma } from "@/lib/db";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 interface InjuredPlayer {
   id: string;
@@ -13,7 +14,7 @@ interface InjuredPlayer {
   lastName: string;
   seasonId: string;
   injuredAt: Date | null;
-  club: { id: string; name: string; shortName: string };
+  club: { id: string; name: string; shortName: string; displayName?: string | null };
 }
 
 // reason : motif libre saisi par l'admin (ex. "fin de contrat", "transféré à X")
@@ -34,7 +35,7 @@ export async function createInjuryNewsItem(player: InjuredPlayer, reason?: strin
   // rubrique "Transferts", pas "Blessures" (demande explicite 2026-09-07).
   const isDeparture = isInjured && Boolean(reason);
   const dedupeSuffix = isInjured ? player.injuredAt!.toISOString() : `cleared-${Date.now()}`;
-  const name = `${player.firstName} ${player.lastName} (${player.club.shortName})`;
+  const name = `${player.firstName} ${player.lastName} (${clubDisplayName(player.club)})`;
   const title = !isInjured
     ? `${name} de retour de blessure`
     : isDeparture

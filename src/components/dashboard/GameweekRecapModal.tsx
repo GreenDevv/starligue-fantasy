@@ -21,6 +21,7 @@ import { PositionBadge } from "@/components/ui/Badge";
 import type { Position } from "@/lib/squad/validation";
 import type { PendingGameweekRecap } from "@/lib/team/pending-gameweek-recap";
 import type { LineupPlayerDetail } from "@/lib/team/gameweek-lineup-detail";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 interface GameweekRecapModalProps {
   recaps: PendingGameweekRecap[];
@@ -234,7 +235,7 @@ export function GameweekRecapModal({ recaps }: GameweekRecapModalProps) {
                     </p>
                     <p className="flex items-center gap-1 text-xs text-text-muted">
                       <ClubLogo club={top.club} size="xs" />
-                      {top.club.shortName}
+                      {clubDisplayName(top.club)}
                     </p>
                   </div>
                   <span className="font-arcade text-2xl leading-none text-accent-secondary">

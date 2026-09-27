@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import type { ActiveClub } from "@/lib/clubs/get-active-clubs";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 // Dropdown custom (bouton + panel), même pattern d'interaction que
 // LocaleSwitcher.tsx (click-outside/Escape pour fermer) — nécessaire pour
@@ -56,7 +57,7 @@ export function ClubFilterDropdown({
         className="pixel-corners-sm flex w-full items-center gap-2 border border-border bg-surface px-3 py-2 text-sm text-text transition-colors hover:border-accent/50 focus:border-accent focus:outline-none"
       >
         {selected ? <ClubLogo club={selected} size="xs" /> : null}
-        <span className="flex-1 truncate text-left">{selected ? selected.shortName : allLabel}</span>
+        <span className="flex-1 truncate text-left">{selected ? clubDisplayName(selected) : allLabel}</span>
         <span className="text-text-muted">▾</span>
       </button>
 
@@ -88,7 +89,7 @@ export function ClubFilterDropdown({
               }`}
             >
               <ClubLogo club={club} size="xs" />
-              <span className="truncate">{club.shortName}</span>
+              <span className="truncate">{clubDisplayName(club)}</span>
             </button>
           ))}
         </div>

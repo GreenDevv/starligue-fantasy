@@ -35,7 +35,7 @@ export async function GET(_req: Request, { params }: { params: { id: string; tea
   const squadInclude = {
     include: {
       player: {
-        include: { club: { select: { id: true, name: true, shortName: true, logoUrl: true } } },
+        include: { club: { select: { id: true, name: true, shortName: true, displayName: true, logoUrl: true } } },
       },
     },
   } as const;

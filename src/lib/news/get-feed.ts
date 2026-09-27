@@ -17,7 +17,7 @@ export interface NewsFeedItem {
   sourceUrl: string | null;
   imageUrl: string | null;
   publishedAt: Date;
-  club: { shortName: string; logoUrl: string | null } | null;
+  club: { shortName: string; displayName?: string | null; logoUrl: string | null } | null;
   player: { firstName: string; lastName: string } | null;
 }
 
@@ -48,7 +48,7 @@ export async function getNewsFeed(
       sourceUrl: true,
       imageUrl: true,
       publishedAt: true,
-      club: { select: { shortName: true, logoUrl: true } },
+      club: { select: { shortName: true, displayName: true, logoUrl: true } },
       player: { select: { firstName: true, lastName: true } },
     },
   });
@@ -81,7 +81,7 @@ export async function getNewsItemById(id: string): Promise<NewsItemDetail | null
       sourceUrl: true,
       imageUrl: true,
       publishedAt: true,
-      club: { select: { shortName: true, logoUrl: true } },
+      club: { select: { shortName: true, displayName: true, logoUrl: true } },
       player: { select: { firstName: true, lastName: true } },
     },
   });

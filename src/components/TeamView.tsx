@@ -22,15 +22,15 @@ interface SquadEntry {
   photoOffsetX?: number;
   photoOffsetY?: number;
   photoZoom?: number;
-  club: { shortName: string; logoUrl?: string | null };
+  club: { shortName: string; displayName?: string | null; logoUrl?: string | null };
   role: "STARTER" | "BENCH";
   marketValue: number;
 }
 
 interface StripMatch {
   id: string;
-  homeClub: { id: string; shortName: string; name: string; logoUrl: string | null };
-  awayClub: { id: string; shortName: string; name: string; logoUrl: string | null };
+  homeClub: { id: string; shortName: string; displayName?: string | null; name: string; logoUrl: string | null };
+  awayClub: { id: string; shortName: string; displayName?: string | null; name: string; logoUrl: string | null };
   homeScore: number | null;
   awayScore: number | null;
   kickoffAt: string | Date;

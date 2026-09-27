@@ -5,6 +5,7 @@ import { OutcomeBadge } from "@/components/ui/OutcomeBadge";
 import { pickHighlightStats, type HighlightStatKey } from "@/lib/players/highlight-stat";
 import { matchOutcomeForTeam } from "@/lib/matches/match-outcome";
 import type { LiveGameweekPerformances, LiveGameweekPerformanceEntry } from "@/lib/matches/current-gameweek-performances";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 // Carte "meilleures perfs en direct" de la journée en cours — remplace l'ancienne
 // liste toute simple embarquée dans la bande "journée en cours" de la home
@@ -72,7 +73,7 @@ function MatchLine({ entry, compact = false }: { entry: LiveGameweekPerformanceE
       {outcome && <OutcomeBadge outcome={outcome} big={!compact} />}
       <span className="shrink-0">vs</span>
       <ClubLogo club={match.opponentClub} size="xs" />
-      <span className="truncate">{match.opponentClub.shortName}</span>
+      <span className="truncate">{clubDisplayName(match.opponentClub)}</span>
       {hasScore && (
         <span className={`shrink-0 tabular-nums ${finished ? "" : "text-points-neg"}`}>
           ({match.isHome ? `${match.homeScore}-${match.awayScore}` : `${match.awayScore}-${match.homeScore}`})

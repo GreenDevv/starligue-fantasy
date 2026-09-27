@@ -155,6 +155,8 @@
     "playersLabel": "spillere",
     "fullNameLabel": "Fulde navn",
     "shortNameLabel": "Kort kode",
+    "displayNameLabel": "Visningsnavn",
+    "displayNameHelp": "Navn vist overalt på siden og i grafik (f.eks. “Chambéry”). Tomt = forkortelse.",
     "logoUrlLabel": "Logo-URL",
     "lnhSlugLabel": "LNH-slug",
     "lnhSlugPlaceholder": "f.eks.: montpellier, paris, nantes…",

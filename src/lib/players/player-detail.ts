@@ -11,6 +11,7 @@ import { SIMULATION_SEASON_LABEL } from "@/lib/simulation/constants";
 import { findArchivedPlayerId } from "./season-recap";
 import { buildPlayerStatsChartEntries, type PlayerStatsChartEntry } from "./player-stats-chart";
 import type { Position } from "@/lib/squad/validation";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 export interface PlayerDetailMatchLogEntry {
   id: string;
@@ -30,7 +31,7 @@ export interface PlayerDetailData {
   photoOffsetX: number;
   photoOffsetY: number;
   photoZoom: number;
-  club: { id: string; name: string; shortName: string; logoUrl: string | null };
+  club: { id: string; name: string; shortName: string; displayName?: string | null; logoUrl: string | null };
   marketValue: number;
   seasonId: string;
   seasonLabel: string;
@@ -41,7 +42,7 @@ export interface PlayerDetailData {
   // PENDANT la saison archivée (peut différer si transfert entretemps), à
   // afficher uniquement à côté du bloc de stats de repli, pas dans l'en-tête.
   isFallbackSeason: boolean;
-  statsClub: { id: string; name: string; shortName: string; logoUrl: string | null } | null;
+  statsClub: { id: string; name: string; shortName: string; displayName?: string | null; logoUrl: string | null } | null;
   statsSeasonLabel: string;
   avgRating: number | null;
   seasonStatTotals: { key: string; category: "bonus" | "malus"; total: number }[];
@@ -59,8 +60,8 @@ const STATS_INCLUDE = {
       match: {
         include: {
           gameweek: { select: { number: true } },
-          homeClub: { select: { shortName: true, name: true, logoUrl: true } },
-          awayClub: { select: { shortName: true, name: true, logoUrl: true } },
+          homeClub: { select: { shortName: true, displayName: true, name: true, logoUrl: true } },
+          awayClub: { select: { shortName: true, displayName: true, name: true, logoUrl: true } },
         },
       },
     },
@@ -107,7 +108,7 @@ function computeStatsBlock(
     return {
       id: s.id,
       gameweekNumber: s.match.gameweek.number,
-      opponent: isHome ? s.match.awayClub.shortName : s.match.homeClub.shortName,
+      opponent: clubDisplayName(isHome ? s.match.awayClub : s.match.homeClub),
       lnhRating: s.lnhRating ? Number(s.lnhRating) : null,
       played: s.played,
       pts,
@@ -216,6 +217,7 @@ export async function getPlayerDetailData(playerId: string): Promise<PlayerDetai
               id: archivedPlayer.club.id,
               name: archivedPlayer.club.name,
               shortName: archivedPlayer.club.shortName,
+              displayName: archivedPlayer.club.displayName,
               logoUrl: archivedPlayer.club.logoUrl,
             };
             isFallbackSeason = true;
@@ -239,6 +241,7 @@ export async function getPlayerDetailData(playerId: string): Promise<PlayerDetai
       id: player.club.id,
       name: player.club.name,
       shortName: player.club.shortName,
+      displayName: player.club.displayName,
       logoUrl: player.club.logoUrl,
     },
     marketValue: Number(player.marketValue),

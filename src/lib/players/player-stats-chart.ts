@@ -6,6 +6,7 @@ import { CHARTABLE_STAT_LINES } from "@/lib/stats/stat-chart-colors";
 
 export interface PlayerStatsChartOpponent {
   shortName: string;
+  displayName?: string | null;
   name?: string;
   logoUrl?: string | null;
 }

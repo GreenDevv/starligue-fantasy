@@ -4,6 +4,7 @@ import { ClubLogo } from "@/components/ui/ClubLogo";
 import { OutcomeBadge } from "@/components/ui/OutcomeBadge";
 import { hasPendingMatchThisRound } from "@/lib/standings/pending-match";
 import type { FullRanking } from "@/lib/standings/full-ranking";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 // Classement complet "tout-en-un" (/ranking) : classement général + forme (5
 // derniers résultats) + prochain adversaire par club — demande explicite du
@@ -55,7 +56,7 @@ export async function RankingTable({ gameweekNumber, liveMatchesCounted, rows }:
                 <td className="py-1.5">
                   <Link href={`/clubs/${r.clubId}`} className="flex items-center gap-1.5 hover:text-accent">
                     <ClubLogo club={{ shortName: r.clubShortName, name: r.clubName, logoUrl: r.logoUrl }} size="xs" />
-                    <span className="truncate text-text">{r.clubShortName}</span>
+                    <span className="truncate text-text">{r.clubDisplayName}</span>
                     {hasPendingMatchThisRound(r.played, gameweekNumber) && (
                       <span className="shrink-0 text-[10px] font-bold text-points-neg" title={t("pendingMatchTitle")}>
                         -1
@@ -113,7 +114,7 @@ function NextOpponentCell({
     <div className="flex items-center gap-1.5 whitespace-nowrap text-text-muted">
       <span className="text-[10px]">{opponent.isHome ? "vs" : "@"}</span>
       <ClubLogo club={opponent} size="xs" />
-      <span className="truncate">{opponent.shortName}</span>
+      <span className="truncate">{clubDisplayName(opponent)}</span>
       <span className="text-[10px]">{dateLabel}</span>
     </div>
   );

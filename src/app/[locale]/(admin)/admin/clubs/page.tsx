@@ -9,6 +9,7 @@ interface Club {
   id: string;
   name: string;
   shortName: string;
+  displayName: string | null;
   logoUrl: string | null;
   externalIds: Record<string, string>;
   playerCount: number;
@@ -56,6 +57,7 @@ function ClubPanel({
   const tRoot = useTranslations();
   const [name, setName] = useState(club.name);
   const [shortName, setShortName] = useState(club.shortName);
+  const [displayName, setDisplayName] = useState(club.displayName ?? "");
   const [logoUrl, setLogoUrl] = useState(club.logoUrl ?? "");
   const [lnhSlug, setLnhSlug] = useState(club.externalIds.lnh ?? "");
   const [saving, setSaving] = useState(false);
@@ -64,6 +66,7 @@ function ClubPanel({
   const hasChanges =
     name !== club.name ||
     shortName !== club.shortName ||
+    displayName !== (club.displayName ?? "") ||
     logoUrl !== (club.logoUrl ?? "") ||
     lnhSlug !== (club.externalIds.lnh ?? "");
 
@@ -74,7 +77,7 @@ function ClubPanel({
       const res = await fetch(`/api/admin/clubs/${club.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, shortName, logoUrl, lnhSlug }),
+        body: JSON.stringify({ name, shortName, displayName, logoUrl, lnhSlug }),
       });
       const json = await res.json() as { data?: Club; error?: { message?: string; code?: string } };
       if (res.ok && json.data) {
@@ -129,6 +132,19 @@ function ClubPanel({
               maxLength={20}
               className="w-full rounded border border-border bg-bg px-3 py-2 font-mono text-sm text-text focus:border-accent focus:outline-none"
             />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-text-muted">
+              {t("clubs.displayNameLabel")}
+            </label>
+            <input
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              maxLength={40}
+              className="w-full rounded border border-border bg-bg px-3 py-2 text-sm text-text focus:border-accent focus:outline-none"
+            />
+            <p className="mt-1 text-xs text-text-muted">{t("clubs.displayNameHelp")}</p>
           </div>
 
           <div>

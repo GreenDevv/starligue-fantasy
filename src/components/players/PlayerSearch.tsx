@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 export interface PlayerSearchOption {
   id: string;
   firstName: string;
   lastName: string;
-  club: { shortName: string };
+  club: { shortName: string; displayName?: string | null };
 }
 
 function normalize(s: string): string {
@@ -56,7 +57,7 @@ export function PlayerSearch({
     return (
       <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-bg px-4 py-2.5">
         <span className="text-text">
-          {selected.firstName} {selected.lastName} <span className="text-text-muted">— {selected.club.shortName}</span>
+          {selected.firstName} {selected.lastName} <span className="text-text-muted">— {clubDisplayName(selected.club)}</span>
         </span>
         <button
           type="button"
@@ -104,7 +105,7 @@ export function PlayerSearch({
                 <span>
                   {p.firstName} {p.lastName}
                 </span>
-                <span className="shrink-0 text-xs text-text-muted">{p.club.shortName}</span>
+                <span className="shrink-0 text-xs text-text-muted">{clubDisplayName(p.club)}</span>
               </button>
             ))
           )}

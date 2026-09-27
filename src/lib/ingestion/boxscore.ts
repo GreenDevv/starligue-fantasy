@@ -254,7 +254,7 @@ export async function scrapeGameweekBoxscoreRows(
   const resolution = await loadLnhResolutionContext(gameweek.seasonId);
   const seasonPlayers = await prisma.player.findMany({
     where: { seasonId: gameweek.seasonId },
-    select: { id: true, firstName: true, lastName: true, club: { select: { shortName: true } } },
+    select: { id: true, firstName: true, lastName: true, club: { select: { shortName: true, displayName: true } } },
   });
   const playerById = new Map(seasonPlayers.map((p) => [p.id, p]));
 

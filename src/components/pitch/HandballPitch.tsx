@@ -17,7 +17,7 @@ interface PitchPlayer {
   photoOffsetX?: number;
   photoOffsetY?: number;
   photoZoom?: number;
-  club: { shortName: string; logoUrl?: string | null };
+  club: { shortName: string; displayName?: string | null; logoUrl?: string | null };
   role: "STARTER" | "BENCH";
   points?: number;
 }
@@ -169,7 +169,7 @@ function PitchClubBadge({
   dy = 9.5,
 }: {
   coords: { x: number; y: number };
-  club: { shortName: string; logoUrl?: string | null };
+  club: { shortName: string; displayName?: string | null; logoUrl?: string | null };
   dx?: number;
   dy?: number;
 }) {

@@ -7,7 +7,7 @@ import { ClubLogo } from "@/components/ui/ClubLogo";
 // Petit island client pour le hover Framer Motion sur la grille des 16 logos de
 // la home (page.tsx, Server Component) — whileHover/whileTap nécessitent un
 // Client Component, d'où l'extraction plutôt qu'un <motion.div> inline là-bas.
-export function ClubLogoLink({ club }: { club: { id: string; shortName: string; name: string; logoUrl: string | null } }) {
+export function ClubLogoLink({ club }: { club: { id: string; shortName: string; displayName?: string | null; name: string; logoUrl: string | null } }) {
   return (
     <motion.div
       whileHover={{ scale: 1.15 }}

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import type { Position } from "@/lib/squad/validation";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 export interface CaptainPickerPlayer {
   playerId: string;
@@ -11,7 +12,7 @@ export interface CaptainPickerPlayer {
   lastName: string;
   position: Position;
   photoUrl?: string | null;
-  club: { shortName: string; logoUrl?: string | null };
+  club: { shortName: string; displayName?: string | null; logoUrl?: string | null };
 }
 
 interface CaptainPickerProps {
@@ -51,7 +52,7 @@ export function CaptainPicker({ squad, captainId, onSelect, disabled = false }: 
               </p>
               <p className="flex items-center gap-1 text-[10px] leading-tight text-text-muted">
                 <ClubLogo club={p.club} size="xs" className="h-2.5 w-2.5" />
-                {t(`positionShort.${p.position}`)} · {p.club.shortName}
+                {t(`positionShort.${p.position}`)} · {clubDisplayName(p.club)}
               </p>
             </div>
             <span

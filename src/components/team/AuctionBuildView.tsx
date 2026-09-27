@@ -10,6 +10,7 @@ import type { AuctionBidError } from "@/lib/auction/validate";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { cn } from "@/lib/utils";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 interface Player {
   id: string;
@@ -18,7 +19,7 @@ interface Player {
   position: Position;
   marketValue: number;
   photoUrl?: string | null;
-  club: { id: string; shortName: string; name: string; logoUrl?: string | null };
+  club: { id: string; shortName: string; displayName?: string | null; name: string; logoUrl?: string | null };
 }
 
 interface AuctionState {
@@ -107,7 +108,7 @@ export function AuctionBuildView({ leagueId, leagueSuffix }: { leagueId: string;
           p.position === activePos &&
           !unavailableSet.has(p.id) &&
           (search === "" ||
-            `${p.firstName} ${p.lastName} ${p.club.shortName}`.toLowerCase().includes(search.toLowerCase()))
+            `${p.firstName} ${p.lastName} ${clubDisplayName(p.club)} ${clubDisplayName(p.club)}`.toLowerCase().includes(search.toLowerCase()))
       ),
     [allPlayers, activePos, unavailableSet, search]
   );
@@ -173,7 +174,7 @@ export function AuctionBuildView({ leagueId, leagueSuffix }: { leagueId: string;
           });
         case "TOO_MANY_PLAYERS_FROM_CLUB":
           return t("auction.errors.tooManyFromClub", {
-            club: clubById.get(err.clubId)?.shortName ?? err.clubId,
+            club: (() => { const c = clubById.get(err.clubId); return c ? clubDisplayName(c) : err.clubId; })(),
             count: err.count,
             max: err.max,
           });
@@ -354,7 +355,7 @@ export function AuctionBuildView({ leagueId, leagueSuffix }: { leagueId: string;
                               )}
                             >
                               <ClubLogo club={player.club} size="xs" />
-                              <span className="truncate">{player.club.shortName}</span>
+                              <span className="truncate">{clubDisplayName(player.club)}</span>
                               {overClubQuota && ` · ${clubTotal}/${state.maxPlayersPerClub}`}
                             </p>
                           </div>
@@ -434,7 +435,7 @@ export function AuctionBuildView({ leagueId, leagueSuffix }: { leagueId: string;
                           </p>
                           <p className="flex items-center gap-1 text-xs text-text-muted">
                             <ClubLogo club={player.club} size="xs" />
-                            {player.club.shortName}
+                            {clubDisplayName(player.club)}
                           </p>
                         </div>
                         <input

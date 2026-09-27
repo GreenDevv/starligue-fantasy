@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 type LogoSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 interface ClubLogoProps {
-  club: { shortName: string; name?: string; logoUrl?: string | null };
+  club: { shortName: string; displayName?: string | null; name?: string; logoUrl?: string | null };
   size?: LogoSize;
   className?: string;
   // Info-bulle au survol (ex: "Ivry (Proligue)") — utile pour un club hors DB dont

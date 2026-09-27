@@ -57,10 +57,10 @@ export async function GET(req: Request) {
             }
           : {}),
       },
-      include: { club: { select: { id: true, name: true, shortName: true } } },
+      include: { club: { select: { id: true, name: true, shortName: true, displayName: true } } },
       orderBy: [{ club: { shortName: "asc" } }, { position: "asc" }, { lastName: "asc" }],
     }),
-    prisma.club.findMany({ orderBy: { shortName: "asc" }, select: { id: true, name: true, shortName: true } }),
+    prisma.club.findMany({ orderBy: { shortName: "asc" }, select: { id: true, name: true, shortName: true, displayName: true } }),
   ]);
 
   return NextResponse.json({
@@ -126,7 +126,7 @@ export async function POST(req: Request) {
       photoUrl: photoUrl || null,
       isActive,
     },
-    include: { club: { select: { id: true, name: true, shortName: true } } },
+    include: { club: { select: { id: true, name: true, shortName: true, displayName: true } } },
   });
 
   return NextResponse.json({

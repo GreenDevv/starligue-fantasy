@@ -65,7 +65,7 @@ export async function POST(req: Request) {
 
   const players = await prisma.player.findMany({
     where: { seasonId: season.id },
-    include: { club: { select: { shortName: true } } },
+    include: { club: { select: { shortName: true, displayName: true } } },
   });
 
   const rows: ScrapedScoreRow[] = scraped.map((s) => ({

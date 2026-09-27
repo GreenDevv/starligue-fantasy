@@ -269,7 +269,10 @@ model Season {
 model Club {
   id                String                @id @default(cuid())
   name              String // "Montpellier Handball"
-  shortName         String // "MHB"
+  shortName         String // "MHB" — clé technique (logos, imports, correspondances), pas un libellé
+  // Nom affiché partout sur le site et les visuels (« Montpellier », « Chambéry »,
+  // « St-Raph »…) — voir clubDisplayName (src/lib/clubs/display-name.ts). null = repli sur shortName.
+  displayName       String?
   logoUrl           String?
   externalIds       Json                  @default("{}") // { "api_sports": "123", "lnh": "mhb" }
   players           Player[]

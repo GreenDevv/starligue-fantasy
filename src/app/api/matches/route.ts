@@ -48,8 +48,8 @@ export async function GET(request: Request) {
       include: {
         matches: {
           include: {
-            homeClub: { select: { id: true, name: true, shortName: true, logoUrl: true } },
-            awayClub: { select: { id: true, name: true, shortName: true, logoUrl: true } },
+            homeClub: { select: { id: true, name: true, shortName: true, displayName: true, logoUrl: true } },
+            awayClub: { select: { id: true, name: true, shortName: true, displayName: true, logoUrl: true } },
           },
           orderBy: { kickoffAt: "asc" },
         },

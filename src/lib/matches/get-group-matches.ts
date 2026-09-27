@@ -12,6 +12,7 @@ export interface GroupTeam {
   clubId: string | null; // null si club hors DB (pas de page /clubs/[id])
   name: string;
   shortName: string;
+  displayName?: string | null;
   logoUrl: string | null;
 }
 
@@ -32,8 +33,8 @@ export async function getGroupMatches(
   const matches = await prisma.friendlyMatch.findMany({
     where: { seasonId, competitionLabel, groupLabel },
     include: {
-      homeClub: { select: { id: true, shortName: true, name: true, logoUrl: true } },
-      awayClub: { select: { id: true, shortName: true, name: true, logoUrl: true } },
+      homeClub: { select: { id: true, shortName: true, displayName: true, name: true, logoUrl: true } },
+      awayClub: { select: { id: true, shortName: true, displayName: true, name: true, logoUrl: true } },
     },
     orderBy: { kickoffAt: "asc" },
   });
@@ -44,10 +45,10 @@ export async function getGroupMatches(
     homeScore: m.homeScore,
     awayScore: m.awayScore,
     home: m.homeClub
-      ? { clubId: m.homeClub.id, name: m.homeClub.name, shortName: m.homeClub.shortName, logoUrl: m.homeClub.logoUrl }
+      ? { clubId: m.homeClub.id, name: m.homeClub.name, shortName: m.homeClub.shortName, displayName: m.homeClub.displayName, logoUrl: m.homeClub.logoUrl }
       : { clubId: null, name: m.homeClubName, shortName: m.homeClubName, logoUrl: m.homeClubLogoUrl },
     away: m.awayClub
-      ? { clubId: m.awayClub.id, name: m.awayClub.name, shortName: m.awayClub.shortName, logoUrl: m.awayClub.logoUrl }
+      ? { clubId: m.awayClub.id, name: m.awayClub.name, shortName: m.awayClub.shortName, displayName: m.awayClub.displayName, logoUrl: m.awayClub.logoUrl }
       : { clubId: null, name: m.awayClubName, shortName: m.awayClubName, logoUrl: m.awayClubLogoUrl },
   }));
 }

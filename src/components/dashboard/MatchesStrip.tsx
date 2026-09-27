@@ -12,6 +12,7 @@ interface StripClub {
   // Absent pour un club hors DB (pas de page /clubs/[id] à lier) — voir linkHref.
   id?: string;
   shortName: string;
+  displayName?: string | null;
   name?: string;
   logoUrl?: string | null;
   // Renseigné seulement pour un club hors DB (ex: adversaire Warm Up de D2/étranger,
@@ -169,7 +170,7 @@ function formatGameweekRange(format: DateFormatter, dates: (string | Date)[]): s
 // (2025/26) — ARCHITECTURE.md §8.1.
 function clubTooltip(club: StripClub): string | undefined {
   if (!club.division) return undefined;
-  return `${club.name ?? club.shortName} (${club.division})`;
+  return `${club.displayName ?? club.name ?? club.shortName} (${club.division})`;
 }
 
 // Info-bulle native (attribut title, même mécanisme que clubTooltip ci-dessus) sur
@@ -181,7 +182,7 @@ function clubTooltip(club: StripClub): string | undefined {
 // place, contrairement à l'espace très contraint de l'encart lui-même.
 function matchTooltip(m: StripMatch, format: DateFormatter): string {
   const date = typeof m.kickoffAt === "string" ? new Date(m.kickoffAt) : m.kickoffAt;
-  const home = m.homeClub.name ?? m.homeClub.shortName;
+  const home = m.homeClub.displayName ?? m.homeClub.name ?? m.homeClub.shortName;
   const when = format.dateTime(date, { weekday: "short", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
   return `${home} · ${when}`;
 }

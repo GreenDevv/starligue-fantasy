@@ -45,7 +45,7 @@ export async function POST() {
     );
   }
 
-  const clubs = await prisma.club.findMany({ select: { shortName: true, externalIds: true } });
+  const clubs = await prisma.club.findMany({ select: { shortName: true, displayName: true, externalIds: true } });
   const shortNameBySlug = new Map<string, string>();
   for (const c of clubs) {
     const slug = (c.externalIds as Record<string, string> | null)?.lnh;
@@ -62,7 +62,7 @@ export async function POST() {
 
   const players = await prisma.player.findMany({
     where: { seasonId: season.id },
-    include: { club: { select: { shortName: true } } },
+    include: { club: { select: { shortName: true, displayName: true } } },
   });
 
   const { updates, unchanged, unmatched } = matchPlayerPhotoRows(

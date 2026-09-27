@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { ClubLogo } from "@/components/ui/ClubLogo";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 // Graphique SVG à la main (même convention que ValueHistoryChart — pas de
 // dépendance ajoutée), multi-séries générique : abscisse = journées de
@@ -24,6 +25,7 @@ export interface ChartSeries {
 
 export interface ChartOpponent {
   shortName: string;
+  displayName?: string | null;
   name?: string;
   logoUrl?: string | null;
 }
@@ -324,7 +326,7 @@ export function MultiSeriesLineChart({
                   <ClubLogo club={hoveredPrimary.opponent} size="xs" />
                   <span className="truncate">
                     {isComparing && primaryLabel ? `${primaryLabel} ${t("vs")} ` : `${t("vs")} `}
-                    {hoveredPrimary.opponent.shortName}
+                    {clubDisplayName(hoveredPrimary.opponent)}
                   </span>
                 </div>
               )}
@@ -332,7 +334,7 @@ export function MultiSeriesLineChart({
                 <div className="mb-1 flex items-center gap-1.5 text-text-muted">
                   <ClubLogo club={hoveredCompare.opponent} size="xs" />
                   <span className="truncate">
-                    {compareLabel} {t("vs")} {hoveredCompare.opponent.shortName}
+                    {compareLabel} {t("vs")} {clubDisplayName(hoveredCompare.opponent)}
                   </span>
                 </div>
               )}

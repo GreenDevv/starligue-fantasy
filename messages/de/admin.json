@@ -155,6 +155,8 @@
     "playersLabel": "Spieler",
     "fullNameLabel": "Vollständiger Name",
     "shortNameLabel": "Kurzcode",
+    "displayNameLabel": "Anzeigename",
+    "displayNameHelp": "Überall auf der Website und in Grafiken angezeigter Name (z. B. „Chambéry“). Leer = Abkürzung.",
     "logoUrlLabel": "Logo-URL",
     "lnhSlugLabel": "LNH-Slug",
     "lnhSlugPlaceholder": "z. B. montpellier, paris, nantes…",

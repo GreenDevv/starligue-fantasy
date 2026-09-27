@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { cn } from "@/lib/utils";
 import type { ClubPageMatch } from "@/lib/clubs/club-page-data";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 // Bilan V/N/D + forme (5 derniers matchs Starligue, pastilles) — extrait de
 // /clubs/[id] (en-tête club) pour être réutilisé tel quel sur la page
@@ -54,7 +55,7 @@ export async function ClubFormBadge({
           return (
             <span
               key={m.id}
-              title={`${m.opponent.shortName} ${m.ownScore}-${m.opponentScore}`}
+              title={`${clubDisplayName(m.opponent)} ${m.ownScore}-${m.opponentScore}`}
               className={`h-2.5 w-2.5 rounded-full ${tone}`}
             />
           );

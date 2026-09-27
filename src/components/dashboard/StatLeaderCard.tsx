@@ -10,6 +10,7 @@ import type { WidgetSize } from "@/lib/dashboard/layout";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { teamColor } from "@/lib/team/team-colors";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 // Extrait de src/components/dashboard/StatLeadersPanel.tsx — réutilisé tel quel par
 // le dashboard personnalisable (widget "stat joueur", src/components/DashboardView.tsx).
@@ -22,7 +23,7 @@ interface LeaderApiRow {
   lastName: string;
   photoUrl: string | null;
   position: Position;
-  club: { shortName: string; logoUrl: string | null };
+  club: { shortName: string; displayName?: string | null; logoUrl: string | null };
   value: number;
 }
 
@@ -180,7 +181,7 @@ export function StatLeaderCard({
                 {showPhotos && (
                   <div className="flex items-center gap-1 text-xs text-text-muted">
                     <ClubLogo club={top.club} size="xs" />
-                    <span>{top.club.shortName}</span>
+                    <span>{clubDisplayName(top.club)}</span>
                   </div>
                 )}
               </div>

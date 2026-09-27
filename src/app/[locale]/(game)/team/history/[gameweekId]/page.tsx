@@ -9,6 +9,7 @@ import { PositionBadge } from "@/components/ui/Badge";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import type { Position } from "@/lib/squad/validation";
+import { clubDisplayName } from "@/lib/clubs/display-name";
 
 interface SnapshotEntry {
   playerId: string;
@@ -94,7 +95,7 @@ export default async function LineupDetailPage({
   const [players, rawStats, configs] = await Promise.all([
     prisma.player.findMany({
       where: { id: { in: playerIds } },
-      include: { club: { select: { shortName: true, logoUrl: true } } },
+      include: { club: { select: { shortName: true, displayName: true, logoUrl: true } } },
     }),
     isScored
       ? prisma.playerMatchStat.findMany({
@@ -251,7 +252,7 @@ function PlayerRow({
 }: {
   entry: ReturnType<
     typeof Array.prototype.map<SnapshotEntry & {
-      player: { firstName: string; lastName: string; photoUrl: string | null; club: { shortName: string; logoUrl: string | null } } | undefined;
+      player: { firstName: string; lastName: string; photoUrl: string | null; club: { shortName: string; displayName?: string | null; logoUrl: string | null } } | undefined;
       stat: { lnhRating: number | null; played: boolean } | undefined;
       points: number | null;
     }>
@@ -280,7 +281,7 @@ function PlayerRow({
         </p>
         <p className="flex items-center gap-1 text-xs text-text-muted">
           {entry.player?.club && <ClubLogo club={entry.player.club} size="xs" />}
-          {entry.player?.club.shortName}
+          {entry.player ? clubDisplayName(entry.player.club) : null}
         </p>
       </div>
       <PositionBadge position={entry.position as Position} />
