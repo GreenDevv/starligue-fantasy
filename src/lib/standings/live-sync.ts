@@ -10,6 +10,18 @@ export interface LiveStandingsSyncResult {
   gameweekNumber: number;
   upserted: number;
   unresolvedSlugs: string[];
+  /** true = classement lnh.fr déjà en avance sur la journée visée, rien écrit. */
+  skippedAhead?: boolean;
+}
+
+// Le classement lnh.fr est mis à jour dès la fin d'un match, parfois avant que notre
+// Match.status passe à FINISHED : la « dernière journée finie » vue par l'appelant
+// peut alors être N alors que lnh.fr compte déjà un match de N+1. Écrire ce
+// classement dans l'instantané N le corromprait (cas réel : SRVH–SARAN J4 compté
+// dans l'instantané J3, 25/09). Invariant : dans l'instantané de la journée N, aucun
+// club n'a joué plus de N matchs (moins est possible : match reporté).
+export function standingsFitGameweek(rows: { played: number }[], gameweekNumber: number): boolean {
+  return rows.every((r) => r.played <= gameweekNumber);
 }
 
 export async function syncLiveClubStandings(
@@ -47,6 +59,11 @@ export async function syncLiveClubStandings(
       goalsAgainst: s.goalsAgainst,
       goalAvg: s.goalAvg,
     });
+  }
+
+  if (!standingsFitGameweek(rows, gameweekNumber)) {
+    console.warn(`[standings] classement lnh.fr en avance sur J${gameweekNumber} (un club a joué plus de ${gameweekNumber} matchs) — instantané non écrit`);
+    return { gameweekNumber, upserted: 0, unresolvedSlugs, skippedAhead: true };
   }
 
   const upserted = await snapshotClubStandings(seasonId, gameweekNumber, rows, "LNH_SCRAPER");
