@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { computeValuationsFromLnhScores, type PlayerLnhScoreInput } from "./valuation";
+import {
+  computeValuationsFromLnhScores,
+  valueNewcomersFromSeasonScores,
+  type PlayerLnhScoreInput,
+  type SeasonScoreInput,
+} from "./valuation";
 
 function p(overrides: Partial<PlayerLnhScoreInput> = {}): PlayerLnhScoreInput {
   return { playerId: "p1", position: "CB", avgLnhScore: 5, ...overrides };
@@ -82,5 +87,35 @@ describe("computeValuationsFromLnhScores", () => {
 
   it("handles an empty list", () => {
     expect(computeValuationsFromLnhScores([])).toEqual([]);
+  });
+});
+
+describe("valueNewcomersFromSeasonScores", () => {
+  const ref: SeasonScoreInput[] = [
+    { playerId: "star", position: "PV", matchesPlayed: 4, totalScore: 60 },
+    { playerId: "neg", position: "PV", matchesPlayed: 4, totalScore: -8 },
+    { playerId: "good", position: "PV", matchesPlayed: 4, totalScore: 30 },
+    { playerId: "oneShot", position: "PV", matchesPlayed: 1, totalScore: 10 }, // moyenne brute 10 > 7.5 de "good"
+    { playerId: "almostZero", position: "PV", matchesPlayed: 4, totalScore: 1 },
+    { playerId: "bench", position: "PV", matchesPlayed: 0, totalScore: 0 },
+  ];
+
+  it("valorise un nouveau selon son rang au poste, sans toucher aux autres", () => {
+    const v = valueNewcomersFromSeasonScores(ref, ["good"]);
+    expect([...v.keys()]).toEqual(["good"]);
+    expect(v.get("good")).toBeGreaterThan(4);
+    expect(v.get("good")).toBeLessThan(20);
+  });
+
+  it("lisse les petits échantillons : un seul bon match vaut moins que 4 bons matchs", () => {
+    const v = valueNewcomersFromSeasonScores(ref, ["good", "oneShot"]);
+    expect(v.get("oneShot")!).toBeLessThan(v.get("good")!);
+  });
+
+  it("plancher : total < 3 ou aucun match → valeur minimale, même si le poste a un minimum négatif", () => {
+    const v = valueNewcomersFromSeasonScores(ref, ["almostZero", "bench", "inconnu"]);
+    expect(v.get("almostZero")).toBe(4);
+    expect(v.get("bench")).toBe(4);
+    expect(v.get("inconnu")).toBe(4);
   });
 });

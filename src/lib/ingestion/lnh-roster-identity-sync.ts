@@ -9,7 +9,8 @@
 //
 // Dry-run par défaut (rien n'est écrit). `apply` écrit les identités ;
 // `createMissing` crée en plus les joueurs lnh.fr absents de l'effectif
-// (idempotent : retrouvés par slug au run suivant).
+// (idempotent : retrouvés par slug au run suivant), valorisés d'après leur Score
+// LNH de la saison en cours (valueNewcomersFromSeasonScores, grille validée 27/09).
 import { prisma } from "@/lib/db";
 import { createLnhScraperProvider, type ScrapedPlayer } from "@/lib/data-providers/lnh-scraper.provider";
 import {
@@ -20,11 +21,17 @@ import {
   resolveLnhPlayer,
   type LnhMatchMethod,
 } from "@/lib/players/lnh-player-resolver";
+import {
+  DEFAULT_NEWCOMER_VALUATION_CONFIG,
+  valueNewcomersFromSeasonScores,
+  type NewcomerValuationConfig,
+} from "@/lib/players/valuation";
+import type { Position } from "@/lib/squad/validation";
 
 export interface RosterIdentitySyncOptions {
   apply: boolean;
   createMissing: boolean;
-  defaultMarketValue: number;
+  valuation?: NewcomerValuationConfig;
 }
 
 export interface RosterIdentitySyncReport {
@@ -34,7 +41,15 @@ export interface RosterIdentitySyncReport {
   renamedByLnh: { playerId: string; ours: string; lnh: string; slug: string }[];
   clubChanges: { playerId: string; name: string; ourClubId: string; lnhClubId: string }[];
   conflicts: string[];
-  missing: { slug: string; name: string; club: string; position: string }[];
+  missing: {
+    slug: string;
+    name: string;
+    club: string;
+    position: string;
+    matchesPlayed: number;
+    totalScore: number;
+    marketValue: number;
+  }[];
   created: number;
   unknownClubs: string[];
 }
@@ -50,7 +65,11 @@ export async function syncLnhRosterIdentities(opts: RosterIdentitySyncOptions): 
   if (!season) throw new Error("NO_SEASON");
 
   const provider = createLnhScraperProvider();
-  const [lnhPlayers, photos] = await Promise.all([provider.fetchPlayers(), provider.fetchPlayerPhotos("40")]);
+  const [lnhPlayers, photos, seasonScores] = await Promise.all([
+    provider.fetchPlayers(),
+    provider.fetchPlayerPhotos("40"),
+    provider.fetchSeasonScores("40"),
+  ]);
 
   const clubs = await prisma.club.findMany({ select: { id: true, shortName: true, externalIds: true } });
   const clubIdBySlug = new Map<string, string>();
@@ -85,6 +104,19 @@ export async function syncLnhRosterIdentities(opts: RosterIdentitySyncOptions): 
     unknownClubs: [],
   };
 
+  // Score LNH saison de chaque joueur lnh.fr (référence de valorisation), clé = slug.
+  const scoreByNameClub = new Map(
+    seasonScores.map((s) => [`${lnhNameKey(s.lastName, s.firstName)}|${s.lnhClubSlug.toLowerCase()}`, s])
+  );
+  const reference = lnhPlayers.flatMap((sp) => {
+    const slug = lnhSlugFromProfileUrl(sp.profileUrl);
+    const sc = scoreByNameClub.get(`${lnhNameKey(sp.lastName, sp.firstName)}|${sp.lnhClubSlug.toLowerCase()}`);
+    return slug && sc
+      ? [{ playerId: slug, position: sp.position as Position, matchesPlayed: sc.matchesPlayed, totalScore: sc.totalScore }]
+      : [];
+  });
+  const referenceBySlug = new Map(reference.map((r) => [r.playerId, r]));
+
   const writes: { id: string; externalIds: Record<string, unknown> }[] = [];
   const toCreate: { sp: ScrapedPlayer; slug: string; clubId: string }[] = [];
   const claimed = new Map<string, string>(); // playerId → slug déjà attribué sur ce run
@@ -111,7 +143,16 @@ export async function syncLnhRosterIdentities(opts: RosterIdentitySyncOptions): 
     }
 
     if (!resolved) {
-      report.missing.push({ slug, name: `${sp.lastName} ${sp.firstName}`, club: clubShortById.get(clubId) ?? sp.lnhClubSlug, position: sp.position });
+      const ref = referenceBySlug.get(slug);
+      report.missing.push({
+        slug,
+        name: `${sp.lastName} ${sp.firstName}`,
+        club: clubShortById.get(clubId) ?? sp.lnhClubSlug,
+        position: sp.position,
+        matchesPlayed: ref?.matchesPlayed ?? 0,
+        totalScore: ref?.totalScore ?? 0,
+        marketValue: 0, // renseigné après la boucle (dépend de toute la référence)
+      });
       toCreate.push({ sp, slug, clubId });
       continue;
     }
@@ -141,6 +182,13 @@ export async function syncLnhRosterIdentities(opts: RosterIdentitySyncOptions): 
     writes.push({ id: player.id, externalIds: patch.externalIds });
   }
 
+  const newcomerValues = valueNewcomersFromSeasonScores(
+    reference,
+    report.missing.map((m) => m.slug),
+    opts.valuation ?? DEFAULT_NEWCOMER_VALUATION_CONFIG
+  );
+  for (const m of report.missing) m.marketValue = newcomerValues.get(m.slug)!;
+
   report.identitiesWritten = writes.length;
   if (opts.apply && writes.length > 0) {
     await prisma.$transaction(
@@ -163,7 +211,7 @@ export async function syncLnhRosterIdentities(opts: RosterIdentitySyncOptions): 
           firstName: sp.firstName,
           lastName: sp.lastName,
           position: sp.position as "GK" | "LW" | "LB" | "CB" | "RB" | "RW" | "PV",
-          marketValue: opts.defaultMarketValue,
+          marketValue: newcomerValues.get(slug)!,
           isActive: true,
           externalIds: { lnh_slug: slug, lnh_name: lnhNameKey(sp.lastName, sp.firstName) },
         },

@@ -79,3 +79,57 @@ export function computeValuationsFromLnhScores(
   }
   return results;
 }
+
+// Valorisation d'un joueur qui entre dans l'effectif EN COURS de saison (joueur
+// lnh.fr absent de notre base, cf. src/lib/ingestion/lnh-roster-identity-sync.ts).
+// Même barème par poste que ci-dessus, calculé sur le Score LNH de la saison en
+// cours de TOUS les joueurs lnh.fr (référence), avec :
+//  - un lissage des petits échantillons : moyenne = total / (matchs + shrinkMatches),
+//    pour qu'un seul bon match ne fasse pas un joueur cher ;
+//  - un plancher : total saison < minTotalForValue → minValue. Sans lui, un joueur
+//    quasi nul d'un poste dont le minimum est négatif (pivots) sortait à 6,5 M.
+// Grille validée le 2026-09-27 (46 joueurs, NAGY 13 M … 29+ joueurs à 4 M).
+export interface NewcomerValuationConfig extends ValuationConfig {
+  shrinkMatches: number;
+  minTotalForValue: number;
+}
+
+export const DEFAULT_NEWCOMER_VALUATION_CONFIG: NewcomerValuationConfig = {
+  ...DEFAULT_VALUATION_CONFIG,
+  shrinkMatches: 2,
+  minTotalForValue: 3,
+};
+
+export interface SeasonScoreInput {
+  playerId: string; // identifiant arbitraire, stable entre référence et nouveaux
+  position: Position;
+  matchesPlayed: number;
+  totalScore: number;
+}
+
+export function valueNewcomersFromSeasonScores(
+  reference: SeasonScoreInput[],
+  newcomerIds: string[],
+  config: NewcomerValuationConfig = DEFAULT_NEWCOMER_VALUATION_CONFIG
+): Map<string, number> {
+  const played = reference.filter((r) => r.matchesPlayed > 0);
+  const valued = new Map(
+    computeValuationsFromLnhScores(
+      played.map((r) => ({
+        playerId: r.playerId,
+        position: r.position,
+        avgLnhScore: r.totalScore / (r.matchesPlayed + config.shrinkMatches),
+      })),
+      config
+    ).map((v) => [v.playerId, v.marketValue])
+  );
+  const byId = new Map(reference.map((r) => [r.playerId, r]));
+
+  const out = new Map<string, number>();
+  for (const id of newcomerIds) {
+    const r = byId.get(id);
+    const eligible = r && r.matchesPlayed > 0 && r.totalScore >= config.minTotalForValue;
+    out.set(id, eligible ? (valued.get(id) ?? config.minValue) : config.minValue);
+  }
+  return out;
+}

@@ -3,7 +3,8 @@ export const dynamic = "force-dynamic";
 // POST /api/cron/sync-players-lnh
 // Rattache les joueurs lnh.fr de la saison active à leur Player par slug de profil
 // lnh.fr (Player.externalIds.lnh_slug / lnh_name) et crée ceux qui manquent
-// (idempotent : retrouvés par slug au run suivant). Remplace l'ancien rapprochement
+// (idempotent : retrouvés par slug au run suivant), valorisés d'après leur Score
+// LNH de la saison (valueNewcomersFromSeasonScores). Remplace l'ancien rapprochement
 // par nom seul, qui aurait créé un doublon pour un joueur renommé par la LNH (MONTE,
 // 27/09). Logique : src/lib/ingestion/lnh-roster-identity-sync.ts (aussi lançable en
 // dry-run via scripts/sync-lnh-player-identities.ts).
@@ -12,23 +13,14 @@ import { NextResponse } from "next/server";
 import { verifyCronAuth } from "@/lib/cron-auth";
 import { IngestionError } from "@/lib/data-providers/lnh-scraper.provider";
 import { syncLnhRosterIdentities } from "@/lib/ingestion/lnh-roster-identity-sync";
-import { prisma } from "@/lib/db";
-
-// Valeur marchande d'un joueur créé par la synchro (GameConfig
-// NEW_PLAYER_MARKET_VALUE, repli = valeur historique de ce cron).
-const FALLBACK_NEW_PLAYER_MARKET_VALUE = 7.0;
 
 export async function POST(req: Request) {
   if (!(await verifyCronAuth(req))) {
     return NextResponse.json({ error: { code: "UNAUTHORIZED" } }, { status: 401 });
   }
 
-  const configured = await prisma.gameConfig.findUnique({ where: { key: "NEW_PLAYER_MARKET_VALUE" } });
-  const parsedValue = configured ? Number(configured.value) : NaN;
-  const defaultMarketValue = Number.isFinite(parsedValue) ? parsedValue : FALLBACK_NEW_PLAYER_MARKET_VALUE;
-
   try {
-    const report = await syncLnhRosterIdentities({ apply: true, createMissing: true, defaultMarketValue });
+    const report = await syncLnhRosterIdentities({ apply: true, createMissing: true });
     return NextResponse.json({ data: report });
   } catch (e) {
     if (e instanceof IngestionError) {
