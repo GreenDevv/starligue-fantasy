@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseLiveMatchFeedHtml, parseLiveIndexHtml, parseLiveEventsHtml } from "./lnh-scraper.provider";
+import { parseLiveMatchFeedHtml, parseLiveIndexHtml, parseLiveEventsHtml, parseMatchBoxscoreHtml } from "./lnh-scraper.provider";
 
 // Structure fidèle au HTML réel capturé le 2026-09-11 (scripts/probe-lnh-live-feed.ts,
 // J02 Limoges–Saran, contents_action=view_tab_live) : table `table-stats events`,
@@ -202,5 +202,42 @@ describe("parseLiveEventsHtml", () => {
 
   it("feed vide → []", () => {
     expect(parseLiveEventsHtml("<div>rien</div>")).toEqual([]);
+  });
+});
+
+// Onglet "Stats match" de la réponse /ajaxlive pendant un match en cours (markup
+// réel du 27/09, Nantes–Toulouse, réduit) : nom sans lien <a>, pas de colonne
+// "temps de jeu".
+describe("parseMatchBoxscoreHtml — flux live /ajaxlive", () => {
+  const head = ["joueurs", "buts<br />tirs", "total<br />buts", "score<br>LNH"]
+    .map((h) => `<th><div class="thead-inside">${h}</div></th>`)
+    .join("");
+  const row = (num: number, name: string, cells: string[]) =>
+    `<tr class=""><td class="first-cell sticky-cell cell-info"><div class="cell-player"><div class="num">${num}</div>
+      <div class="name">
+        ${name}                    </div>
+    </div></td>${cells.map((c) => `<td> ${c} </td>`).join("")}</tr>`;
+  const html = `
+    <div class="team-header">
+      <div class="logo"><img src="https://lnh.fr/medias/sports_teams/nantes__logo__2026-2027.png" alt="logo domicile"></div>
+      <div class="name">Nantes</div>
+    </div>
+    <div class="sticky-table"><table class="table-stats"><thead><tr>${head}</tr></thead><tbody>
+      ${row(3, "BRIET Thibaud", ["2 / 2", "2 / 2", "5.0"])}
+      ${row(7, "TOURNAT Nicolas", ["0 / 0", "0 / 0", "0.0"])}
+      ${row(9, "ANTONSEN René", ["0 / 1", "0 / 1", "0.0"])}
+    </tbody></table></div>`;
+
+  it("lit nom, club et Score LNH sans lien <a>", () => {
+    const rows = parseMatchBoxscoreHtml(html);
+    expect(rows.map((r) => [r.lastName, r.firstName, r.lnhClubSlug, r.score])).toEqual([
+      ["BRIET", "Thibaud", "nantes", 5],
+      ["TOURNAT", "Nicolas", "nantes", 0],
+      ["ANTONSEN", "René", "nantes", 0],
+    ]);
+  });
+
+  it("sans colonne temps de jeu : a joué = au moins une action comptabilisée", () => {
+    expect(parseMatchBoxscoreHtml(html).map((r) => r.played)).toEqual([true, false, true]);
   });
 });

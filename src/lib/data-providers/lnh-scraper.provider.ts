@@ -242,6 +242,8 @@ export function boxscoreRowToStatFields(row: ScrapedMatchBoxscoreRow) {
     twoMinTaken: row.twoMinTaken,
     disqualified: row.disqualified,
     source: "LNH_SCRAPER" as const,
+    // Boxscore définitif : repasse à false une ligne écrite en direct (isLive=true).
+    isLive: false,
   };
 }
 
@@ -273,6 +275,20 @@ function parseName(raw: string): { firstName: string; lastName: string } {
     return { lastName: parts.slice(0, -1).join(" "), firstName: parts[parts.length - 1]! };
   }
   return { lastName: cleaned, firstName: "" };
+}
+
+// Clé de rapprochement boxscore lnh.fr → Player : nom complet sans accents, casse
+// ni ponctuation, indépendante de la découpe nom/prénom. lnh.fr écrit « André »
+// là où notre effectif a « Andre », et parseName coupe « GARCIANDIA A. Imanol » en
+// GARCIANDIA / « A. Imanol » alors que l'effectif a GARCIANDIA A. / Imanol — ces
+// joueurs n'étaient jamais rapprochés (0 stat, 0 point) avant le 27/09.
+export function boxscorePlayerNameKey(lastName: string, firstName: string): string {
+  return `${lastName} ${firstName}`
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 // Extrait le slug club depuis une URL logo : "montpellier__logo__2024-2025.png" → "montpellier"
@@ -486,7 +502,9 @@ export function parseMatchBoxscoreHtml(html: string): ScrapedMatchBoxscoreRow[] 
       let rowMatch: RegExpExecArray | null;
       while ((rowMatch = rowRegex.exec(table)) !== null) {
         const row = rowMatch[1]!;
-        const nameMatch = row.match(/<div class="name">\s*<a[^>]*>\s*([^<]+?)\s*<\/a>/);
+        // Nom dans un lien <a> sur la fiche match, en texte brut sur le flux live
+        // (/ajaxlive, voir fetchLiveChannelFeed).
+        const nameMatch = row.match(/<div class="name">\s*(?:<a[^>]*>\s*)?([^<]+?)\s*<\/(?:a|div)>/);
         if (!nameMatch) continue;
 
         const tds: string[] = [];
@@ -500,7 +518,14 @@ export function parseMatchBoxscoreHtml(html: string): ScrapedMatchBoxscoreRow[] 
         if (Number.isNaN(score)) continue;
 
         const playedTime = timeIdx !== -1 ? (tds[timeIdx] ?? "") : "";
-        const played = /^(?!00:00$).+/.test(playedTime.trim()) && playedTime.trim() !== "";
+        // Pas de colonne "temps de jeu" sur le flux live : on considère qu'un joueur
+        // a joué dès qu'il a une action comptabilisée (note ≠ 0 ou une stat ≠ 0),
+        // sinon un remplaçant pas encore entré serait noté (0 − baseline). Le
+        // boxscore définitif (avec temps de jeu) corrige après le match.
+        const played =
+          timeIdx !== -1
+            ? /^(?!00:00$).+/.test(playedTime.trim()) && playedTime.trim() !== ""
+            : score !== 0 || tds.slice(1).some((cell) => /[1-9]/.test(cell.replace(/%/g, "")));
 
         const { firstName, lastName } = parseName(nameMatch[1]!.trim());
         if (!firstName || !lastName) continue;
@@ -1478,6 +1503,18 @@ export class LnhScraperProvider implements StarligueDataProvider {
   // le `filename` est invalide/expiré (réponse 400) : à l'appelant de ré-résoudre
   // via fetchLiveChannelFilename et réessayer.
   async fetchLiveEventsFeed(channelId: string, filename: string): Promise<ScrapedLiveEvent[] | null> {
+    return (await this.fetchLiveChannelFeed(channelId, filename))?.events ?? null;
+  }
+
+  // Même réponse /ajaxlive, lue en entier : elle contient la page live complète
+  // (Avant match / Live / Stats match, le paramètre `tabs` est ignoré côté lnh.fr),
+  // dont les tableaux "Stats joueurs" avec le Score LNH de chaque joueur, mis à
+  // jour en direct (validé le 27/09 sur Nantes–Toulouse en 1ère mi-temps). Même
+  // markup que la fiche match → parseMatchBoxscoreHtml. null si filename expiré.
+  async fetchLiveChannelFeed(
+    channelId: string,
+    filename: string
+  ): Promise<{ events: ScrapedLiveEvent[]; boxscore: ScrapedMatchBoxscoreRow[] } | null> {
     const body = new URLSearchParams({
       tabs: "tab_events",
       channels_id: channelId,
@@ -1500,7 +1537,8 @@ export class LnhScraperProvider implements StarligueDataProvider {
       throw new IngestionError(`LNH Scraper : impossible de récupérer les événements live du channel ${channelId} (HTTP ${res.status})`, this.name, true);
     }
 
-    return parseLiveEventsHtml(await res.text());
+    const html = await res.text();
+    return { events: parseLiveEventsHtml(html), boxscore: parseMatchBoxscoreHtml(html) };
   }
 
   // Récupère les boxscores de plusieurs matchs déjà joués (ex : les ~8 matchs d'une

@@ -30,7 +30,7 @@ export async function computeBestPerformances(
   if (totals.size === 0) return [];
 
   const stats = await prisma.playerMatchStat.findMany({
-    where: { playerId: { in: Array.from(totals.keys()) }, match: { gameweekId } },
+    where: { playerId: { in: Array.from(totals.keys()) }, match: { gameweekId }, isLive: false },
     select: { playerId: true, lnhRating: true },
   });
   const ratingByPlayer = new Map(stats.map((s) => [s.playerId, s.lnhRating !== null ? Number(s.lnhRating) : null]));

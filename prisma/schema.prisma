@@ -727,6 +727,13 @@ model PlayerMatchStat {
   twoMinTaken          Int? // 2 min (reçues)
   disqualified         Int? // disq. — 0/1 (Int plutôt que Boolean pour permettre un SUM() Prisma groupBy identique aux autres stats)
   source               DataSource
+  // true = note PROVISOIRE lue en direct sur le flux live lnh.fr (/ajaxlive,
+  // cron sync-live) pendant le match. Repassée à false par l'ingestion du boxscore
+  // définitif (boxscoreRowToStatFields). Tout ce qui est définitif (calcul des
+  // points, settle-gameweek, leaders stats, valorisation, corrections LNH) ne lit
+  // que isLive=false ; seules les vues live (score provisoire, classement live,
+  // page match) incluent les lignes provisoires.
+  isLive               Boolean    @default(false)
   updatedAt            DateTime   @updatedAt
 
   @@unique([matchId, playerId])

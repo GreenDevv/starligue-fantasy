@@ -61,7 +61,7 @@ export async function POST(req: Request) {
 
     await prisma.playerMatchStat.upsert({
       where: { matchId_playerId: { matchId: match.id, playerId: player.id } },
-      update: { lnhRating: row.lnhRating, played: row.played, source: "CSV" },
+      update: { lnhRating: row.lnhRating, played: row.played, source: "CSV", isLive: false },
       create: { matchId: match.id, playerId: player.id, lnhRating: row.lnhRating, played: row.played, source: "CSV" },
     });
     upserted++;

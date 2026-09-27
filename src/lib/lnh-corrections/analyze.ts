@@ -68,7 +68,7 @@ export async function analyzeGameweekCorrections(gameweekNumber: number): Promis
   const scraped = await scrapeGameweekBoxscoreRows(gameweek.id, LNH_LIVE_SEASONS_ID);
 
   const storedStats = await prisma.playerMatchStat.findMany({
-    where: { matchId: { in: gameweek.matches.map((m) => m.id) } },
+    where: { matchId: { in: gameweek.matches.map((m) => m.id) }, isLive: false },
   });
 
   const storedRows: StoredStatRow[] = storedStats.map((s) => {

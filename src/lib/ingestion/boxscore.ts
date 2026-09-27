@@ -29,6 +29,7 @@ import { prisma } from "@/lib/db";
 import {
   createLnhScraperProvider,
   boxscoreRowToStatFields,
+  boxscorePlayerNameKey,
   type ScrapedMatchBoxscoreRow,
 } from "@/lib/data-providers/lnh-scraper.provider";
 
@@ -256,7 +257,7 @@ export async function scrapeGameweekBoxscoreRows(
   });
   const playerByKey = new Map<string, (typeof seasonPlayers)[number]>();
   for (const p of seasonPlayers) {
-    const key = `${p.lastName.toLowerCase()}|${p.firstName.toLowerCase()}|${p.club.shortName.toLowerCase()}`;
+    const key = `${boxscorePlayerNameKey(p.lastName, p.firstName)}|${p.club.shortName.toLowerCase()}`;
     playerByKey.set(key, p);
   }
 
@@ -266,7 +267,7 @@ export async function scrapeGameweekBoxscoreRows(
     for (const row of boxRows) {
       const clubShortName = clubShortNameBySlug.get(row.lnhClubSlug.toLowerCase());
       if (!clubShortName) continue;
-      const key = `${row.lastName.toLowerCase()}|${row.firstName.toLowerCase()}|${clubShortName.toLowerCase()}`;
+      const key = `${boxscorePlayerNameKey(row.lastName, row.firstName)}|${clubShortName.toLowerCase()}`;
       const player = playerByKey.get(key);
       if (!player) continue;
       rows.push({
@@ -312,6 +313,12 @@ export async function syncGameweekBoxscore(
         });
       })
     );
+    // Notes provisoires du direct (isLive=true) restées sans équivalent dans le
+    // boxscore définitif (joueur absent de la feuille finale) : supprimées pour
+    // qu'aucune note provisoire ne survive au match.
+    await prisma.playerMatchStat.deleteMany({
+      where: { matchId: { in: [...new Set(statUpserts.map((u) => u.matchId))] }, isLive: true },
+    });
   }
 
   return {

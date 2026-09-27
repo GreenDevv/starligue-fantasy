@@ -21,6 +21,7 @@ import { computePlayerPoints, parseScoringConfig } from "@/lib/scoring/engine";
 import {
   createLnhScraperProvider,
   boxscoreRowToStatFields,
+  boxscorePlayerNameKey,
   type ScrapedMatchBoxscoreRow,
 } from "@/lib/data-providers/lnh-scraper.provider";
 import { SIMULATION_SEASON_LABEL, SIMULATION_LNH_SEASONS_ID } from "@/lib/simulation/constants";
@@ -199,7 +200,7 @@ async function scrapeAndIngestBoxscore(
   });
   const playerByKey = new Map<string, (typeof seasonPlayers)[number]>();
   for (const p of seasonPlayers) {
-    const key = `${p.lastName.toLowerCase()}|${p.firstName.toLowerCase()}|${p.club.shortName.toLowerCase()}`;
+    const key = `${boxscorePlayerNameKey(p.lastName, p.firstName)}|${p.club.shortName.toLowerCase()}`;
     playerByKey.set(key, p);
   }
 
@@ -207,7 +208,7 @@ async function scrapeAndIngestBoxscore(
   for (const row of rows) {
     const clubShortName = clubShortNameBySlug.get(row.lnhClubSlug.toLowerCase());
     if (!clubShortName) continue;
-    const key = `${row.lastName.toLowerCase()}|${row.firstName.toLowerCase()}|${clubShortName.toLowerCase()}`;
+    const key = `${boxscorePlayerNameKey(row.lastName, row.firstName)}|${clubShortName.toLowerCase()}`;
     const player = playerByKey.get(key);
     if (!player) continue;
     upserts.push({ playerId: player.id, ...row });
@@ -224,6 +225,8 @@ async function scrapeAndIngestBoxscore(
         });
       })
     );
+    // Notes provisoires du direct sans équivalent dans le boxscore définitif.
+    await prisma.playerMatchStat.deleteMany({ where: { matchId: match.id, isLive: true } });
   }
 }
 
@@ -256,9 +259,10 @@ export async function getMatchDetail(matchId: string): Promise<MatchDetail | nul
 
   // Le boxscore lnh.fr n'existe qu'après le coup de sifflet final — inutile de
   // tenter un scrape à la demande pendant qu'un match est encore LIVE (rien à
-  // trouver, juste une requête gâchée). La page affiche le tableau vide
-  // ("Statistiques indisponibles") + la timeline d'événements en attendant.
-  if (stats.length === 0 && match.status !== "LIVE") {
+  // trouver, juste une requête gâchée). Pendant le match, la page affiche les
+  // notes provisoires du flux live (isLive=true, cron sync-live) s'il y en a.
+  // Match fini mais seulement des notes provisoires → on tente le définitif.
+  if (stats.every((s) => s.isLive) && match.status !== "LIVE") {
     await scrapeAndIngestBoxscore(match, match.homeClub, match.awayClub, match.season.label);
     stats = await prisma.playerMatchStat.findMany({
       where: { matchId },
@@ -279,8 +283,12 @@ export async function getMatchDetail(matchId: string): Promise<MatchDetail | nul
   const scoringConfig = parseScoringConfig(
     Object.fromEntries((await prisma.gameConfig.findMany()).map((c) => [c.key, c.value]))
   );
-  const homeWon = match.homeScore !== null && match.awayScore !== null && match.homeScore > match.awayScore;
-  const awayWon = match.homeScore !== null && match.awayScore !== null && match.awayScore > match.homeScore;
+  // Pas de bonus de victoire tant que le match n'est pas fini (score courant en LIVE).
+  const finished = isSimulation || match.status === "FINISHED";
+  const homeWon =
+    finished && match.homeScore !== null && match.awayScore !== null && match.homeScore > match.awayScore;
+  const awayWon =
+    finished && match.homeScore !== null && match.awayScore !== null && match.awayScore > match.homeScore;
 
   function buildTeam(club: typeof homeClub | typeof awayClub): MatchTeamBoxscore {
     const teamWon = club.id === homeClub.id ? homeWon : awayWon;

@@ -95,7 +95,7 @@ async function resolveSelection(
   const rowByKey = new Map(scraped.rows.map((r) => [correctionKey(r.matchId, r.playerId), r]));
 
   const storedStats = await prisma.playerMatchStat.findMany({
-    where: { matchId: { in: gameweek.matches.map((m) => m.id) } },
+    where: { matchId: { in: gameweek.matches.map((m) => m.id) }, isLive: false },
   });
   const storedByKey = new Map<string, Record<string, FieldValue>>();
   const storedRows: StoredStatRow[] = storedStats.map((s) => {

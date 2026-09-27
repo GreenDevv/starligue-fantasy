@@ -72,7 +72,7 @@ export async function getPreviousSeasonRecap(playerId: string): Promise<PlayerSe
   if (!archivedPlayerId) return null;
 
   const agg = await prisma.playerMatchStat.aggregate({
-    where: { playerId: archivedPlayerId, played: true },
+    where: { playerId: archivedPlayerId, isLive: false, played: true },
     _count: { _all: true },
     _avg: { lnhRating: true },
     _sum: { goalsTotal: true, assists: true, saves: true, shotsFaced: true },

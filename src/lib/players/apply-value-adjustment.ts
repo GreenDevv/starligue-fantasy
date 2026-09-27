@@ -42,7 +42,7 @@ export async function applyGameweekValueAdjustments(
   const minValue = parseFloat(raw["VALUE_ADJUSTMENT_MIN"] ?? "1.0");
 
   const stats = await prisma.playerMatchStat.findMany({
-    where: { match: { gameweekId }, played: true, lnhRating: { not: null } },
+    where: { match: { gameweekId }, isLive: false, played: true, lnhRating: { not: null } },
     include: { player: { select: { id: true, position: true, marketValue: true } } },
   });
 
