@@ -211,6 +211,9 @@ export interface ScrapedMatchBoxscoreRow extends ScrapedMatchBoxscoreStats {
   firstName: string;
   lastName: string;
   lnhClubSlug: string; // domicile ou extérieur, déduit de l'en-tête d'équipe le plus proche
+  // Slug du profil lnh.fr (lien du nom, « lnh/joueurs/<slug> ») — identifiant stable,
+  // cf. src/lib/players/lnh-player-resolver.ts. null sur le flux live (nom sans lien).
+  profileSlug: string | null;
   score: number; // "Score LNH" de CE match précis (≈ PlayerMatchStat.lnhRating)
   played: boolean; // true si temps de jeu > 0
 }
@@ -275,20 +278,6 @@ function parseName(raw: string): { firstName: string; lastName: string } {
     return { lastName: parts.slice(0, -1).join(" "), firstName: parts[parts.length - 1]! };
   }
   return { lastName: cleaned, firstName: "" };
-}
-
-// Clé de rapprochement boxscore lnh.fr → Player : nom complet sans accents, casse
-// ni ponctuation, indépendante de la découpe nom/prénom. lnh.fr écrit « André »
-// là où notre effectif a « Andre », et parseName coupe « GARCIANDIA A. Imanol » en
-// GARCIANDIA / « A. Imanol » alors que l'effectif a GARCIANDIA A. / Imanol — ces
-// joueurs n'étaient jamais rapprochés (0 stat, 0 point) avant le 27/09.
-export function boxscorePlayerNameKey(lastName: string, firstName: string): string {
-  return `${lastName} ${firstName}`
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
 }
 
 // Extrait le slug club depuis une URL logo : "montpellier__logo__2024-2025.png" → "montpellier"
@@ -529,6 +518,7 @@ export function parseMatchBoxscoreHtml(html: string): ScrapedMatchBoxscoreRow[] 
 
         const { firstName, lastName } = parseName(nameMatch[1]!.trim());
         if (!firstName || !lastName) continue;
+        const profileSlug = row.match(/<div class="name">\s*<a[^>]*href="[^"]*joueurs\/([a-z0-9-]+)"/i)?.[1]?.toLowerCase() ?? null;
 
         const goalsPlayFrac = parseFraction(cellAt(tds, statIdx.goalsPlay));
         const goalsPenaltyFrac = parseFraction(cellAt(tds, statIdx.goalsPenalty));
@@ -542,6 +532,7 @@ export function parseMatchBoxscoreHtml(html: string): ScrapedMatchBoxscoreRow[] 
           firstName,
           lastName,
           lnhClubSlug: clubSlug,
+          profileSlug,
           score,
           played,
           saves: savesFrac.made,

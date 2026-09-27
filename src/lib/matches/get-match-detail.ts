@@ -21,9 +21,9 @@ import { computePlayerPoints, parseScoringConfig } from "@/lib/scoring/engine";
 import {
   createLnhScraperProvider,
   boxscoreRowToStatFields,
-  boxscorePlayerNameKey,
   type ScrapedMatchBoxscoreRow,
 } from "@/lib/data-providers/lnh-scraper.provider";
+import { loadLnhResolutionContext, persistLnhIdentities, resolveLnhRow } from "@/lib/ingestion/lnh-player-identity";
 import { SIMULATION_SEASON_LABEL, SIMULATION_LNH_SEASONS_ID } from "@/lib/simulation/constants";
 
 // Saison live en cours — même convention (pas encore centralisée) que
@@ -187,31 +187,11 @@ async function scrapeAndIngestBoxscore(
   const rows = boxscoreMap.get(calendarsId) ?? [];
   if (rows.length === 0) return;
 
-  const dbClubs = await prisma.club.findMany();
-  const clubShortNameBySlug = new Map<string, string>();
-  for (const c of dbClubs) {
-    const extIds = (c.externalIds as Record<string, string>) ?? {};
-    if (extIds.lnh) clubShortNameBySlug.set(extIds.lnh.toLowerCase(), c.shortName);
-  }
-
-  const seasonPlayers = await prisma.player.findMany({
-    where: { seasonId: match.seasonId },
-    include: { club: { select: { shortName: true } } },
-  });
-  const playerByKey = new Map<string, (typeof seasonPlayers)[number]>();
-  for (const p of seasonPlayers) {
-    const key = `${boxscorePlayerNameKey(p.lastName, p.firstName)}|${p.club.shortName.toLowerCase()}`;
-    playerByKey.set(key, p);
-  }
-
+  const resolution = await loadLnhResolutionContext(match.seasonId);
   const upserts: Array<{ playerId: string } & ScrapedMatchBoxscoreRow> = [];
   for (const row of rows) {
-    const clubShortName = clubShortNameBySlug.get(row.lnhClubSlug.toLowerCase());
-    if (!clubShortName) continue;
-    const key = `${boxscorePlayerNameKey(row.lastName, row.firstName)}|${clubShortName.toLowerCase()}`;
-    const player = playerByKey.get(key);
-    if (!player) continue;
-    upserts.push({ playerId: player.id, ...row });
+    const resolved = resolveLnhRow(resolution, row);
+    if (resolved) upserts.push({ playerId: resolved.playerId, ...row });
   }
 
   if (upserts.length > 0) {
@@ -227,6 +207,10 @@ async function scrapeAndIngestBoxscore(
     );
     // Notes provisoires du direct sans équivalent dans le boxscore définitif.
     await prisma.playerMatchStat.deleteMany({ where: { matchId: match.id, isLive: true } });
+    await persistLnhIdentities(
+      resolution,
+      upserts.map((u) => ({ playerId: u.playerId, row: u }))
+    );
   }
 }
 

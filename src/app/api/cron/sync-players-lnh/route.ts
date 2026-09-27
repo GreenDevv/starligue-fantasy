@@ -1,34 +1,35 @@
 export const dynamic = "force-dynamic";
 
 // POST /api/cron/sync-players-lnh
-// Scrape les joueurs depuis lnh.fr et met à jour les records en DB
-// Résolution club : par Club.externalIds.lnh (slug LNH) puis par similarité de nom
+// Rattache les joueurs lnh.fr de la saison active à leur Player par slug de profil
+// lnh.fr (Player.externalIds.lnh_slug / lnh_name) et crée ceux qui manquent
+// (idempotent : retrouvés par slug au run suivant). Remplace l'ancien rapprochement
+// par nom seul, qui aurait créé un doublon pour un joueur renommé par la LNH (MONTE,
+// 27/09). Logique : src/lib/ingestion/lnh-roster-identity-sync.ts (aussi lançable en
+// dry-run via scripts/sync-lnh-player-identities.ts).
 
 import { NextResponse } from "next/server";
 import { verifyCronAuth } from "@/lib/cron-auth";
+import { IngestionError } from "@/lib/data-providers/lnh-scraper.provider";
+import { syncLnhRosterIdentities } from "@/lib/ingestion/lnh-roster-identity-sync";
 import { prisma } from "@/lib/db";
-import { createLnhScraperProvider, IngestionError } from "@/lib/data-providers/lnh-scraper.provider";
 
-// Normalise un nom pour la comparaison : minuscules, sans accents, sans tirets
-function normalizeName(s: string): string {
-  return s
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[-\s]+/g, " ")
-    .trim();
-}
+// Valeur marchande d'un joueur créé par la synchro (GameConfig
+// NEW_PLAYER_MARKET_VALUE, repli = valeur historique de ce cron).
+const FALLBACK_NEW_PLAYER_MARKET_VALUE = 7.0;
 
 export async function POST(req: Request) {
   if (!(await verifyCronAuth(req))) {
     return NextResponse.json({ error: { code: "UNAUTHORIZED" } }, { status: 401 });
   }
 
-  const provider = createLnhScraperProvider();
+  const configured = await prisma.gameConfig.findUnique({ where: { key: "NEW_PLAYER_MARKET_VALUE" } });
+  const parsedValue = configured ? Number(configured.value) : NaN;
+  const defaultMarketValue = Number.isFinite(parsedValue) ? parsedValue : FALLBACK_NEW_PLAYER_MARKET_VALUE;
 
-  let scrapedPlayers;
   try {
-    scrapedPlayers = await provider.fetchPlayers();
+    const report = await syncLnhRosterIdentities({ apply: true, createMissing: true, defaultMarketValue });
+    return NextResponse.json({ data: report });
   } catch (e) {
     if (e instanceof IngestionError) {
       return NextResponse.json(
@@ -36,121 +37,9 @@ export async function POST(req: Request) {
         { status: 502 }
       );
     }
+    if (e instanceof Error && e.message === "NO_SEASON") {
+      return NextResponse.json({ error: { code: "NO_SEASON", message: "Aucune saison active" } }, { status: 400 });
+    }
     throw e;
   }
-
-  if (scrapedPlayers.length === 0) {
-    return NextResponse.json(
-      { error: { code: "NO_DATA", message: "Le scraper LNH n'a retourné aucun joueur" } },
-      { status: 502 }
-    );
-  }
-
-  // Récupère la saison active
-  const season = await prisma.season.findFirst({ where: { isActive: true } });
-  if (!season) {
-    return NextResponse.json({ error: { code: "NO_SEASON" } }, { status: 400 });
-  }
-
-  // Charge tous les clubs avec leurs externalIds
-  const clubs = await prisma.club.findMany();
-
-  // Construit un map lnhSlug → clubId depuis externalIds.lnh
-  const clubBySlug = new Map<string, string>();
-  const clubByNormalizedName = new Map<string, string>();
-
-  for (const club of clubs) {
-    const extIds = (club.externalIds as Record<string, string>) ?? {};
-    if (extIds.lnh) {
-      clubBySlug.set(extIds.lnh.toLowerCase(), club.id);
-    }
-    clubByNormalizedName.set(normalizeName(club.name), club.id);
-    clubByNormalizedName.set(normalizeName(club.shortName), club.id);
-  }
-
-  // Charge tous les joueurs de la saison active
-  const dbPlayers = await prisma.player.findMany({
-    where: { seasonId: season.id },
-    select: { id: true, firstName: true, lastName: true, clubId: true, position: true, photoUrl: true },
-  });
-
-  // Construit un map (normalizedLastName + normalizedFirstName + clubId) → player
-  const playerMap = new Map<string, typeof dbPlayers[0]>();
-  for (const p of dbPlayers) {
-    const key = `${normalizeName(p.lastName)}|${normalizeName(p.firstName)}|${p.clubId}`;
-    playerMap.set(key, p);
-    // Aussi sans clubId pour fallback
-    const keyNoClub = `${normalizeName(p.lastName)}|${normalizeName(p.firstName)}`;
-    if (!playerMap.has(keyNoClub)) playerMap.set(keyNoClub, p);
-  }
-
-  let updated = 0;
-  let created = 0;
-  let skipped = 0;
-  const errors: string[] = [];
-
-  for (const sp of scrapedPlayers) {
-    // Résout le club
-    const slug = sp.lnhClubSlug.toLowerCase();
-    let clubId = clubBySlug.get(slug);
-
-    if (!clubId) {
-      // Fallback : recherche par nom normalisé
-      clubId = clubByNormalizedName.get(normalizeName(sp.lnhClubSlug));
-    }
-
-    if (!clubId) {
-      errors.push(`Club introuvable pour slug "${sp.lnhClubSlug}" (${sp.lastName} ${sp.firstName})`);
-      skipped++;
-      continue;
-    }
-
-    // Cherche le joueur par nom + club
-    const key = `${normalizeName(sp.lastName)}|${normalizeName(sp.firstName)}|${clubId}`;
-    const keyNoClub = `${normalizeName(sp.lastName)}|${normalizeName(sp.firstName)}`;
-    const existing = playerMap.get(key) ?? playerMap.get(keyNoClub);
-
-    if (existing) {
-      // Met à jour seulement si le club correspond ou si pas de photo définie
-      const updates: Record<string, unknown> = {};
-      if (existing.clubId !== clubId) updates.clubId = clubId;
-      // On ne touche pas la position si elle est déjà correcte
-      if (Object.keys(updates).length === 0) {
-        skipped++;
-        continue;
-      }
-
-      await prisma.player.update({ where: { id: existing.id }, data: updates });
-      updated++;
-    } else {
-      // Joueur non trouvé — on le crée avec une valeur marchande par défaut
-      try {
-        await prisma.player.create({
-          data: {
-            seasonId: season.id,
-            clubId,
-            firstName: sp.firstName,
-            lastName: sp.lastName,
-            position: sp.position as "GK" | "LW" | "LB" | "CB" | "RB" | "RW" | "PV",
-            marketValue: 7.0,
-            isActive: true,
-          },
-        });
-        created++;
-      } catch (err) {
-        errors.push(`Erreur création ${sp.lastName} ${sp.firstName}: ${String(err)}`);
-        skipped++;
-      }
-    }
-  }
-
-  return NextResponse.json({
-    data: {
-      scraped: scrapedPlayers.length,
-      updated,
-      created,
-      skipped,
-      errors: errors.slice(0, 20),
-    },
-  });
 }

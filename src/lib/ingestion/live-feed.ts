@@ -38,9 +38,9 @@ import { prisma } from "@/lib/db";
 import {
   createLnhScraperProvider,
   boxscoreRowToStatFields,
-  boxscorePlayerNameKey,
   type ScrapedMatchBoxscoreRow,
 } from "@/lib/data-providers/lnh-scraper.provider";
+import { loadLnhResolutionContext, resolveLnhRow, type LnhResolutionContext } from "@/lib/ingestion/lnh-player-identity";
 import { IngestionError } from "@/lib/data-providers/lnh-scraper.provider";
 import type { LnhScraperProvider } from "@/lib/data-providers/lnh-scraper.provider";
 import { resolveEventPlayerId, type EventPlayerCandidate } from "@/lib/live/resolve-event-player";
@@ -64,16 +64,15 @@ export interface LiveFeedSyncResult {
   errors: string[];
 }
 
-// Upsert des notes/stats PROVISOIRES d'un match en cours (isLive=true). Joueur
-// retrouvé par nom + club, même clé que l'ingestion du boxscore définitif
-// (scrapeGameweekBoxscoreRows). Si le match a déjà au moins une ligne définitive
+// Upsert des notes/stats PROVISOIRES d'un match en cours (isLive=true). Le tableau
+// live n'a pas de lien profil : joueur retrouvé par dernier nom lnh.fr connu puis
+// par notre nom (resolveLnhRow, même résolveur que le boxscore définitif). Si le match a déjà au moins une ligne définitive
 // (isLive=false, boxscore final passé), on ne touche à rien. Retourne le nombre de
 // lignes écrites.
 async function upsertLiveStats(
   matchId: string,
   rows: ScrapedMatchBoxscoreRow[],
-  playerIdByKey: Map<string, string>,
-  clubIdBySlug: Map<string, string>
+  resolution: LnhResolutionContext
 ): Promise<number> {
   if (rows.length === 0) return 0;
   const definitive = await prisma.playerMatchStat.count({ where: { matchId, isLive: false } });
@@ -81,11 +80,9 @@ async function upsertLiveStats(
 
   const upserts: { playerId: string; fields: ReturnType<typeof boxscoreRowToStatFields> }[] = [];
   for (const row of rows) {
-    const clubId = clubIdBySlug.get(row.lnhClubSlug.toLowerCase());
-    if (!clubId) continue;
-    const playerId = playerIdByKey.get(liveStatPlayerKey(row.lastName, row.firstName, clubId));
-    if (!playerId) continue;
-    upserts.push({ playerId, fields: { ...boxscoreRowToStatFields(row), isLive: true } });
+    const resolved = resolveLnhRow(resolution, row);
+    if (!resolved) continue;
+    upserts.push({ playerId: resolved.playerId, fields: { ...boxscoreRowToStatFields(row), isLive: true } });
   }
   if (upserts.length === 0) return 0;
 
@@ -101,10 +98,6 @@ async function upsertLiveStats(
   return upserts.length;
 }
 
-function liveStatPlayerKey(lastName: string, firstName: string, clubId: string): string {
-  return `${boxscorePlayerNameKey(lastName, firstName)}|${clubId}`;
-}
-
 // Résout/rafraîchit le flux live d'un match (/ajaxlive) : insère les nouveaux
 // événements (delta only, associés best effort à un joueur de `rosterCandidates`)
 // et upsert les notes provisoires des joueurs (upsertLiveStats). Ne jette jamais —
@@ -118,8 +111,7 @@ async function syncMatchEvents(
   rosterCandidates: EventPlayerCandidate[],
   homeClubId: string,
   awayClubId: string,
-  playerIdByKey: Map<string, string>,
-  clubIdBySlug: Map<string, string>
+  resolution: LnhResolutionContext
 ): Promise<{ inserted: number; liveStats: number; errors: string[] }> {
   const errors: string[] = [];
   let filename = externalIds.lnh_live_channel_filename;
@@ -155,7 +147,7 @@ async function syncMatchEvents(
 
   let liveStats = 0;
   try {
-    liveStats = await upsertLiveStats(matchId, feed.boxscore, playerIdByKey, clubIdBySlug);
+    liveStats = await upsertLiveStats(matchId, feed.boxscore, resolution);
   } catch (err) {
     errors.push(`liveStats(${matchId}): ${String(err)}`);
   }
@@ -235,19 +227,12 @@ export async function syncLiveMatchFeeds(seasonId: string, _seasonsId: string): 
     select: { id: true, firstName: true, lastName: true, clubId: true },
   });
   const rosterByClub = new Map<string, EventPlayerCandidate[]>();
-  const playerIdByKey = new Map<string, string>();
   for (const p of rosterPlayers) {
     const arr = rosterByClub.get(p.clubId) ?? [];
     arr.push({ id: p.id, firstName: p.firstName, lastName: p.lastName });
     rosterByClub.set(p.clubId, arr);
-    playerIdByKey.set(liveStatPlayerKey(p.lastName, p.firstName, p.clubId), p.id);
   }
-  const clubs = await prisma.club.findMany({ where: { id: { in: clubIds } }, select: { id: true, externalIds: true } });
-  const clubIdBySlug = new Map<string, string>();
-  for (const c of clubs) {
-    const slug = (c.externalIds as Record<string, string> | null)?.lnh;
-    if (slug) clubIdBySlug.set(slug.toLowerCase(), c.id);
-  }
+  const resolution = await loadLnhResolutionContext(seasonId, clubIds);
 
   for (const match of candidates) {
     const externalIds = match.externalIds as Record<string, string>;
@@ -292,8 +277,7 @@ export async function syncLiveMatchFeeds(seasonId: string, _seasonsId: string): 
         rosterCandidates,
         match.homeClubId,
         match.awayClubId,
-        playerIdByKey,
-        clubIdBySlug
+        resolution
       );
       newEvents = inserted;
       liveStats = statsWritten;
