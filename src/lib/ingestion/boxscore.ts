@@ -174,7 +174,7 @@ export async function syncCalendarsIdsForSeason(
 // vaut laisser l'ancienne valeur en place (déjà passée ou non) que de faire
 // apparaître d'un coup, sans aucun préavis pour les joueurs, une deadline désormais
 // derrière eux.
-async function recomputeGameweekDeadlines(gameweekIds: Set<string>): Promise<number> {
+export async function recomputeGameweekDeadlines(gameweekIds: Set<string>): Promise<number> {
   let updated = 0;
   const now = new Date();
 

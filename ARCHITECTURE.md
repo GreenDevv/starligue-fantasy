@@ -3252,7 +3252,8 @@ réponses réelles, `__fixtures__/lfh-*`, `vision-sport-*`) :
 
 | Besoin | Source |
 |---|---|
-| Calendrier, résultats, classement, joueuses (poste, photo détourée) | API REST du WordPress LFH `ligue-feminine-handball.fr/wp-json/lfh/v1` (l'ancienne `api.ligue-feminine-handball.fr` n'existe plus) |
+| Calendrier, résultats, classement | API REST du WordPress LFH `ligue-feminine-handball.fr/wp-json/lfh/v1` (l'ancienne `api.ligue-feminine-handball.fr` n'existe plus) |
+| Effectif (fiche WordPress : poste, photo détourée) | `/stats/joueurs?poule_id=` = toutes les joueuses déjà inscrites sur une feuille de match (199 à J4). La liste générale des fiches (racine `/lfh/v1`) ignore toute pagination : inutilisable |
 | Feuille officielle par match : buts, buts 7 m, avertissements, 2 min, disqualification | `/stats/joueurs?rencontre_id=` — fait foi |
 | Tirs tentés, temps de jeu, arrêts / tirs subis des gardiennes | Feuille vision-sport `LIVE<nnn>LFH.html`, une par match, conservée toute la saison ; nom du fichier via `/handvision/match/<ext_rencontreId>` |
 
@@ -3287,9 +3288,48 @@ le moteur de points (§2.3) ne voit pas la différence.
 | Lot | Contenu | État |
 |---|---|---|
 | 1 | Profil de compétition, provider LFH, note calculée (aucun changement pour le jeu LNH) | fait |
-| 2 | Ingestion LFH : `DataSource.LFH_SCRAPER` (migration additive), seed saison (12 clubs, 22 journées, joueuses, valeurs initiales), `src/lib/ingestion/lfh.ts` (calendrier, effectifs, stats + note, classement), crons `settle-gameweek` / `sync-standings` aiguillés par le profil | à faire |
+| 2 | Ingestion LFH : `DataSource.LFH_SCRAPER` (migration additive), `src/lib/ingestion/lfh.ts` + `lfh-season-plan.ts` (pur), `scripts/setup-lfh-season.ts` (config, saison, stats, valorisation), `settle-gameweek` aiguillé (`src/lib/ingestion/competition.ts`) | en cours |
 | 3 | Marque et fonctionnalités : libellés « Starligue »/« LNH » tirés du profil (i18n 8 langues, métadonnées, emails), entrées de nav et crons des fonctionnalités coupées masqués / no-op | à faire |
 | 4 | Déploiement : 2ᵉ service Railway + Postgres + domaine + Resend, workflows GitHub Actions appelant les deux URLs | à faire |
+
+### 35.4.1 Mise en place et lancement (lot 2)
+
+Lancement décidé pour **J7 (30/10/2026)**. `scripts/setup-lfh-season.ts` (base LFH
+uniquement : refuse une base contenant des clubs Starligue) :
+- **config** : `GameConfig` = défauts communs (`prisma/game-config-defaults.ts`,
+  extraits du seed Starligue) + surcharges LFH, sans jamais écraser une clé déjà là.
+- **season** : saison, 12 clubs (identité = slug de fiche club LFH, nom affiché
+  court), 22 journées (deadline = 1 h avant le 1er match, même règle §2.4), 132
+  matchs (horaire pas encore publié → 1er jour de la journée 20 h, marqué
+  `lfh_kickoff_tbd`, remplacé par la synchro calendrier), joueuses des 12 clubs.
+- **stats** : stats + note de chaque journée déjà jouée, classement officiel, puis
+  `closePreLaunchGameweeks` : journées jouées avant le lancement et **sans aucune
+  équipe** marquées notées + confirmées. Sans ça, le 1er passage du cron de clôture
+  les traiterait comme des journées normales et appliquerait l'ajustement hebdo des
+  valeurs une fois par journée, par-dessus la valorisation initiale.
+- **valuation** : **valeurs de départ = notes de début de saison** (J1 → J6 au
+  lancement), même calcul qu'une recrue LNH (par poste, lissage des petits
+  échantillons) mais **fourchette 7,5 → 17,5** (10 points au lieu de 16 chez les
+  hommes : amplitude moins forte, décision du 29/09). **Même budget que les hommes
+  (140)** : c'est la fourchette qui est placée pour que la valeur moyenne tombe au
+  même niveau (10,7 contre 10,6 → même tension). Effectif « rêve » (2 plus chères
+  par poste) : 232,5 contre 272 chez les hommes. Ajustement hebdo : 3 hautes /
+  3 basses par poste (au lieu de 5) vu les effectifs plus courts.
+
+Essai complet sur une base locale jetable (29/09, J1-J4 jouées) : 12 clubs, 22
+journées, 132 matchs (44 sans horaire publié), 198 joueuses (1 sans fiche donc sans
+poste : signalée), 706 lignes de stats sur 24 matchs, valeur moyenne 10,7 pour un
+budget de 140 ; relance de chaque étape sans doublon.
+
+Recrue en cours de saison : une joueuse inconnue sur une feuille de match déclenche
+un rafraîchissement de l'effectif puis la journée est rejouée (`syncLfhGameweekStats`).
+
+Confirmation 🟢 (pas de cron corrections côté LFH) : étape 6 de `settle-gameweek`,
+`confirmLfhGameweeks`, 48 h (`LFH_CONFIRM_DELAY_HOURS`) après la fin du dernier match :
+relit les feuilles, recalcule les points si une note a bougé, puis confirme.
+
+Points d'accueil : aucun crédit pour J1-J6 (aucune équipe réelle, déjà géré par
+`recompute-catchup.ts`) ; ils servent aux arrivées après J7.
 
 ### 35.5 Plus tard (fonctionnalités coupées côté LFH au lot 1)
 

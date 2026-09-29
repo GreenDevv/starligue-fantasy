@@ -1,0 +1,159 @@
+{
+ "data": [
+  {
+   "individuId": "1398578",
+   "equipeId": "3321",
+   "nom": "ANDON JULILOVE",
+   "prenom": "",
+   "numero": "92",
+   "licenceId": "0",
+   "buts": "29",
+   "arrets": "0",
+   "tirs": "49",
+   "septMetres": "7",
+   "septMetresTirs": "7",
+   "avertissements": "0",
+   "deuxMins": "0",
+   "disqualifie": "0",
+   "matchsJoues": "4",
+   "equipe": {
+    "id": 666,
+    "libelle": "PARIS 92",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2022/08/logo_paris92.png",
+    "sigle": "IPH",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/issy-paris-hand/"
+   },
+   "wp_player": {
+    "ID": 29079,
+    "thumbnail": "https://ligue-feminine-handball.fr/wp-content/uploads/2026/09/paris92_julilove_andon_b-e1788536204846-550x652.png",
+    "link": "https://ligue-feminine-handball.fr/joueuses/andon-julilove/",
+    "firstname": "Julilove",
+    "lastname": "Andon",
+    "number": "92",
+    "captain": false,
+    "player_status": "",
+    "position": 4,
+    "related_club": {
+     "id": 3321,
+     "name": "Paris 92",
+     "link": "https://ligue-feminine-handball.fr/clubs/issy-paris-hand/",
+     "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2022/08/logo_paris92.png"
+    }
+   }
+  },
+  {
+   "individuId": "1398578",
+   "equipeId": "3321",
+   "nom": "ANDON JULILOVE",
+   "prenom": "",
+   "numero": "92",
+   "licenceId": "0",
+   "buts": "29",
+   "arrets": "0",
+   "tirs": "49",
+   "septMetres": "7",
+   "septMetresTirs": "7",
+   "avertissements": "0",
+   "deuxMins": "0",
+   "disqualifie": "0",
+   "matchsJoues": "4",
+   "equipe": {
+    "id": 666,
+    "libelle": "PARIS 92",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2022/08/logo_paris92.png",
+    "sigle": "IPH",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/issy-paris-hand/"
+   },
+   "wp_player": {
+    "ID": 29079,
+    "thumbnail": "https://ligue-feminine-handball.fr/wp-content/uploads/2026/09/paris92_julilove_andon_b-e1788536204846-550x652.png",
+    "link": "https://ligue-feminine-handball.fr/joueuses/andon-julilove/",
+    "firstname": "Julilove",
+    "lastname": "Andon",
+    "number": "92",
+    "captain": false,
+    "player_status": "",
+    "position": 4,
+    "related_club": {
+     "id": 3321,
+     "name": "Paris 92",
+     "link": "https://ligue-feminine-handball.fr/clubs/issy-paris-hand/",
+     "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2022/08/logo_paris92.png"
+    }
+   }
+  },
+  {
+   "individuId": "1000310",
+   "equipeId": "3321",
+   "nom": "BALLUREAU LEA",
+   "prenom": "",
+   "numero": "28",
+   "licenceId": "0",
+   "buts": "26",
+   "arrets": "0",
+   "tirs": "38",
+   "septMetres": "12",
+   "septMetresTirs": "14",
+   "avertissements": "0",
+   "deuxMins": "1",
+   "disqualifie": "0",
+   "matchsJoues": "4",
+   "equipe": {
+    "id": 666,
+    "libelle": "PARIS 92",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2022/08/logo_paris92.png",
+    "sigle": "IPH",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/issy-paris-hand/"
+   },
+   "wp_player": {
+    "ID": 14448,
+    "thumbnail": "https://ligue-feminine-handball.fr/wp-content/uploads/2026/09/paris92_lea_ballureau_b-e1788536074361-550x652.png",
+    "link": "https://ligue-feminine-handball.fr/joueuses/lea-ballureau/",
+    "firstname": "Léa",
+    "lastname": "BALLUREAU",
+    "number": "28",
+    "captain": false,
+    "player_status": "Pro",
+    "position": 5,
+    "related_club": {
+     "id": 3321,
+     "name": "Paris 92",
+     "link": "https://ligue-feminine-handball.fr/clubs/issy-paris-hand/",
+     "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2022/08/logo_paris92.png"
+    }
+   }
+  },
+  {
+   "individuId": "4264962",
+   "equipeId": "3987",
+   "nom": "TOLSTRUP PETERSEN ANNE",
+   "prenom": "",
+   "numero": "31",
+   "licenceId": "0",
+   "buts": "10",
+   "arrets": "0",
+   "tirs": "16",
+   "septMetres": "0",
+   "septMetresTirs": "1",
+   "avertissements": "0",
+   "deuxMins": "0",
+   "disqualifie": "0",
+   "matchsJoues": "4",
+   "equipe": {
+    "id": 676,
+    "libelle": "STRASBOURG ACHENHEIM TRUCHTERSHEIM HANDBALL",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2022/08/Piraths_coul_noir.png",
+    "sigle": "SATH",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/achenheim-truchtersheim/"
+   },
+   "wp_player": null
+  }
+ ],
+ "meta": {
+  "total": 199,
+  "last_sync": null,
+  "total_pages": 2,
+  "current_page": 1,
+  "per_page": 100
+ }
+}

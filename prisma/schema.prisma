@@ -54,6 +54,7 @@ enum DataSource {
   API_SPORTS
   LNH_SCRAPER
   EHF_SCRAPER
+  LFH_SCRAPER // Ligue Butagaz Énergie (jeu féminin, ARCHITECTURE.md §35)
   MANUAL
 }
 

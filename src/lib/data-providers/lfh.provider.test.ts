@@ -5,9 +5,10 @@ import {
   parseLfhRencontres,
   parseLfhMatchPlayerStats,
   parseLfhStandings,
-  parseLfhPlayersPage,
+  parseLfhSeasonRoster,
   parseVisionSportSheet,
   parseVisionSportTime,
+  parseLfhPouleJournees,
   mergeLfhMatchStats,
 } from "./lfh.provider";
 import { computeMatchRating, DEFAULT_COMPUTED_RATING_WEIGHTS, ZERO_POSITION_BASE } from "@/lib/scoring/computed-rating";
@@ -60,15 +61,26 @@ describe("parseLfhStandings", () => {
   });
 });
 
-describe("parseLfhPlayersPage", () => {
-  it("poste LFH → notre enum, pagination", () => {
-    const { players, totalPages } = parseLfhPlayersPage(json("lfh-players-page1.json"));
-    expect(totalPages).toBeGreaterThan(1);
-    expect(players.length).toBe(12);
-    expect(players.find((p) => p.lastName === "ABIVEN")!.clubPageUrl).toBeNull(); // sans club
-    const abadie = players.find((p) => p.lastName === "ABADIE")!;
-    expect(abadie.position).toBe("RW"); // code 3 = Ailière droite
-    expect(abadie.clubName).toBe("Stade Pessacais Union Club Handball");
+describe("parseLfhSeasonRoster", () => {
+  // Extrait réel de /stats/joueurs?poule_id=98 : 3 joueuses avec fiche + la seule sans fiche.
+  const { players, totalPages } = parseLfhSeasonRoster(json("lfh-stats-joueurs-poule98-extrait.json"));
+
+  it("identité, poste LFH → notre enum, fiche club pour la jointure", () => {
+    expect(totalPages).toBe(2);
+    const andon = players.find((p) => p.wpPlayerId === 29079)!;
+    expect(andon).toMatchObject({
+      firstName: "Julilove",
+      lastName: "ANDON", // « Andon » sur la fiche : mis en majuscules
+      position: "LB", // code 4 = Arrière gauche
+      clubPageUrl: "https://ligue-feminine-handball.fr/clubs/issy-paris-hand/",
+    });
+    expect(andon.photoUrl).toMatch(/andon/);
+  });
+
+  it("joueuse sans fiche WordPress : gardée, mais sans poste", () => {
+    const noSheet = players.find((p) => p.wpPlayerId === null)!;
+    expect(noSheet.lastName).toBe("TOLSTRUP PETERSEN ANNE");
+    expect(noSheet.position).toBeNull();
   });
 });
 
@@ -158,5 +170,40 @@ describe("mergeLfhMatchStats", () => {
     expect(rate("MAIROT", "LB")).toBe(16.1);
     expect(rate("ANDRE", "GK")).toBe(20.5);
     expect(rate("RENAUD", "CB")).toBeNull();
+  });
+});
+
+describe("parseLfhPouleJournees", () => {
+  // Forme réelle de /competitions : `journees` est un JSON encodé dans une chaîne.
+  const json = {
+    data: [
+      {
+        phases: [
+          {
+            poules: [
+              { id: "97", journees: null },
+              {
+                id: "98",
+                journees: JSON.stringify([
+                  { journee_numero: 7, date_debut: "2026-10-30", date_fin: "2026-11-01" },
+                  { journee_numero: 12, date_debut: "2027-01-01", date_fin: "2027-01-03" },
+                ]),
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  it("dates de la poule demandée", () => {
+    expect(parseLfhPouleJournees(json, "98")).toEqual([
+      { journee_numero: 7, date_debut: "2026-10-30", date_fin: "2026-11-01" },
+      { journee_numero: 12, date_debut: "2027-01-01", date_fin: "2027-01-03" },
+    ]);
+  });
+
+  it("poule absente → erreur explicite", () => {
+    expect(() => parseLfhPouleJournees(json, "42")).toThrow(/poule 42/);
   });
 });

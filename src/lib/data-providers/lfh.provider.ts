@@ -10,7 +10,7 @@
 //      buts, buts à 7 m, avertissements, 2 min, disqualification — PAS les tirs
 //      tentés ni les arrêts (`tirs` = buts dans le jeu, `arrets` toujours 0)
 //    - /classements?poule_id=…     classement officiel
-//    - /  (racine, paginée par 12) toutes les joueuses LFH+D2F avec poste et photo
+//    - /stats/joueurs?poule_id=…  effectif de la saison (fiche WordPress : poste, photo)
 //    - /handvision/match/<ext_rencontreId>  → nom du fichier vision-sport du match
 //
 // 2. Feuille de stats vision-sport (prestataire de la saisie live LFH) :
@@ -142,6 +142,40 @@ export function parseLfhRencontres(json: unknown): ScrapedLfhFixture[] {
   return out;
 }
 
+// ─────────────────────── Dates des journées ───────────────────────
+
+export interface LfhJournee {
+  journee_numero: number;
+  date_debut: string; // "2026-10-30"
+  date_fin: string;
+}
+
+/**
+ * Dates de début/fin de chaque journée d'une poule, lues dans /competitions
+ * (champ `journees`, JSON encodé dans une chaîne). Sert de repli pour dater un
+ * match dont l'horaire n'est pas encore publié (src/lib/ingestion/lfh-season-plan.ts).
+ */
+export function parseLfhPouleJournees(json: unknown, pouleId: string): LfhJournee[] {
+  const parsed = z
+    .object({
+      data: z.array(
+        z.object({
+          phases: z.array(z.object({ poules: z.array(z.object({ id: z.string(), journees: z.string().nullable() })) })),
+        })
+      ),
+    })
+    .safeParse(json);
+  if (!parsed.success) throw new IngestionError("LFH : réponse /competitions illisible", SOURCE, true);
+
+  const poule = parsed.data.data.flatMap((c) => c.phases.flatMap((p) => p.poules)).find((p) => p.id === pouleId);
+  if (!poule?.journees) throw new IngestionError(`LFH : poule ${pouleId} introuvable dans /competitions`, SOURCE, true);
+  const journees = z
+    .array(z.object({ journee_numero: z.number(), date_debut: z.string(), date_fin: z.string() }))
+    .safeParse(JSON.parse(poule.journees));
+  if (!journees.success) throw new IngestionError(`LFH : journées de la poule ${pouleId} illisibles`, SOURCE, true);
+  return journees.data;
+}
+
 // ─────────────────────── Feuille de match officielle ───────────────────────
 
 const lfhWpPlayerSchema = z
@@ -261,61 +295,73 @@ export function parseLfhStandings(json: unknown): ScrapedLfhStanding[] {
 
 // ─────────────────────────── Joueuses ───────────────────────────
 
-const lfhPlayerDocSchema = z.object({
-  ID: z.number(),
-  thumbnail: z.string().nullable(),
-  link: z.string(),
-  firstname: z.string(),
-  lastname: z.string(),
-  number: z.string().nullable().optional(),
-  player_status: z.string().nullable().optional(),
-  position: z.union([z.number(), z.string()]).nullable(),
-  // Joueuse sans club : { id: 0, label: "", link: false, logo: false }.
-  club: z
-    .object({ id: z.number(), label: z.string(), link: z.union([z.string(), z.literal(false)]) })
+// Effectif = joueuses déjà inscrites sur une feuille de match de la poule cette
+// saison (/stats/joueurs?poule_id=…, paginé par 100 — 199 joueuses au 29/09 J4).
+// La liste générale des fiches (racine /lfh/v1, « totalPages: 57 ») ignore tout
+// paramètre de pagination (renvoie toujours les 12 mêmes) : inutilisable. Ici
+// `equipeId` est l'id du CLUB (1791 = Brest), pas l'id d'équipe de la poule
+// utilisé par /rencontres et la feuille par match (592) → jointure par la fiche
+// club (`equipe.wp_link`), stable.
+const lfhRosterRowSchema = z.object({
+  individuId: z.string(),
+  nom: z.string(),
+  prenom: z.string().nullable(),
+  numero: numStr,
+  matchsJoues: numStr,
+  equipe: z.object({ libelle: z.string(), wp_link: z.string().nullable() }).nullable(),
+  wp_player: z
+    .object({
+      ID: z.number(),
+      thumbnail: z.string().nullable().optional(),
+      firstname: z.string(),
+      lastname: z.string(),
+      position: z.union([z.number(), z.string()]).nullable(),
+    })
     .nullable()
-    .optional()
-    .transform((c) => (c && c.id !== 0 && c.link ? { label: c.label, link: c.link } : null)),
+    .optional(),
 });
 
 export interface ScrapedLfhPlayer {
-  wpPlayerId: number;
+  individuId: string; // identifiant fédéral, stable
+  wpPlayerId: number | null; // null = pas de fiche WordPress (donc pas de poste connu)
   firstName: string;
-  lastName: string;
+  lastName: string; // en majuscules, comme côté Starligue
   position: Position | null; // null = code poste absent ou inconnu
   shirtNumber: number | null;
   photoUrl: string | null;
   clubName: string | null;
   clubPageUrl: string | null; // jointure avec LfhTeamRef.clubPageUrl
-  profileUrl: string;
+  matchesPlayed: number;
 }
 
-export function parseLfhPlayersPage(json: unknown): { players: ScrapedLfhPlayer[]; totalPages: number } {
+export function parseLfhSeasonRoster(json: unknown): { players: ScrapedLfhPlayer[]; totalPages: number } {
   const parsed = z
-    .object({ docs: z.array(z.unknown()), totalPages: z.number() })
+    .object({ data: z.array(z.unknown()), meta: z.object({ total_pages: z.number() }) })
     .safeParse(json);
-  if (!parsed.success) throw new IngestionError("LFH : réponse joueuses illisible", SOURCE, true);
+  if (!parsed.success) throw new IngestionError("LFH : réponse /stats/joueurs (effectif) illisible", SOURCE, true);
 
-  const players = parsed.data.docs.flatMap((raw): ScrapedLfhPlayer[] => {
-    const r = lfhPlayerDocSchema.safeParse(raw);
+  const players = parsed.data.data.flatMap((raw): ScrapedLfhPlayer[] => {
+    const r = lfhRosterRowSchema.safeParse(raw);
     if (!r.success) return [];
     const d = r.data;
-    const shirt = d.number ? Number(d.number) : NaN;
+    const wp = d.wp_player ?? null;
     return [
       {
-        wpPlayerId: d.ID,
-        firstName: decodeEntities(d.firstname).trim(),
-        lastName: decodeEntities(d.lastname).trim(),
-        position: LFH_POSITION_MAP[Number(d.position)] ?? null,
-        shirtNumber: Number.isFinite(shirt) ? shirt : null,
-        photoUrl: d.thumbnail,
-        clubName: d.club ? decodeEntities(d.club.label) : null,
-        clubPageUrl: d.club?.link ?? null,
-        profileUrl: d.link,
+        individuId: d.individuId,
+        wpPlayerId: wp?.ID ?? null,
+        // Fiche WordPress = prénom/nom bien écrits ; feuille officielle = « NOM PRÉNOM » collés.
+        firstName: decodeEntities(wp ? wp.firstname : (d.prenom ?? "")).trim(),
+        lastName: decodeEntities(wp ? wp.lastname : d.nom).trim().toUpperCase(),
+        position: wp ? (LFH_POSITION_MAP[Number(wp.position)] ?? null) : null,
+        shirtNumber: d.numero,
+        photoUrl: wp?.thumbnail ?? null,
+        clubName: d.equipe ? decodeEntities(d.equipe.libelle) : null,
+        clubPageUrl: d.equipe?.wp_link ?? null,
+        matchesPlayed: d.matchsJoues ?? 0,
       },
     ];
   });
-  return { players, totalPages: parsed.data.totalPages };
+  return { players, totalPages: parsed.data.meta.total_pages };
 }
 
 // ─────────────────────── Feuille vision-sport ───────────────────────
@@ -588,6 +634,10 @@ export class LfhProvider {
     return all;
   }
 
+  async fetchPouleJournees(pouleId: string): Promise<LfhJournee[]> {
+    return parseLfhPouleJournees(await this.getJson(`/competitions`), pouleId);
+  }
+
   async fetchMatchOfficialStats(rencontreId: string): Promise<LfhOfficialPlayerStat[]> {
     return parseLfhMatchPlayerStats(await this.getJson(`/stats/joueurs?rencontre_id=${rencontreId}&limit=100`));
   }
@@ -596,12 +646,15 @@ export class LfhProvider {
     return parseLfhStandings(await this.getJson(`/classements?poule_id=${pouleId}`));
   }
 
-  /** Toutes les joueuses publiées (LFH + D2F mélangées, ~57 pages de 12) — à filtrer par club. */
-  async fetchAllPlayers(): Promise<ScrapedLfhPlayer[]> {
-    const first = parseLfhPlayersPage(await this.getJson(`?page=1`));
-    const all = [...first.players];
-    for (let page = 2; page <= Math.min(first.totalPages, 200); page++) {
-      all.push(...parseLfhPlayersPage(await this.getJson(`?page=${page}`)).players);
+  /** Effectif de la poule : toutes les joueuses déjà inscrites sur une feuille de match. */
+  async fetchPouleRoster(pouleId: string): Promise<ScrapedLfhPlayer[]> {
+    const all: ScrapedLfhPlayer[] = [];
+    for (let page = 1; page <= 20; page++) {
+      const { players, totalPages } = parseLfhSeasonRoster(
+        await this.getJson(`/stats/joueurs?poule_id=${pouleId}&limit=100&page=${page}`)
+      );
+      all.push(...players);
+      if (page >= totalPages) break;
     }
     return all;
   }
