@@ -1,0 +1,438 @@
+{
+ "data": [
+  {
+   "id": "2852",
+   "ext_rencontreId": "2625116",
+   "pouleId": "98",
+   "equipe1Id": "592",
+   "equipe2Id": "591",
+   "equipe1Score": "28",
+   "equipe2Score": "21",
+   "equipe1ScoreMT": "14",
+   "equipe2ScoreMT": "10",
+   "date": "2026-08-29 15:45:00.000",
+   "fdmCode": "WAGSMAS",
+   "equipementId": "12232",
+   "arbitre1": null,
+   "arbitre1Id": null,
+   "arbitre2": null,
+   "arbitre2Id": null,
+   "dateDernierUpdateEnfants": "2026-09-11 06:43:15.000",
+   "journeeNumero": "1",
+   "equipe1": {
+    "id": 592,
+    "libelle": "BREST BRETAGNE HANDBALL",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2016/07/BBH_Logo-oblique1_couleur-fond-blanc-1.png",
+    "sigle": "BBH",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/brest-bretagne-handball/"
+   },
+   "equipe2": {
+    "id": 591,
+    "libelle": "ES BESANCON FEMININ",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2013/06/LOGO-ESBF.png",
+    "sigle": "ESBF",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/entente-sportive-besancon-feminin/"
+   },
+   "ville": "BREST",
+   "salle": "BREST ARENA",
+   "billetterie": "https://brestarena.fr/programmation/?_filtres_programmation=sport",
+   "chainesTv": [
+    {
+     "slug": "HandballTV",
+     "nom": "HandballTV",
+     "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2026/08/HTV_LOGO_QUADRI_MONO_ROUGE.jpg",
+     "link": "https://handballtv.fr/"
+    },
+    {
+     "slug": "bein-sports",
+     "nom": "Bein sports",
+     "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2026/08/beIN_SPORTS_Logo_RGB-scaled.png",
+     "link": "https://www.beinsports.com/france/"
+    }
+   ]
+  },
+  {
+   "id": "2853",
+   "ext_rencontreId": "2625117",
+   "pouleId": "98",
+   "equipe1Id": "593",
+   "equipe2Id": "602",
+   "equipe1Score": "26",
+   "equipe2Score": "22",
+   "equipe1ScoreMT": "14",
+   "equipe2ScoreMT": "11",
+   "date": "2026-08-29 18:00:00.000",
+   "fdmCode": "WAGQTMD",
+   "equipementId": "9166",
+   "arbitre1": null,
+   "arbitre1Id": null,
+   "arbitre2": null,
+   "arbitre2Id": null,
+   "dateDernierUpdateEnfants": "2026-09-11 06:48:00.000",
+   "journeeNumero": "1",
+   "equipe1": {
+    "id": 593,
+    "libelle": "CHAMBRAY TOURAINE HANDBALL",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2022/08/logo_ct.png",
+    "sigle": "CTHB",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/chambray/"
+   },
+   "equipe2": {
+    "id": 602,
+    "libelle": "TOULON METROPOLE VAR HANDBALL",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2013/06/1.logo_Toulon.png",
+    "sigle": "TMVHB",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/toulon-metropole-var-handball/"
+   },
+   "ville": "CHAMBRAY LES TOURS",
+   "salle": "GYMNASE DE LA FONTAINE BLANCHE",
+   "billetterie": "https://billetterie.festik.net/cthb/",
+   "chainesTv": [
+    {
+     "slug": "HandballTV",
+     "nom": "HandballTV",
+     "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2026/08/HTV_LOGO_QUADRI_MONO_ROUGE.jpg",
+     "link": "https://handballtv.fr/"
+    },
+    {
+     "slug": "BFM Locales",
+     "nom": "BFM Locales",
+     "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2026/05/logo-BFM-LOCALES-CONTOUR-color-RVB.jpg",
+     "link": "https://www.bfmtv.com/regions/"
+    }
+   ]
+  },
+  {
+   "id": "2854",
+   "ext_rencontreId": "2625118",
+   "pouleId": "98",
+   "equipe1Id": "597",
+   "equipe2Id": "595",
+   "equipe1Score": "21",
+   "equipe2Score": "46",
+   "equipe1ScoreMT": "11",
+   "equipe2ScoreMT": "24",
+   "date": "2026-08-29 17:00:00.000",
+   "fdmCode": "WAGQTME",
+   "equipementId": "7992",
+   "arbitre1": null,
+   "arbitre1Id": null,
+   "arbitre2": null,
+   "arbitre2Id": null,
+   "dateDernierUpdateEnfants": "2026-09-11 06:43:11.000",
+   "journeeNumero": "1",
+   "equipe1": {
+    "id": 597,
+    "libelle": "PARIS 92",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2022/08/logo_paris92.png",
+    "sigle": "IPH",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/issy-paris-hand/"
+   },
+   "equipe2": {
+    "id": 595,
+    "libelle": "METZ HANDBALL",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2013/06/Metz_logo.png",
+    "sigle": "MHB",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/metz-handball/"
+   },
+   "ville": "ISSY LES MOULINEAUX",
+   "salle": "ROBERT-CHARPENTIER",
+   "billetterie": "https://paris92.billetterie-club.fr/home",
+   "chainesTv": [
+    {
+     "slug": "HandballTV",
+     "nom": "HandballTV",
+     "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2026/08/HTV_LOGO_QUADRI_MONO_ROUGE.jpg",
+     "link": "https://handballtv.fr/"
+    },
+    {
+     "slug": "Moselle TV",
+     "nom": "Moselle TV",
+     "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2026/01/Logo-Moselle-TV-Couleur.png",
+     "link": "https://moselle.tv/"
+    }
+   ]
+  },
+  {
+   "id": "2855",
+   "ext_rencontreId": "2625119",
+   "pouleId": "98",
+   "equipe1Id": "598",
+   "equipe2Id": "594",
+   "equipe1Score": "23",
+   "equipe2Score": "28",
+   "equipe1ScoreMT": "14",
+   "equipe2ScoreMT": "14",
+   "date": "2026-08-29 18:00:00.000",
+   "fdmCode": "WAGQTMF",
+   "equipementId": "6863",
+   "arbitre1": null,
+   "arbitre1Id": null,
+   "arbitre2": null,
+   "arbitre2Id": null,
+   "dateDernierUpdateEnfants": "2026-09-11 06:52:49.000",
+   "journeeNumero": "1",
+   "equipe1": {
+    "id": 598,
+    "libelle": "HANDBALL PLAN DE CUQUES",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2020/04/1.logo_Plan-de-Cuques.png",
+    "sigle": "HBPC",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/handball-plan-de-cuques/"
+   },
+   "equipe2": {
+    "id": 594,
+    "libelle": "JDA BOURGOGNE DIJON HANDBALL",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2014/07/JDA-SPORT_logo_RVB_couleur-e1739525341948.jpg",
+    "sigle": "JDA HAND",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/jdadijonhand/"
+   },
+   "ville": "PLAN DE CUQUES",
+   "salle": "LES AMBROSIS",
+   "billetterie": "https://handball-plandecuques.billetterie-club.fr/",
+   "chainesTv": [
+    {
+     "slug": "HandballTV",
+     "nom": "HandballTV",
+     "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2026/08/HTV_LOGO_QUADRI_MONO_ROUGE.jpg",
+     "link": "https://handballtv.fr/"
+    },
+    {
+     "slug": "BFM Locales",
+     "nom": "BFM Locales",
+     "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2026/05/logo-BFM-LOCALES-CONTOUR-color-RVB.jpg",
+     "link": "https://www.bfmtv.com/regions/"
+    }
+   ]
+  },
+  {
+   "id": "2856",
+   "ext_rencontreId": "2625120",
+   "pouleId": "98",
+   "equipe1Id": "599",
+   "equipe2Id": "601",
+   "equipe1Score": "20",
+   "equipe2Score": "27",
+   "equipe1ScoreMT": "9",
+   "equipe2ScoreMT": "11",
+   "date": "2026-08-29 17:30:00.000",
+   "fdmCode": "WAGQTMG",
+   "equipementId": "7461",
+   "arbitre1": null,
+   "arbitre1Id": null,
+   "arbitre2": null,
+   "arbitre2Id": null,
+   "dateDernierUpdateEnfants": "2026-09-11 06:43:14.000",
+   "journeeNumero": "1",
+   "equipe1": {
+    "id": 599,
+    "libelle": "ST AMAND HANDBALL -  PORTE DU HAINAUT",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2022/08/logo_stamand.png",
+    "sigle": "SAH-PH",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/hbc-st-amand-les-eaux-porte-du-hainaut/"
+   },
+   "equipe2": {
+    "id": 601,
+    "libelle": "STRASBOURG ACHENHEIM TRUCHTERSHEIM HANDBALL",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2022/08/Piraths_coul_noir.png",
+    "sigle": "SATH",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/achenheim-truchtersheim/"
+   },
+   "ville": "ST AMAND LES EAUX",
+   "salle": "MAURICE HUGOT",
+   "billetterie": "https://billetterie-sahph.ticketchainer.com/",
+   "chainesTv": [
+    {
+     "slug": "HandballTV",
+     "nom": "HandballTV",
+     "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2026/08/HTV_LOGO_QUADRI_MONO_ROUGE.jpg",
+     "link": "https://handballtv.fr/"
+    },
+    {
+     "slug": "BFM Locales",
+     "nom": "BFM Locales",
+     "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2026/05/logo-BFM-LOCALES-CONTOUR-color-RVB.jpg",
+     "link": "https://www.bfmtv.com/regions/"
+    }
+   ]
+  },
+  {
+   "id": "2857",
+   "ext_rencontreId": "2625121",
+   "pouleId": "98",
+   "equipe1Id": "600",
+   "equipe2Id": "596",
+   "equipe1Score": "24",
+   "equipe2Score": "34",
+   "equipe1ScoreMT": "12",
+   "equipe2ScoreMT": "16",
+   "date": "2026-08-29 18:30:00.000",
+   "fdmCode": "WAGRHUH",
+   "equipementId": "7086",
+   "arbitre1": null,
+   "arbitre1Id": null,
+   "arbitre2": null,
+   "arbitre2Id": null,
+   "dateDernierUpdateEnfants": "2026-09-11 06:48:06.000",
+   "journeeNumero": "1",
+   "equipe1": {
+    "id": 600,
+    "libelle": "STELLA SAINT-MAUR HANDBALL",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2022/08/Stella_Saint-Maur_Handball_Logo.png",
+    "sigle": "",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/stella-st-maur-handball/"
+   },
+   "equipe2": {
+    "id": 596,
+    "libelle": "OGC NICE COTE D'AZUR HANDBALL",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2013/06/LOGO-ROUGE.png",
+    "sigle": "OGCNCAHB",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/ogc-nice-cote-dazur-handball/"
+   },
+   "ville": "ST MAUR DES FOSSES",
+   "salle": "GYMNASE BROSSOLETTE",
+   "billetterie": "https://www.billetweb.fr/multi_event.php?user=79221",
+   "chainesTv": [
+    {
+     "slug": "HandballTV",
+     "nom": "HandballTV",
+     "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2026/08/HTV_LOGO_QUADRI_MONO_ROUGE.jpg",
+     "link": "https://handballtv.fr/"
+    },
+    {
+     "slug": "BFM Locales",
+     "nom": "BFM Locales",
+     "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2026/05/logo-BFM-LOCALES-CONTOUR-color-RVB.jpg",
+     "link": "https://www.bfmtv.com/regions/"
+    }
+   ]
+  },
+  {
+   "id": "2858",
+   "ext_rencontreId": "2625122",
+   "pouleId": "98",
+   "equipe1Id": "591",
+   "equipe2Id": "593",
+   "equipe1Score": "28",
+   "equipe2Score": "24",
+   "equipe1ScoreMT": "15",
+   "equipe2ScoreMT": "13",
+   "date": "2026-09-05 18:00:00.000",
+   "fdmCode": "WAGSMAT",
+   "equipementId": "6888",
+   "arbitre1": null,
+   "arbitre1Id": null,
+   "arbitre2": null,
+   "arbitre2Id": null,
+   "dateDernierUpdateEnfants": "2026-09-11 06:48:07.000",
+   "journeeNumero": "2",
+   "equipe1": {
+    "id": 591,
+    "libelle": "ES BESANCON FEMININ",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2013/06/LOGO-ESBF.png",
+    "sigle": "ESBF",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/entente-sportive-besancon-feminin/"
+   },
+   "equipe2": {
+    "id": 593,
+    "libelle": "CHAMBRAY TOURAINE HANDBALL",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2022/08/logo_ct.png",
+    "sigle": "CTHB",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/chambray/"
+   },
+   "ville": "BESANCON",
+   "salle": "PALAIS DES SPORTS GHANI YALOUZ",
+   "billetterie": "ttps://esbf.billetterie-club.fr/home",
+   "chainesTv": [
+    {
+     "slug": "HandballTV",
+     "nom": "HandballTV",
+     "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2026/08/HTV_LOGO_QUADRI_MONO_ROUGE.jpg",
+     "link": "https://handballtv.fr/"
+    }
+   ]
+  },
+  {
+   "id": "2859",
+   "ext_rencontreId": "2625123",
+   "pouleId": "98",
+   "equipe1Id": "594",
+   "equipe2Id": "592",
+   "equipe1Score": "32",
+   "equipe2Score": "33",
+   "equipe1ScoreMT": "18",
+   "equipe2ScoreMT": "20",
+   "date": "2026-09-02 17:30:00.000",
+   "fdmCode": "WAGQTMJ",
+   "equipementId": "6993",
+   "arbitre1": null,
+   "arbitre1Id": null,
+   "arbitre2": null,
+   "arbitre2Id": null,
+   "dateDernierUpdateEnfants": "2026-09-12 06:37:35.000",
+   "journeeNumero": "2",
+   "equipe1": {
+    "id": 594,
+    "libelle": "JDA BOURGOGNE DIJON HANDBALL",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2014/07/JDA-SPORT_logo_RVB_couleur-e1739525341948.jpg",
+    "sigle": "JDA HAND",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/jdadijonhand/"
+   },
+   "equipe2": {
+    "id": 592,
+    "libelle": "BREST BRETAGNE HANDBALL",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2016/07/BBH_Logo-oblique1_couleur-fond-blanc-1.png",
+    "sigle": "BBH",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/brest-bretagne-handball/"
+   },
+   "ville": "DIJON",
+   "salle": "PALAIS DES SPORTS JEAN-MICHEL GEOFFROY",
+   "billetterie": "https://billetterie-handball.jdadijon.com/fr",
+   "chainesTv": []
+  },
+  {
+   "id": "2918",
+   "ext_rencontreId": "2625182",
+   "pouleId": "98",
+   "equipe1Id": "593",
+   "equipe2Id": "600",
+   "equipe1Score": null,
+   "equipe2Score": null,
+   "equipe1ScoreMT": null,
+   "equipe2ScoreMT": null,
+   "date": null,
+   "fdmCode": "WAGQTOQ",
+   "equipementId": null,
+   "arbitre1": null,
+   "arbitre1Id": null,
+   "arbitre2": null,
+   "arbitre2Id": null,
+   "dateDernierUpdateEnfants": "2023-05-31 19:00:00.000",
+   "journeeNumero": "12",
+   "equipe1": {
+    "id": 593,
+    "libelle": "CHAMBRAY TOURAINE HANDBALL",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2022/08/logo_ct.png",
+    "sigle": "CTHB",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/chambray/"
+   },
+   "equipe2": {
+    "id": 600,
+    "libelle": "STELLA SAINT-MAUR HANDBALL",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2022/08/Stella_Saint-Maur_Handball_Logo.png",
+    "sigle": "",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/stella-st-maur-handball/"
+   },
+   "ville": null,
+   "salle": null,
+   "billetterie": "https://billetterie.festik.net/cthb/",
+   "chainesTv": []
+  }
+ ],
+ "meta": {
+  "total": 132,
+  "last_sync": null,
+  "pages": 2,
+  "page": 1,
+  "per_page": 100
+ }
+}

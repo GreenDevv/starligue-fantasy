@@ -1,0 +1,80 @@
+{
+ "data": [
+  {
+   "id": "343",
+   "ext_classementId": "59710902",
+   "pouleId": "98",
+   "equipeId": "595",
+   "place": "1",
+   "point": "12",
+   "joue": "4",
+   "gagne": "4",
+   "nul": "0",
+   "perdu": "0",
+   "butPlus": "161",
+   "butMoins": "90",
+   "diff": "71",
+   "dernieresRencontres": "1;1;1;1",
+   "equipe": {
+    "id": 595,
+    "libelle": "METZ HANDBALL",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2013/06/Metz_logo.png",
+    "sigle": "MHB",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/metz-handball/"
+   },
+   "evolution": 0
+  },
+  {
+   "id": "340",
+   "ext_classementId": "59710893",
+   "pouleId": "98",
+   "equipeId": "592",
+   "place": "2",
+   "point": "10",
+   "joue": "4",
+   "gagne": "3",
+   "nul": "0",
+   "perdu": "1",
+   "butPlus": "124",
+   "butMoins": "104",
+   "diff": "20",
+   "dernieresRencontres": "1;1;-1;1",
+   "equipe": {
+    "id": 592,
+    "libelle": "BREST BRETAGNE HANDBALL",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2016/07/BBH_Logo-oblique1_couleur-fond-blanc-1.png",
+    "sigle": "BBH",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/brest-bretagne-handball/"
+   },
+   "evolution": 1
+  },
+  {
+   "id": "339",
+   "ext_classementId": "59710896",
+   "pouleId": "98",
+   "equipeId": "591",
+   "place": "3",
+   "point": "10",
+   "joue": "4",
+   "gagne": "3",
+   "nul": "0",
+   "perdu": "1",
+   "butPlus": "111",
+   "butMoins": "99",
+   "diff": "12",
+   "dernieresRencontres": "-1;1;1;1",
+   "equipe": {
+    "id": 591,
+    "libelle": "ES BESANCON FEMININ",
+    "logo": "https://ligue-feminine-handball.fr/wp-content/uploads/2013/06/LOGO-ESBF.png",
+    "sigle": "ESBF",
+    "wp_link": "https://ligue-feminine-handball.fr/clubs/entente-sportive-besancon-feminin/"
+   },
+   "evolution": -1
+  }
+ ],
+ "meta": {
+  "total": 12,
+  "last_sync": null
+ }
+}

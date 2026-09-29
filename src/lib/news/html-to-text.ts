@@ -41,11 +41,12 @@ const NAMED_ENTITIES: Record<string, string> = {
   icirc: "î",
   iuml: "ï",
   euro: "€",
+  deg: "°",
   laquo: "«",
   raquo: "»",
 };
 
-function decodeEntities(text: string): string {
+export function decodeEntities(text: string): string {
   return text
     .replace(/&#(\d+);/g, (_, code: string) => String.fromCharCode(Number(code)))
     .replace(/&([a-z]+);/gi, (full: string, name: string) => NAMED_ENTITIES[name.toLowerCase()] ?? full);

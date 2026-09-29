@@ -3227,3 +3227,72 @@ Nouveau namespace i18n `ranking` (8 locales, `src/i18n/request.ts`).
 ### Rollout
 
 Aucune migration Prisma. Déploiement direct.
+
+---
+
+## 35. Deuxième jeu : Ligue Butagaz Énergie (D1 féminine) sur le même code
+
+### 35.1 Principe (décidé le 29/09/2026)
+
+Un seul code, **deux déploiements** : Starligue Fantasy (LNH) et un jeu Ligue
+Butagaz Énergie (LFH), chacun avec son service Railway, sa base, son domaine.
+Le jeu servi est choisi au build par `NEXT_PUBLIC_COMPETITION` (`LNH` par
+défaut → rien à configurer côté jeu masculin). Tout ce qui diffère passe par
+`src/lib/competition/profile.ts` (`getCompetitionProfile()`) : marque, source
+de la note, fonctionnalités disponibles. Effectif, alignement, points, ligues,
+transferts, pronostics… sont partagés tels quels : une amélioration profite aux
+deux jeux. Option rejetée : fork du dépôt (chaque correctif à refaire deux fois).
+Une fantasy **mixte** (hommes + femmes dans le même jeu) n'est pas l'objectif,
+mais ce socle en est le prérequis (profil + note commune).
+
+### 35.2 Données LFH
+
+Provider `src/lib/data-providers/lfh.provider.ts` (parseurs purs testés sur des
+réponses réelles, `__fixtures__/lfh-*`, `vision-sport-*`) :
+
+| Besoin | Source |
+|---|---|
+| Calendrier, résultats, classement, joueuses (poste, photo détourée) | API REST du WordPress LFH `ligue-feminine-handball.fr/wp-json/lfh/v1` (l'ancienne `api.ligue-feminine-handball.fr` n'existe plus) |
+| Feuille officielle par match : buts, buts 7 m, avertissements, 2 min, disqualification | `/stats/joueurs?rencontre_id=` — fait foi |
+| Tirs tentés, temps de jeu, arrêts / tirs subis des gardiennes | Feuille vision-sport `LIVE<nnn>LFH.html`, une par match, conservée toute la saison ; nom du fichier via `/handvision/match/<ext_rencontreId>` |
+
+`mergeLfhMatchStats` fusionne les deux (côté + numéro, confirmé par le nom) et
+produit des champs `PlayerMatchStat` identiques à ceux du boxscore LNH. Écarts
+constatés : la saisie live vision-sport peut se tromper d'un but (Brest–Besançon
+J1 : 29 buts saisis pour 28 officiels) → les buts officiels priment ; 3 pages sur
+24 ont des en-têtes de colonnes vides → tableaux reconnus par leur forme.
+
+**Non publié par la LFH** : passes décisives, ballons récupérés, pertes de balle,
+7 m / 2 min provoqués, note de performance. Postes : code WordPress 1 GB, 2 AG,
+3 AD, 4 ArG, 5 DC, 6 ArD, 7 PV.
+
+### 35.3 Note calculée
+
+`src/lib/scoring/computed-rating.ts` : la note LNH officielle est en fait une
+somme pondérée du boxscore (régression sur 7 988 lignes prod, R² 0,995) : but
++1,9, tir raté −0,35, passe / ballon récupéré / 7 m ou 2 min provoqué +1, perte
+−1, 2 min −2, disqualification −1,5, arrêt +1,5, but encaissé −0,1. Le profil
+`ratingSource: "COMPUTED"` applique ces poids aux stats LFH, **plus une base par
+poste** (GB 0,7 · AG 0,9 · ArG 2,5 · DC 4,7 · ArD 3,1 · AD 0,7 · PV 0,9) mesurée
+sur les hommes = moyenne(note LNH) − moyenne(formule réduite) : elle compense ce
+que la LFH ne publie pas (surtout les passes des demi-centres). Vérification sur
+les 24 matchs J1-J4 2026/27 : moyennes par poste des joueuses alignées sur la
+note LNH masculine (DC 9,1 vs 9,0 · GB 8,2 vs 8,5 · PV 2,7 vs 3,3). Tous les poids
+sont surchargeables par GameConfig (`COMPUTED_RATING_*`, `COMPUTED_RATING_BASE_<POSTE>`).
+La note calculée est stockée dans `PlayerMatchStat.lnhRating` (nom historique) ;
+le moteur de points (§2.3) ne voit pas la différence.
+
+### 35.4 Lots
+
+| Lot | Contenu | État |
+|---|---|---|
+| 1 | Profil de compétition, provider LFH, note calculée (aucun changement pour le jeu LNH) | fait |
+| 2 | Ingestion LFH : `DataSource.LFH_SCRAPER` (migration additive), seed saison (12 clubs, 22 journées, joueuses, valeurs initiales), `src/lib/ingestion/lfh.ts` (calendrier, effectifs, stats + note, classement), crons `settle-gameweek` / `sync-standings` aiguillés par le profil | à faire |
+| 3 | Marque et fonctionnalités : libellés « Starligue »/« LNH » tirés du profil (i18n 8 langues, métadonnées, emails), entrées de nav et crons des fonctionnalités coupées masqués / no-op | à faire |
+| 4 | Déploiement : 2ᵉ service Railway + Postgres + domaine + Resend, workflows GitHub Actions appelant les deux URLs | à faire |
+
+### 35.5 Plus tard (fonctionnalités coupées côté LFH au lot 1)
+
+Direct (les pages vision-sport se rafraîchissent toutes les 10 s pendant le match :
+un flux live est possible), corrections a posteriori (re-diff de la feuille
+officielle J+2), actus (le site LFH est un WordPress), Instagram.
