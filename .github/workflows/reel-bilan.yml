@@ -1,0 +1,97 @@
+name: Reel bilan après chaque journée (une fois les corrections LNH passées)
+
+# Génère automatiquement le reel « bilan J1→JN » (scripts/social/season-recap/) dès que
+# la journée N est CONFIRMÉE (Gameweek.confirmedAt), c.-à-d. après le passage du cron
+# des corrections LNH du mardi matin (cron-lnh-corrections.yml, 07:00 UTC) : les notes
+# ne bougeront plus, le reel est définitif.
+#
+# Idempotent : `generate.mjs --auto` ne fait rien si un bilan de cette journée (ou d'une
+# plus récente) est déjà dans public/social/. Sinon : données prod → rendu (Playwright +
+# ffmpeg, qualité identique au rendu local) → commit du mp4 sur main (Railway le sert
+# sur starliguefantasy.fr/social/…) → issue GitHub avec le lien pour prévenir.
+#
+# Rien n'est publié sur Instagram : c'est toujours une action manuelle.
+on:
+  schedule:
+    - cron: "30 9 * * 2"  # mardi 09:30 UTC, après les corrections LNH (07:00)
+    - cron: "0 6 * * 3"   # mercredi 06:00 UTC, rattrapage
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: reel-bilan
+  cancel-in-progress: false
+
+jobs:
+  reel-bilan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Installer pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          # Même pin que cron-daily.yml (pas de packageManager dans package.json : casse
+          # le build Railway, voir le commentaire là-bas).
+          version: 11.10.0
+
+      - name: Installer Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22 # pnpm@11.10.0 exige Node >= 22.13
+          cache: pnpm
+
+      - name: Dépendances
+        run: pnpm install --frozen-lockfile
+
+      - name: ffmpeg + polices emoji
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-color-emoji
+
+      - name: Playwright 1.48.2 + Chromium
+        run: |
+          npm install --prefix "$RUNNER_TEMP/pw" --no-save --silent playwright@1.48.2
+          "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
+          echo "PLAYWRIGHT_DIR=$RUNNER_TEMP/pw/node_modules/playwright" >> "$GITHUB_ENV"
+
+      - name: Générer le bilan (si une nouvelle journée est confirmée)
+        id: gen
+        env:
+          PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+          NEXT_PUBLIC_CARTO_API_KEY: ${{ secrets.NEXT_PUBLIC_CARTO_API_KEY }}
+        run: |
+          # Prisma a besoin de sslmode=require sur l'URL publique Railway.
+          case "$PROD_DATABASE_URL" in
+            *sslmode=*) ;;
+            *\?*) export PROD_DATABASE_URL="${PROD_DATABASE_URL}&sslmode=require" ;;
+            *) export PROD_DATABASE_URL="${PROD_DATABASE_URL}?sslmode=require" ;;
+          esac
+          pnpm tsx scripts/social/season-recap/generate.mjs --auto
+
+      - name: Publier le mp4 sur main
+        if: steps.gen.outputs.generated == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "public/social/${{ steps.gen.outputs.file }}"
+          git commit -m "Reel bilan J1-J${{ steps.gen.outputs.gameweek }} (auto, après corrections LNH)"
+          git pull --rebase -q origin main
+          git push origin HEAD:main
+
+      - name: Prévenir (issue GitHub)
+        if: steps.gen.outputs.generated == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "🎬 Reel bilan J1–J${{ steps.gen.outputs.gameweek }} prêt" \
+            --body "Généré automatiquement après la confirmation de la journée ${{ steps.gen.outputs.gameweek }} (corrections LNH passées).
+
+          ▶️ https://starliguefantasy.fr/social/${{ steps.gen.outputs.file }} (en ligne quelques minutes après le déploiement Railway)
+
+          Rien n'est publié sur Instagram — à relire puis poster à la main."

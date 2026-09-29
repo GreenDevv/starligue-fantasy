@@ -72,3 +72,26 @@ export function resolvePlaywright() {
 }
 
 export const b64 = (buf) => buf.toString("base64");
+
+// Nom d'équipe affiché dans les reels (classements, scores, fiches joueurs) à la place
+// de l'abréviation interne Club.shortName — lisible par tout le monde, et source
+// unique pour ne plus confondre CSMBH (Chambéry) et CCMHB (Chartres). Repli : l'abréviation.
+export const CLUB_DISPLAY_NAME = {
+  CAEN: "Caen",
+  CCMHB: "Chartres",
+  CRMHB: "Cesson",
+  CSMBH: "Chambéry",
+  FENIX: "Toulouse",
+  HBCN: "Nantes",
+  LIMOGES: "Limoges",
+  MHB: "Montpellier",
+  PAUC: "Aix",
+  PSG: "Paris SG",
+  SAHB: "Sélestat",
+  SARAN: "Saran",
+  SRVH: "St-Raph",
+  TREMBLAY: "Tremblay",
+  USAM: "Nîmes",
+  USDK: "Dunkerque",
+};
+export const clubName = (sn) => CLUB_DISPLAY_NAME[String(sn).toUpperCase()] ?? String(sn);
