@@ -3290,7 +3290,7 @@ le moteur de points (§2.3) ne voit pas la différence.
 | 1 | Profil de compétition, provider LFH, note calculée (aucun changement pour le jeu LNH) | fait |
 | 2 | Ingestion LFH : `DataSource.LFH_SCRAPER` (migration additive), `src/lib/ingestion/lfh.ts` + `lfh-season-plan.ts` (pur), `scripts/setup-lfh-season.ts` (config, saison, stats, valorisation), `settle-gameweek` aiguillé (`src/lib/ingestion/competition.ts`) | en cours |
 | 3 | Marque, vocabulaire, stats, actus, fonctionnalités coupées (§35.6) | fait |
-| 4 | Jeu LBE sous `starliguefantasy.fr/lbe` (§35.7, fait) ; 2ᵉ service Railway + Postgres + crons (à faire) | en cours |
+| 4 | Jeu LBE sous `starliguefantasy.fr/lbe` : EN LIGNE le 30/09 en mode « bientôt » (service `web-lbe` + base LBE, saison seedée) ; crons GitHub (à faire) | en cours |
 
 ### 35.4.1 Mise en place et lancement (lot 2)
 
@@ -3386,10 +3386,18 @@ navigateur ─► starliguefantasy.fr ─► service « web » (Starligue, racin
   `redirect` et à `public/` ; tout le reste passe par `withBasePath()`
   (`src/lib/base-path.ts`) : les ~110 appels `fetch("/api/…")`, le manifest, le
   service worker, les `callbackUrl` de `signOut`, les liens des notifications.
-- **Service Starligue** : `LBE_ORIGIN` (adresse privée du service LBE) active le
-  rewrite `/lbe/*`. Le middleware laisse passer `/lbe` (sinon next-intl le
-  redirigerait vers `/fr/lbe`) et transmet l'adresse publique
-  (`x-forwarded-host` = hôte réel, jamais celui fourni par le client).
+- **Service Starligue** : `LBE_ORIGIN` active le rewrite `/lbe/*` (en prod :
+  `https://web-lbe-production.up.railway.app`, l'adresse publique Railway du
+  service LBE ; bascule possible vers le réseau privé plus tard). Le middleware
+  laisse passer `/lbe` (sinon next-intl le redirigerait vers `/fr/lbe`) et
+  transmet l'adresse publique dans **`x-lbe-public-origin`** (+ x-forwarded-*).
+  Deux pièges Railway constatés en prod le 30/09 : (1) côté Starligue,
+  `req.nextUrl.host` = adresse interne du conteneur (`localhost:8080`) → l'hôte
+  public se lit dans `x-forwarded-host` / `host`, posés par le proxy d'entrée
+  Railway (qui écrase toute valeur du client) ; (2) côté LBE, ce même proxy
+  écrase `x-forwarded-host` avec l'adresse Railway du service → d'où l'en-tête
+  propre à l'appli, lu en priorité par `forwardedOrigin`. Contrôle :
+  `/lbe/api/auth/providers` doit renvoyer des URL en `https://www.starliguefantasy.fr`.
 - **Auth.js** (pièges constatés en local, tous corrigés) :
   - côté serveur, `basePath` Auth.js par défaut (`/api/auth`) : Next retire
     `/lbe` avant la route ; côté navigateur, `SessionProvider basePath="/lbe/api/auth"` ;

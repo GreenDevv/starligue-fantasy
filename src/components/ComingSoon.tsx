@@ -2,7 +2,12 @@
 
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { siteDisplayUrl } from "@/lib/competition/profile";
+import { getCompetitionProfile, siteDisplayUrl } from "@/lib/competition/profile";
+
+// Grand logo : « Starligue / Fantasy » ou « LBE / Fantasy » selon le jeu servi.
+const APP_NAME_WORDS = getCompetitionProfile().appName.split(" ");
+const APP_NAME_TAIL = APP_NAME_WORDS.pop();
+const APP_NAME_HEAD = APP_NAME_WORDS.join(" ");
 
 const FEATURE_KEYS = ["squad", "lineup", "score", "challenge"] as const;
 const FEATURE_STYLE: Record<(typeof FEATURE_KEYS)[number], string> = {
@@ -58,7 +63,7 @@ export function ComingSoon() {
                 "0.045em 0.05em 0 #F59E0B, -0.03em -0.02em 0 #1F7C72, 0 0 0.6em rgba(45,212,191,0.35)",
             }}
           >
-            Starligue
+            {APP_NAME_HEAD}
             <br />
             <span
               className="text-accent"
@@ -67,7 +72,7 @@ export function ComingSoon() {
                   "0.045em 0.05em 0 #A86A09, -0.03em -0.02em 0 rgba(45,212,191,0.6), 0 0 0.7em rgba(45,212,191,0.55)",
               }}
             >
-              Fantasy
+              {APP_NAME_TAIL}
             </span>
           </motion.h1>
 
