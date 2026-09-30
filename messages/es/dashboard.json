@@ -13,6 +13,7 @@
     "seasonBadge": "TEMPORADA 2026 / 2027",
     "tagline": "El juego de <strong>fantasy de balonmano</strong> basado en los jugadores reales de la Daikin StarLigue. Forma tu equipo y suma puntos con su rendimiento real, jornada tras jornada.",
     "badge": "PRONTO",
+    "launchBadge": "LANZAMIENTO EL {date}",
     "previewAriaLabel": "Vista previa del juego",
     "footerDisclaimer": "Proyecto personal, sin relación oficial con la LNH ni la Daikin StarLigue — se lanza antes del inicio de la temporada.",
     "features": {

@@ -13,6 +13,7 @@
     "seasonBadge": "SÆSON 2026/2027",
     "tagline": "Fantasy-spillet for <strong>håndbold</strong>, baseret på de rigtige spillere fra Daikin StarLigue. Saml dit hold og score point på deres reelle præstationer, runde efter runde.",
     "badge": "SNART",
+    "launchBadge": "LANCERING {date}",
     "previewAriaLabel": "Forhåndsvisning af spillet",
     "footerDisclaimer": "Personligt projekt, uden officiel tilknytning til LNH eller Daikin StarLigue — åbner inden sæsonstart.",
     "features": {

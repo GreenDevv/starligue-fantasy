@@ -3,11 +3,14 @@
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { getCompetitionProfile, siteDisplayUrl } from "@/lib/competition/profile";
+import { formatLaunchDate } from "@/lib/competition/launch-date";
 
 // Grand logo : « Starligue / Fantasy » ou « LBE / Fantasy » selon le jeu servi.
 const APP_NAME_WORDS = getCompetitionProfile().appName.split(" ");
 const APP_NAME_TAIL = APP_NAME_WORDS.pop();
 const APP_NAME_HEAD = APP_NAME_WORDS.join(" ");
+// « LANCEMENT LE 10.10.26 » à la place de « BIENTÔT » si une date est configurée.
+const LAUNCH_DATE = formatLaunchDate(process.env.NEXT_PUBLIC_LAUNCH_DATE);
 
 const FEATURE_KEYS = ["squad", "lineup", "score", "challenge"] as const;
 const FEATURE_STYLE: Record<(typeof FEATURE_KEYS)[number], string> = {
@@ -95,7 +98,7 @@ export function ComingSoon() {
             transition={{ duration: 0.6, delay: 0.34 }}
             className="pixel-corners-sm shadow-glow-accent mt-9 border border-border bg-surface px-5 py-2 font-arcade text-xl text-accent"
           >
-            <span>{t("comingSoon.badge")}</span>
+            <span>{LAUNCH_DATE ? t("comingSoon.launchBadge", { date: LAUNCH_DATE }) : t("comingSoon.badge")}</span>
             <span className="ml-1 inline-block h-[1.1em] w-[0.55em] translate-y-[0.12em] animate-pulse bg-accent align-middle" />
           </motion.div>
         </section>

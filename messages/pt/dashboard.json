@@ -13,6 +13,7 @@
     "seasonBadge": "ÉPOCA 2026 / 2027",
     "tagline": "O jogo de <strong>fantasy andebol</strong> baseado nos jogadores reais da Daikin StarLigue. Cria a tua equipa e marca pontos com as suas performances reais, jornada após jornada.",
     "badge": "EM BREVE",
+    "launchBadge": "LANÇAMENTO A {date}",
     "previewAriaLabel": "Pré-visualização do jogo",
     "footerDisclaimer": "Projeto pessoal, sem qualquer relação oficial com a LNH ou a Daikin StarLigue — abertura antes do arranque da época.",
     "features": {

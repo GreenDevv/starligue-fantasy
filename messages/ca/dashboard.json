@@ -13,6 +13,7 @@
     "seasonBadge": "TEMPORADA 2026 / 2027",
     "tagline": "El joc de <strong>fantasy d'handbol</strong> basat en els jugadors reals de la Daikin StarLigue. Forma el teu equip i suma punts amb el seu rendiment real, jornada rere jornada.",
     "badge": "AVIAT",
+    "launchBadge": "LLANÇAMENT EL {date}",
     "previewAriaLabel": "Previsualització del joc",
     "footerDisclaimer": "Projecte personal, sense relació oficial amb la LNH ni la Daikin StarLigue — obertura abans del començament de la temporada.",
     "features": {

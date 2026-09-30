@@ -13,6 +13,7 @@
     "seasonBadge": "SAISON 2026 / 2027",
     "tagline": "Le jeu de <strong>fantasy handball</strong> basé sur les vrais joueurs de la Daikin StarLigue. Compose ton équipe et marque des points sur leurs vraies performances, journée après journée.",
     "badge": "BIENTÔT",
+    "launchBadge": "LANCEMENT LE {date}",
     "previewAriaLabel": "Aperçu du jeu",
     "footerDisclaimer": "Projet perso, sans rapport officiel avec la LNH ou la Daikin StarLigue — ouverture avant le coup d'envoi de la saison.",
     "features": {

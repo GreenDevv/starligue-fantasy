@@ -81,6 +81,8 @@ export const LFH_KEY_OVERRIDES: Record<string, Record<string, string>> = {
       "LBE Fantasy, jeu de fantasy handball indépendant basé sur le championnat de France de handball D1 féminine (Ligue Butagaz Énergie). Compose ton équipe avec les vraies joueuses et marque des points sur leurs performances réelles.",
     "dashboard.home.metadataDescription":
       "LBE Fantasy : jeu de fantasy handball indépendant basé sur le championnat de France de handball D1 féminine (Ligue Butagaz Énergie). Compose ton équipe avec les vraies joueuses et marque des points sur leurs performances réelles.",
+    "dashboard.comingSoon.footerDisclaimer":
+      "Projet perso, sans rapport officiel avec la LFH ou la Ligue Butagaz Énergie — ouverture en cours de saison.",
     "dashboard.comingSoon.features.squad.description":
       "14 joueuses parmi les 12 clubs de Ligue Butagaz, un budget serré, un poste à la fois — gardienne, ailières, arrières, demi-centre, pivot.",
     "gameweek.state.PROVISIONAL.detail": "Points confirmés 48 h après le dernier match de la journée",
