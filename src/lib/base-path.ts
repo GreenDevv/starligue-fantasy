@@ -27,12 +27,21 @@ export function isLbeProxyPath(pathname: string): boolean {
   return pathname === "/lbe" || pathname.startsWith("/lbe/");
 }
 
+/** En-tête posé par le jeu Starligue sur les requêtes qu'il transfère au jeu LBE. */
+export const PUBLIC_ORIGIN_HEADER = "x-lbe-public-origin";
+
 /**
  * Origine publique d'une requête transférée par le jeu Starligue (en-têtes posés
  * par src/middleware.ts), ou null si la requête n'est pas passée par lui.
+ * En priorité PUBLIC_ORIGIN_HEADER : en prod, le proxy d'entrée Railway du
+ * service LBE ÉCRASE x-forwarded-host avec sa propre adresse (constaté le 30/09 :
+ * Auth.js voyait web-lbe-production.up.railway.app) ; un en-tête propre à
+ * l'appli traverse intact. x-forwarded-* en secours (essai local, sans proxy).
  * Seuls http/https sont acceptés comme protocole.
  */
 export function forwardedOrigin(headers: Headers): string | null {
+  const explicit = headers.get(PUBLIC_ORIGIN_HEADER)?.trim();
+  if (explicit && /^https?:\/\/[a-z0-9.-]+(:\d+)?$/i.test(explicit)) return explicit.toLowerCase();
   const host = headers.get("x-forwarded-host")?.split(",")[0]?.trim();
   if (!host || !/^[a-z0-9.-]+(:\d+)?$/i.test(host)) return null;
   const proto = headers.get("x-forwarded-proto")?.split(",")[0]?.trim();

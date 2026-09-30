@@ -61,6 +61,18 @@ describe("forwardedOrigin", () => {
     );
   });
 
+  it("en-tête propre à l'appli prioritaire (x-forwarded-host écrasé par le proxy Railway)", () => {
+    expect(
+      forwardedOrigin(
+        h({ "x-lbe-public-origin": "https://www.starliguefantasy.fr", "x-forwarded-host": "web-lbe-production.up.railway.app" })
+      )
+    ).toBe("https://www.starliguefantasy.fr");
+    // Valeur invalide ignorée → repli sur x-forwarded-host.
+    expect(forwardedOrigin(h({ "x-lbe-public-origin": "javascript:alert(1)", "x-forwarded-host": "starliguefantasy.fr" }))).toBe(
+      "https://starliguefantasy.fr"
+    );
+  });
+
   it("absent ou invalide → null (requête non transférée)", () => {
     expect(forwardedOrigin(h({}))).toBeNull();
     expect(forwardedOrigin(h({ "x-forwarded-host": "evil.com/path" }))).toBeNull();

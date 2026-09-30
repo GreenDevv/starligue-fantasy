@@ -2,7 +2,7 @@ import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextFetchEvent, type NextMiddleware, type NextRequest } from "next/server";
 import { routing } from "@/i18n/routing";
 import { auth } from "@/lib/auth";
-import { BASE_PATH, isLbeProxyPath } from "@/lib/base-path";
+import { BASE_PATH, isLbeProxyPath, PUBLIC_ORIGIN_HEADER } from "@/lib/base-path";
 
 // La logique de protection des routes est dans auth.ts → callbacks.authorized,
 // qui s'exécute AVANT ce middleware next-intl (auth() n'appelle le callback
@@ -24,8 +24,12 @@ export default function middleware(req: NextRequest, event: NextFetchEvent) {
     // Hôte réel de la requête, jamais un x-forwarded-host fourni par le client
     // (il orienterait les redirections d'Auth.js). Protocole : celui posé par
     // l'hébergeur (Railway termine le HTTPS en amont), à défaut celui de l'URL.
+    const proto = req.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() || req.nextUrl.protocol.replace(":", "");
     headers.set("x-forwarded-host", req.nextUrl.host);
-    headers.set("x-forwarded-proto", req.headers.get("x-forwarded-proto") ?? req.nextUrl.protocol.replace(":", ""));
+    headers.set("x-forwarded-proto", proto);
+    // Écrasé par le proxy d'entrée Railway du service LBE : on double avec un
+    // en-tête propre à l'appli (voir forwardedOrigin, src/lib/base-path.ts).
+    headers.set(PUBLIC_ORIGIN_HEADER, `${proto}://${req.nextUrl.host}`);
     return NextResponse.next({ request: { headers } });
   }
   return authAndI18n(req, event);
