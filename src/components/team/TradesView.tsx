@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import type { SeasonMode } from "@/lib/team/active-team-context";
 import { resolveApiError } from "@/lib/api/error-messages";
 import { clubDisplayName } from "@/lib/clubs/display-name";
+import { withBasePath } from "@/lib/base-path";
 
 interface SquadPlayerRow {
   id: string;
@@ -80,20 +81,20 @@ export function TradesView({ mode }: { mode: SeasonMode }) {
   const [success, setSuccess] = useState<string | null>(null);
 
   function loadAll() {
-    fetch(`/api/my-team${leagueSuffix}`)
+    fetch(withBasePath(`/api/my-team${leagueSuffix}`))
       .then((r) => r.json())
       .then((teamRes: { data?: { id: string; leagueId: string; squad: Array<{ player: SquadPlayerRow }> } }) => {
         if (!teamRes.data) return;
         setMyTeamId(teamRes.data.id);
         setMySquad(teamRes.data.squad.map((s) => s.player));
-        return fetch(`/api/leagues/${teamRes.data.leagueId}`).then((r) => r.json());
+        return fetch(withBasePath(`/api/leagues/${teamRes.data.leagueId}`)).then((r) => r.json());
       })
       .then((leagueRes?: { data?: { standings: StandingEntry[] } }) => {
         if (leagueRes?.data) setStandings(leagueRes.data.standings);
       })
       .finally(() => setLoading(false));
 
-    fetch(`/api/trades${leagueSuffix}`)
+    fetch(withBasePath(`/api/trades${leagueSuffix}`))
       .then((r) => r.json())
       .then((res: { data?: TradeProposalRow[] }) => setProposals(res.data ?? []));
   }
@@ -107,7 +108,7 @@ export function TradesView({ mode }: { mode: SeasonMode }) {
       return;
     }
     setLoadingOpponent(true);
-    fetch(`/api/leagues/${leagueId}/teams/${opponentId}/squad`)
+    fetch(withBasePath(`/api/leagues/${leagueId}/teams/${opponentId}/squad`))
       .then((r) => r.json())
       .then((res: { data?: { squad: SquadPlayerRow[] } }) => setOpponentSquad(res.data?.squad ?? []))
       .finally(() => setLoadingOpponent(false));
@@ -128,7 +129,7 @@ export function TradesView({ mode }: { mode: SeasonMode }) {
     setError(null);
     setSuccess(null);
     try {
-      const res = await fetch("/api/trades", {
+      const res = await fetch(withBasePath("/api/trades"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -156,7 +157,7 @@ export function TradesView({ mode }: { mode: SeasonMode }) {
   }
 
   async function respond(id: string, action: "accept" | "reject" | "cancel") {
-    await fetch(`/api/trades/${id}/${action}`, { method: "POST" });
+    await fetch(withBasePath(`/api/trades/${id}/${action}`), { method: "POST" });
     loadAll();
   }
 

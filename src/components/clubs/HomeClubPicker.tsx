@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { countryOptions, countryFlag } from "@/lib/geo/countries";
+import { withBasePath } from "@/lib/base-path";
 
 // Club d'origine d'un membre — ARCHITECTURE.md §23.6. Composant contrôlé, réutilisé
 // à l'inscription et sur /account. Le parent traduit la valeur en payload API :
@@ -90,7 +91,7 @@ export function HomeClubPicker({
     }
     const ctrl = new AbortController();
     const timer = setTimeout(() => {
-      fetch(`/api/handball-clubs?q=${encodeURIComponent(q)}&country=${country}&limit=10`, {
+      fetch(withBasePath(`/api/handball-clubs?q=${encodeURIComponent(q)}&country=${country}&limit=10`), {
         signal: ctrl.signal,
       })
         .then((r) => r.json())
@@ -115,7 +116,7 @@ export function HomeClubPicker({
     }
     const ctrl = new AbortController();
     const timer = setTimeout(() => {
-      fetch(`/api/geo/cities?q=${encodeURIComponent(q)}&country=${country}&limit=8`, { signal: ctrl.signal })
+      fetch(withBasePath(`/api/geo/cities?q=${encodeURIComponent(q)}&country=${country}&limit=8`), { signal: ctrl.signal })
         .then((r) => r.json())
         .then((j: { data?: { cities: CityHit[] } }) => setCityHits(j.data?.cities ?? []))
         .catch(() => {

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useFormatter } from "next-intl";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { withBasePath } from "@/lib/base-path";
 
 interface TransferWindow {
   id: string;
@@ -72,7 +73,7 @@ function WindowPanel({
         opensAt: new Date(opensAt).toISOString(),
         closesAt: new Date(closesAt).toISOString(),
       };
-      const res = await fetch(isNew ? "/api/admin/transfer-windows" : `/api/admin/transfer-windows/${w.id}`, {
+      const res = await fetch(withBasePath(isNew ? "/api/admin/transfer-windows" : `/api/admin/transfer-windows/${w.id}`), {
         method: isNew ? "POST" : "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -95,7 +96,7 @@ function WindowPanel({
     if (!("id" in w)) return;
     setSaving(true);
     try {
-      await fetch(`/api/admin/transfer-windows/${w.id}`, { method: "DELETE" });
+      await fetch(withBasePath(`/api/admin/transfer-windows/${w.id}`), { method: "DELETE" });
       onDeleted(w.id);
       onClose();
     } finally {
@@ -217,7 +218,7 @@ export default function AdminTransferWindowsPage() {
 
   async function load() {
     setLoading(true);
-    const res = await fetch("/api/admin/transfer-windows");
+    const res = await fetch(withBasePath("/api/admin/transfer-windows"));
     const json = (await res.json()) as { data?: { windows: TransferWindow[]; seasons: SeasonOption[] } };
     if (json.data) {
       setWindows(json.data.windows);

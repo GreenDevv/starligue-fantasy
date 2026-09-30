@@ -6,6 +6,7 @@ import { useTranslations, useFormatter } from "next-intl";
 import { resolveApiError } from "@/lib/api/error-messages";
 import { PhotoPositionEditor, type PhotoCrop } from "@/components/admin/PhotoPositionEditor";
 import { resizeImageToDataUri } from "@/lib/image/resize-to-data-uri";
+import { withBasePath } from "@/lib/base-path";
 
 // ---- Types ----
 
@@ -208,7 +209,7 @@ function PlayerPanel({
     try {
       const url = player ? `/api/admin/players/${player.id}` : "/api/admin/players";
       const method = player ? "PUT" : "POST";
-      const res = await fetch(url, {
+      const res = await fetch(withBasePath(url), {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -240,7 +241,7 @@ function PlayerPanel({
     if (!player) return;
     setDeleting(true);
     try {
-      const res = await fetch(`/api/admin/players/${player.id}`, { method: "DELETE" });
+      const res = await fetch(withBasePath(`/api/admin/players/${player.id}`), { method: "DELETE" });
       const json = await res.json() as { error?: { message?: string; code?: string } };
       if (!res.ok) throw new Error(resolveApiError(tRoot, "admin", json.error?.code));
       onDeleted(player.id);
@@ -544,7 +545,7 @@ function LnhScoresImportPanel() {
     setResult(null);
     const seasonLabel = LNH_SEASON_OPTIONS.find((o) => o.seasonsId === seasonsId)?.label ?? seasonsId;
     try {
-      const res = await fetch("/api/admin/import/lnh-season-scores", {
+      const res = await fetch(withBasePath("/api/admin/import/lnh-season-scores"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ seasonsId, seasonLabel }),
@@ -631,7 +632,7 @@ function ApplyValuationPanel({ onApplied }: { onApplied: () => void }) {
     setError("");
     setResult(null);
     try {
-      const res = await fetch("/api/admin/valuation/apply-lnh-scores", {
+      const res = await fetch(withBasePath("/api/admin/valuation/apply-lnh-scores"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ seasonLabel: "2025/2026" }),
@@ -715,7 +716,7 @@ function ValuationImportExport({ onImported }: { onImported: () => void }) {
     fd.append("file", file);
 
     try {
-      const res = await fetch("/api/admin/import/player-values", { method: "POST", body: fd });
+      const res = await fetch(withBasePath("/api/admin/import/player-values"), { method: "POST", body: fd });
       const json = await res.json() as {
         data?: ValueImportResult;
         error?: { message?: string; code?: string };
@@ -735,7 +736,7 @@ function ValuationImportExport({ onImported }: { onImported: () => void }) {
       <div className="flex flex-wrap items-center gap-3">
         <span className="text-xs font-semibold uppercase tracking-widest text-text-muted">{t("players.valuationImportExport.title")}</span>
         <a
-          href="/api/admin/players/export"
+          href={withBasePath("/api/admin/players/export")}
           className="rounded border border-accent/40 px-3 py-1.5 text-xs text-accent transition-colors hover:bg-accent/10"
         >
           {t("players.valuationImportExport.exportButton")}
@@ -806,7 +807,7 @@ function PhotoImportPanel({ onImported }: { onImported: () => void }) {
     setError("");
     setResult(null);
     try {
-      const res = await fetch("/api/admin/import/player-photos", { method: "POST" });
+      const res = await fetch(withBasePath("/api/admin/import/player-photos"), { method: "POST" });
       const json = await res.json() as {
         data?: PhotoImportResult;
         error?: { message?: string; code?: string };
@@ -887,7 +888,7 @@ function LnhPhotoImportPanel({ onImported }: { onImported: () => void }) {
     setError("");
     setResult(null);
     try {
-      const res = await fetch("/api/admin/import/lnh-player-photos", { method: "POST" });
+      const res = await fetch(withBasePath("/api/admin/import/lnh-player-photos"), { method: "POST" });
       const json = (await res.json()) as { data?: LnhPhotoImportResult; error?: { message?: string; code?: string } };
       if (!res.ok || !json.data) throw new Error(resolveApiError(tRoot, "admin", json.error?.code));
       setResult(json.data);
@@ -968,7 +969,7 @@ export default function AdminPlayersPage() {
     if (clubFilter) params.set("clubId", clubFilter);
     const effectiveSeasonId = sid ?? seasonId;
     if (effectiveSeasonId) params.set("seasonId", effectiveSeasonId);
-    const res = await fetch(`/api/admin/players?${params}`);
+    const res = await fetch(withBasePath(`/api/admin/players?${params}`));
     const json = await res.json() as { data?: { players: Player[]; clubs: Club[]; seasons: Season[]; currentSeasonId: string } };
     if (json.data) {
       setPlayers(json.data.players);

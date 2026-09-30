@@ -6,6 +6,7 @@ import { LeaderboardList } from "@/components/leaderboard/LeaderboardList";
 import { LiveLeaderboard } from "@/components/live/LiveLeaderboard";
 import { GameweekStandingsBanner } from "@/components/gameweek/GameweekStandingsBanner";
 import { useSession } from "next-auth/react";
+import { withBasePath } from "@/lib/base-path";
 
 interface StandingEntry {
   rank: number;
@@ -45,7 +46,7 @@ export default function LeaderboardPage() {
   // Load global leaderboard
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/leaderboard?page=${page}&perPage=20`)
+    fetch(withBasePath(`/api/leaderboard?page=${page}&perPage=20`))
       .then((r) => r.json())
       .then((data: { data?: GlobalData }) => {
         if (data.data) setGlobalData(data.data);
@@ -57,7 +58,7 @@ export default function LeaderboardPage() {
   useEffect(() => {
     if (tab !== "gameweek") return;
     if (gwNumber !== null) return;
-    fetch("/api/gameweeks/current")
+    fetch(withBasePath("/api/gameweeks/current"))
       .then((r) => r.json())
       .then((data: { data?: { number: number } | null }) => {
         const num = data.data?.number ?? 1;
@@ -69,7 +70,7 @@ export default function LeaderboardPage() {
   useEffect(() => {
     if (tab !== "gameweek" || gwNumber === null) return;
     setLoading(true);
-    fetch(`/api/leaderboard/gameweek/${gwNumber}`)
+    fetch(withBasePath(`/api/leaderboard/gameweek/${gwNumber}`))
       .then((r) => r.json())
       .then((data: { data?: GameweekData }) => {
         if (data.data) setGwData(data.data);

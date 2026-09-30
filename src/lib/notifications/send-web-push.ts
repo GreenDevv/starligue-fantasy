@@ -1,4 +1,5 @@
 import webpush from "web-push";
+import { withBasePath } from "@/lib/base-path";
 
 // Enveloppe fine autour de `web-push` — configuration paresseuse (une seule fois,
 // au premier envoi) via les clés VAPID générées le 11/09
@@ -45,7 +46,8 @@ export async function sendWebPush(
   try {
     await webpush.sendNotification(
       { endpoint: subscription.endpoint, keys: { p256dh: subscription.p256dh, auth: subscription.auth } },
-      JSON.stringify(payload)
+      // Lien du jeu servi : « /fr/matches/… » → « /lbe/fr/matches/… » côté LBE.
+      JSON.stringify({ ...payload, url: withBasePath(payload.url) })
     );
     return { expired: false };
   } catch (err) {

@@ -11,6 +11,7 @@ import { Skeleton, SkeletonRow } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 import type { SeasonMode } from "@/lib/team/active-team-context";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { withBasePath } from "@/lib/base-path";
 
 interface SquadEntry {
   playerId: string;
@@ -59,7 +60,7 @@ export function StartView({ mode }: { mode: SeasonMode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/my-team${leagueSuffix}`)
+    fetch(withBasePath(`/api/my-team${leagueSuffix}`))
       .then((r) => r.json())
       .then((data: TeamResponse) => {
         if (data.data) {
@@ -120,7 +121,7 @@ export function StartView({ mode }: { mode: SeasonMode }) {
     setError(null);
     const starters = squad.filter((p) => p.role === "STARTER").map((p) => p.playerId);
     try {
-      const lineupRes = await fetch("/api/my-team/lineup", {
+      const lineupRes = await fetch(withBasePath("/api/my-team/lineup"), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ starters, ...(leagueId ? { leagueId } : {}) }),
@@ -136,7 +137,7 @@ export function StartView({ mode }: { mode: SeasonMode }) {
         return;
       }
 
-      const captainRes = await fetch("/api/my-team/captain", {
+      const captainRes = await fetch(withBasePath("/api/my-team/captain"), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ playerId: captainId, ...(leagueId ? { leagueId } : {}) }),

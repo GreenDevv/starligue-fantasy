@@ -11,6 +11,7 @@ import { MatchesStrip } from "@/components/dashboard/MatchesStrip";
 import { StatLeadersPanel } from "@/components/dashboard/StatLeadersPanel";
 import { LiveTeamScoreCard } from "@/components/live/LiveTeamScoreCard";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { withBasePath } from "@/lib/base-path";
 
 interface SquadEntry {
   squadEntryId: string;
@@ -125,7 +126,7 @@ export function TeamView({
     setError(null);
     const starters = squad.filter((p) => p.role === "STARTER").map((p) => p.playerId);
     try {
-      const res = await fetch("/api/my-team/lineup", {
+      const res = await fetch(withBasePath("/api/my-team/lineup"), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ starters, leagueId }),
@@ -147,7 +148,7 @@ export function TeamView({
     setBonusSaving(true);
     setBonusError(null);
     try {
-      const res = await fetch("/api/my-team/bonus", {
+      const res = await fetch(withBasePath("/api/my-team/bonus"), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type, leagueId }),
@@ -173,7 +174,7 @@ export function TeamView({
     setConvertError(null);
     setConvertSuccess(null);
     try {
-      const res = await fetch("/api/my-team/points-conversion", {
+      const res = await fetch(withBasePath("/api/my-team/points-conversion"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount, leagueId }),

@@ -11,6 +11,7 @@ import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { cn } from "@/lib/utils";
 import { clubDisplayName } from "@/lib/clubs/display-name";
+import { withBasePath } from "@/lib/base-path";
 
 interface Player {
   id: string;
@@ -60,7 +61,7 @@ export function AuctionBuildView({ leagueId, leagueSuffix }: { leagueId: string;
   const lastRoundNumber = useRef<number | null>(null);
 
   const fetchState = useCallback(async () => {
-    const res = await fetch(`/api/leagues/${leagueId}/auction`);
+    const res = await fetch(withBasePath(`/api/leagues/${leagueId}/auction`));
     const data = (await res.json()) as { data?: AuctionState; error?: { message?: string } };
     if (data.data) {
       setState(data.data);
@@ -77,7 +78,7 @@ export function AuctionBuildView({ leagueId, leagueSuffix }: { leagueId: string;
   }, [leagueId]);
 
   useEffect(() => {
-    Promise.all([fetch("/api/players?perPage=500").then((r) => r.json()), fetchState()]).then(
+    Promise.all([fetch(withBasePath("/api/players?perPage=500")).then((r) => r.json()), fetchState()]).then(
       ([playersRes]: [{ data?: { players: Player[] } }, AuctionState | null]) => {
         if (playersRes.data?.players) setAllPlayers(playersRes.data.players);
         setLoading(false);
@@ -221,7 +222,7 @@ export function AuctionBuildView({ leagueId, leagueSuffix }: { leagueId: string;
       .map(([playerId, value]) => ({ playerId, amount: parseFloat(value) }))
       .filter((b) => b.amount > 0);
     try {
-      const res = await fetch(`/api/leagues/${leagueId}/auction/bids`, {
+      const res = await fetch(withBasePath(`/api/leagues/${leagueId}/auction/bids`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ bids }),
@@ -252,7 +253,7 @@ export function AuctionBuildView({ leagueId, leagueSuffix }: { leagueId: string;
       return;
     }
     try {
-      const res = await fetch(`/api/leagues/${leagueId}/auction/submit`, { method: "POST" });
+      const res = await fetch(withBasePath(`/api/leagues/${leagueId}/auction/submit`), { method: "POST" });
       const data = (await res.json()) as {
         data?: { resolved: boolean };
         error?: { code?: string; message?: string; details?: unknown };

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations, useFormatter } from "next-intl";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { withBasePath } from "@/lib/base-path";
 
 interface ChatMessage {
   id: string;
@@ -41,7 +42,7 @@ export function LeagueChat({ leagueId, currentUserId }: { leagueId: string; curr
   const [reportedIds, setReportedIds] = useState<Set<string>>(new Set());
 
   async function handleReport(messageId: string) {
-    const res = await fetch(`/api/leagues/${leagueId}/chat/${messageId}/report`, { method: "POST" });
+    const res = await fetch(withBasePath(`/api/leagues/${leagueId}/chat/${messageId}/report`), { method: "POST" });
     if (res.ok) {
       // Le menu reste ouvert : c'est lui qui contient le bouton, et c'est ce
       // bouton qui bascule sur "Signalé" (désactivé) pour donner une
@@ -57,7 +58,7 @@ export function LeagueChat({ leagueId, currentUserId }: { leagueId: string; curr
   async function handleBlock(userId: string) {
     setMenuOpenFor(null);
     setConfirmingBlockOf(null);
-    const res = await fetch("/api/blocked-users", {
+    const res = await fetch(withBasePath("/api/blocked-users"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId }),
@@ -71,7 +72,7 @@ export function LeagueChat({ leagueId, currentUserId }: { leagueId: string; curr
     const url = latestCreatedAt.current
       ? `/api/leagues/${leagueId}/chat?since=${encodeURIComponent(latestCreatedAt.current)}`
       : `/api/leagues/${leagueId}/chat`;
-    const res = await fetch(url);
+    const res = await fetch(withBasePath(url));
     const json = (await res.json()) as { data?: { messages: ChatMessage[] } };
     const incoming = json.data?.messages ?? [];
     if (incoming.length === 0) return;
@@ -97,7 +98,7 @@ export function LeagueChat({ leagueId, currentUserId }: { leagueId: string; curr
     if (!content || sending) return;
     setSending(true);
     setError(null);
-    const res = await fetch(`/api/leagues/${leagueId}/chat`, {
+    const res = await fetch(withBasePath(`/api/leagues/${leagueId}/chat`), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content }),

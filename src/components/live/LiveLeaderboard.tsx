@@ -5,6 +5,7 @@
 // seul (rend null) hors journée en cours / sans match noté.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
+import { withBasePath } from "@/lib/base-path";
 
 interface LiveRow {
   teamId: string;
@@ -51,7 +52,7 @@ export function LiveLeaderboard({ limit = 30 }: { limit?: number }) {
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch("/api/leaderboard/live", { cache: "no-store" });
+      const res = await fetch(withBasePath("/api/leaderboard/live"), { cache: "no-store" });
       if (res.status === 204) {
         setBoard(null);
         return;

@@ -3290,7 +3290,7 @@ le moteur de points (§2.3) ne voit pas la différence.
 | 1 | Profil de compétition, provider LFH, note calculée (aucun changement pour le jeu LNH) | fait |
 | 2 | Ingestion LFH : `DataSource.LFH_SCRAPER` (migration additive), `src/lib/ingestion/lfh.ts` + `lfh-season-plan.ts` (pur), `scripts/setup-lfh-season.ts` (config, saison, stats, valorisation), `settle-gameweek` aiguillé (`src/lib/ingestion/competition.ts`) | en cours |
 | 3 | Marque, vocabulaire, stats, actus, fonctionnalités coupées (§35.6) | fait |
-| 4 | Déploiement : 2ᵉ service Railway + Postgres + domaine + Resend, workflows GitHub Actions appelant les deux URLs | à faire |
+| 4 | Jeu LBE sous `starliguefantasy.fr/lbe` (§35.7, fait) ; 2ᵉ service Railway + Postgres + crons (à faire) | en cours |
 
 ### 35.4.1 Mise en place et lancement (lot 2)
 
@@ -3369,6 +3369,52 @@ textes identiques à avant, aucune erreur.
 
 À savoir (hors lot 3, non corrigé) : « moy. {rating}/10 » est aussi faux côté
 Starligue (la note LNH n'est pas sur 10, voir la mémoire du 29/09).
+
+### 35.7 Lot 4 — le jeu LBE sous starliguefantasy.fr/lbe
+
+Deux services Railway, un seul domaine public (celui du jeu Starligue) :
+
+```
+navigateur ─► starliguefantasy.fr ─► service « web » (Starligue, racine)
+                                        │  /lbe/*  (rewrite = proxy, next.config.mjs)
+                                        ▼
+                                     service LBE (basePath /lbe, réseau privé)
+```
+
+- **Service LBE** : `NEXT_PUBLIC_BASE_PATH=/lbe` + `NEXT_PUBLIC_COMPETITION=LFH`
+  (lues au BUILD). Next applique le basePath aux `<Link>`, `router.push`,
+  `redirect` et à `public/` ; tout le reste passe par `withBasePath()`
+  (`src/lib/base-path.ts`) : les ~110 appels `fetch("/api/…")`, le manifest, le
+  service worker, les `callbackUrl` de `signOut`, les liens des notifications.
+- **Service Starligue** : `LBE_ORIGIN` (adresse privée du service LBE) active le
+  rewrite `/lbe/*`. Le middleware laisse passer `/lbe` (sinon next-intl le
+  redirigerait vers `/fr/lbe`) et transmet l'adresse publique
+  (`x-forwarded-host` = hôte réel, jamais celui fourni par le client).
+- **Auth.js** (pièges constatés en local, tous corrigés) :
+  - côté serveur, `basePath` Auth.js par défaut (`/api/auth`) : Next retire
+    `/lbe` avant la route ; côté navigateur, `SessionProvider basePath="/lbe/api/auth"` ;
+  - **pas d'`AUTH_URL` sur le service LBE** : next-auth en ferait son basePath
+    (erreur UnknownAction) ET reconstruit la requête du middleware en perdant
+    le basePath (redirection vers `/fr/lbe/…`). L'adresse publique est rendue à
+    Auth.js par la route `/api/auth` elle-même (`forwardedOrigin`) ;
+  - cookies du jeu LBE renommés (`lfh.authjs.session-token`…) : même domaine,
+    sessions isolées dans les deux sens (vérifié) ;
+  - redirections internes (`authorized`) préfixées.
+- **Middleware** : `"/"` ajouté au motif — avec un basePath, `/lbe` tout court
+  n'était plus couvert (404 au lieu de `/lbe/fr`).
+- **Service worker** : `/lbe/sw.js`, portée `/lbe/` ; `getRegistration()` ne
+  garde que le worker de SA portée (celui de la Starligue, portée `/`, couvre
+  aussi `/lbe`).
+- **En local** : `NEXT_DIST_DIR` sépare les dossiers de build pour faire tourner
+  les deux jeux côte à côte (défaut `.next`, inchangé en prod).
+
+Essai local du 30/09 (deux serveurs, proxy) : pages LBE via le jeu Starligue,
+connexion / déconnexion LBE avec les bonnes URL publiques, redirection vers un
+site externe refusée même avec un en-tête falsifié, connexion Starligue
+inchangée, aucune session partagée.
+
+`COMING_SOON=true` sur le service LBE = page « bientôt » à la place de
+l'accueil, textes déjà LBE : mise en ligne possible avant J7.
 
 ### 35.5 Plus tard (fonctionnalités coupées côté LFH au lot 1)
 

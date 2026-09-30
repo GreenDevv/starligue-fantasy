@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { Capacitor } from "@capacitor/core";
 import { PushNotifications } from "@capacitor/push-notifications";
+import { withBasePath } from "@/lib/base-path";
 
 // No-op sur le web : Capacitor.isNativePlatform() est false hors de l'app
 // mobile, ce hook n'a donc aucun effet sur le site — ARCHITECTURE.md §20.2.
@@ -20,7 +21,7 @@ export function useRegisterPush(enabled: boolean) {
 
       registrationListener = await PushNotifications.addListener("registration", async (token) => {
         try {
-          await fetch("/api/push-tokens", {
+          await fetch(withBasePath("/api/push-tokens"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

@@ -13,6 +13,7 @@ import { ModeSwitchLink } from "@/components/nav/ModeSwitchLink";
 import { SeasonToggle } from "@/components/SeasonToggle";
 import { MenuIcon, CloseIcon, LogoutIcon } from "@/components/ui/icons";
 import type { SeasonMode } from "@/lib/team/active-team-context";
+import { withBasePath } from "@/lib/base-path";
 
 const listVariants = {
   hidden: {},
@@ -64,7 +65,7 @@ export function PublicMobileMenu({
 
   function handleLogout() {
     setOpen(false);
-    signOut({ callbackUrl: `/${locale}/` });
+    signOut({ callbackUrl: withBasePath(`/${locale}/`) });
   }
 
   return (

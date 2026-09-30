@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { withBasePath } from "@/lib/base-path";
 
 export function CopyInviteButton({ inviteCode }: { inviteCode: string }) {
   const t = useTranslations("leagues");
@@ -38,7 +39,7 @@ export function SwitchToTeamButton({ leagueId, label }: { leagueId: string; labe
   async function go() {
     setLoading(true);
     try {
-      await fetch("/api/team/active-league", {
+      await fetch(withBasePath("/api/team/active-league"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ leagueId }),
@@ -73,7 +74,7 @@ export function LeaveLeagueButton({ leagueId }: { leagueId: string }) {
   async function handleLeave() {
     setLoading(true);
     setError(null);
-    const res = await fetch(`/api/leagues/${leagueId}/members/me`, {
+    const res = await fetch(withBasePath(`/api/leagues/${leagueId}/members/me`), {
       method: "DELETE",
     });
     const data = await res.json() as { data?: { success: boolean }; error?: { code?: string; message: string } };
@@ -126,7 +127,7 @@ export function DeleteLeagueButton({ leagueId }: { leagueId: string }) {
 
   async function handleDelete() {
     setLoading(true);
-    await fetch(`/api/leagues/${leagueId}`, { method: "DELETE" });
+    await fetch(withBasePath(`/api/leagues/${leagueId}`), { method: "DELETE" });
     router.push("/leagues");
   }
 

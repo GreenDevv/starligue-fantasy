@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { withBasePath } from "@/lib/base-path";
 
 interface Club {
   id: string;
@@ -74,7 +75,7 @@ function ClubPanel({
     setSaving(true);
     setError("");
     try {
-      const res = await fetch(`/api/admin/clubs/${club.id}`, {
+      const res = await fetch(withBasePath(`/api/admin/clubs/${club.id}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, shortName, displayName, logoUrl, lnhSlug }),
@@ -227,7 +228,7 @@ export default function AdminClubsPage() {
 
   async function load() {
     setLoading(true);
-    const res = await fetch("/api/admin/clubs");
+    const res = await fetch(withBasePath("/api/admin/clubs"));
     const json = await res.json() as { data?: { clubs: Club[] } };
     if (json.data?.clubs) setClubs(json.data.clubs);
     setLoading(false);

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { NewsCardClient } from "./NewsCardClient";
 import type { NewsFeedItem } from "@/lib/news/get-feed";
 import type { NewsCategory } from "@prisma/client";
+import { withBasePath } from "@/lib/base-path";
 
 // Charge les actus suivantes en place (sous les 10 déjà rendues côté serveur par
 // NewsFeed.tsx), sans navigation/rechargement de page — demande explicite de
@@ -32,7 +33,7 @@ export function NewsFeedLoadMore({
     try {
       const params = new URLSearchParams({ page: String(page + 1) });
       if (category) params.set("category", category);
-      const res = await fetch(`/api/news?${params.toString()}`);
+      const res = await fetch(withBasePath(`/api/news?${params.toString()}`));
       if (!res.ok) return; // échec récupérable — le bouton reste cliquable, l'utilisateur peut réessayer
       const json = (await res.json()) as { data: { items: NewsFeedItem[]; page: number; hasMore: boolean } };
       setItems((prev) => [...prev, ...json.data.items]);

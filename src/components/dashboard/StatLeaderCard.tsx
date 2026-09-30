@@ -11,6 +11,7 @@ import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { teamColor } from "@/lib/team/team-colors";
 import { clubDisplayName } from "@/lib/clubs/display-name";
+import { withBasePath } from "@/lib/base-path";
 
 // Extrait de src/components/dashboard/StatLeadersPanel.tsx — réutilisé tel quel par
 // le dashboard personnalisable (widget "stat joueur", src/components/DashboardView.tsx).
@@ -87,7 +88,7 @@ export function StatLeaderCard({
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetch(`/api/stats/leaders?statKey=${statKey}&scope=${scope}&seasonId=${seasonId}`)
+    fetch(withBasePath(`/api/stats/leaders?statKey=${statKey}&scope=${scope}&seasonId=${seasonId}`))
       .then((r) => r.json())
       .then((json: { data?: { leaders: LeaderApiRow[] } }) => {
         if (cancelled) return;
@@ -107,7 +108,7 @@ export function StatLeaderCard({
   // l'affichage des leaders — silencieux si non connecté/pas d'équipe.
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/my-team/ownership")
+    fetch(withBasePath("/api/my-team/ownership"))
       .then((r) => r.json())
       .then((json: { data?: { teams: MyTeam[] } }) => {
         if (!cancelled) setMyTeams(json.data?.teams ?? []);

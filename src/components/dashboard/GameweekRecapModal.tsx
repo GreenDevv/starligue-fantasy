@@ -22,6 +22,7 @@ import type { Position } from "@/lib/squad/validation";
 import type { PendingGameweekRecap } from "@/lib/team/pending-gameweek-recap";
 import type { LineupPlayerDetail } from "@/lib/team/gameweek-lineup-detail";
 import { clubDisplayName } from "@/lib/clubs/display-name";
+import { withBasePath } from "@/lib/base-path";
 
 interface GameweekRecapModalProps {
   recaps: PendingGameweekRecap[];
@@ -79,7 +80,7 @@ export function GameweekRecapModal({ recaps }: GameweekRecapModalProps) {
     if (!current || dismissing) return;
     setDismissing(true);
     try {
-      await fetch("/api/team/recap-seen", {
+      await fetch(withBasePath("/api/team/recap-seen"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -101,8 +102,7 @@ export function GameweekRecapModal({ recaps }: GameweekRecapModalProps) {
     if (!current || sharing) return;
     setSharing(true);
     try {
-      const res = await fetch(
-        `/api/og/gameweek-recap?mode=${current.mode}&teamId=${current.teamId}&gameweekId=${current.gameweekId}`
+      const res = await fetch(withBasePath(`/api/og/gameweek-recap?mode=${current.mode}&teamId=${current.teamId}&gameweekId=${current.gameweekId}`)
       );
       if (!res.ok) throw new Error("og failed");
       const blob = await res.blob();

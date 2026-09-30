@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import type { SeasonMode } from "@/lib/team/active-team-context";
 import { resolveApiError } from "@/lib/api/error-messages";
 import { clubDisplayName } from "@/lib/clubs/display-name";
+import { withBasePath } from "@/lib/base-path";
 
 interface MarketPlayer {
   id: string;
@@ -58,8 +59,8 @@ export function TransfersView({ mode }: { mode: SeasonMode }) {
 
   function load() {
     Promise.all([
-      fetch(`/api/my-team${leagueSuffix}`).then((r) => r.json()),
-      fetch("/api/players?perPage=500").then((r) => r.json()),
+      fetch(withBasePath(`/api/my-team${leagueSuffix}`)).then((r) => r.json()),
+      fetch(withBasePath("/api/players?perPage=500")).then((r) => r.json()),
     ]).then(([teamRes, playersRes]: [TeamResponse, { data?: { players: MarketPlayer[] } }]) => {
       if (teamRes.data) {
         setSquad(teamRes.data.squad.map((s) => s.player));
@@ -98,7 +99,7 @@ export function TransfersView({ mode }: { mode: SeasonMode }) {
     setError(null);
     setSuccess(null);
     try {
-      const res = await fetch("/api/my-team/transfer", {
+      const res = await fetch(withBasePath("/api/my-team/transfer"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sellPlayerId: sellPlayer.id, buyPlayerId: buyPlayer.id, ...(leagueId ? { leagueId } : {}) }),

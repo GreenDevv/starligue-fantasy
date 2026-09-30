@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { withBasePath } from "@/lib/base-path";
 
 function ResetPasswordForm() {
   const t = useTranslations();
@@ -30,7 +31,7 @@ function ResetPasswordForm() {
 
     setLoading(true);
 
-    const res = await fetch("/api/auth/reset-password", {
+    const res = await fetch(withBasePath("/api/auth/reset-password"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token, password }),

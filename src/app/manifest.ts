@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getCompetitionProfile } from "@/lib/competition/profile";
+import { withBasePath } from "@/lib/base-path";
 
 // Rend le site installable ("Ajouter à l'écran d'accueil") — prérequis STRICT
 // d'Apple pour que les notifications Web Push fonctionnent sur iOS (16.4+) : un
@@ -13,13 +14,15 @@ export default function manifest(): MetadataRoute.Manifest {
     name: competition.appName,
     short_name: competition.appName,
     description: `Jeu fantasy handball basé sur la ${competition.leagueName}.`,
-    start_url: "/",
+    // Préfixe du jeu servi (LBE : /lbe) — un manifest n'hérite pas du basePath.
+    start_url: withBasePath("/"),
+    scope: withBasePath("/"),
     display: "standalone",
     background_color: "#0E1116",
     theme_color: "#0E1116",
     icons: [
-      { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
-      { src: "/icon-512.png", sizes: "512x512", type: "image/png" },
+      { src: withBasePath("/icon-192.png"), sizes: "192x192", type: "image/png" },
+      { src: withBasePath("/icon-512.png"), sizes: "512x512", type: "image/png" },
     ],
   };
 }

@@ -12,6 +12,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslations, useFormatter } from "next-intl";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { withBasePath } from "@/lib/base-path";
 
 type FriendlyStatus = "SCHEDULED" | "LIVE" | "FINISHED" | "POSTPONED" | "CANCELLED";
 
@@ -79,7 +80,7 @@ function MatchRow({ match, onUpdated, onDeleted }: { match: FriendlyMatchRow; on
     setSaving(true);
     setError("");
     try {
-      const res = await fetch(`/api/admin/friendly-matches/${match.id}`, {
+      const res = await fetch(withBasePath(`/api/admin/friendly-matches/${match.id}`), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -103,7 +104,7 @@ function MatchRow({ match, onUpdated, onDeleted }: { match: FriendlyMatchRow; on
     setSaving(true);
     setError("");
     try {
-      const res = await fetch(`/api/admin/friendly-matches/${match.id}`, { method: "DELETE" });
+      const res = await fetch(withBasePath(`/api/admin/friendly-matches/${match.id}`), { method: "DELETE" });
       const json = (await res.json()) as { data?: Partial<FriendlyMatchRow>; error?: { code?: string } };
       if (res.ok && json.data) {
         onUpdated({ ...match, ...json.data });
@@ -133,7 +134,7 @@ function MatchRow({ match, onUpdated, onDeleted }: { match: FriendlyMatchRow; on
     setSaving(true);
     setError("");
     try {
-      const res = await fetch(`/api/admin/friendly-matches/${match.id}?hard=1`, { method: "DELETE" });
+      const res = await fetch(withBasePath(`/api/admin/friendly-matches/${match.id}?hard=1`), { method: "DELETE" });
       const json = (await res.json()) as { data?: { deleted?: boolean }; error?: { code?: string } };
       if (res.ok && json.data?.deleted) {
         onDeleted(match.id);
@@ -262,7 +263,7 @@ export default function AdminFriendlyMatchesPage() {
 
   async function load() {
     setLoading(true);
-    const res = await fetch("/api/admin/friendly-matches");
+    const res = await fetch(withBasePath("/api/admin/friendly-matches"));
     const json = (await res.json()) as { data?: { matches: FriendlyMatchRow[] } };
     if (json.data) setMatches(json.data.matches);
     setLoading(false);

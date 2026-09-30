@@ -14,6 +14,7 @@ import { SkeletonRow } from "@/components/ui/Skeleton";
 import type { SeasonMode } from "@/lib/team/active-team-context";
 import type { MarketPlayer } from "@/lib/players/market-list";
 import { clubDisplayName } from "@/lib/clubs/display-name";
+import { withBasePath } from "@/lib/base-path";
 
 type SortKey = "pointsPerMillion" | "seasonPoints" | "marketValue" | "lastName";
 
@@ -39,7 +40,7 @@ export function MarketView({ mode }: { mode: SeasonMode }) {
 
   useEffect(() => {
     setLoading(true);
-    fetch("/api/market")
+    fetch(withBasePath("/api/market"))
       .then((r) => r.json())
       .then((data: { data?: { players: MarketPlayer[] } }) => {
         if (data.data?.players) setPlayers(data.data.players);

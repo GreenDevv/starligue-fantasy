@@ -10,6 +10,7 @@ import { PlayerStatsChart } from "@/components/charts/PlayerStatsChart";
 import type { PlayerDetailData, PlayerDetailMatchLogEntry } from "@/lib/players/player-detail";
 import type { Position } from "@/lib/squad/validation";
 import { clubDisplayName } from "@/lib/clubs/display-name";
+import { withBasePath } from "@/lib/base-path";
 
 interface SearchResult {
   id: string;
@@ -43,7 +44,7 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
     const controller = new AbortController();
     setSearching(true);
     const timer = setTimeout(() => {
-      fetch(`/api/players?search=${encodeURIComponent(query)}&seasonId=${primary.seasonId}&perPage=8`, {
+      fetch(withBasePath(`/api/players?search=${encodeURIComponent(query)}&seasonId=${primary.seasonId}&perPage=8`), {
         signal: controller.signal,
       })
         .then((r) => r.json())
@@ -66,7 +67,7 @@ export function PlayerCompareView({ primary }: { primary: PlayerDetailData }) {
     setResults([]);
     setLoadingCompare(true);
     try {
-      const res = await fetch(`/api/players/${p.id}/detail`);
+      const res = await fetch(withBasePath(`/api/players/${p.id}/detail`));
       const json: { data?: PlayerDetailData } = await res.json();
       if (json.data) setCompare(json.data);
     } finally {

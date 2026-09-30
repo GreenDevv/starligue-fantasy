@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { withBasePath } from "@/lib/base-path";
 
 // Un navigateur ne revérifie /sw.js pour une mise à jour que ~1x/24h tant que
 // rien ne le lui demande explicitement (spec Service Worker) — un utilisateur
@@ -14,8 +15,11 @@ export function WebPushServiceWorkerUpdater() {
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
     navigator.serviceWorker
-      .getRegistration("/sw.js")
-      .then((registration) => registration?.update())
+      .getRegistration(withBasePath("/"))
+      // Portée exacte : sous /lbe, ne pas relancer le worker du jeu Starligue.
+      .then((registration) =>
+        registration && new URL(registration.scope).pathname === withBasePath("/") ? registration.update() : undefined
+      )
       .catch(() => {
         /* best-effort — pas grave si ça échoue, retenté au prochain chargement */
       });

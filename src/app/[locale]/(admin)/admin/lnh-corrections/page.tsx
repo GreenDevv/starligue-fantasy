@@ -9,6 +9,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations, useFormatter } from "next-intl";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { withBasePath } from "@/lib/base-path";
 
 interface FieldChange {
   field: string;
@@ -106,7 +107,7 @@ function BatchCard({ batch, onChanged }: { batch: PendingBatch; onChanged: () =>
     setBusy(kind);
     setMsg("");
     try {
-      const res = await fetch(path, {
+      const res = await fetch(withBasePath(path), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -270,7 +271,7 @@ export default function AdminLnhCorrectionsPage() {
 
   const loadPending = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin/lnh-corrections");
+      const res = await fetch(withBasePath("/api/admin/lnh-corrections"));
       const json = (await res.json()) as { data?: { pendingBatches: PendingBatch[] } };
       if (json.data) setPending(json.data.pendingBatches);
     } catch {
@@ -291,7 +292,7 @@ export default function AdminLnhCorrectionsPage() {
     setAnalysis(null);
     setSelected(new Set());
     try {
-      const res = await fetch(`/api/admin/lnh-corrections?gameweek=${gw}`);
+      const res = await fetch(withBasePath(`/api/admin/lnh-corrections?gameweek=${gw}`));
       const json = (await res.json()) as { data?: AnalyzeData; error?: { code?: string; message?: string } };
       if (res.ok && json.data) {
         setAnalysis(json.data);
@@ -337,7 +338,7 @@ export default function AdminLnhCorrectionsPage() {
     setPhase("applying");
     setError("");
     try {
-      const res = await fetch("/api/admin/lnh-corrections/apply", {
+      const res = await fetch(withBasePath("/api/admin/lnh-corrections/apply"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ gameweek: analysis.gameweekNumber, correctionKeys: [...selected] }),

@@ -11,6 +11,7 @@ import { ClubLogo } from "@/components/ui/ClubLogo";
 import { PlayerAvatar } from "@/components/ui/PlayerAvatar";
 import type { Position } from "@/lib/squad/validation";
 import { cn } from "@/lib/utils";
+import { withBasePath } from "@/lib/base-path";
 
 const POLL_MS = 15_000;
 const TOAST_DURATION_MS = 7_000;
@@ -126,7 +127,7 @@ export function LiveEventToaster() {
   const poll = useCallback(async () => {
     try {
       const url = sinceRef.current ? `/api/live/events?since=${encodeURIComponent(sinceRef.current)}` : "/api/live/events";
-      const res = await fetch(url, { cache: "no-store" });
+      const res = await fetch(withBasePath(url), { cache: "no-store" });
       if (!res.ok) return;
       const json = (await res.json()) as { data?: { serverTime: string; events: LiveEvent[] } };
       if (!json.data) return;

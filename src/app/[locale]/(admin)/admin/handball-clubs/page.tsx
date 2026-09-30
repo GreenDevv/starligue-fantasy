@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations, useFormatter } from "next-intl";
 import { countryFlag } from "@/lib/geo/countries";
+import { withBasePath } from "@/lib/base-path";
 
 interface AdminClub {
   id: string;
@@ -29,7 +30,7 @@ export default function AdminHandballClubsPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const res = await fetch(`/api/admin/handball-clubs?filter=${filter}`);
+    const res = await fetch(withBasePath(`/api/admin/handball-clubs?filter=${filter}`));
     const json = (await res.json()) as { data?: { clubs: AdminClub[] } };
     setClubs(json.data?.clubs ?? []);
     setLoading(false);
@@ -42,7 +43,7 @@ export default function AdminHandballClubsPage() {
   async function act(id: string, body: Record<string, unknown>) {
     setBusyId(id);
     try {
-      const res = await fetch(`/api/admin/handball-clubs/${id}`, {
+      const res = await fetch(withBasePath(`/api/admin/handball-clubs/${id}`), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -56,7 +57,7 @@ export default function AdminHandballClubsPage() {
   async function reject(id: string) {
     setBusyId(id);
     try {
-      const res = await fetch(`/api/admin/handball-clubs/${id}`, { method: "DELETE" });
+      const res = await fetch(withBasePath(`/api/admin/handball-clubs/${id}`), { method: "DELETE" });
       if (res.ok) {
         setConfirmRejectId(null);
         await load();

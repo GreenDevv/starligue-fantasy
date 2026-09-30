@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { InfoIcon } from "@/components/ui/icons";
 import type { PlayerSeasonRecap } from "@/lib/players/season-recap";
+import { withBasePath } from "@/lib/base-path";
 
 // Saison affichée dans le popup de récap — pas encore branchée sur GameConfig
 // (limitation pré-existante, hors périmètre de cette traduction), on ne fait
@@ -61,7 +62,7 @@ export function PlayerSeasonRecapTrigger({ playerId, isGoalkeeper }: PlayerSeaso
     setOpen(true);
     if (state.status === "idle") {
       setState({ status: "loading" });
-      fetch(`/api/players/${playerId}/season-recap`)
+      fetch(withBasePath(`/api/players/${playerId}/season-recap`))
         .then((r) => r.json())
         .then((res: { data: PlayerSeasonRecap | null }) => setState({ status: "done", recap: res.data ?? null }))
         .catch(() => setState({ status: "done", recap: null }));

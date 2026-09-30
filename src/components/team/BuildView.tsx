@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import type { SeasonMode } from "@/lib/team/active-team-context";
 import { resolveApiError } from "@/lib/api/error-messages";
 import { clubDisplayName } from "@/lib/clubs/display-name";
+import { withBasePath } from "@/lib/base-path";
 
 interface Player {
   id: string;
@@ -60,8 +61,8 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/players?perPage=500").then((r) => r.json()),
-      fetch(`/api/my-team${leagueSuffix}`).then((r) => r.json()),
+      fetch(withBasePath("/api/players?perPage=500")).then((r) => r.json()),
+      fetch(withBasePath(`/api/my-team${leagueSuffix}`)).then((r) => r.json()),
     ]).then(
       ([
         playersRes,
@@ -211,7 +212,7 @@ export function BuildView({ mode }: { mode: SeasonMode }) {
       .filter(Boolean)
       .map((p) => p!.id);
     try {
-      const res = await fetch("/api/my-team/squad", {
+      const res = await fetch(withBasePath("/api/my-team/squad"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ playerIds, ...(leagueId ? { leagueId } : {}) }),

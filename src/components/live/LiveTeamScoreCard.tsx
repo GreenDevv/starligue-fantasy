@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { PositionBadge } from "@/components/ui/Badge";
 import type { Position } from "@/lib/squad/validation";
+import { withBasePath } from "@/lib/base-path";
 
 interface PlayerRow {
   playerId: string;
@@ -36,7 +37,7 @@ export function LiveTeamScoreCard() {
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch("/api/team/live-score", { cache: "no-store" });
+      const res = await fetch(withBasePath("/api/team/live-score"), { cache: "no-store" });
       if (res.status === 204 || res.status === 401) {
         setScore(null);
         return;

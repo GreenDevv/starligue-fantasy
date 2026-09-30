@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useTranslations, useFormatter } from "next-intl";
 import { resolveApiError } from "@/lib/api/error-messages";
 import { resizeImageToDataUri } from "@/lib/image/resize-to-data-uri";
+import { withBasePath } from "@/lib/base-path";
 
 interface NewsRow {
   id: string;
@@ -90,7 +91,7 @@ export default function AdminNewsPage() {
 
   async function load() {
     setLoading(true);
-    const res = await fetch("/api/admin/news");
+    const res = await fetch(withBasePath("/api/admin/news"));
     const json = (await res.json()) as { data?: { news: NewsRow[] } };
     if (json.data?.news) setNews(json.data.news);
     setLoading(false);
@@ -105,8 +106,8 @@ export default function AdminNewsPage() {
     setCreateError("");
     if (clubs.length === 0) {
       const [clubsRes, playersRes] = await Promise.all([
-        fetch("/api/admin/clubs"),
-        fetch("/api/admin/players"),
+        fetch(withBasePath("/api/admin/clubs")),
+        fetch(withBasePath("/api/admin/players")),
       ]);
       const clubsJson = (await clubsRes.json()) as { data?: { clubs: ClubOption[] } };
       const playersJson = (await playersRes.json()) as { data?: { players: PlayerOption[] } };
@@ -123,7 +124,7 @@ export default function AdminNewsPage() {
     setCreating(true);
     setCreateError("");
     try {
-      const res = await fetch("/api/admin/news", {
+      const res = await fetch(withBasePath("/api/admin/news"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -177,7 +178,7 @@ export default function AdminNewsPage() {
     setSyncResult(null);
     setPending([]);
     try {
-      const res = await fetch("/api/admin/news/sync", { method: "POST" });
+      const res = await fetch(withBasePath("/api/admin/news/sync"), { method: "POST" });
       const json = (await res.json()) as { data?: { sources: Record<string, SourceSummary> }; error?: { message?: string; code?: string } };
       if (res.ok && json.data) {
         setSyncResult(json.data.sources);
@@ -201,7 +202,7 @@ export default function AdminNewsPage() {
     const key = pendingKey(item);
     setPublishingKey(key);
     try {
-      const res = await fetch("/api/admin/news/sync/confirm", {
+      const res = await fetch(withBasePath("/api/admin/news/sync/confirm"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(item),
@@ -231,7 +232,7 @@ export default function AdminNewsPage() {
     if (!confirm(t("news.confirmDelete"))) return;
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/admin/news/${id}`, { method: "DELETE" });
+      const res = await fetch(withBasePath(`/api/admin/news/${id}`), { method: "DELETE" });
       if (res.ok) {
         setNews((prev) => prev.filter((n) => n.id !== id));
       }

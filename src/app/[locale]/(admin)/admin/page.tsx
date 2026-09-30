@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations, useFormatter } from "next-intl";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { withBasePath } from "@/lib/base-path";
 
 // ---- Types ----
 
@@ -76,7 +77,7 @@ function CsvImportForm({ type, label }: { type: ImportType; label: string }) {
     fd.append("file", file);
 
     try {
-      const res = await fetch(`/api/admin/import/${type}`, { method: "POST", body: fd });
+      const res = await fetch(withBasePath(`/api/admin/import/${type}`), { method: "POST", body: fd });
       const json = await res.json() as { data?: { upserted?: number; errors?: string[] }; error?: { message?: string; code?: string } };
       if (res.ok && json.data) {
         const errCount = json.data.errors?.length ?? 0;
@@ -136,7 +137,7 @@ function ConfigRow({ config, onSaved }: { config: GameConfig; onSaved: () => voi
   async function save() {
     setSaving(true);
     try {
-      await fetch("/api/admin/config", {
+      await fetch(withBasePath("/api/admin/config"), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ key: config.key, value }),
@@ -188,7 +189,7 @@ function CronButton({
     setStatus("loading");
     setDetail("");
     try {
-      const res = await fetch(path, { method: "POST" });
+      const res = await fetch(withBasePath(path), { method: "POST" });
       const json = await res.json() as { data?: Record<string, unknown>; error?: { message?: string; code?: string } };
       if (res.ok) {
         setStatus("ok");
@@ -252,7 +253,7 @@ function LnhRosterImport() {
     setStatus("loading");
     setResult(null);
     try {
-      const res = await fetch("/api/admin/import/lnh-roster", {
+      const res = await fetch(withBasePath("/api/admin/import/lnh-roster"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ dryRun: true }),
@@ -276,7 +277,7 @@ function LnhRosterImport() {
     setResult(null);
     setConfirmed(false);
     try {
-      const res = await fetch("/api/admin/import/lnh-roster", {
+      const res = await fetch(withBasePath("/api/admin/import/lnh-roster"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ seasonsId: "39" }),
@@ -403,7 +404,7 @@ function RecomputeSection() {
   async function lookupGameweek() {
     const num = parseInt(gwInput, 10);
     if (!num) return;
-    const res = await fetch(`/api/matches?gameweek=${num}`);
+    const res = await fetch(withBasePath(`/api/matches?gameweek=${num}`));
     const json = await res.json() as { data?: { gameweekId?: string } };
     if (json.data?.gameweekId) setGameweekId(json.data.gameweekId);
   }
@@ -411,7 +412,7 @@ function RecomputeSection() {
   async function recompute() {
     if (!gameweekId) return;
     setStatus("loading");
-    const res = await fetch(`/api/admin/recompute/${gameweekId}`, { method: "POST" });
+    const res = await fetch(withBasePath(`/api/admin/recompute/${gameweekId}`), { method: "POST" });
     const json = await res.json() as { data?: Record<string, unknown>; error?: { message?: string; code?: string } };
     if (res.ok) {
       setStatus("ok");
@@ -461,13 +462,13 @@ export default function AdminPage() {
   const [configs, setConfigs] = useState<GameConfig[]>([]);
 
   async function loadStatus() {
-    const res = await fetch("/api/admin/ingestion-log");
+    const res = await fetch(withBasePath("/api/admin/ingestion-log"));
     const json = await res.json() as { data?: IngestionStatus };
     if (json.data) setStatus(json.data);
   }
 
   async function loadConfigs() {
-    const res = await fetch("/api/admin/config");
+    const res = await fetch(withBasePath("/api/admin/config"));
     const json = await res.json() as { data?: { configs: GameConfig[] } };
     if (json.data?.configs) setConfigs(json.data.configs);
   }

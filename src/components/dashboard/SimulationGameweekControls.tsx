@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { withBasePath } from "@/lib/base-path";
 
 // Contrôle admin de la progression de la saison simulée (avance/recule TOUTES les
 // SimulationTeam à la fois) — au niveau du titre Dashboard, pas dans un widget en
@@ -28,7 +29,7 @@ export function SimulationGameweekControls({ controls }: { controls: SimulationA
     try {
       const path =
         direction === "advance" ? "/api/admin/simulation/advance-gameweek" : "/api/admin/simulation/revert-gameweek";
-      const res = await fetch(path, { method: "POST" });
+      const res = await fetch(withBasePath(path), { method: "POST" });
       const json = (await res.json()) as { error?: { code?: string; message: string } };
       if (!res.ok) {
         setError(resolveApiError(t, "dashboard", json.error?.code));

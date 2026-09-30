@@ -14,6 +14,7 @@ import { ClubFilterDropdown } from "@/components/players/ClubFilterDropdown";
 import type { ActiveClub } from "@/lib/clubs/get-active-clubs";
 import type { SeasonMode } from "@/lib/team/active-team-context";
 import { clubDisplayName } from "@/lib/clubs/display-name";
+import { withBasePath } from "@/lib/base-path";
 
 interface Player {
   id: string;
@@ -53,7 +54,7 @@ export function PlayersListView({ mode, clubs }: { mode: SeasonMode; clubs: Acti
 
   useEffect(() => {
     setLoading(true);
-    fetch("/api/players?perPage=500&sortBy=lastName&order=asc")
+    fetch(withBasePath("/api/players?perPage=500&sortBy=lastName&order=asc"))
       .then((r) => r.json())
       .then((data: { data?: { players: Player[] } }) => {
         if (data.data?.players) setPlayers(data.data.players);

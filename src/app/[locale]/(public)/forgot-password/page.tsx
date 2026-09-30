@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { withBasePath } from "@/lib/base-path";
 
 export default function ForgotPasswordPage() {
   const t = useTranslations();
@@ -18,7 +19,7 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     setError(null);
 
-    const res = await fetch("/api/auth/forgot-password", {
+    const res = await fetch(withBasePath("/api/auth/forgot-password"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, locale }),

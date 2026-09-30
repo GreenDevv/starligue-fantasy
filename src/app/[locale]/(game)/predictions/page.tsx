@@ -8,6 +8,7 @@ import { useTranslations, useFormatter } from "next-intl";
 import { ClubLogo } from "@/components/ui/ClubLogo";
 import { resolveApiError } from "@/lib/api/error-messages";
 import { clubDisplayName } from "@/lib/clubs/display-name";
+import { withBasePath } from "@/lib/base-path";
 
 type PredictionOutcome = "HOME" | "DRAW" | "AWAY";
 
@@ -52,7 +53,7 @@ export default function PredictionsPage() {
       setError(null);
       try {
         const qs = gw ? `?gw=${gw}` : "";
-        const res = await fetch(`/api/predictions${qs}`);
+        const res = await fetch(withBasePath(`/api/predictions${qs}`));
         const body = (await res.json()) as {
           data?: { gameweekNumber: number; currentGameweekNumber: number | null; matches: MatchPrediction[] };
           error?: { code: string; message: string };
@@ -79,7 +80,7 @@ export default function PredictionsPage() {
   async function pick(matchId: string, outcome: PredictionOutcome) {
     setPendingMatchId(matchId);
     try {
-      const res = await fetch("/api/predictions", {
+      const res = await fetch(withBasePath("/api/predictions"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ matchId, outcome }),

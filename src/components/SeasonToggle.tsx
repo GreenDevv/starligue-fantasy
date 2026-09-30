@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { SeasonMode } from "@/lib/team/active-team-context";
+import { withBasePath } from "@/lib/base-path";
 
 const OPTIONS: { mode: SeasonMode; label: string }[] = [
   { mode: "live", label: "26/27" },
@@ -23,7 +24,7 @@ export function SeasonToggle({ initialMode }: { initialMode: SeasonMode }) {
     if (next === mode || isPending) return;
     setMode(next);
     startTransition(async () => {
-      await fetch("/api/season-mode", {
+      await fetch(withBasePath("/api/season-mode"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mode: next }),

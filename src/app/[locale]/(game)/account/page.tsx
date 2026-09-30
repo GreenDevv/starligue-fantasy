@@ -10,6 +10,7 @@ import { ClubLogo } from "@/components/ui/ClubLogo";
 import { WebPushSettings } from "@/components/notifications/WebPushSettings";
 import { clubDisplayName } from "@/lib/clubs/display-name";
 import { getCompetitionProfile } from "@/lib/competition/profile";
+import { withBasePath } from "@/lib/base-path";
 
 const LIVE_FEED = getCompetitionProfile().features.liveFeed;
 
@@ -82,8 +83,8 @@ export default function AccountPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/account").then((res) => res.json()),
-      fetch("/api/players?perPage=500&sortBy=lastName&order=asc").then((res) => res.json()),
+      fetch(withBasePath("/api/account")).then((res) => res.json()),
+      fetch(withBasePath("/api/players?perPage=500&sortBy=lastName&order=asc")).then((res) => res.json()),
     ]).then(
       ([accountJson, playersJson]: [
         { data?: AccountData },
@@ -123,7 +124,7 @@ export default function AccountPage() {
     setError(null);
     setSaved(false);
 
-    const res = await fetch("/api/account", {
+    const res = await fetch(withBasePath("/api/account"), {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -159,7 +160,7 @@ export default function AccountPage() {
     setDeleting(true);
     setDeleteError(null);
 
-    const res = await fetch("/api/account", {
+    const res = await fetch(withBasePath("/api/account"), {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password: deletePassword }),
@@ -172,7 +173,7 @@ export default function AccountPage() {
       return;
     }
 
-    await signOut({ callbackUrl: `/${locale}` });
+    await signOut({ callbackUrl: withBasePath(`/${locale}`) });
   }
 
   if (loading) {

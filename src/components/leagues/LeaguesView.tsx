@@ -8,6 +8,7 @@ import { JerseyBadge } from "@/components/jersey/JerseyBadge";
 import { Button } from "@/components/ui/Button";
 import { resolveApiError } from "@/lib/api/error-messages";
 import type { SeasonMode } from "@/lib/team/active-team-context";
+import { withBasePath } from "@/lib/base-path";
 
 interface League {
   id: string;
@@ -61,7 +62,7 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const res = await fetch("/api/leagues", {
+    const res = await fetch(withBasePath("/api/leagues"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: createName, leagueMode: "CLASSIC" }),
@@ -85,7 +86,7 @@ export function LeaguesView({ initialLeagues, mode }: LeaguesViewProps) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const res = await fetch("/api/leagues/join", {
+    const res = await fetch(withBasePath("/api/leagues/join"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ inviteCode: joinCode.toUpperCase() }),

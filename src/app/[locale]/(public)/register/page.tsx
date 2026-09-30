@@ -7,6 +7,7 @@ import { useRouter, Link } from "@/i18n/navigation";
 import { PlayerSearch, type PlayerSearchOption } from "@/components/players/PlayerSearch";
 import { HomeClubPicker, homeClubValueToPayload, type HomeClubValue } from "@/components/clubs/HomeClubPicker";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { withBasePath } from "@/lib/base-path";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -24,7 +25,7 @@ export default function RegisterPage() {
   // Facultatif (jamais bloquant) — liste chargée une fois, pas de session requise
   // (GET /api/players n'est pas derrière PROTECTED_PREFIXES).
   useEffect(() => {
-    fetch("/api/players?perPage=500&sortBy=lastName&order=asc")
+    fetch(withBasePath("/api/players?perPage=500&sortBy=lastName&order=asc"))
       .then((res) => res.json())
       .then((json: { data?: { players: PlayerSearchOption[] } }) => setPlayers(json.data?.players ?? []))
       .catch(() => setPlayers([]));
@@ -35,7 +36,7 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
 
-    const res = await fetch("/api/auth/register", {
+    const res = await fetch(withBasePath("/api/auth/register"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

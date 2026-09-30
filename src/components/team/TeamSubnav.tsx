@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { PitchIcon, MarketIcon, PlayerIcon, RewindClockIcon, ChevronDownIcon } from "@/components/ui/icons";
+import { withBasePath } from "@/lib/base-path";
 
 interface League {
   id: string;
@@ -134,7 +135,7 @@ function LeagueContextSwitcher({ leagues, activeLeagueId }: { leagues: League[];
     if (id === activeLeagueId || switching) return;
     setSwitching(true);
     try {
-      await fetch("/api/team/active-league", {
+      await fetch(withBasePath("/api/team/active-league"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ leagueId: id }),

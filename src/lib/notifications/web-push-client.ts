@@ -1,5 +1,7 @@
 "use client";
 
+import { withBasePath } from "@/lib/base-path";
+
 // Helpers Web Push côté navigateur — voir public/sw.js (service worker) et
 // src/components/notifications/WebPushSettings.tsx (UI). Souscrire nécessite un
 // geste utilisateur explicite (bouton) : impossible de demander la permission
@@ -21,13 +23,25 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return output;
 }
 
+// Service worker du jeu servi : /sw.js (portée /) pour la Starligue, /lbe/sw.js
+// (portée /lbe/) pour le jeu LBE (ARCHITECTURE.md §35.7). Même domaine : sous
+// /lbe, getRegistration() renverrait AUSSI le worker Starligue (sa portée / couvre
+// /lbe) — on ne garde qu'un enregistrement dont la portée est exactement la nôtre.
+const SW_URL = withBasePath("/sw.js");
+const SW_SCOPE = withBasePath("/");
+
+async function findOwnRegistration(): Promise<ServiceWorkerRegistration | undefined> {
+  const registration = await navigator.serviceWorker.getRegistration(SW_SCOPE);
+  return registration && new URL(registration.scope).pathname === SW_SCOPE ? registration : undefined;
+}
+
 async function getRegistration(): Promise<ServiceWorkerRegistration> {
-  return (await navigator.serviceWorker.getRegistration("/sw.js")) ?? (await navigator.serviceWorker.register("/sw.js"));
+  return (await findOwnRegistration()) ?? (await navigator.serviceWorker.register(SW_URL, { scope: SW_SCOPE }));
 }
 
 export async function getWebPushSubscriptionStatus(): Promise<"subscribed" | "unsubscribed"> {
   if (!isWebPushSupported()) return "unsubscribed";
-  const registration = await navigator.serviceWorker.getRegistration("/sw.js");
+  const registration = await findOwnRegistration();
   const subscription = await registration?.pushManager.getSubscription();
   return subscription ? "subscribed" : "unsubscribed";
 }
@@ -50,7 +64,7 @@ export async function subscribeToWebPush(): Promise<void> {
     }));
 
   const json = subscription.toJSON();
-  const res = await fetch("/api/web-push/subscribe", {
+  const res = await fetch(withBasePath("/api/web-push/subscribe"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys }),
@@ -59,13 +73,13 @@ export async function subscribeToWebPush(): Promise<void> {
 }
 
 export async function unsubscribeFromWebPush(): Promise<void> {
-  const registration = await navigator.serviceWorker.getRegistration("/sw.js");
+  const registration = await findOwnRegistration();
   const subscription = await registration?.pushManager.getSubscription();
   if (!subscription) return;
 
   const endpoint = subscription.endpoint;
   await subscription.unsubscribe();
-  await fetch("/api/web-push/subscribe", {
+  await fetch(withBasePath("/api/web-push/subscribe"), {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ endpoint }),

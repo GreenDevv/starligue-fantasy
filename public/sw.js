@@ -22,8 +22,13 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
 
+// Chemins relatifs à la portée du worker : / pour le jeu Starligue, /lbe/ pour le
+// jeu LBE (même fichier servi sous les deux, ARCHITECTURE.md §35.7).
+const scoped = (path) => new URL(path, self.registration.scope).href;
+
 self.addEventListener("push", (event) => {
-  let payload = { title: "Starligue Fantasy", body: "", url: "/" };
+  const appName = new URL(self.registration.scope).pathname.startsWith("/lbe/") ? "LBE Fantasy" : "Starligue Fantasy";
+  let payload = { title: appName, body: "", url: scoped("./") };
   try {
     if (event.data) payload = { ...payload, ...event.data.json() };
   } catch {
@@ -33,8 +38,8 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(payload.title, {
       body: payload.body,
-      icon: "/icon-192.png",
-      badge: "/icon-192.png",
+      icon: scoped("icon-192.png"),
+      badge: scoped("icon-192.png"),
       image: payload.image,
       data: { url: payload.url },
       tag: payload.tag,
@@ -52,7 +57,8 @@ self.addEventListener("push", (event) => {
 // fil du match (payload.url).
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = event.action === "settings" ? "/account#live-notifications" : (event.notification.data?.url ?? "/");
+  const url =
+    event.action === "settings" ? scoped("account#live-notifications") : (event.notification.data?.url ?? scoped("./"));
 
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {

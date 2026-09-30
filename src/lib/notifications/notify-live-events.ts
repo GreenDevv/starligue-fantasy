@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db";
 import { sendWebPush } from "./send-web-push";
 import { tallyGoalsBySequence, frenchOrdinal } from "@/lib/live/goal-tally";
 import { clubDisplayName } from "@/lib/clubs/display-name";
+import { withBasePath } from "@/lib/base-path";
 
 interface NewLiveEventForNotif {
   text: string;
@@ -130,7 +131,7 @@ export async function notifyWebPushForLiveEvents(
   const url = `/matches/${matchId}#match-events`;
   // Bannière écusson vs écusson (voir src/app/api/og/live-event/route.tsx) — un seul
   // appel généré une fois par match, pas par événement.
-  const image = `/api/og/live-event?home=${homeClubId}&away=${awayClubId}`;
+  const image = withBasePath(`/api/og/live-event?home=${homeClubId}&away=${awayClubId}`);
 
   // Noms courts des clubs, chargés une seule fois si besoin (mi-temps/fin de match
   // uniquement) pour ne pas alourdir le cas courant (buts, exclusions…).
@@ -196,7 +197,7 @@ export async function notifyWebPushForMatchMilestone(
   if (candidates.length === 0) return;
 
   const url = `/matches/${matchId}#match-events`;
-  const image = `/api/og/live-event?home=${homeClubId}&away=${awayClubId}`;
+  const image = withBasePath(`/api/og/live-event?home=${homeClubId}&away=${awayClubId}`);
 
   for (const user of candidates) {
     if (!passesPlayerFilterForMatch(user, homeClubId, awayClubId)) continue;

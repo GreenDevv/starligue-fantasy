@@ -4,6 +4,7 @@ import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { LogoutIcon } from "@/components/ui/icons";
+import { withBasePath } from "@/lib/base-path";
 
 // Bouton connexion/déconnexion rapide dans la navbar — évite de devoir passer par
 // /login manuellement (utile notamment après un changement de rôle admin, qui ne
@@ -11,9 +12,9 @@ import { LogoutIcon } from "@/components/ui/icons";
 export function AuthButton({ userName }: { userName?: string | null }) {
   const t = useTranslations("nav");
   const locale = useLocale();
-  // next-auth's signOut({ callbackUrl }) n'a pas de notion de locale : le
-  // préfixe courant doit être injecté manuellement.
-  const loginPath = `/${locale}/login`;
+  // next-auth's signOut({ callbackUrl }) n'a pas de notion de locale ni de
+  // basePath (jeu LBE sous /lbe) : les deux préfixes sont injectés manuellement.
+  const loginPath = withBasePath(`/${locale}/login`);
 
   if (!userName) {
     return (

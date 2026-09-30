@@ -6,6 +6,7 @@ import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { resolveApiError } from "@/lib/api/error-messages";
+import { withBasePath } from "@/lib/base-path";
 
 interface TeamResponse {
   data?: { name: string };
@@ -30,7 +31,7 @@ export default function TeamIdentityPage() {
       router.push("/leagues");
       return;
     }
-    fetch(`/api/my-team?league=${leagueId}`)
+    fetch(withBasePath(`/api/my-team?league=${leagueId}`))
       .then((r) => r.json())
       .then((data: TeamResponse) => {
         if (data.data) setName(data.data.name);
@@ -64,7 +65,7 @@ export default function TeamIdentityPage() {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch("/api/my-team/identity", {
+      const res = await fetch(withBasePath("/api/my-team/identity"), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ leagueId, name: name.trim() }),

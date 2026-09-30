@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { GameweekStateBanner, type GameweekStateBannerData } from "@/components/gameweek/GameweekStateBanner";
+import { withBasePath } from "@/lib/base-path";
 
 // Bandeau de fiabilité du classement — se fetch lui-même (/api/gameweek-status),
 // rendu sur /leaderboard et /leagues/[id]. Rien en pré-saison.
@@ -10,7 +11,7 @@ export function GameweekStandingsBanner({ className }: { className?: string }) {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/gameweek-status")
+    fetch(withBasePath("/api/gameweek-status"))
       .then((r) => r.json())
       .then((json: { data?: GameweekStateBannerData | null }) => {
         if (!cancelled && json.data) setData(json.data);
