@@ -11,6 +11,7 @@ import { MobileMenu } from "@/components/MobileMenu";
 import { FantasyTabBar } from "@/components/nav/FantasyTabBar";
 import { ModeSwitchLink } from "@/components/nav/ModeSwitchLink";
 import { resolveSeasonMode } from "@/lib/team/active-team-context";
+import { getCompetitionProfile } from "@/lib/competition/profile";
 
 export default async function GameLayout({
   children,
@@ -46,7 +47,7 @@ export default async function GameLayout({
             href="/"
             className="whitespace-nowrap font-display text-base uppercase tracking-widest text-accent"
           >
-            Handball Fantasy
+            {getCompetitionProfile().siteName}
           </Link>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
             {/* Desktop uniquement : sur mobile, nav + saison + compte + connexion

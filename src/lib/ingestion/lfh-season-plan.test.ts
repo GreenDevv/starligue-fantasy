@@ -33,7 +33,7 @@ describe("planLfhSeason", () => {
 
   it("un club par équipe, clé technique = sigle, nom affiché court", () => {
     const brest = plan.clubs.find((c) => c.slug === "brest-bretagne-handball")!;
-    expect(brest).toMatchObject({ lfhTeamId: "592", shortName: "BBH", displayName: "Brest" });
+    expect(brest).toMatchObject({ lfhTeamId: "592", shortName: "BBH", name: "Brest Bretagne Handball", displayName: "Brest" });
   });
 
   it("sigle vide (Stella) → clé dérivée du slug", () => {

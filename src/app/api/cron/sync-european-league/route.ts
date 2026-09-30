@@ -16,11 +16,15 @@ import { prisma } from "@/lib/db";
 import { IngestionError } from "@/lib/data-providers/lnh-scraper.provider";
 import { syncEuropeanLeagueMatches } from "@/lib/ingestion/warmup";
 import { verifyCronAuth } from "@/lib/cron-auth";
+import { starligueOnlyCronSkip } from "@/lib/competition/cron-guard";
 
 export async function POST(req: Request) {
   if (!(await verifyCronAuth(req))) {
     return NextResponse.json({ error: { code: "UNAUTHORIZED", message: "Cron secret invalide" } }, { status: 401 });
   }
+  // Jeu LBE : source Starligue, sans objet (src/lib/competition/cron-guard.ts).
+  const starligueOnly = starligueOnlyCronSkip("sync-european-league");
+  if (starligueOnly) return starligueOnly;
 
   const season = await prisma.season.findFirst({ where: { isActive: true } });
   if (!season) {

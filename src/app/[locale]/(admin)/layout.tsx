@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { getCompetitionProfile } from "@/lib/competition/profile";
 
 export default async function AdminLayout({
   children,
@@ -28,7 +29,7 @@ export default async function AdminLayout({
       <nav className="sticky top-0 z-10 border-b border-border bg-surface/90 pt-[env(safe-area-inset-top)] backdrop-blur-sm">
         <div className="mx-auto flex max-w-4xl items-center gap-4 px-4 py-3">
           <span className="font-display text-base uppercase tracking-widest text-accent">
-            Handball Fantasy
+            {getCompetitionProfile().siteName}
           </span>
           <span className="rounded-full bg-points-neg/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-points-neg">
             {t("nav.badge")}
@@ -43,15 +44,19 @@ export default async function AdminLayout({
             <Link href="/admin/transfer-windows" className="text-text-muted transition-colors hover:text-text">
               {t("nav.transfers")}
             </Link>
-            <Link href="/admin/friendly-matches" className="text-text-muted transition-colors hover:text-text">
-              {t("nav.friendlyMatches")}
-            </Link>
+            {getCompetitionProfile().features.warmupMatches && (
+              <Link href="/admin/friendly-matches" className="text-text-muted transition-colors hover:text-text">
+                {t("nav.friendlyMatches")}
+              </Link>
+            )}
             <Link href="/admin/news" className="text-text-muted transition-colors hover:text-text">
               {t("nav.news")}
             </Link>
-            <Link href="/admin/lnh-corrections" className="text-text-muted transition-colors hover:text-text">
-              {t("nav.lnhCorrections")}
-            </Link>
+            {getCompetitionProfile().features.officialRatingCorrections && (
+              <Link href="/admin/lnh-corrections" className="text-text-muted transition-colors hover:text-text">
+                {t("nav.lnhCorrections")}
+              </Link>
+            )}
             <Link href="/admin/handball-clubs" className="text-text-muted transition-colors hover:text-text">
               {t("nav.homeClubs")}
             </Link>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { STAT_LINES } from "@/lib/stats/stat-lines";
 import { COMPUTED_STAT_LINES } from "@/lib/stats/computed-stat-lines";
+import { getCompetitionProfile, competitionStorageKey } from "@/lib/competition/profile";
 import { StatLeaderCard } from "@/components/dashboard/StatLeaderCard";
 import type { SeasonMode } from "@/lib/team/active-team-context";
 
@@ -15,10 +16,11 @@ import type { SeasonMode } from "@/lib/team/active-team-context";
 // /api/my-team/ownership échoue silencieusement, voir le composant).
 const ALL_LINES = [...STAT_LINES, ...COMPUTED_STAT_LINES];
 
-const DEFAULT_VISIBLE_KEYS = ["goalsTotal", "assists", "ballsRecovered", "neutralizations"];
+const DEFAULT_VISIBLE_KEYS = getCompetitionProfile().defaultStatKeys;
+const KNOWN_KEYS = new Set(ALL_LINES.map((l) => l.key));
 
 function storageKey(mode: SeasonMode): string {
-  return `starligue:statsPage:${mode}`;
+  return competitionStorageKey(`starligue:statsPage:${mode}`);
 }
 
 export function StatsExplorerView({ mode, seasonId }: { mode: SeasonMode; seasonId: string }) {
@@ -31,8 +33,9 @@ export function StatsExplorerView({ mode, seasonId }: { mode: SeasonMode; season
     if (!raw) return;
     try {
       const parsed = JSON.parse(raw) as unknown;
+      // Clés inconnues ignorées : stat retirée du jeu servi (ex. « passes » côté LBE).
       if (Array.isArray(parsed) && parsed.every((k) => typeof k === "string")) {
-        setVisibleKeys(parsed);
+        setVisibleKeys(parsed.filter((k) => KNOWN_KEYS.has(k)));
       }
     } catch {
       // localStorage corrompu — on garde les défauts

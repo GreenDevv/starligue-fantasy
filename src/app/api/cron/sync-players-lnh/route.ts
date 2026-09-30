@@ -13,11 +13,15 @@ import { NextResponse } from "next/server";
 import { verifyCronAuth } from "@/lib/cron-auth";
 import { IngestionError } from "@/lib/data-providers/lnh-scraper.provider";
 import { syncLnhRosterIdentities } from "@/lib/ingestion/lnh-roster-identity-sync";
+import { starligueOnlyCronSkip } from "@/lib/competition/cron-guard";
 
 export async function POST(req: Request) {
   if (!(await verifyCronAuth(req))) {
     return NextResponse.json({ error: { code: "UNAUTHORIZED" } }, { status: 401 });
   }
+  // Jeu LBE : source Starligue, sans objet (src/lib/competition/cron-guard.ts).
+  const starligueOnly = starligueOnlyCronSkip("sync-players-lnh");
+  if (starligueOnly) return starligueOnly;
 
   try {
     const report = await syncLnhRosterIdentities({ apply: true, createMissing: true });

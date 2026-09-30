@@ -10,11 +10,15 @@ import { NextResponse } from "next/server";
 import { verifyCronAuth } from "@/lib/cron-auth";
 import { IngestionError } from "@/lib/data-providers/lnh-scraper.provider";
 import { runWeeklyCorrectionsCheck } from "@/lib/lnh-corrections/cron";
+import { starligueOnlyCronSkip } from "@/lib/competition/cron-guard";
 
 export async function POST(req: Request) {
   if (!(await verifyCronAuth(req))) {
     return NextResponse.json({ error: { code: "UNAUTHORIZED", message: "Cron secret invalide" } }, { status: 401 });
   }
+  // Jeu LBE : source Starligue, sans objet (src/lib/competition/cron-guard.ts).
+  const starligueOnly = starligueOnlyCronSkip("lnh-corrections");
+  if (starligueOnly) return starligueOnly;
 
   const url = new URL(req.url);
   const gwParam = url.searchParams.get("gameweek");

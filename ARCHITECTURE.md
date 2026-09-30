@@ -3289,7 +3289,7 @@ le moteur de points (§2.3) ne voit pas la différence.
 |---|---|---|
 | 1 | Profil de compétition, provider LFH, note calculée (aucun changement pour le jeu LNH) | fait |
 | 2 | Ingestion LFH : `DataSource.LFH_SCRAPER` (migration additive), `src/lib/ingestion/lfh.ts` + `lfh-season-plan.ts` (pur), `scripts/setup-lfh-season.ts` (config, saison, stats, valorisation), `settle-gameweek` aiguillé (`src/lib/ingestion/competition.ts`) | en cours |
-| 3 | Marque et fonctionnalités : libellés « Starligue »/« LNH » tirés du profil (i18n 8 langues, métadonnées, emails), entrées de nav et crons des fonctionnalités coupées masqués / no-op | à faire |
+| 3 | Marque, vocabulaire, stats, actus, fonctionnalités coupées (§35.6) | fait |
 | 4 | Déploiement : 2ᵉ service Railway + Postgres + domaine + Resend, workflows GitHub Actions appelant les deux URLs | à faire |
 
 ### 35.4.1 Mise en place et lancement (lot 2)
@@ -3330,6 +3330,45 @@ relit les feuilles, recalcule les points si une note a bougé, puis confirme.
 
 Points d'accueil : aucun crédit pour J1-J6 (aucune équipe réelle, déjà géré par
 `recompute-catchup.ts`) ; ils servent aux arrivées après J7.
+
+### 35.6 Lot 3 — le site en mode LBE
+
+Nom du jeu : **LBE Fantasy** (décision du 29/09), servi à terme sous
+`starliguefantasy.fr/lbe` (lot 4), puis `handballfantasy.fr/lbe`.
+
+- **Profil** : `siteName` (en-tête, onglet : « Handball Fantasy » côté Starligue,
+  inchangé), `appName` (appli installée, intro, emails), `leagueName`,
+  `unavailableStatKeys`, `defaultStatKeys`.
+- **Traductions** (`src/lib/competition/brand-messages.ts`, appliqué dans
+  `src/i18n/request.ts`) : règles de remplacement communes aux 8 langues
+  (Daikin StarLigue → Ligue Butagaz Énergie, Starligue → Ligue Butagaz, LNH → LFH,
+  Handball Fantasy → LBE Fantasy, « {rating}/10 » → « {rating} ») + réécritures par
+  clé (fr, en) + **français au féminin** (joueuses, gardienne, ailières,
+  remplaçantes, accords : « Aucune joueuse trouvée »…). Chaque phrase française
+  modifiée est relue et figée par un test. Les 6 autres langues restent au
+  masculin générique ; l'anglais est neutre. Le jeu Starligue ne passe jamais
+  par ces règles (même objet renvoyé, testé).
+- **Stats** : `STAT_LINES` filtré par le profil → côté LBE, 8 lignes (buts jeu /
+  7 m / total, % tirs, arrêts, % arrêts, 2 min, disqualifications) partout :
+  tableaux de match, leaders, fiches, graphiques, bonus « leader de journée ».
+- **Stockage navigateur** : les deux jeux partagent le domaine →
+  `competitionStorageKey()` préfixe les clés côté LBE (`lfh:…`), clés Starligue
+  inchangées ; les stats mémorisées inconnues du jeu servi sont ignorées.
+- **Actus** : `NEWS_PROVIDERS` suit le jeu servi ; côté LBE, site officiel LFH
+  (WordPress, catégorie 20 « Ligue Butagaz Energie ») via le provider WordPress
+  existant (options `sourceType`, `categories`, club facultatif). `sourceType`
+  réutilise `LNH_SITE` = « site de la ligue » (nom historique, pas de migration).
+- **Fonctionnalités coupées** : 13 crons réservés à la Starligue répondent 200
+  « ignoré » sur le jeu LBE (`starligueOnlyCronSkip`, après le contrôle du secret) ;
+  réglages d'événements en direct masqués sur `/account` (les push restent pour
+  les rappels de deadline) ; entrées admin Matchs amicaux / Corrections LNH masquées.
+
+Contrôle du 29/09 : pages principales rendues en mode LBE sans aucune mention
+Starligue / LNH / Daikin / « joueur » ; en mode Starligue (base neuve + seed),
+textes identiques à avant, aucune erreur.
+
+À savoir (hors lot 3, non corrigé) : « moy. {rating}/10 » est aussi faux côté
+Starligue (la note LNH n'est pas sur 10, voir la mémoire du 29/09).
 
 ### 35.5 Plus tard (fonctionnalités coupées côté LFH au lot 1)
 

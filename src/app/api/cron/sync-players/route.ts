@@ -9,6 +9,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { verifyCronAuth } from "@/lib/cron-auth";
+import { starligueOnlyCronSkip } from "@/lib/competition/cron-guard";
 
 const PlayerSchema = z.object({
   id: z.number(),
@@ -49,6 +50,9 @@ export async function POST(req: Request) {
   if (!(await verifyCronAuth(req))) {
     return NextResponse.json({ error: { code: "FORBIDDEN" } }, { status: 403 });
   }
+  // Jeu LBE : source Starligue, sans objet (src/lib/competition/cron-guard.ts).
+  const starligueOnly = starligueOnlyCronSkip("sync-players");
+  if (starligueOnly) return starligueOnly;
 
   const apiKey = process.env.API_SPORTS_KEY;
   if (!apiKey) {

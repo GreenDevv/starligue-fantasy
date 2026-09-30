@@ -8,6 +8,7 @@ import { AuthButton } from "@/components/auth/AuthButton";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { SeasonToggle } from "@/components/SeasonToggle";
 import { resolveSeasonMode } from "@/lib/team/active-team-context";
+import { getCompetitionProfile } from "@/lib/competition/profile";
 
 // Layout du mode Starligue (public, aucune connexion requise) : /, /matches,
 // /clubs/[id], /players/[id] (regroupées sous (browse), voir son layout.tsx
@@ -32,7 +33,7 @@ export default async function PublicLayout({ children }: { children: React.React
             href="/"
             className="whitespace-nowrap font-display text-base uppercase tracking-widest text-accent"
           >
-            Handball Fantasy
+            {getCompetitionProfile().siteName}
           </Link>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
             {/* Desktop uniquement : sur mobile, nav + connexion sont regroupés

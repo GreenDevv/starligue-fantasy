@@ -13,6 +13,7 @@ import { prisma } from "@/lib/db";
 import { IngestionError } from "@/lib/data-providers/lnh-scraper.provider";
 import { syncCoupeDeFranceMatches } from "@/lib/ingestion/warmup";
 import { verifyCronAuth } from "@/lib/cron-auth";
+import { starligueOnlyCronSkip } from "@/lib/competition/cron-guard";
 
 const LNH_SEASONS_ID_2026_2027 = "40";
 const SEASON_START_YEAR_2026_2027 = 2026;
@@ -21,6 +22,9 @@ export async function POST(req: Request) {
   if (!(await verifyCronAuth(req))) {
     return NextResponse.json({ error: { code: "UNAUTHORIZED", message: "Cron secret invalide" } }, { status: 401 });
   }
+  // Jeu LBE : source Starligue, sans objet (src/lib/competition/cron-guard.ts).
+  const starligueOnly = starligueOnlyCronSkip("sync-coupe-de-france");
+  if (starligueOnly) return starligueOnly;
 
   const season = await prisma.season.findFirst({ where: { isActive: true } });
   if (!season) {

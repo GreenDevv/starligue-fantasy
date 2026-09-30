@@ -23,8 +23,10 @@ import { nimesNewsProvider } from "./clubs/nimes.provider";
 import { psgNewsProvider } from "./clubs/psg.provider";
 import { nantesNewsProvider } from "./clubs/nantes.provider";
 import { montpellierNewsProvider } from "./clubs/montpellier.provider";
+import { lfhNewsProvider } from "./lfh.provider";
+import { getCompetitionId } from "@/lib/competition/profile";
 
-export const NEWS_PROVIDERS: NewsSourceProvider[] = [
+const STARLIGUE_NEWS_PROVIDERS: NewsSourceProvider[] = [
   lnhNewsProvider,
   handnewsNewsProvider,
   istresNewsProvider,
@@ -41,3 +43,10 @@ export const NEWS_PROVIDERS: NewsSourceProvider[] = [
   nantesNewsProvider,
   montpellierNewsProvider,
 ];
+
+// Jeu LBE (ARCHITECTURE.md §35) : site officiel LFH seulement pour l'instant.
+const LBE_NEWS_PROVIDERS: NewsSourceProvider[] = [lfhNewsProvider];
+
+/** Sources d'actus du jeu servi (Starligue ou LBE). */
+export const NEWS_PROVIDERS: NewsSourceProvider[] =
+  getCompetitionId() === "LFH" ? LBE_NEWS_PROVIDERS : STARLIGUE_NEWS_PROVIDERS;

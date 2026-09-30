@@ -1,8 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { getCompetitionProfile } from "@/lib/competition/profile";
 
 export const metadata = {
-  title: "Support — Handball Fantasy",
+  title: `Support — ${getCompetitionProfile().siteName}`,
 };
 
 const SUPPORT_EMAIL = "contact@starliguefantasy.fr";

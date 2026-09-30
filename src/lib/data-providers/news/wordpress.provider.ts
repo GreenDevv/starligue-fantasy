@@ -61,17 +61,23 @@ function stripLeadingTitleDuplicate(text: string, title: string): string {
 export function createWordpressNewsProvider(opts: {
   sourceKey: string;
   siteUrl: string; // ex: "https://istreshandball.com"
-  clubExternalSlug: string;
+  /** Club concerné ; absent pour un site de ligue (actu non rattachée à un club). */
+  clubExternalSlug?: string;
   perPage?: number;
+  /** "CLUB_SITE" par défaut ; "LNH_SITE" = site officiel de la ligue (nom historique, sert aussi au site LFH). */
+  sourceType?: "CLUB_SITE" | "LNH_SITE";
+  /** Filtre WordPress par catégorie (ex. LFH : 20 = « Ligue Butagaz Energie », sans D2F ni coupes d'Europe). */
+  categories?: number[];
 }): NewsSourceProvider {
   const perPage = opts.perPage ?? 12;
+  const categoryFilter = opts.categories?.length ? `&categories=${opts.categories.join(",")}` : "";
 
   return {
     sourceKey: opts.sourceKey,
-    sourceType: "CLUB_SITE",
+    sourceType: opts.sourceType ?? "CLUB_SITE",
 
     async fetchNews(): Promise<ScrapedNewsItem[]> {
-      const url = `${opts.siteUrl}/wp-json/wp/v2/posts?per_page=${perPage}&_embed`;
+      const url = `${opts.siteUrl}/wp-json/wp/v2/posts?per_page=${perPage}&_embed${categoryFilter}`;
       let res: Response;
       try {
         res = await globalThis.fetch(url, {

@@ -7,6 +7,7 @@
 import * as React from "react";
 import { ImageResponse } from "next/og";
 import type { Position } from "@/lib/squad/validation";
+import { siteDisplayUrl } from "@/lib/competition/profile";
 
 export const RECAP_IMAGE_SIZE = { width: 1080, height: 1350 };
 
@@ -274,7 +275,7 @@ export function renderGameweekRecapImage(
           <div style={{ display: "flex", fontFamily: "display", fontSize: 24, fontWeight: 700, color: "#F1F5F9", letterSpacing: 1 }}>
             STARLIGUE <div style={{ display: "flex", color: "#2DD4BF", marginLeft: 8 }}>FANTASY</div>
           </div>
-          <div style={{ display: "flex", fontSize: 18, color: "#94A3B8" }}>starliguefantasy.fr</div>
+          <div style={{ display: "flex", fontSize: 18, color: "#94A3B8" }}>{siteDisplayUrl()}</div>
         </div>
       </div>
     ),

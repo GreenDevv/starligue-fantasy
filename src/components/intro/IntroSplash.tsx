@@ -3,8 +3,17 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import gsap from "gsap";
+import { getCompetitionProfile, competitionStorageKey } from "@/lib/competition/profile";
 
-const STORAGE_KEY = "sf-intro-seen";
+// « Starligue Fantasy » / « LBE Fantasy » : dernier mot en couleur d'accent.
+const APP_NAME_WORDS = getCompetitionProfile().appName.split(" ");
+const APP_NAME_TAIL = APP_NAME_WORDS.pop();
+const APP_NAME_HEAD = APP_NAME_WORDS.join(" ");
+
+// Clé propre au jeu servi (LBE : « lfh:sf-intro-seen ») — même domaine que la
+// Starligue, chaque jeu a sa propre intro. Doit rester égale à la clé lue par le
+// script inline de src/app/[locale]/layout.tsx.
+const STORAGE_KEY = competitionStorageKey("sf-intro-seen");
 
 interface IntroClub {
   id: string;
@@ -221,7 +230,7 @@ export function IntroSplash({ clubs }: IntroSplashProps) {
               className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-center opacity-0"
             >
               <p className="font-display text-3xl uppercase tracking-wide text-text sm:text-4xl">
-                Starligue <span className="text-accent">Fantasy</span>
+                {APP_NAME_HEAD} <span className="text-accent">{APP_NAME_TAIL}</span>
               </p>
             </div>
           </div>

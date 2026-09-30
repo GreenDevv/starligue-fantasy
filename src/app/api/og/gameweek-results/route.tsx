@@ -9,6 +9,7 @@ import { ImageResponse } from "next/og";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { clubDisplayName } from "@/lib/clubs/display-name";
+import { siteDisplayUrl } from "@/lib/competition/profile";
 
 export const dynamic = "force-dynamic";
 
@@ -245,7 +246,7 @@ export async function GET(request: Request) {
           <div style={{ display: "flex", fontFamily: "display", fontSize: 24, fontWeight: 700, color: TEXT }}>
             STARLIGUE <span style={{ color: "#2DD4BF" }}>FANTASY</span>
           </div>
-          <div style={{ display: "flex", fontSize: 20, color: "#94A3B8" }}>starliguefantasy.fr</div>
+          <div style={{ display: "flex", fontSize: 20, color: "#94A3B8" }}>{siteDisplayUrl()}</div>
         </div>
       </div>
     ),

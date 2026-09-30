@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getCompetitionId, getCompetitionProfile } from "./profile";
+import { getCompetitionId, getCompetitionProfile, siteDisplayUrl, competitionStorageKey } from "./profile";
 
 describe("getCompetitionId", () => {
   it("LNH par défaut quand la variable est absente ou vide", () => {
@@ -28,5 +28,27 @@ describe("getCompetitionProfile", () => {
     expect(p.gender).toBe("F");
     expect(p.ratingSource).toBe("COMPUTED");
     expect(Object.values(p.features).some(Boolean)).toBe(false);
+  });
+});
+
+describe("siteDisplayUrl", () => {
+  it("sans protocole ni / final, chemin conservé", () => {
+    expect(siteDisplayUrl("https://starliguefantasy.fr/lbe/")).toBe("starliguefantasy.fr/lbe");
+    expect(siteDisplayUrl(undefined)).toBe("starliguefantasy.fr");
+  });
+
+  it("Starligue : noms affichés inchangés", () => {
+    const p = getCompetitionProfile("LNH");
+    expect([p.siteName, p.appName, p.leagueName]).toEqual(["Handball Fantasy", "Starligue Fantasy", "Daikin StarLigue"]);
+  });
+});
+
+describe("competitionStorageKey", () => {
+  it("Starligue : clé inchangée (aucune préférence perdue)", () => {
+    expect(competitionStorageKey("sf-intro-seen", "LNH")).toBe("sf-intro-seen");
+  });
+
+  it("LBE : clé préfixée (même domaine que la Starligue)", () => {
+    expect(competitionStorageKey("sf-intro-seen", "LFH")).toBe("lfh:sf-intro-seen");
   });
 });

@@ -4,6 +4,7 @@
 // src/lib/notifications/notify-new-home-club.ts.
 // Français uniquement (comme l'email de blessure — pas de langue par admin).
 import { renderBaseEmail } from "./base-template";
+import { getCompetitionProfile } from "@/lib/competition/profile";
 import { countryName, countryFlag } from "@/lib/geo/countries";
 
 export interface NewHomeClubEmailParams {
@@ -62,7 +63,7 @@ export function buildNewHomeClubEmail(params: NewHomeClubEmailParams): NewHomeCl
       actionsBlock(params.verifyUrl, params.rejectUrl),
       `<span style="font-size:13px;color:#94A3B8;">Ou <a href="${params.adminUrl}" style="color:#2DD4BF;">ouvre la modération</a> pour fusionner avec un club de l'annuaire. Ces liens expirent dans 7 jours.</span>`,
     ],
-    footNote: "Tu reçois cet email parce que tu es administrateur de Starligue Fantasy.",
+    footNote: `Tu reçois cet email parce que tu es administrateur de ${getCompetitionProfile().appName}.`,
   });
 
   return { subject, html };

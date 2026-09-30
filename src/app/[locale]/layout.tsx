@@ -9,6 +9,7 @@ import { CookieBanner } from "@/components/CookieBanner";
 import { routing } from "@/i18n/routing";
 import { getPathname } from "@/i18n/navigation";
 import "./globals.css";
+import { getCompetitionProfile, competitionStorageKey } from "@/lib/competition/profile";
 
 // Typographie — ARCHITECTURE.md §8.1
 const display = Barlow_Condensed({
@@ -83,7 +84,7 @@ export async function generateMetadata({
     keywords: [
       "fantasy handball",
       "handball",
-      "Starligue",
+      getCompetitionProfile().leagueShortName,
       "jeu fantasy handball",
       "handball D1",
       "pronostics handball",
@@ -132,8 +133,7 @@ function jsonLd(locale: string, siteName: string, description: string) {
         "@type": "Organization",
         name: siteName,
         url: siteUrl,
-        description:
-          "Jeu de fantasy handball indépendant, sans rapport officiel avec la LNH ou la Daikin Starligue.",
+        description: `Jeu de fantasy handball indépendant, sans rapport officiel avec la ${getCompetitionProfile().federationShortName} ou la ${getCompetitionProfile().leagueName}.`,
       },
     ],
   };
@@ -169,7 +169,7 @@ export default async function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{if(localStorage.getItem('sf-intro-seen')==='1'){document.documentElement.classList.add('sf-intro-seen')}}catch(e){}",
+              `try{if(localStorage.getItem('${competitionStorageKey("sf-intro-seen")}')==='1'){document.documentElement.classList.add('sf-intro-seen')}}catch(e){}`,
           }}
         />
         <NextIntlClientProvider messages={messages}>

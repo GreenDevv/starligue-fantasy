@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { STAT_LINES } from "@/lib/stats/stat-lines";
 import { COMPUTED_STAT_LINES } from "@/lib/stats/computed-stat-lines";
+import { getCompetitionProfile, competitionStorageKey } from "@/lib/competition/profile";
 import { StatLeaderCard } from "./StatLeaderCard";
 
 // Lignes brutes (boxscore) + dérivées (points fantasy) dans le même sélecteur —
@@ -16,10 +17,11 @@ const ALL_LINES = [...STAT_LINES, ...COMPUTED_STAT_LINES];
 // purement UI). Décision actée avec l'utilisateur : sélecteur compact par ligne,
 // leader n°1 en photo plus grosse, toggle Journée/Saison/Match indépendant par carte
 // (StatLeaderCard, réutilisé tel quel par le dashboard personnalisable).
-const DEFAULT_VISIBLE_KEYS = ["goalsTotal", "assists", "ballsRecovered", "neutralizations"];
+const DEFAULT_VISIBLE_KEYS = getCompetitionProfile().defaultStatKeys;
+const KNOWN_KEYS = new Set(ALL_LINES.map((l) => l.key));
 
 function storageKey(context: "live" | "simulation"): string {
-  return `starligue:statLeaders:${context}`;
+  return competitionStorageKey(`starligue:statLeaders:${context}`);
 }
 
 export function StatLeadersPanel({
@@ -40,9 +42,9 @@ export function StatLeadersPanel({
     if (!raw) return;
     try {
       const parsed = JSON.parse(raw) as unknown;
-      if (Array.isArray(parsed) && parsed.every((k) => typeof k === "string") && parsed.length > 0) {
-        setVisibleKeys(parsed);
-      }
+      // Clés inconnues ignorées : stat retirée du jeu servi (ex. « passes » côté LBE).
+      const keys = Array.isArray(parsed) ? parsed.filter((k): k is string => typeof k === "string" && KNOWN_KEYS.has(k)) : [];
+      if (keys.length > 0) setVisibleKeys(keys);
     } catch {
       // localStorage corrompu — on garde les défauts
     }

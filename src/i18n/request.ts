@@ -1,6 +1,8 @@
 import { getRequestConfig } from "next-intl/server";
 import { hasLocale } from "next-intl";
 import { routing, type AppLocale } from "./routing";
+import { getCompetitionId } from "@/lib/competition/profile";
+import { brandMessages } from "@/lib/competition/brand-messages";
 
 // Un fichier JSON par namespace sous messages/<locale>/ (pas un seul gros
 // fichier par langue) : chaque zone fonctionnelle du site possède son propre
@@ -75,7 +77,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   return {
     locale,
-    messages: await loadMessages(locale),
+    // Jeu LBE : noms Starligue/LNH remplacés au chargement (ARCHITECTURE.md §35).
+    messages: brandMessages(await loadMessages(locale), getCompetitionId(), locale),
     // Sans timeZone explicite, next-intl retombe sur le fuseau de l'environnement
     // d'exécution — le SERVEUR (Railway, UTC) et le NAVIGATEUR (fuseau local du
     // visiteur, ex: Europe/Paris) divergent alors, ce qui ne pose aucun problème

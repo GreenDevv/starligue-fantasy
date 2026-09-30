@@ -8,22 +8,24 @@ import type { LfhTeamRef, ScrapedLfhFixture } from "@/lib/data-providers/lfh.pro
 
 const HOUR = 60 * 60 * 1000;
 
-// Nom affiché de chaque club (équivalent de Club.displayName côté Starligue), indexé
-// par le slug de la fiche club WordPress LFH — stable d'une saison à l'autre,
-// contrairement à l'id d'équipe LFH (propre à chaque poule).
-export const LFH_CLUB_DISPLAY_NAMES: Record<string, string> = {
-  "entente-sportive-besancon-feminin": "Besançon",
-  "brest-bretagne-handball": "Brest",
-  chambray: "Chambray",
-  jdadijonhand: "Dijon",
-  "metz-handball": "Metz",
-  "ogc-nice-cote-dazur-handball": "Nice",
-  "issy-paris-hand": "Paris 92",
-  "handball-plan-de-cuques": "Plan-de-Cuques",
-  "hbc-st-amand-les-eaux-porte-du-hainaut": "St-Amand",
-  "stella-st-maur-handball": "Stella St-Maur",
-  "achenheim-truchtersheim": "Strasbourg",
-  "toulon-metropole-var-handball": "Toulon",
+// Nom complet et nom affiché de chaque club (équivalents de Club.name /
+// Club.displayName côté Starligue), indexés par le slug de la fiche club WordPress
+// LFH — stable d'une saison à l'autre, contrairement à l'id d'équipe LFH (propre à
+// chaque poule). Nom complet = libellé officiel de /wp-json/lfh/clubs : le
+// calendrier ne donne que des MAJUSCULES (« BREST BRETAGNE HANDBALL »).
+export const LFH_CLUB_NAMES: Record<string, { name: string; displayName: string }> = {
+  "entente-sportive-besancon-feminin": { name: "Entente Sportive Besançon Féminin", displayName: "Besançon" },
+  "brest-bretagne-handball": { name: "Brest Bretagne Handball", displayName: "Brest" },
+  chambray: { name: "Chambray Touraine Handball", displayName: "Chambray" },
+  jdadijonhand: { name: "JDA Bourgogne Dijon Handball", displayName: "Dijon" },
+  "metz-handball": { name: "Metz Handball", displayName: "Metz" },
+  "ogc-nice-cote-dazur-handball": { name: "OGC Nice Côte d’Azur Handball", displayName: "Nice" },
+  "issy-paris-hand": { name: "Paris 92", displayName: "Paris 92" },
+  "handball-plan-de-cuques": { name: "Handball Plan-de-Cuques", displayName: "Plan-de-Cuques" },
+  "hbc-st-amand-les-eaux-porte-du-hainaut": { name: "St-Amand Handball - Porte du Hainaut", displayName: "St-Amand" },
+  "stella-st-maur-handball": { name: "Stella St-Maur Handball", displayName: "Stella St-Maur" },
+  "achenheim-truchtersheim": { name: "Strasbourg Achenheim Truchtersheim Handball", displayName: "Strasbourg" },
+  "toulon-metropole-var-handball": { name: "Toulon Métropole Var Handball", displayName: "Toulon" },
 };
 
 /** Slug de la fiche club WordPress (« …/clubs/metz-handball/ » → « metz-handball »). */
@@ -74,9 +76,10 @@ function planClub(team: LfhTeamRef): PlannedLfhClub {
   return {
     lfhTeamId: team.teamId,
     slug,
-    name: team.name,
+    // Club promu inconnu de la table : nom du calendrier (majuscules) en attendant.
+    name: LFH_CLUB_NAMES[slug]?.name ?? team.name,
     shortName: (team.sigle ?? slug.split("-")[0]!).toUpperCase(),
-    displayName: LFH_CLUB_DISPLAY_NAMES[slug] ?? null,
+    displayName: LFH_CLUB_NAMES[slug]?.displayName ?? null,
     logoUrl: team.logoUrl,
   };
 }

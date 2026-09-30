@@ -8,13 +8,19 @@
 // "malus" : le(s) leader(s) de la journée sur cette ligne reçoivent un malus
 // (pertes de balle, 2 min, disqualifications — être en tête n'est pas une
 // bonne chose).
+//
+// STAT_LINES = lignes disponibles pour la compétition servie (ARCHITECTURE.md §35) :
+// le jeu LBE retire celles que la LFH ne publie pas (profil unavailableStatKeys),
+// donc tous les consommateurs s'adaptent sans rien savoir de la compétition.
+import { getCompetitionProfile, type CompetitionProfile } from "@/lib/competition/profile";
+
 export interface StatLine {
   key: string;
   label: string;
   category: "bonus" | "malus";
 }
 
-export const STAT_LINES: StatLine[] = [
+export const ALL_STAT_LINES: StatLine[] = [
   { key: "goalsPlay", label: "Buts (tirs)", category: "bonus" },
   { key: "goalsPenalty", label: "Buts (penalty)", category: "bonus" },
   { key: "goalsTotal", label: "Total buts", category: "bonus" },
@@ -31,6 +37,12 @@ export const STAT_LINES: StatLine[] = [
   { key: "twoMinTaken", label: "2 min", category: "malus" },
   { key: "disqualified", label: "Disqualifications", category: "malus" },
 ];
+
+export function statLinesFor(profile: Pick<CompetitionProfile, "unavailableStatKeys">): StatLine[] {
+  return ALL_STAT_LINES.filter((l) => !profile.unavailableStatKeys.includes(l.key));
+}
+
+export const STAT_LINES: StatLine[] = statLinesFor(getCompetitionProfile());
 
 export const STAT_LINE_KEYS = STAT_LINES.map((s) => s.key) as [string, ...string[]];
 

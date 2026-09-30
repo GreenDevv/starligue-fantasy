@@ -13,6 +13,7 @@ import { verifyClubActionToken } from "@/lib/admin/club-action-token";
 import { geocodeCity } from "@/lib/geo/cities";
 import { countryFlag, countryName } from "@/lib/geo/countries";
 import { ensureHandballClubLogo } from "@/lib/clubs/handball-club-logo";
+import { getCompetitionProfile } from "@/lib/competition/profile";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://starliguefantasy.fr";
 
@@ -33,7 +34,7 @@ function page(title: string, message: string, tone: "ok" | "info" | "warn"): Res
 <body style="margin:0;background:#0E1116;color:#F1F5F9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
   <div style="max-width:520px;margin:0 auto;padding:48px 20px;">
     <div style="font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#F59E0B;">Fantasy Handball</div>
-    <div style="font-size:22px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin:6px 0 32px;">Starligue <span style="color:#2DD4BF;">Fantasy</span></div>
+    <div style="font-size:22px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin:6px 0 32px;">${getCompetitionProfile().appName.replace(/ (\S+)$/, ' <span style="color:#2DD4BF;">$1</span>')}</div>
     <div style="background:#171C24;border:1px solid #262D38;border-radius:16px;padding:28px;">
       <h1 style="margin:0 0 12px;font-size:20px;color:${accent};">${esc(title)}</h1>
       <p style="margin:0 0 24px;color:#94A3B8;font-size:15px;line-height:1.6;">${message}</p>

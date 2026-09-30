@@ -14,6 +14,7 @@ import { prisma } from "@/lib/db";
 import { IngestionError } from "@/lib/data-providers/lnh-scraper.provider";
 import { syncCalendarsIdsForSeason, syncGameweekBoxscore } from "@/lib/ingestion/boxscore";
 import { verifyCronAuth } from "@/lib/cron-auth";
+import { starligueOnlyCronSkip } from "@/lib/competition/cron-guard";
 
 const LNH_SEASONS_ID_2026_2027 = "40";
 const SEASON_START_YEAR_2026_2027 = 2026;
@@ -22,6 +23,9 @@ export async function POST(req: Request) {
   if (!(await verifyCronAuth(req))) {
     return NextResponse.json({ error: { code: "UNAUTHORIZED", message: "Cron secret invalide" } }, { status: 401 });
   }
+  // Jeu LBE : source Starligue, sans objet (src/lib/competition/cron-guard.ts).
+  const starligueOnly = starligueOnlyCronSkip("sync-ratings");
+  if (starligueOnly) return starligueOnly;
 
   const url = new URL(req.url);
   const gameweekParam = url.searchParams.get("gameweek");

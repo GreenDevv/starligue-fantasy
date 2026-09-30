@@ -1,8 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { getCompetitionProfile } from "@/lib/competition/profile";
 
 export const metadata = {
-  title: "Confidentialité & cookies — Handball Fantasy",
+  title: `Confidentialité & cookies — ${getCompetitionProfile().siteName}`,
 };
 
 // Politique de confidentialité + cookies (une seule page, pratique courante pour un

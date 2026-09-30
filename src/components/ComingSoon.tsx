@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
+import { siteDisplayUrl } from "@/lib/competition/profile";
 
 const FEATURE_KEYS = ["squad", "lineup", "score", "challenge"] as const;
 const FEATURE_STYLE: Record<(typeof FEATURE_KEYS)[number], string> = {
@@ -116,7 +117,7 @@ export function ComingSoon() {
       </main>
 
       <footer className="relative z-10 flex w-full flex-col items-center gap-1 border-t border-border px-6 py-8 text-center text-xs text-text-muted">
-        <span className="font-arcade text-base tracking-wide text-text-muted">starliguefantasy.fr</span>
+        <span className="font-arcade text-base tracking-wide text-text-muted">{siteDisplayUrl()}</span>
         <span>{t("comingSoon.footerDisclaimer")}</span>
       </footer>
     </div>

@@ -3,6 +3,8 @@
 // `saveDashboardLayout` touchent localStorage (browser-only, no-op côté serveur) —
 // même précédent que StatLeadersPanel : préférence purement UI, pas de modèle DB.
 
+import { competitionStorageKey } from "@/lib/competition/profile";
+
 export type WidgetType =
   | "best-xi"
   | "leaderboard-global"
@@ -67,7 +69,8 @@ export const DEFAULT_LAYOUT: DashboardWidget[] = SINGLETON_WIDGETS.map((w) => ({
   size: defaultSizeForType(w.type),
 }));
 
-const STORAGE_KEY = "starligue:dashboardLayout";
+// Clé propre au jeu servi (même domaine pour la Starligue et le jeu LBE).
+const STORAGE_KEY = competitionStorageKey("starligue:dashboardLayout");
 const VALID_SIZES: WidgetSize[] = ["mini", "square", "wide"];
 
 export function loadDashboardLayout(): DashboardWidget[] {

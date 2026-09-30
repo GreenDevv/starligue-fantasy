@@ -8,6 +8,13 @@
 // plupart des clients mail bloquent ou ignorent les polices custom, le rendu
 // serait incohérent d'une boîte à l'autre. L'effet "display" est simulé par
 // majuscules + tracking sur le bandeau de marque, qui passe partout.
+import { getCompetitionProfile } from "@/lib/competition/profile";
+
+// « Starligue Fantasy » / « LBE Fantasy » : dernier mot en couleur d'accent.
+const APP_NAME_WORDS = getCompetitionProfile().appName.split(" ");
+const APP_NAME_TAIL = APP_NAME_WORDS.pop();
+const APP_NAME_HEAD = APP_NAME_WORDS.join(" ");
+
 const COLORS = {
   bg: "#0E1116",
   surface: "#171C24",
@@ -75,7 +82,7 @@ export function renderBaseEmail({ preheader, heading, bodyParagraphs, cta, footN
               <td align="center" style="padding-bottom:28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
                 <span style="font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:${COLORS.accentSecondary};">Fantasy Handball</span>
                 <div style="font-size:22px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:${COLORS.text};margin-top:6px;">
-                  Starligue <span style="color:${COLORS.accent};">Fantasy</span>
+                  ${APP_NAME_HEAD} <span style="color:${COLORS.accent};">${APP_NAME_TAIL}</span>
                 </div>
               </td>
             </tr>
@@ -95,7 +102,7 @@ export function renderBaseEmail({ preheader, heading, bodyParagraphs, cta, footN
             </tr>
             <tr>
               <td align="center" style="padding-top:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
-                <a href="${SITE_URL}" style="color:${COLORS.textMuted};font-size:12px;text-decoration:none;">Handball Fantasy — ${SITE_URL.replace(/^https?:\/\//, "")}</a>
+                <a href="${SITE_URL}" style="color:${COLORS.textMuted};font-size:12px;text-decoration:none;">${getCompetitionProfile().siteName} — ${SITE_URL.replace(/^https?:\/\//, "")}</a>
               </td>
             </tr>
           </table>

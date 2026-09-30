@@ -21,6 +21,7 @@ import {
   InstagramApiError,
 } from "@/lib/instagram/client";
 import { buildStatLeadersCaption, type StatLeadersPostKind } from "@/lib/instagram/stat-leaders-caption";
+import { starligueOnlyCronSkip } from "@/lib/competition/cron-guard";
 
 const POST_DEFINITIONS: { kind: StatLeadersPostKind; statKeys: string[] }[] = [
   { kind: "attack", statKeys: ["goalsPlay", "goalsTotal", "goalsPenalty", "assists"] },
@@ -66,6 +67,9 @@ export async function POST(request: Request) {
   if (!(await verifyCronAuth(request))) {
     return NextResponse.json({ error: { code: "FORBIDDEN" } }, { status: 403 });
   }
+  // Jeu LBE : source Starligue, sans objet (src/lib/competition/cron-guard.ts).
+  const starligueOnly = starligueOnlyCronSkip("post-stat-leaders");
+  if (starligueOnly) return starligueOnly;
 
   const { searchParams } = new URL(request.url);
   const dryRun = searchParams.get("dryRun") === "true";
