@@ -21,15 +21,20 @@ const authAndI18n = auth((req) => handleI18nRouting(req)) as unknown as NextMidd
 export default function middleware(req: NextRequest, event: NextFetchEvent) {
   if (!BASE_PATH && isLbeProxyPath(req.nextUrl.pathname)) {
     const headers = new Headers(req.headers);
-    // Hôte réel de la requête, jamais un x-forwarded-host fourni par le client
-    // (il orienterait les redirections d'Auth.js). Protocole : celui posé par
-    // l'hébergeur (Railway termine le HTTPS en amont), à défaut celui de l'URL.
+    // Hôte public : en prod, req.nextUrl.host est l'adresse interne du conteneur
+    // (constaté : localhost:8080) ; le proxy d'entrée Railway pose le vrai domaine
+    // dans x-forwarded-host (en écrasant toute valeur envoyée par le client) et
+    // host. En local, sans proxy, host suffit.
+    const host =
+      req.headers.get("x-forwarded-host")?.split(",")[0]?.trim() || req.headers.get("host") || req.nextUrl.host;
+    // Protocole : celui posé par l'hébergeur (Railway termine le HTTPS en amont),
+    // à défaut celui de l'URL.
     const proto = req.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() || req.nextUrl.protocol.replace(":", "");
-    headers.set("x-forwarded-host", req.nextUrl.host);
+    headers.set("x-forwarded-host", host);
     headers.set("x-forwarded-proto", proto);
     // Écrasé par le proxy d'entrée Railway du service LBE : on double avec un
     // en-tête propre à l'appli (voir forwardedOrigin, src/lib/base-path.ts).
-    headers.set(PUBLIC_ORIGIN_HEADER, `${proto}://${req.nextUrl.host}`);
+    headers.set(PUBLIC_ORIGIN_HEADER, `${proto}://${host}`);
     return NextResponse.next({ request: { headers } });
   }
   return authAndI18n(req, event);
