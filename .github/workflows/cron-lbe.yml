@@ -1,0 +1,95 @@
+name: Cron jeu LBE (clôture de journée + actus + rappels de deadline)
+
+# Crons du jeu LBE Fantasy (ARCHITECTURE.md §35), servi sous
+# https://www.starliguefantasy.fr/lbe par le service Railway « web-lbe ».
+# Secret propre au service LBE : LBE_CRON_SECRET (= CRON_SECRET de web-lbe),
+# distinct du CRON_SECRET Starligue.
+#
+# Seules les routes utiles au jeu LBE sont appelées — les 13 crons réservés à la
+# Starligue répondent 200 « ignoré » côté LBE (starligueOnlyCronSkip, §35.6) :
+#   - settle-gameweek  : clôture auto (calendrier LFH → snapshot → feuilles
+#                        vision-sport → note calculée → points → classement) +
+#                        étape 6 (confirmation 🟢 48 h après le dernier match, pas
+#                        de cron corrections côté LFH). Mêmes créneaux que
+#                        cron-settle.yml : la LBE joue aussi mer.→dim. soir.
+#   - sync-news        : actus site officiel LFH (WordPress cat. 20), 06:00 UTC.
+#   - notify-deadlines : rappels d'alignement avant deadline, toutes les 15 min
+#                        (idempotent via NotificationLog).
+# Chaque job filtre sur le créneau qui l'a déclenché ; workflow_dispatch lance tout.
+on:
+  schedule:
+    - cron: "*/15 16-23 * * 3,4,5,6" # settle — mer. jeu. ven. sam. 16-23 UTC
+    - cron: "*/15 13-21 * * 0"       # settle — dim. 13-21 UTC
+    - cron: "0 6,12,20 * * *"        # settle (rattrapage) + sync-news (06:00)
+    - cron: "5,20,35,50 * * * *"     # notify-deadlines
+  workflow_dispatch: {}
+
+jobs:
+  settle-gameweek:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule != '5,20,35,50 * * * *' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler /lbe/api/cron/settle-gameweek
+        env:
+          CRON_SECRET: ${{ secrets.LBE_CRON_SECRET }}
+        run: |
+          response=$(curl -sS -w "\n%{http_code}" --max-time 280 -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://www.starliguefantasy.fr/lbe/api/cron/settle-gameweek")
+          body=$(echo "$response" | sed '$d')
+          status=$(echo "$response" | tail -n 1)
+
+          echo "$body" | python3 -m json.tool || echo "$body"
+
+          if [ "$status" -ge 300 ]; then
+            echo "::error::HTTP $status"
+            exit 1
+          fi
+
+  sync-news:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule == '0 6,12,20 * * *' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler /lbe/api/cron/sync-news (une fois par jour, 06:00 UTC)
+        env:
+          CRON_SECRET: ${{ secrets.LBE_CRON_SECRET }}
+        run: |
+          # Le créneau « 0 6,12,20 » est partagé avec le rattrapage settle : on
+          # ne garde que le passage de 06:00 pour les actus.
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$(date -u +%H)" != "06" ]; then
+            echo "Pas 06:00 UTC — actus ignorées sur ce passage"
+            exit 0
+          fi
+          response=$(curl -sS -w "\n%{http_code}" -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://www.starliguefantasy.fr/lbe/api/cron/sync-news")
+          body=$(echo "$response" | sed '$d')
+          status=$(echo "$response" | tail -n 1)
+
+          echo "$body" | python3 -m json.tool || echo "$body"
+
+          if [ "$status" -ge 300 ]; then
+            echo "::error::HTTP $status"
+            exit 1
+          fi
+
+  notify-deadlines:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule == '5,20,35,50 * * * *' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler /lbe/api/cron/notify-deadlines
+        env:
+          CRON_SECRET: ${{ secrets.LBE_CRON_SECRET }}
+        run: |
+          response=$(curl -sS -w "\n%{http_code}" -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://www.starliguefantasy.fr/lbe/api/cron/notify-deadlines")
+          body=$(echo "$response" | sed '$d')
+          status=$(echo "$response" | tail -n 1)
+
+          echo "$body" | python3 -m json.tool || echo "$body"
+
+          if [ "$status" -ge 300 ]; then
+            echo "::error::HTTP $status"
+            exit 1
+          fi

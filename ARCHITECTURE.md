@@ -3290,7 +3290,7 @@ le moteur de points (§2.3) ne voit pas la différence.
 | 1 | Profil de compétition, provider LFH, note calculée (aucun changement pour le jeu LNH) | fait |
 | 2 | Ingestion LFH : `DataSource.LFH_SCRAPER` (migration additive), `src/lib/ingestion/lfh.ts` + `lfh-season-plan.ts` (pur), `scripts/setup-lfh-season.ts` (config, saison, stats, valorisation), `settle-gameweek` aiguillé (`src/lib/ingestion/competition.ts`) | en cours |
 | 3 | Marque, vocabulaire, stats, actus, fonctionnalités coupées (§35.6) | fait |
-| 4 | Jeu LBE sous `starliguefantasy.fr/lbe` : EN LIGNE le 30/09 en mode « bientôt » (service `web-lbe` + base LBE, saison seedée) ; crons GitHub (à faire) | en cours |
+| 4 | Jeu LBE sous `starliguefantasy.fr/lbe` : EN LIGNE le 30/09 en mode « bientôt » (service `web-lbe` + base LBE, saison seedée) ; crons GitHub : `.github/workflows/cron-lbe.yml` (settle-gameweek, sync-news, notify-deadlines vers `/lbe`, secret `LBE_CRON_SECRET` = `CRON_SECRET` de web-lbe) | fait |
 
 ### 35.4.1 Mise en place et lancement (lot 2)
 
