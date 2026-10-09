@@ -6,6 +6,10 @@ name: Lancement jeu LBE (jour J — stats + valorisation)
 # l'ouverture : la page « bientôt » tombe d'elle-même à 06:00 UTC = 08:00 Paris
 # (isComingSoon, src/lib/competition/launch-date.ts), sans toucher à Railway.
 #
+# Appel DIRECT au service web-lbe (adresse Railway), pas via www…/lbe : le rewrite
+# /lbe/* du service Starligue coupe à 30 s (proxyTimeout Next 14 par défaut) et
+# renvoie un 500 alors que la préparation dure plusieurs minutes (constaté le 09/10).
+#
 # Jusqu'à 3 essais espacés de 15 min en cas d'erreur (feuilles vision-sport de la
 # veille pas encore publiées, source lente). Aucun nouvel essai sur un 409 : une
 # équipe existe déjà, la valorisation est refusée exprès.
@@ -32,7 +36,7 @@ jobs:
           for attempt in 1 2 3; do
             response=$(curl -sS -w "\n%{http_code}" --max-time 600 -X POST \
               -H "Authorization: Bearer ${CRON_SECRET}" \
-              "https://www.starliguefantasy.fr/lbe/api/cron/lfh-launch-prep") || response=$'\n000'
+              "https://web-lbe-production.up.railway.app/lbe/api/cron/lfh-launch-prep") || response=$'\n000'
             body=$(echo "$response" | sed '$d')
             status=$(echo "$response" | tail -n 1)
 

@@ -2,6 +2,9 @@ name: Cron jeu LBE (clôture de journée + actus + rappels de deadline)
 
 # Crons du jeu LBE Fantasy (ARCHITECTURE.md §35), servi sous
 # https://www.starliguefantasy.fr/lbe par le service Railway « web-lbe ».
+# Appels DIRECTS à l'adresse Railway de web-lbe : le rewrite /lbe/* du service
+# Starligue coupe à 30 s (proxyTimeout Next 14), trop court pour une clôture de
+# journée qui récupère les feuilles de match (constaté le 09/10).
 # Secret propre au service LBE : LBE_CRON_SECRET (= CRON_SECRET de web-lbe),
 # distinct du CRON_SECRET Starligue.
 #
@@ -35,7 +38,7 @@ jobs:
         run: |
           response=$(curl -sS -w "\n%{http_code}" --max-time 280 -X POST \
             -H "Authorization: Bearer ${CRON_SECRET}" \
-            "https://www.starliguefantasy.fr/lbe/api/cron/settle-gameweek")
+            "https://web-lbe-production.up.railway.app/lbe/api/cron/settle-gameweek")
           body=$(echo "$response" | sed '$d')
           status=$(echo "$response" | tail -n 1)
 
@@ -62,7 +65,7 @@ jobs:
           fi
           response=$(curl -sS -w "\n%{http_code}" -X POST \
             -H "Authorization: Bearer ${CRON_SECRET}" \
-            "https://www.starliguefantasy.fr/lbe/api/cron/sync-news")
+            "https://web-lbe-production.up.railway.app/lbe/api/cron/sync-news")
           body=$(echo "$response" | sed '$d')
           status=$(echo "$response" | tail -n 1)
 
@@ -83,7 +86,7 @@ jobs:
         run: |
           response=$(curl -sS -w "\n%{http_code}" -X POST \
             -H "Authorization: Bearer ${CRON_SECRET}" \
-            "https://www.starliguefantasy.fr/lbe/api/cron/notify-deadlines")
+            "https://web-lbe-production.up.railway.app/lbe/api/cron/notify-deadlines")
           body=$(echo "$response" | sed '$d')
           status=$(echo "$response" | tail -n 1)
 
