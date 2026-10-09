@@ -17,11 +17,9 @@ import { prisma } from "../src/lib/db";
 import { getCompetitionId } from "../src/lib/competition/profile";
 import {
   setupLfhSeason,
-  syncLfhGameweekStats,
-  syncLfhStandings,
   valueLfhPlayersFromSeasonStats,
-  closePreLaunchGameweeks,
 } from "../src/lib/ingestion/lfh";
+import { refreshLfhSeasonStats } from "../src/lib/ingestion/lfh-launch";
 import { GAME_CONFIG } from "../prisma/game-config-defaults";
 
 const SEASON_LABEL = "2026-2027";
@@ -78,25 +76,19 @@ async function stepSeason() {
 
 async function stepStats() {
   const season = await prisma.season.findUniqueOrThrow({ where: { label: SEASON_LABEL } });
-  const gameweeks = await prisma.gameweek.findMany({
-    where: { seasonId: season.id, matches: { some: { status: "FINISHED" } } },
-    orderBy: { number: "asc" },
-  });
-  for (const gw of gameweeks) {
-    const r = await syncLfhGameweekStats(gw.id);
+  const r = await refreshLfhSeasonStats(season.id);
+  for (const gw of r.gameweeks) {
     console.log(
-      `stats      J${r.gameweekNumber} : ${r.matchesProcessed} matchs, ${r.statsUpserted} lignes` +
-        (r.missingSheets.length ? `, feuilles vision-sport manquantes : ${r.missingSheets.join(", ")}` : "") +
-        (r.unresolved.length ? `, joueuses introuvables : ${r.unresolved.join(", ")}` : "")
+      `stats      J${gw.number} : ${gw.matchesProcessed} matchs, ${gw.statsUpserted} lignes` +
+        (gw.missingSheets.length ? `, feuilles vision-sport manquantes : ${gw.missingSheets.join(", ")}` : "") +
+        (gw.unresolved.length ? `, joueuses introuvables : ${gw.unresolved.join(", ")}` : "")
     );
   }
-  const last = gameweeks.at(-1);
-  if (last) {
-    const s = await syncLfhStandings(season.id, last.number);
-    console.log(`classement J${last.number} : ${s.upserted} clubs${s.skippedAhead ? " (en avance, non écrit)" : ""}`);
+  if (r.standings) {
+    const s = r.standings;
+    console.log(`classement J${s.gameweek} : ${s.upserted} clubs${s.skippedAhead ? " (en avance, non écrit)" : ""}`);
   }
-  const closed = await closePreLaunchGameweeks(season.id);
-  console.log(`closes     ${closed.length ? closed.map((n) => `J${n}`).join(", ") : "aucune"} (jouées avant le lancement, sans équipe)`);
+  console.log(`closes     ${r.closed.length ? r.closed.map((n) => `J${n}`).join(", ") : "aucune"} (jouées avant le lancement, sans équipe)`);
 }
 
 async function stepValuation() {

@@ -1,0 +1,55 @@
+name: Lancement jeu LBE (jour J — stats + valorisation)
+
+# Ponctuel : 10/10/2026, lancement du jeu LBE Fantasy (ARCHITECTURE.md §35.4.1).
+# Appelle /lbe/api/cron/lfh-launch-prep (= `setup-lfh-season.ts stats valuation`,
+# la base LBE n'ayant pas d'accès réseau public) à 04:00 UTC, deux heures avant
+# l'ouverture : la page « bientôt » tombe d'elle-même à 06:00 UTC = 08:00 Paris
+# (isComingSoon, src/lib/competition/launch-date.ts), sans toucher à Railway.
+#
+# Jusqu'à 3 essais espacés de 15 min en cas d'erreur (feuilles vision-sport de la
+# veille pas encore publiées, source lente). Aucun nouvel essai sur un 409 : une
+# équipe existe déjà, la valorisation est refusée exprès.
+# Le créneau « 0 4 10 10 * » revient chaque année : garde sur 2026 ; workflow à
+# supprimer une fois le lancement passé.
+on:
+  schedule:
+    - cron: "0 4 10 10 *"
+  workflow_dispatch: {}
+
+jobs:
+  launch-prep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Appeler /lbe/api/cron/lfh-launch-prep
+        env:
+          CRON_SECRET: ${{ secrets.LBE_CRON_SECRET }}
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$(date -u +%Y)" != "2026" ]; then
+            echo "Lancement 2026 déjà passé — rien à faire"
+            exit 0
+          fi
+          for attempt in 1 2 3; do
+            response=$(curl -sS -w "\n%{http_code}" --max-time 600 -X POST \
+              -H "Authorization: Bearer ${CRON_SECRET}" \
+              "https://www.starliguefantasy.fr/lbe/api/cron/lfh-launch-prep") || response=$'\n000'
+            body=$(echo "$response" | sed '$d')
+            status=$(echo "$response" | tail -n 1)
+
+            echo "── essai ${attempt} : HTTP ${status}"
+            echo "$body" | python3 -m json.tool || echo "$body"
+
+            if [ "$status" -lt 300 ]; then
+              if echo "$body" | grep -q '"missingSheets": *\[ *"'; then
+                echo "::warning::Feuilles vision-sport manquantes (matchs notés sur la feuille officielle seule)"
+              fi
+              exit 0
+            fi
+            if [ "$status" = "409" ]; then
+              echo "::error::Valorisation refusée : des équipes existent déjà"
+              exit 1
+            fi
+            [ "$attempt" -lt 3 ] && sleep 900
+          done
+          echo "::error::Échec après 3 essais (HTTP $status)"
+          exit 1

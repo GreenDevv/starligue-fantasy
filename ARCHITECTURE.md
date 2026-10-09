@@ -3321,6 +3321,13 @@ journées, 132 matchs (44 sans horaire publié), 198 joueuses (1 sans fiche donc
 poste : signalée), 706 lignes de stats sur 24 matchs, valeur moyenne 10,7 pour un
 budget de 140 ; relance de chaque étape sans doublon.
 
+**Jour J automatisé (10/10/2026)** : `.github/workflows/lbe-launch.yml` appelle à
+04:00 UTC `POST /api/cron/lfh-launch-prep` (= étapes `stats` + `valuation`, logique
+partagée `src/lib/ingestion/lfh-launch.ts` ; 409 si une équipe existe) ; la page
+« bientôt » tombe seule à l'ouverture (`isComingSoon`, `src/lib/competition/launch-date.ts` :
+`COMING_SOON=true` jusqu'à `LAUNCH_AT`, défaut jour `NEXT_PUBLIC_LAUNCH_DATE` 06:00 UTC
+= 08:00 Paris). Après lancement, NE PLUS relancer `valuation` (écrase les ajustements hebdo).
+
 Recrue en cours de saison : une joueuse inconnue sur une feuille de match déclenche
 un rafraîchissement de l'effectif puis la journée est rejouée (`syncLfhGameweekStats`).
 

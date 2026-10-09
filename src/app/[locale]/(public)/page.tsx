@@ -30,6 +30,7 @@ import { LiveMatchesBanner } from "@/components/starligue/LiveMatchesBanner";
 import { LivePerformancesCard } from "@/components/starligue/LivePerformancesCard";
 import { StatLeadersPanel } from "@/components/dashboard/StatLeadersPanel";
 import { ComingSoon } from "@/components/ComingSoon";
+import { isComingSoonNow } from "@/lib/competition/launch-date";
 import { IntroSplash } from "@/components/intro/IntroSplash";
 import type { NewsCategory } from "@prisma/client";
 import type { Metadata } from "next";
@@ -41,7 +42,7 @@ export async function generateMetadata({
 }: {
   params: { locale: string };
 }): Promise<Metadata> {
-  if (process.env.COMING_SOON === "true") {
+  if (isComingSoonNow()) {
     const t = await getTranslations({ locale: params.locale, namespace: "dashboard" });
     return {
       title: t("home.metadataTitle"),
@@ -67,7 +68,7 @@ export default async function HomePage({
 }: {
   searchParams: { category?: string; page?: string; gw?: string; resultsGw?: string };
 }) {
-  if (process.env.COMING_SOON === "true") {
+  if (isComingSoonNow()) {
     return <ComingSoon />;
   }
 
