@@ -1,0 +1,41 @@
+name: Jeu LBE — rattrapage effectif (manuel)
+
+# Déclenchement manuel de /lbe/api/cron/lfh-roster-sync avec options
+# (src/app/api/cron/lfh-roster-sync/route.ts) : rejouer les stats de la saison
+# et/ou recalculer la valeur de joueuses précises (ids Player, séparés par des
+# virgules). Appel direct au service web-lbe (rewrite /lbe/* coupé à 30 s).
+on:
+  workflow_dispatch:
+    inputs:
+      refresh_stats:
+        description: "Rejouer les stats de toutes les journées passées"
+        type: boolean
+        default: false
+      revalue:
+        description: "Ids des joueuses à revaloriser (séparés par des virgules)"
+        type: string
+        default: ""
+
+jobs:
+  roster-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler /lbe/api/cron/lfh-roster-sync
+        env:
+          CRON_SECRET: ${{ secrets.LBE_CRON_SECRET }}
+          REFRESH: ${{ inputs.refresh_stats && '1' || '0' }}
+          REVALUE: ${{ inputs.revalue }}
+        run: |
+          revalue=$(printf %s "$REVALUE" | tr -cd 'a-z0-9,')
+          response=$(curl -sS -w "\n%{http_code}" --max-time 600 -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://web-lbe-production.up.railway.app/lbe/api/cron/lfh-roster-sync?refreshStats=${REFRESH}&revalue=${revalue}")
+          body=$(echo "$response" | sed '$d')
+          status=$(echo "$response" | tail -n 1)
+
+          echo "$body" | python3 -m json.tool || echo "$body"
+
+          if [ "$status" -ge 300 ]; then
+            echo "::error::HTTP $status"
+            exit 1
+          fi

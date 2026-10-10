@@ -161,6 +161,22 @@ describe("mergeLfhMatchStats", () => {
     expect(fallback.find((r) => r.lastName === "RENAUD")!.played).toBe(false);
   });
 
+  it("nom complet découpé autrement entre les deux feuilles (joueuse sans fiche) → rattachée", () => {
+    const off = [{ teamId: "601", individuId: "4264962", wpPlayerId: null, lastName: "PETERSEN", firstName: "ANNE TOLSTRUP",
+      shirtNumber: 31, goals: 4, penaltyGoals: 0, warnings: 0, twoMin: 0, disqualified: 0 }];
+    const vs = { ...sheet, goalkeepers: [], players: [{ side: "away", shirtNumber: 31, lastName: "TOLSTRUP PETERSEN",
+      firstName: "ANNE", goals: 4, shots: 4, twoMin: 0, red: 0, secondsPlayed: 2940 }] } as typeof sheet;
+    const [m] = mergeLfhMatchStats(off, vs, "592");
+    expect(m).toMatchObject({ played: true, secondsPlayed: 2940, shotsTotal: 4 });
+  });
+
+  it("buteuse dont la ligne vision-sport est introuvable → a quand même joué", () => {
+    const off = [{ teamId: "601", individuId: "1", wpPlayerId: null, lastName: "INCONNUE", firstName: "X",
+      shirtNumber: 99, goals: 2, penaltyGoals: 0, warnings: 0, twoMin: 0, disqualified: 0 }];
+    const [m] = mergeLfhMatchStats(off, sheet, "592");
+    expect(m).toMatchObject({ played: true, secondsPlayed: 0 });
+  });
+
   it("de bout en bout : note calculée de la meilleure buteuse et de la gardienne", () => {
     const raw = { ...DEFAULT_COMPUTED_RATING_WEIGHTS, base: ZERO_POSITION_BASE };
     const rate = (name: string, position: "LB" | "GK" | "CB") => {

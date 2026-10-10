@@ -551,8 +551,15 @@ export function mergeLfhMatchStats(
 ): MergedLfhPlayerStat[] {
   return official.map((o) => {
     const side = o.teamId === homeTeamId ? "home" : "away";
-    const sameName = (r: { lastName: string }) => normName(r.lastName) === normName(o.lastName);
-    const pick = <T extends { side: string; shirtNumber: number; lastName: string }>(rows: T[]) =>
+    // Nom de famille identique, sinon même nom complet découpé autrement (feuille
+    // officielle « PETERSEN / ANNE TOLSTRUP », vision-sport « TOLSTRUP PETERSEN /
+    // ANNE » — joueuse sans fiche, constaté le 10/10/2026).
+    const fullName = (first: string, last: string) =>
+      `${first} ${last}`.split(/\s+/).map(normName).filter(Boolean).sort().join(" ");
+    const sameName = (r: { lastName: string; firstName?: string }) =>
+      normName(r.lastName) === normName(o.lastName) ||
+      fullName(r.firstName ?? "", r.lastName) === fullName(o.firstName, o.lastName);
+    const pick = <T extends { side: string; shirtNumber: number; lastName: string; firstName?: string }>(rows: T[]) =>
       rows.find((r) => r.side === side && r.shirtNumber === o.shirtNumber && sameName(r)) ??
       // Numéro différent entre les deux feuilles : repli sur le nom seul dans l'équipe.
       rows.find((r) => r.side === side && sameName(r));
@@ -562,8 +569,10 @@ export function mergeLfhMatchStats(
 
     const shotsTotal = vs ? Math.max(vs.shots, o.goals) : null;
     const secondsPlayed = sheet ? Math.max(vs?.secondsPlayed ?? 0, gk?.secondsPlayed ?? 0) : null;
+    // Un but ou une sanction officielle prouve la présence sur le terrain, même si la
+    // ligne vision-sport n'a pas pu être rattachée (temps de jeu alors à 0).
     const played =
-      secondsPlayed !== null ? secondsPlayed > 0 : o.goals > 0 || o.twoMin > 0 || o.disqualified > 0;
+      (secondsPlayed ?? 0) > 0 || o.goals > 0 || o.twoMin > 0 || o.disqualified > 0;
 
     return {
       teamId: o.teamId,

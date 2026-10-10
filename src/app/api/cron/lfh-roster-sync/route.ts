@@ -6,6 +6,9 @@ export const maxDuration = 600;
 // si nouvelles joueuses : stats rejouées sur les journées passées (leurs matchs
 // déjà joués) → valeur des SEULES nouvelles (valuationPending), les autres gardent
 // la leur. Rejouable, quasi gratuit quand rien ne change.
+// Options (query, déclenchement manuel via .github/workflows/lbe-admin.yml) :
+//   refreshStats=1          rejoue les stats même sans nouvelle joueuse
+//   revalue=<id>,<id>       recalcule la valeur de ces joueuses (rattrapage)
 // Planifié par .github/workflows/cron-lbe.yml (quotidien).
 
 import { NextResponse } from "next/server";
@@ -29,8 +32,17 @@ export async function POST(req: Request) {
   }
 
   try {
+    const params = new URL(req.url).searchParams;
+    const revalueIds = (params.get("revalue") ?? "").split(",").map((s) => s.trim()).filter(Boolean);
     const roster = await syncLfhRoster(season.id);
-    const stats = roster.created > 0 ? await refreshLfhSeasonStats(season.id) : null;
+    const stats =
+      roster.created > 0 || params.get("refreshStats") === "1" ? await refreshLfhSeasonStats(season.id) : null;
+    if (revalueIds.length > 0) {
+      await prisma.player.updateMany({
+        where: { id: { in: revalueIds }, seasonId: season.id },
+        data: { valuationPending: true },
+      });
+    }
     const valued = await valueLfhPendingPlayers(season.id);
     return NextResponse.json({ data: { season: season.label, roster, statsRefreshed: stats !== null, valued } });
   } catch (err) {
