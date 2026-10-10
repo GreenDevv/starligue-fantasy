@@ -19,10 +19,12 @@ import {
   planLfhSeason,
   lfhClubSlug,
   resolveLfhPlayer,
+  applyLfhRosterOverride,
   isLfhGameweekReadyToConfirm,
   type LfhKnownPlayer,
 } from "./lfh-season-plan";
 import { recomputeGameweekDeadlines } from "./boxscore";
+import { LFH_ROSTER_OVERRIDES } from "./lfh-roster-overrides";
 import { computeMatchRating, parseComputedRatingWeights } from "@/lib/scoring/computed-rating";
 import { snapshotClubStandings } from "@/lib/standings/snapshot";
 import { computeGameweekScores } from "@/lib/scoring/compute";
@@ -184,7 +186,8 @@ export async function syncLfhRoster(seasonId: string): Promise<LfhRosterSyncResu
     }));
 
   const result: LfhRosterSyncResult = { created: 0, updated: 0, skippedNoPosition: [] };
-  for (const s of scraped) {
+  for (const raw of scraped) {
+    const s = applyLfhRosterOverride(raw, LFH_ROSTER_OVERRIDES);
     const clubId = clubIdBySlug.get(lfhClubSlug(s.clubPageUrl) ?? "");
     if (!clubId) continue; // club hors poule (ne devrait pas arriver : effectif filtré par poule)
     if (!s.position) {
@@ -548,6 +551,39 @@ export interface LfhValuationResult {
   averageValue: number;
   /** Budget qui garde la même tension que chez les hommes (140 pour 14 × 10,6 de moyenne). */
   suggestedBudget: number;
+}
+
+/**
+ * Valeur des joueuses arrivées en cours de saison (valuationPending) : même calcul
+ * que la valeur de départ, sur la même référence (toutes les joueuses), mais SEULES
+ * les nouvelles sont écrites — les autres gardent leur valeur (ajustements hebdo).
+ */
+export async function valueLfhPendingPlayers(seasonId: string): Promise<{ playerId: string; value: number }[]> {
+  const config = parseLfhValuationConfig(await loadGameConfig());
+  const players = await prisma.player.findMany({
+    where: { seasonId },
+    select: {
+      id: true,
+      position: true,
+      valuationPending: true,
+      stats: { where: { isLive: false, played: true, lnhRating: { not: null } }, select: { lnhRating: true } },
+    },
+  });
+  const pending = players.filter((p) => p.valuationPending);
+  if (pending.length === 0) return [];
+  const reference = players.map((p) => ({
+    playerId: p.id,
+    position: p.position,
+    matchesPlayed: p.stats.length,
+    totalScore: p.stats.reduce((s, x) => s + Number(x.lnhRating), 0),
+  }));
+  const values = valueNewcomersFromSeasonScores(reference, pending.map((p) => p.id), config);
+  const out = pending.map((p) => ({ playerId: p.id, value: values.get(p.id)! }));
+  await prisma.$transaction([
+    ...out.map((o) => prisma.player.update({ where: { id: o.playerId }, data: { marketValue: o.value, valuationPending: false } })),
+    prisma.playerValueHistory.createMany({ data: out.map((o) => ({ playerId: o.playerId, value: o.value })) }),
+  ]);
+  return out;
 }
 
 /**

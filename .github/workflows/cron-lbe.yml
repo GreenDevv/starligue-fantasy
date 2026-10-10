@@ -16,6 +16,9 @@ name: Cron jeu LBE (clôture de journée + actus + rappels de deadline)
 #                        de cron corrections côté LFH). Mêmes créneaux que
 #                        cron-settle.yml : la LBE joue aussi mer.→dim. soir.
 #   - sync-news        : actus site officiel LFH (WordPress cat. 20), 06:00 UTC.
+#   - roster-sync      : effectif LFH (recrues, joueuses sans fiche saisies dans
+#                        src/lib/ingestion/lfh-roster-overrides.ts) + valeur des
+#                        seules nouvelles, 06:00 UTC avec les actus.
 #   - notify-deadlines : rappels d'alignement avant deadline, toutes les 15 min
 #                        (idempotent via NotificationLog).
 # Chaque job filtre sur le créneau qui l'a déclenché ; workflow_dispatch lance tout.
@@ -66,6 +69,31 @@ jobs:
           response=$(curl -sS -w "\n%{http_code}" -X POST \
             -H "Authorization: Bearer ${CRON_SECRET}" \
             "https://web-lbe-production.up.railway.app/lbe/api/cron/sync-news")
+          body=$(echo "$response" | sed '$d')
+          status=$(echo "$response" | tail -n 1)
+
+          echo "$body" | python3 -m json.tool || echo "$body"
+
+          if [ "$status" -ge 300 ]; then
+            echo "::error::HTTP $status"
+            exit 1
+          fi
+
+  roster-sync:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule == '0 6,12,20 * * *' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler /lbe/api/cron/lfh-roster-sync (une fois par jour, 06:00 UTC)
+        env:
+          CRON_SECRET: ${{ secrets.LBE_CRON_SECRET }}
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$(date -u +%H)" != "06" ]; then
+            echo "Pas 06:00 UTC — effectif ignoré sur ce passage"
+            exit 0
+          fi
+          response=$(curl -sS -w "\n%{http_code}" --max-time 600 -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://web-lbe-production.up.railway.app/lbe/api/cron/lfh-roster-sync")
           body=$(echo "$response" | sed '$d')
           status=$(echo "$response" | tail -n 1)
 

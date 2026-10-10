@@ -3328,6 +3328,12 @@ partagée `src/lib/ingestion/lfh-launch.ts` ; 409 si une équipe existe) ; la pa
 `COMING_SOON=true` jusqu'à `LAUNCH_AT`, défaut jour `NEXT_PUBLIC_LAUNCH_DATE` 06:00 UTC
 = 08:00 Paris). Après lancement, NE PLUS relancer `valuation` (écrase les ajustements hebdo).
 
+Effectif quotidien (`POST /api/cron/lfh-roster-sync`, job `roster-sync` de
+`cron-lbe.yml`) : recrues + joueuses SANS fiche LFH (pas de poste → écartées), ces
+dernières saisies à la main dans `src/lib/ingestion/lfh-roster-overrides.ts`
+(clé = identifiant fédéral, source citée) ; stats rejouées si nouvelles joueuses,
+puis valeur des SEULES nouvelles (`valueLfhPendingPlayers`).
+
 Recrue en cours de saison : une joueuse inconnue sur une feuille de match déclenche
 un rafraîchissement de l'effectif puis la journée est rejouée (`syncLfhGameweekStats`).
 

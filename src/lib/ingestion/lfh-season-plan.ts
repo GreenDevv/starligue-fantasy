@@ -5,6 +5,7 @@
 // en base est dans src/lib/ingestion/lfh.ts.
 
 import type { LfhTeamRef, ScrapedLfhFixture } from "@/lib/data-providers/lfh.provider";
+import type { Position } from "@prisma/client";
 
 const HOUR = 60 * 60 * 1000;
 
@@ -198,4 +199,18 @@ export function isLfhGameweekReadyToConfirm(
   if (matches.length === 0 || matches.some((m) => m.status === "SCHEDULED" || m.status === "LIVE")) return false;
   const lastEnd = Math.max(...matches.map((m) => m.kickoffAt.getTime())) + MATCH_DURATION_MS;
   return now.getTime() >= lastEnd + delayHours * HOUR;
+}
+
+// ─────────────────────────── Joueuses sans fiche ───────────────────────────
+
+/**
+ * Complète une ligne d'effectif sans fiche WordPress avec la saisie manuelle
+ * (lfh-roster-overrides.ts). Une ligne qui a déjà un poste n'est jamais touchée.
+ */
+export function applyLfhRosterOverride<
+  T extends { individuId: string; firstName: string; lastName: string; position: Position | null },
+>(row: T, overrides: Record<string, { firstName: string; lastName: string; position: Position }>): T {
+  if (row.position) return row;
+  const o = overrides[row.individuId];
+  return o ? { ...row, firstName: o.firstName, lastName: o.lastName, position: o.position } : row;
 }

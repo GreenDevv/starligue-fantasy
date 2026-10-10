@@ -3,6 +3,7 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 import { parseLfhRencontres } from "@/lib/data-providers/lfh.provider";
 import {
+  applyLfhRosterOverride,
   planLfhSeason,
   lfhClubSlug,
   resolveLfhPlayer,
@@ -114,5 +115,23 @@ describe("isLfhGameweekReadyToConfirm", () => {
 
   it("journée sans match : jamais", () => {
     expect(isLfhGameweekReadyToConfirm([], new Date("2030-01-01"), 48)).toBe(false);
+  });
+});
+
+describe("applyLfhRosterOverride", () => {
+  const overrides = { "42": { firstName: "Anne", lastName: "TOLSTRUP PETERSEN", position: "RW" as const } };
+  it("complète une joueuse sans fiche (poste + nom séparé)", () => {
+    const row = { individuId: "42", firstName: "", lastName: "TOLSTRUP PETERSEN ANNE", position: null, extra: 1 };
+    expect(applyLfhRosterOverride(row, overrides)).toEqual({
+      individuId: "42", firstName: "Anne", lastName: "TOLSTRUP PETERSEN", position: "RW", extra: 1,
+    });
+  });
+  it("ne touche jamais une joueuse qui a déjà un poste (fiche publiée)", () => {
+    const row = { individuId: "42", firstName: "Anne", lastName: "TOLSTRUP", position: "LW" as const };
+    expect(applyLfhRosterOverride(row, overrides)).toBe(row);
+  });
+  it("sans saisie : inchangée (reste écartée)", () => {
+    const row = { individuId: "7", firstName: "", lastName: "X Y", position: null };
+    expect(applyLfhRosterOverride(row, overrides)).toBe(row);
   });
 });
