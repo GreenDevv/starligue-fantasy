@@ -147,7 +147,8 @@
     "seeFullRanking": "See full standings"
   },
   "bestXICard": {
-    "subtitle": "Team of the week · matchday {number}"
+    "subtitle": "Team of the week · matchday {number}",
+    "subtitleSeason": "Team of the season"
   },
   "performancesCard": {
     "subtitle": "Best performances · matchday {number}"
